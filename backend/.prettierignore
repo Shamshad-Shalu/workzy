@@ -1,7 +1,7 @@
 node_modules
-.env
-.env.local
-logs
-dist
 build
+dist
 package-lock.json
+.env
+.env.example
+tsconfig.json
