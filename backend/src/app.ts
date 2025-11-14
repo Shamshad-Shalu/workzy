@@ -25,11 +25,10 @@ app.get("/api/", (req, res) => {
 });
 
 app.post("/api/auth/login", (req, res) => {
+  const { email, password } = req.body;
 
-    const { email, password } = req.body;
-
-    console.log({email , password})
-    res.json({ message: "hlo this is backend login route" });
-})
+  console.log({ email, password });
+  res.json({ message: "hlo this is backend login route" });
+});
 
 export default app;
