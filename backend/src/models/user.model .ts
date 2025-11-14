@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import { ILocation, IUser } from "@/types/user";
+import { ROLE } from "@/constants";
 
 const LocationSchema = new Schema<ILocation>(
   {
@@ -39,7 +40,7 @@ const userSchema: Schema<IUser> = new Schema(
     role: {
       type: String,
       required: true,
-      default: "user",
+      default: ROLE.USER,
     },
     phone: { type: Number },
     isBlocked: {
