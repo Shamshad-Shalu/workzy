@@ -1,10 +1,14 @@
 import React from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import UserRoutes from './routes/UserRoutes';
 
 const App: React.FC = () => {
   return (
-    <div>
-      <h1 className="text-3xl text-blue-600 font-bold underline">Hello, Workzy Frontend!</h1>
-    </div>
+    <BrowserRouter>
+       <Routes>
+          <Route path='/*' element={<UserRoutes/>} />
+       </Routes>
+    </BrowserRouter>
   );
 };
 
