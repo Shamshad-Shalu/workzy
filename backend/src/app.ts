@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import { CLIENT_URL } from "./constants";
 
 import authRoutes from "./routes/auth.routes";
+import errorMiddleware from "./middlewares/errorMiddleware";
 
 const app = express();
 
@@ -27,5 +28,7 @@ app.use("/api/auth", authRoutes);
 app.get("/api/", (req, res) => {
   res.json({ message: "hlo this is backend" });
 });
+
+app.use(errorMiddleware);
 
 export default app;

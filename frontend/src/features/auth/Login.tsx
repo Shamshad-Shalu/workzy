@@ -5,6 +5,7 @@ import  React, { useState } from "react";
 
 const Login :React.FC = () => {
     const [email, setEmail] = useState("");
+    const [name, setName] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
 
@@ -16,7 +17,7 @@ const Login :React.FC = () => {
         e.preventDefault();
 
         try {
-        const res = await api.post(AUTH_ROUTES.LOGIN, {
+        const res = await api.post(AUTH_ROUTES.REGISTER, {
             email,
             password,
         });
@@ -36,7 +37,15 @@ const Login :React.FC = () => {
             placeholder="Email"
             className="w-full p-2 border rounded"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setEmail(e.target.value)} 
+            />
+            
+            <input
+            type="name"
+            placeholder="name"
+            className="w-full p-2 border rounded"
+            value={name}
+            onChange={(e) => setName(e.target.value)} 
             />
 
             <input
