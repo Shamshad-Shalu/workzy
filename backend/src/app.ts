@@ -4,6 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { CLIENT_URL } from "./constants";
 
+import authRoutes from "./routes/auth.routes";
+
 const app = express();
 
 const allowedOrigins = [CLIENT_URL, "http://13.204.5.195:5173"].filter(Boolean) as string[];
@@ -20,15 +22,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use("/api/auth", authRoutes);
+
 app.get("/api/", (req, res) => {
   res.json({ message: "hlo this is backend" });
-});
-
-app.post("/api/auth/login", (req, res) => {
-  const { email, password } = req.body;
-
-  console.log({ email, password });
-  res.json({ message: "hlo this is backend login route" });
 });
 
 export default app;
