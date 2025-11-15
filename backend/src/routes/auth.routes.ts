@@ -5,6 +5,7 @@ import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { validateRefreshToken } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 import { Router } from "express";
+import passport from "passport";
 
 const router = Router();
 
@@ -20,5 +21,22 @@ router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);
 
 router.post("/refresh-token", validateRefreshToken, authController.refreshToken);
+
+router.get(
+  "/google",
+  passport.authenticate("google", {
+    session: false,
+    scope: ["email", "profile"],
+  })
+);
+
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    session: false,
+    failureRedirect: `${process.env.CLIENT_URL}/login`,
+  }),
+  authController.handleGoogleUser
+);
 
 export default router;

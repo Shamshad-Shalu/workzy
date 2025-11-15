@@ -17,4 +17,8 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
   getUserByRoleAndId(role: string, id: string): Promise<IUser | null> {
     return User.findOne({ _id: id, role }).exec();
   }
+
+  async findByGoogleId(googleId: string): Promise<IUser | null> {
+    return await User.findOne({ googleId });
+  }
 }

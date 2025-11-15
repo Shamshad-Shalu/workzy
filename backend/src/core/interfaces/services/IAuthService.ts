@@ -10,4 +10,10 @@ export interface IAuthService {
   isUserBlocked(userId: string): Promise<boolean>;
   getUserByRoleAndId(role: Role, id: string): Promise<IUser | null>;
   updatePassword(email: string, newPassword: string): Promise<void>;
+  handleGoogleUser(googleData: {
+    googleId: string;
+    email: string;
+    name: string;
+    profile: string;
+  }): Promise<IUser>;
 }

@@ -6,7 +6,7 @@ import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { TYPES } from "@/di/types";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
+import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import logger from "@/config/logger";
@@ -16,6 +16,7 @@ import validator from "validator";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import redisClient from "@/config/redisClient";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
+import { Profile } from "passport";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -180,5 +181,40 @@ export class AuthController implements IAuthController {
     await this.authService.updatePassword(email, password);
 
     res.status(HTTPSTATUS.OK).json({ message: USER.PASSWORD_UPDATE_SUCCESS });
+  });
+
+  handleGoogleUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    if (!req.user) {
+      return res.redirect(`${CLIENT_URL}/login`);
+    }
+    const googleProfile = req.user as unknown as Profile;
+
+    const email = googleProfile.emails?.[0]?.value;
+    if (!email) {
+      throw new CustomError(AUTH.GOOGLE_NOT_PROVIDED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const user = await this.authService.handleGoogleUser({
+      googleId: googleProfile.id,
+      email,
+      name: googleProfile.displayName,
+      profile: (googleProfile as any)._json?.picture || "",
+    });
+
+    const isBlocked = await this.authService.isUserBlocked(user._id.toString());
+    if (isBlocked) {
+      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
+      return;
+    }
+
+    setRefreshTokenCookie(res, { _id: user._id.toString(), role: "user" });
+    // const accessToken = generateAccessToken({
+    //   _id: user._id.toString(),
+    //   email: user.email,
+    //   name: user.name,
+    //   role: user.role as Role,
+    // });
+
+    res.redirect(`${CLIENT_URL}/`);
   });
 }

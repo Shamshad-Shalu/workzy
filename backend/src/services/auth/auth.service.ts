@@ -93,4 +93,31 @@ export class AuthService implements IAuthService {
 
     await redisClient.del(`forgotPassword${email}`);
   }
+
+  async handleGoogleUser(googleData: {
+    googleId: string;
+    email: string;
+    name: string;
+    profile: string;
+  }): Promise<IUser> {
+    let user = await this.userRepository.findByGoogleId(googleData.googleId);
+
+    if (!user) {
+      const dummyPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await hash(dummyPassword, 10);
+
+      user = await this.userRepository.create({
+        name: googleData.name,
+        googleId: googleData.googleId,
+        email: googleData.email,
+        profileImage: googleData.profile,
+        password: hashedPassword,
+        role: "user",
+      });
+    } else {
+      user.googleId = googleData.googleId;
+      await user.save();
+    }
+    return user;
+  }
 }
