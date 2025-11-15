@@ -6,6 +6,10 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { AuthService } from "@/services/auth/auth.service";
 import { UserRepository } from "@/repositories/user.repository";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { OTPService } from "@/services/auth/otp.service";
+import { EmailService } from "@/services/auth/email.service";
+import { IEmailService } from "@/core/interfaces/services/IEmailService";
 
 const container = new Container();
 
@@ -14,5 +18,8 @@ container.bind<IAuthController>(TYPES.AuthController).to(AuthController);
 
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
 // container.bind<IUserService>(TYPES.UserService).to(UserService);
+
+container.bind<IOTPService>(TYPES.OTPService).to(OTPService);
+container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
 
 export { container };

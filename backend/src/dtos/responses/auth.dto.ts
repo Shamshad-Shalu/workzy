@@ -18,13 +18,13 @@ export class RegisterResponseDTO {
   @IsString()
   role!: Role;
 
-  static fromEntity(entity: IUser): RegisterResponseDTO {
-    const dto = new RegisterResponseDTO();
-    dto._id = entity._id;
-    dto.name = entity.name;
-    dto.email = entity.email;
-    dto.role = entity.role;
+  // static fromEntity(entity: IUser): RegisterResponseDTO {
+  //   const dto = new RegisterResponseDTO();
+  //   dto._id = entity._id;
+  //   dto.name = entity.name;
+  //   dto.email = entity.email;
+  //   dto.role = entity.role;
 
-    return dto;
-  }
+  //   return dto;
+  // }
 }

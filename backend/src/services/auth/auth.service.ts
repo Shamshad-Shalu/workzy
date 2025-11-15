@@ -6,7 +6,7 @@ import { RegisterResponseDTO } from "@/dtos/responses/auth.dto";
 import { inject, injectable } from "inversify";
 import { hash } from "bcryptjs";
 import redisClient from "@/config/redisClient";
-import { IUser } from "@/types/user";
+import { plainToInstance } from "class-transformer";
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -27,7 +27,10 @@ export class AuthService implements IAuthService {
       password: hashedPassword,
     });
 
-    const userData = RegisterResponseDTO.fromEntity(user);
+    const userData = plainToInstance(RegisterResponseDTO, user, {
+      excludeExtraneousValues: true,
+    });
+
     await redisClient.del(`otp:${email}`);
 
     return userData;

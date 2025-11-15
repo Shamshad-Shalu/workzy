@@ -1,11 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString, Matches } from "class-validator";
 
-interface RegisterPayload {
-  name: string;
-  email: string;
-  password: string;
-}
-
 export class RegisterRequestDTO {
   @IsString()
   @Matches(/^[A-Za-z]{3,25}$/, {
