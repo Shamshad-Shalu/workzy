@@ -1,16 +1,23 @@
-import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { TYPES } from "@/di/types";
-import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { RegisterResponseDTO } from "@/dtos/responses/auth.dto";
+import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+import { LoginResponseDTO, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
 import { inject, injectable } from "inversify";
-import { hash } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import redisClient from "@/config/redisClient";
 import { plainToInstance } from "class-transformer";
+import { AUTH, EMAIL, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
+import { IUser } from "@/types/user";
+import CustomError from "@/utils/customError";
+import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 
 @injectable()
 export class AuthService implements IAuthService {
-  constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {}
+  constructor(
+    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
+    @inject(TYPES.WorkerService) private workerService: IWorkerService
+  ) {}
 
   async findUserByEmail(email: string): Promise<boolean> {
     const user = await this.userRepository.findByEmail(email);
@@ -33,5 +40,44 @@ export class AuthService implements IAuthService {
     await redisClient.del(`otp:${email}`);
 
     return userData;
+  }
+
+  async login(data: LoginRequestDTO): Promise<LoginResponseDTO> {
+    const { email, password } = data;
+
+    const user = await this.userRepository.findByEmail(email);
+    if (!user) {
+      throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const isPasswordValid = await compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const userObj = user.toObject();
+
+    if (user.role === ROLE.WORKER) {
+      const worker = await this.workerService.getWorkerByUserId(user._id);
+      if (worker) {
+        const workerId = worker as { _id: string };
+        userObj.workerId = workerId._id.toString();
+      }
+    }
+
+    return LoginResponseDTO.fromEntity(userObj);
+  }
+
+  async isUserBlocked(userId: string): Promise<boolean> {
+    const user = await this.userRepository.findById(userId);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
+    return user.isBlocked || false;
+  }
+
+  async getUserByRoleAndId(role: Role, id: string): Promise<IUser | null> {
+    return this.userRepository.getUserByRoleAndId(role, id);
   }
 }

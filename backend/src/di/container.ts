@@ -12,6 +12,12 @@ import { EmailService } from "@/services/auth/email.service";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { TokenService } from "@/services/auth/token.service";
+import { IUserService } from "@/core/interfaces/services/IUserService";
+import { UserService } from "@/services/user.service";
+import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
+import { WorkerRepository } from "@/repositories/worker.repository";
+import { WorkerService } from "@/services/worker.service";
 
 const container = new Container();
 
@@ -19,10 +25,13 @@ container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
 container.bind<IAuthController>(TYPES.AuthController).to(AuthController);
 
 container.bind<IUserRepository>(TYPES.UserRepository).to(UserRepository);
-// container.bind<IUserService>(TYPES.UserService).to(UserService);
+container.bind<IUserService>(TYPES.UserService).to(UserService);
 
 container.bind<IOTPService>(TYPES.OTPService).to(OTPService);
 container.bind<IEmailService>(TYPES.EmailService).to(EmailService);
 container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
+
+container.bind<IWorkerRepository>(TYPES.WorkerRepository).to(WorkerRepository);
+container.bind<IWorkerService>(TYPES.WorkerService).to(WorkerService);
 
 export { container };

@@ -2,7 +2,7 @@ import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { inject, injectable } from "inversify";
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { TYPES } from "@/di/types";
 import CustomError from "@/utils/customError";
@@ -10,7 +10,7 @@ import { AUTH, EMAIL, HTTPSTATUS, Role, USER } from "@/constants";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import logger from "@/config/logger";
-import { setRefreshTokenCookie } from "@/utils/cookieUtils";
+import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/cookieUtils";
 import { generateAccessToken } from "@/utils/jwt.util";
 import validator from "validator";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
@@ -67,5 +67,32 @@ export class AuthController implements IAuthController {
     await this.otpService.resendOtp(email);
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_RESENT });
+  });
+
+  login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const user = await this.authService.login(req.body as LoginRequestDTO);
+
+    const isBlocked = await this.authService.isUserBlocked(user._id);
+    if (isBlocked) {
+      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
+      return;
+    }
+
+    setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
+
+    const accessToken = generateAccessToken({
+      _id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      role: user.role as Role,
+      workerId: user.workerId,
+    });
+
+    res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGIN_SUCCESS, accessToken, user });
+  });
+
+  logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    clearRefreshTokenCookie(res);
+    res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGOUT_SUCCESS });
   });
 }

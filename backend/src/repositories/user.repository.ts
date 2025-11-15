@@ -1,6 +1,6 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import User from "@/models/user.model ";
+import User from "@/models/user.model";
 import { IUser } from "@/types/user";
 import { injectable } from "inversify";
 
@@ -12,5 +12,9 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
 
   findByEmail(email: string): Promise<IUser | null> {
     return this.findOne({ email });
+  }
+
+  getUserByRoleAndId(role: string, id: string): Promise<IUser | null> {
+    return User.findOne({ _id: id, role }).exec();
   }
 }

@@ -5,7 +5,13 @@ const TYPES = {
 
   // User
   UserRepository: Symbol.for("UserRepository"),
-  // UserService: Symbol.for("UserService"),
+  UserService: Symbol.for("UserService"),
+  // UserController: Symbol.for("UserController"),
+
+  // worker
+  WorkerRepository: Symbol.for("WorkerRepository"),
+  WorkerService: Symbol.for("WorkerService"),
+  // WorkerController: Symbol.for("WorkerController"),
 
   // Miscellaneous / Utilities
   OTPService: Symbol.for("IOTPService"),

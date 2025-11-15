@@ -10,11 +10,7 @@ export class TokenService implements ITokenService {
   }
 
   async validateToken(email: string, token: string): Promise<boolean> {
-    try {
-      const storedToken = await redisClient.get(`forgotPassword:${email}`);
-      return storedToken === token;
-    } catch (error) {
-      throw error;
-    }
+    const storedToken = await redisClient.get(`forgotPassword:${email}`);
+    return storedToken === token;
   }
 }
