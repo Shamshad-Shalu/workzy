@@ -10,5 +10,7 @@ const router = Router();
 const authController = container.get<IAuthController>(TYPES.AuthController);
 
 router.post("/register", validateDto(RegisterRequestDTO), authController.register);
+router.post("/verify-otp", authController.verifyOTP);
+router.post("/resend-otp", authController.resendOtp);
 
 export default router;

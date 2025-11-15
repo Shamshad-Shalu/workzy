@@ -30,7 +30,6 @@ export class AuthService implements IAuthService {
     const userData = plainToInstance(RegisterResponseDTO, user, {
       excludeExtraneousValues: true,
     });
-
     await redisClient.del(`otp:${email}`);
 
     return userData;

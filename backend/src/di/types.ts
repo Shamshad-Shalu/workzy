@@ -10,6 +10,7 @@ const TYPES = {
   // Miscellaneous / Utilities
   OTPService: Symbol.for("IOTPService"),
   EmailService: Symbol.for("IEmailService"),
+  TokenService: Symbol.for("ITokenService"),
 };
 
 export { TYPES };

@@ -1,30 +1,21 @@
 import { Role } from "@/constants";
-import { IUser } from "@/types/user";
+import { Expose } from "class-transformer";
 import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
 
 export class RegisterResponseDTO {
+  @Expose()
   @IsString()
   _id!: string;
 
+  @Expose()
   @IsString()
   name!: string;
 
+  @Expose()
   @IsEmail()
   email!: string;
 
-  @IsString()
-  username!: string;
-
+  @Expose()
   @IsString()
   role!: Role;
-
-  // static fromEntity(entity: IUser): RegisterResponseDTO {
-  //   const dto = new RegisterResponseDTO();
-  //   dto._id = entity._id;
-  //   dto.name = entity.name;
-  //   dto.email = entity.email;
-  //   dto.role = entity.role;
-
-  //   return dto;
-  // }
 }
