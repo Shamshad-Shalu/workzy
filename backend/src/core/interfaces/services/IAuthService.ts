@@ -9,4 +9,5 @@ export interface IAuthService {
   login(loginDto: LoginRequestDTO): Promise<LoginResponseDTO>;
   isUserBlocked(userId: string): Promise<boolean>;
   getUserByRoleAndId(role: Role, id: string): Promise<IUser | null>;
+  updatePassword(email: string, newPassword: string): Promise<void>;
 }

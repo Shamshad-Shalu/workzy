@@ -80,4 +80,17 @@ export class AuthService implements IAuthService {
   async getUserByRoleAndId(role: Role, id: string): Promise<IUser | null> {
     return this.userRepository.getUserByRoleAndId(role, id);
   }
+
+  async updatePassword(email: string, newPassword: string): Promise<void> {
+    const user = await this.userRepository.findOne({ email });
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    const hashedPassword = await hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await user.save();
+
+    await redisClient.del(`forgotPassword${email}`);
+  }
 }

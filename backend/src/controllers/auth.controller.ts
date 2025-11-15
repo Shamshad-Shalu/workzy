@@ -6,14 +6,16 @@ import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { TYPES } from "@/di/types";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, Role, USER } from "@/constants";
+import { AUTH, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import logger from "@/config/logger";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/cookieUtils";
-import { generateAccessToken } from "@/utils/jwt.util";
+import { generateAccessToken, verifyRefreshToken } from "@/utils/jwt.util";
 import validator from "validator";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
+import redisClient from "@/config/redisClient";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -21,7 +23,8 @@ export class AuthController implements IAuthController {
     @inject(TYPES.AuthService) private authService: IAuthService,
     @inject(TYPES.OTPService) private otpService: IOTPService,
     @inject(TYPES.EmailService) private emailService: IEmailService,
-    @inject(TYPES.TokenService) private tokenService: ITokenService
+    @inject(TYPES.TokenService) private tokenService: ITokenService,
+    @inject(TYPES.WorkerService) private workerService: IWorkerService
   ) {}
 
   // Register a new user and send OTP to email
@@ -94,5 +97,88 @@ export class AuthController implements IAuthController {
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGOUT_SUCCESS });
+  });
+
+  refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { refreshToken } = req.cookies;
+
+    if (!refreshToken) {
+      throw new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED);
+    }
+
+    const decodedToken = verifyRefreshToken(refreshToken);
+    if (!decodedToken) {
+      clearRefreshTokenCookie(res);
+      throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.FORBIDDEN);
+    }
+
+    const isBlocked = await redisClient.get(`blocked_user:${decodedToken.user._id}`);
+    if (isBlocked) {
+      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
+      return;
+    }
+
+    const { _id, role, name, email } = decodedToken.user;
+
+    const user = await this.authService.getUserByRoleAndId(role, _id);
+    if (!user) {
+      clearRefreshTokenCookie(res);
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
+    const payload: any = {
+      _id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      role,
+    };
+
+    let fullUser = user.toObject ? user.toObject() : user;
+
+    if (role === ROLE.WORKER) {
+      const worker = await this.workerService.getWorkerByUserId(user._id.toString());
+      if (!worker) {
+        clearRefreshTokenCookie(res);
+        throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+      }
+      const workerId = worker as { _id: string };
+      payload["workerId"] = worker._id;
+      fullUser = { ...fullUser, workerId: workerId._id.toString() };
+    }
+
+    const accessToken = generateAccessToken(payload);
+
+    res.status(HTTPSTATUS.OK).json({ accessToken, user: fullUser });
+  });
+
+  forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email } = req.body;
+
+    if (!validator.isEmail(email)) {
+      throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    await this.emailService.sendResetEmailWithToken(email);
+
+    res.status(HTTPSTATUS.OK).json({ message: AUTH.FORGOT_PASS_EMAIL_SENT });
+  });
+
+  resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { email, token, password } = req.body;
+
+    console.log(`email: ${email}, token: ${token}, password: ${password}`);
+
+    if (!password || !validator.isStrongPassword(password)) {
+      throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const isValid = await this.tokenService.validateToken(email, token);
+    if (!isValid) {
+      throw new CustomError(AUTH.TOKEN_EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    await this.authService.updatePassword(email, password);
+
+    res.status(HTTPSTATUS.OK).json({ message: USER.PASSWORD_UPDATE_SUCCESS });
   });
 }
