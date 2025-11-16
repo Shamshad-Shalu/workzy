@@ -5,9 +5,9 @@ import UserRoutes from './routes/UserRoutes';
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-       <Routes>
-          <Route path='/*' element={<UserRoutes/>} />
-       </Routes>
+      <Routes>
+        <Route path="/*" element={<UserRoutes />} />
+      </Routes>
     </BrowserRouter>
   );
 };
