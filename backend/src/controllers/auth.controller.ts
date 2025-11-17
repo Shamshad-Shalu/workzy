@@ -159,6 +159,11 @@ export class AuthController implements IAuthController {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
+    let user =  await this.authService.findUserByEmail(email);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
     await this.emailService.sendResetEmailWithToken(email);
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.FORGOT_PASS_EMAIL_SENT });
@@ -168,9 +173,9 @@ export class AuthController implements IAuthController {
     const { email, token, password } = req.body;
 
     console.log(`email: ${email}, token: ${token}, password: ${password}`);
-
-    if (!password || !validator.isStrongPassword(password)) {
-      throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!password || !strongPasswordRegex.test(password)) {
+      throw new CustomError(AUTH.WEAK_PASSWORD, HTTPSTATUS.BAD_REQUEST);
     }
 
     const isValid = await this.tokenService.validateToken(email, token);

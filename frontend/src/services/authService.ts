@@ -27,7 +27,7 @@ export const forgotPasswordService = async (email: string) => {
   return res.data;
 };
 
-export const resetPasswordService = async (email: string, password: string, token: string) => {
+export const resetPasswordService = async (email: string, token: string, password: string) => {
   const res = await api.post(AUTH_ROUTES.RESET_PASSWORD, {
     email,
     token,
@@ -41,6 +41,6 @@ export const googleAuthService = () => {
 };
 
 export const logoutService = async () => {
-  const res = await api.post(AUTH_ROUTES.LOGOUT, {});
+  const res = await api.get(AUTH_ROUTES.LOGOUT, {});
   return res.data;
 };

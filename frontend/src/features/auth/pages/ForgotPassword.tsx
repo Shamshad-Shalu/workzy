@@ -1,14 +1,14 @@
 import type React from 'react';
 import AuthLayout from '@/components/molecules/AuthLayout';
-import LoginForm from '../components/LoginForm';
+import ForgotForm from '../components/ForgotPasswordForm';
 import loginImage from '@/assets/auth/login.jpg';
 
-const LoginPage: React.FC = () => {
+const ForgotPassword: React.FC = () => {
   return (
     <AuthLayout image={loginImage} logo="/logo.png">
-      <LoginForm />
+      <ForgotForm />
     </AuthLayout>
   );
 };
 
-export default LoginPage;
+export default ForgotPassword;
