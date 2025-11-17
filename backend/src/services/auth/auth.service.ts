@@ -47,7 +47,7 @@ export class AuthService implements IAuthService {
 
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
+      throw new CustomError(USER.NOT_FOUND , HTTPSTATUS.BAD_REQUEST);
     }
 
     const isPasswordValid = await compare(password, user.password);
