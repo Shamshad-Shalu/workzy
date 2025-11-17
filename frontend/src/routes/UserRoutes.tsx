@@ -3,6 +3,7 @@ import HomePage from '@/pages/Home';
 import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import GuestRoute from './GuestRoute';
+import Signup from '@/features/auth/pages/Signup';
 
 const UserRoutes: React.FC = () => {
   return (
@@ -11,6 +12,7 @@ const UserRoutes: React.FC = () => {
 
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Signup />} />
       </Route>
     </Routes>
   );
