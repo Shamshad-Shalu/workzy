@@ -7,6 +7,7 @@ import store from './store/store.ts';
 import { Toaster } from 'sonner';
 import { registerAuthHandlers } from './lib/api/axios.ts';
 import { clearUser, updateToken } from './store/slices/authSlice.ts';
+import AuthInitializer from './components/providers/AuthInitializer.tsx';
 
 const queryClient = new QueryClient({});
 
@@ -18,7 +19,9 @@ registerAuthHandlers(
 createRoot(document.getElementById('root')!).render(
   <Provider store={store}>
     <QueryClientProvider client={queryClient}>
-      <App />
+      <AuthInitializer>
+        <App />
+      </AuthInitializer>
       <Toaster richColors closeButton />
     </QueryClientProvider>
   </Provider>
