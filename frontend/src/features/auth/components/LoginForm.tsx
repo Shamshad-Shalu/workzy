@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { loginSchema, type LoginSchemaType } from '../validation/loginSchema';
 import { useForm } from 'react-hook-form';
@@ -8,12 +8,16 @@ import PasswordInput from '@/components/atoms/PasswordInput';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
 import { Mail } from 'lucide-react';
-import { AUTH_MESSAGES } from '@/constants';
+import { AUTH_MESSAGES, GOOGLE_CALLBACK, SERVER_URL } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
 import Button from '@/components/atoms/Button';
 import GoogleIcon from '@/components/icons/GoogleIcon';
+import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
+import { useEffect } from 'react';
+import AuthHeader from './atoms/AuthHeader';
 
 export default function LoginForm() {
+  const location = useLocation();
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -26,27 +30,28 @@ export default function LoginForm() {
     mode: 'onChange',
   });
 
+  useEffect(() => {
+    if (location.state?.blocked) {
+      toast.error('Your account has been blocked');
+    }
+  }, [location.state]);
+
   const onSubmit = async (data: LoginSchemaType) => {
     try {
       const user = await login(data.email, data.password);
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
 
-      if (user.role === 'admin') {
-        navigate('/admin');
-      } else if (user.role === 'worker') {
-        navigate('/worker');
-      } else {
-        navigate('/');
-      }
+      redirectBasedOnRole(user.role, navigate);
     } catch (error: any) {
       toast.error(handleApiError(error));
     }
   };
-
   return (
     <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-3xl font-bold text-gray-900">Welcome Back to Workzy!</h1>
-      <p className="text-gray-600 mb-5">Your workspace is just a click away</p>
+      <AuthHeader
+        title="Welcome Back to Workzy!"
+        description="Your workspace is just a click away"
+      />
 
       {/* Email */}
       <div>
@@ -101,7 +106,14 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <Button variant="outline" fullWidth iconLeft={<GoogleIcon />}>
+      <Button
+        variant="outline"
+        fullWidth
+        iconLeft={<GoogleIcon />}
+        onClick={() => {
+          window.location.href = `${SERVER_URL}/${GOOGLE_CALLBACK}`;
+        }}
+      >
         Sign in with Google
       </Button>
     </form>

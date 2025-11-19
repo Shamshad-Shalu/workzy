@@ -10,6 +10,7 @@ import Input from '@/components/atoms/Input';
 import { Mail, User } from 'lucide-react';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import Button from '@/components/atoms/Button';
+import AuthHeader from './atoms/AuthHeader';
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ export default function SignupForm() {
     try {
       const res = await registerService(data);
       toast.success(res.message);
-      navigate('/verify-otp', { state: { email: data.email } });
+      navigate('/verify-otp', { state: { email: data.email, password: data.password } });
     } catch (error: any) {
       toast.error(handleApiError(error));
     }
@@ -35,8 +36,10 @@ export default function SignupForm() {
 
   return (
     <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-      <h1 className="text-3xl font-bold text-gray-900">Create your Workzy account</h1>
-      <p className="text-gray-600 mb-5">Let's get started with your registration</p>
+      <AuthHeader
+        title="Create your Workzy account"
+        description="Let's get started with your registration"
+      />
       {/* name  */}
       <div>
         <Label>Name</Label>

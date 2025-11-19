@@ -35,10 +35,10 @@ api.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        const data = await refreshTokenRequest(); // refresh WITHOUT store
+        const data = await refreshTokenRequest();
 
         if (onTokenRefreshed) {
-          onTokenRefreshed(data.accessToken); // update redux
+          onTokenRefreshed(data.accessToken);
         }
 
         originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
@@ -47,7 +47,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         if (onLogout) {
           onLogout();
-        } // logout redux
+        }
         return Promise.reject(refreshError);
       }
     }

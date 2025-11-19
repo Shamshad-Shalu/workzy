@@ -8,6 +8,6 @@ export const AUTH_ROUTES = {
   FORGOT_PASSWORD: `${AUTH_ROUTE}/forgot-password`,
   RESET_PASSWORD: `${AUTH_ROUTE}/reset-password`,
   LOGOUT: `${AUTH_ROUTE}/logout`,
-  GOOGLE: '/api/auth/google',
+  GOOGLE: `${AUTH_ROUTE}/google`,
   REFRESH_TOKEN: '/api/auth/refresh-token',
 } as const;

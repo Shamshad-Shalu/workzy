@@ -1,11 +1,11 @@
 import React from 'react';
 import { LogOut, User } from 'lucide-react';
-import { useDispatch } from 'react-redux';
-import { useAppSelector } from '@/store/hooks';
-import { clearUser } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '@/store/hooks';
+import { useDispatch } from 'react-redux';
+import { clearUser } from '@/store/slices/authSlice';
 
-const HomePage: React.FC = () => {
+const Dashboard: React.FC = () => {
   const { user, isAuthenticated } = useAppSelector(state => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -54,15 +54,7 @@ const HomePage: React.FC = () => {
           </div>
         </div>
       </header>
-
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow p-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">Welcome, {user?.name}!</h2>
-          <p className="text-gray-600">This is your home page. You can add your content here.</p>
-        </div>
-      </main>
     </div>
   );
 };
-export default HomePage;
+export default Dashboard;

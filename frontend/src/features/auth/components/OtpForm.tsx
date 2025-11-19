@@ -7,15 +7,20 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthOtp } from '../hooks/useOtpVerification';
 import { AUTH_MESSAGES } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
+import { useAuth } from '../hooks/useAuth';
+import AuthHeader from './atoms/AuthHeader';
 
 export default function OtpForm() {
-  const [otpValue, setOtpValue] = useState('');
-  const [timer, setTimer] = useState(30);
-  const [isResending, setIsResending] = useState(false);
+  const [otpValue, setOtpValue] = useState<string>('');
+  const [timer, setTimer] = useState<number>(30);
+  const [isResending, setIsResending] = useState<boolean>(false);
+
   const navigate = useNavigate();
   const { state } = useLocation();
   const { verifyOtp } = useAuthOtp();
+  const { login } = useAuth();
   const email = state?.email;
+  const password = state?.password;
 
   useEffect(() => {
     if (timer === 0) {
@@ -39,6 +44,9 @@ export default function OtpForm() {
 
     try {
       await verifyOtp(email, otpValue);
+      if (email && password) {
+        await login(email, password);
+      }
       toast.success(AUTH_MESSAGES.REGISTER_SUCCESS);
 
       await new Promise(r => setTimeout(r, 150));
@@ -52,15 +60,13 @@ export default function OtpForm() {
     if (timer !== 0 || isResending) {
       return;
     }
-
     setIsResending(true);
     setTimer(30);
-
     try {
       await resendOtpService(email);
-      toast.success('OTP resent!');
+      toast.success(AUTH_MESSAGES.OTP_RESET_SUCCESS);
     } catch (err) {
-      toast.error('Failed to resend OTP');
+      toast.error(AUTH_MESSAGES.FAILED_OTP_SEND);
       setTimer(0);
     } finally {
       setIsResending(false);
@@ -69,8 +75,9 @@ export default function OtpForm() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold">Verify OTP</h1>
-      <p className="text-gray-600">Enter the code sent to {email}</p>
+      <AuthHeader title="Verify OTP" description={'Enter the code sent to {email}'} />
+      <h1 className="text-2xl font-bold"></h1>
+      <p className="text-gray-600"></p>
 
       <OtpInput value={otpValue} onChange={setOtpValue} />
 
