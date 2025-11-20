@@ -37,7 +37,7 @@ export class EmailService implements IEmailService {
 
     await redisClient.set(`forgotPassword:${email}`, token, { EX: expiryTime });
 
-    const resetLink = `${CLIENT_URL}/login/reset-password?token=${token}&email=${email}`;
+    const resetLink = `${CLIENT_URL}/reset-password?token=${token}&email=${email}`;
 
     await this.sendResetEmail(email, resetLink);
   }

@@ -173,9 +173,9 @@ export class AuthController implements IAuthController {
     const { email, token, password } = req.body;
 
     console.log(`email: ${email}, token: ${token}, password: ${password}`);
-
-    if (!password || !validator.isStrongPassword(password)) {
-      throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);
+    const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
+    if (!password || !strongPasswordRegex.test(password)) {
+      throw new CustomError(AUTH.WEAK_PASSWORD, HTTPSTATUS.BAD_REQUEST);
     }
 
     const isValid = await this.tokenService.validateToken(email, token);
