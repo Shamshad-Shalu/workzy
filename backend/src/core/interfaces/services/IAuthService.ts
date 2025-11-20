@@ -15,5 +15,5 @@ export interface IAuthService {
     email: string;
     name: string;
     profile: string;
-  }): Promise<IUser>;
+  }): Promise<LoginResponseDTO>;
 }

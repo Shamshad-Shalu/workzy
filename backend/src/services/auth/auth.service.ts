@@ -47,7 +47,7 @@ export class AuthService implements IAuthService {
 
     const user = await this.userRepository.findByEmail(email);
     if (!user) {
-      throw new CustomError(USER.NOT_FOUND , HTTPSTATUS.BAD_REQUEST);
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
 
     const isPasswordValid = await compare(password, user.password);
@@ -99,7 +99,7 @@ export class AuthService implements IAuthService {
     email: string;
     name: string;
     profile: string;
-  }): Promise<IUser> {
+  }): Promise<LoginResponseDTO> {
     let user = await this.userRepository.findByGoogleId(googleData.googleId);
 
     if (!user) {
@@ -114,10 +114,16 @@ export class AuthService implements IAuthService {
         password: hashedPassword,
         role: "user",
       });
-    } else {
-      user.googleId = googleData.googleId;
-      await user.save();
     }
-    return user;
+    const userObj = user.toObject();
+
+    if (user.role === ROLE.WORKER) {
+      const worker = await this.workerService.getWorkerByUserId(user._id);
+      if (worker) {
+        const workerId = worker as { _id: string };
+        userObj.workerId = workerId._id.toString();
+      }
+    }
+    return LoginResponseDTO.fromEntity(userObj);
   }
 }

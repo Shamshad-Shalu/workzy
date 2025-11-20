@@ -4,7 +4,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { CLIENT_URL } from "./constants";
 
-import authRoutes from "./routes/auth.routes";
+import passport from "./config/passport";
+import apiRouter from "./routes";
 import errorMiddleware from "./middlewares/errorMiddleware";
 
 const app = express();
@@ -22,12 +23,9 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(passport.initialize());
 
-app.use("/api/auth", authRoutes);
-
-app.get("/api/", (req, res) => {
-  res.json({ message: "hlo this is backend" });
-});
+app.use("/api", apiRouter);
 
 app.use(errorMiddleware);
 

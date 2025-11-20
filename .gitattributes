@@ -1,21 +1,4 @@
-# ===========================
-# Exclude JS config files from GitHub language stats
-# ===========================
-
-# Frontend config files
-frontend/eslint.config.mjs linguist-detectable=false
-frontend/vite.config.js linguist-detectable=false
-frontend/tailwind.config.js linguist-detectable=false
-frontend/postcss.config.js linguist-detectable=false
 frontend/index.html linguist-detectable=false
 frontend/index.css linguist-detectable=false
-
-# Backend config files
-backend/eslint.config.mjs linguist-detectable=false
-backend/prettier.config.js linguist-detectable=false
-backend/tsup.config.js linguist-detectable=false
-backend/jest.config.js linguist-detectable=false
-
-# Optional — ignore all JS config files anywhere
 **/*.config.js linguist-detectable=false
 **/*.config.mjs linguist-detectable=false

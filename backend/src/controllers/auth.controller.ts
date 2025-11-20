@@ -159,6 +159,11 @@ export class AuthController implements IAuthController {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
+    let user =  await this.authService.findUserByEmail(email);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
     await this.emailService.sendResetEmailWithToken(email);
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.FORGOT_PASS_EMAIL_SENT });
@@ -200,21 +205,17 @@ export class AuthController implements IAuthController {
       name: googleProfile.displayName,
       profile: (googleProfile as any)._json?.picture || "",
     });
-
     const isBlocked = await this.authService.isUserBlocked(user._id.toString());
     if (isBlocked) {
-      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
-      return;
+      return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }
 
-    setRefreshTokenCookie(res, { _id: user._id.toString(), role: "user" });
-    // const accessToken = generateAccessToken({
-    //   _id: user._id.toString(),
-    //   email: user.email,
-    //   name: user.name,
-    //   role: user.role as Role,
-    // });
+    setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
 
-    res.redirect(`${CLIENT_URL}/`);
+    const accessToken = generateAccessToken({ ...user });
+
+    const data = Buffer.from(JSON.stringify({ user, accessToken })).toString("base64");
+
+    res.redirect(`${CLIENT_URL}/auth/google/callback?data=${data}`);
   });
 }
