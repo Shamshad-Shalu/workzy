@@ -30,7 +30,6 @@ export const refreshAccessToken = createAsyncThunk(
   }
 );
 
-// Slice
 const authSlice = createSlice({
   name: 'auth',
   initialState,

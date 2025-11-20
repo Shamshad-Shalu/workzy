@@ -36,10 +36,6 @@ export const resetPasswordService = async (email: string, token: string, passwor
   return res.data;
 };
 
-export const googleAuthService = () => {
-  window.location.href = AUTH_ROUTES.GOOGLE;
-};
-
 export const logoutService = async () => {
   const res = await api.get(AUTH_ROUTES.LOGOUT, {});
   return res.data;

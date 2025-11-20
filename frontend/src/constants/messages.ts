@@ -6,6 +6,8 @@ export const AUTH_MESSAGES = {
   OTP_RESET_SUCCESS: 'Password reset successfully!',
   FAILED_OTP_SEND: 'Failed to send OTP. Please try again.',
   FAILED_OTP_VERIFICATION: 'Failed to verify OTP. Please try again.',
+  AUTH_FAILED: 'Authentication failed. Please try again.',
+  AUTH_NOT_RECIEVED: 'Authentication not received. Please try again.',
 } as const;
 
 export const SESSION_MESSAGES = {

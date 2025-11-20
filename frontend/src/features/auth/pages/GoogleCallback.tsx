@@ -5,6 +5,7 @@ import { setCredentials } from '@/store/slices/authSlice';
 import { toast } from 'sonner';
 import type { User } from '@/types/user';
 import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
+import { AUTH_MESSAGES } from '@/constants';
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();
@@ -28,11 +29,11 @@ export default function GoogleCallback() {
 
           redirectBasedOnRole(user.role, navigate);
         } catch (err) {
-          toast.error('Authentication failed. Please try again.');
+          toast.error(AUTH_MESSAGES.AUTH_FAILED);
           navigate('/login');
         }
       } else {
-        toast.error('No authentication data received');
+        toast.error(AUTH_MESSAGES.AUTH_NOT_RECIEVED);
         navigate('/login');
       }
     };

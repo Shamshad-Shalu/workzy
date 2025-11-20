@@ -1,14 +1,11 @@
-import type React from 'react';
 import AuthLayout from '@/components/molecules/AuthLayout';
 import LoginForm from '../components/LoginForm';
 import loginImage from '@/assets/auth/login.jpg';
 
-const LoginPage: React.FC = () => {
+export default function LoginPage() {
   return (
     <AuthLayout image={loginImage} logo="/logo.png">
       <LoginForm />
     </AuthLayout>
   );
-};
-
-export default LoginPage;
+}

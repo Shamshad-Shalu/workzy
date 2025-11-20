@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import OtpInput from '@/components/atoms/OtpInput';
 import Button from '@/components/atoms/Button';
 import { resendOtpService } from '@/services/authService';
@@ -9,47 +9,33 @@ import { AUTH_MESSAGES } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
 import { useAuth } from '../hooks/useAuth';
 import AuthHeader from './atoms/AuthHeader';
+import { useOtpTimer } from '../hooks/useOtpTimer';
 
 export default function OtpForm() {
   const [otpValue, setOtpValue] = useState<string>('');
-  const [timer, setTimer] = useState<number>(30);
-  const [isResending, setIsResending] = useState<boolean>(false);
+
+  const { timer, resetTimer } = useOtpTimer(30);
 
   const navigate = useNavigate();
   const { state } = useLocation();
   const { verifyOtp } = useAuthOtp();
   const { login } = useAuth();
+
   const email = state?.email;
   const password = state?.password;
 
-  useEffect(() => {
-    if (timer === 0) {
-      return;
-    }
-    const interval = setInterval(() => setTimer(t => t - 1), 1000);
-    return () => clearInterval(interval);
-  }, [timer]);
-
-  useEffect(() => {
-    if (otpValue.length === 6) {
-      submitOtp();
-    }
-  }, [otpValue]);
-
-  const submitOtp = async () => {
-    if (otpValue.length !== 6) {
+  const submitOtp = async (code: string = otpValue) => {
+    if (code.length !== 6) {
       toast.error('Please enter 6-digit OTP');
       return;
     }
 
     try {
-      await verifyOtp(email, otpValue);
+      await verifyOtp(email, code);
       if (email && password) {
         await login(email, password);
       }
       toast.success(AUTH_MESSAGES.REGISTER_SUCCESS);
-
-      await new Promise(r => setTimeout(r, 150));
       navigate('/');
     } catch (err: any) {
       toast.error(handleApiError(err));
@@ -57,31 +43,35 @@ export default function OtpForm() {
   };
 
   const resendOtp = async () => {
-    if (timer !== 0 || isResending) {
+    if (timer !== 0) {
       return;
     }
-    setIsResending(true);
-    setTimer(30);
+
+    resetTimer();
+
     try {
       await resendOtpService(email);
       toast.success(AUTH_MESSAGES.OTP_RESET_SUCCESS);
     } catch (err) {
       toast.error(AUTH_MESSAGES.FAILED_OTP_SEND);
-      setTimer(0);
-    } finally {
-      setIsResending(false);
     }
   };
 
   return (
     <div className="space-y-6">
-      <AuthHeader title="Verify OTP" description={'Enter the code sent to {email}'} />
-      <h1 className="text-2xl font-bold"></h1>
-      <p className="text-gray-600"></p>
+      <AuthHeader title="Verify OTP" description={`Enter the code sent to ${email}`} />
 
-      <OtpInput value={otpValue} onChange={setOtpValue} />
+      <OtpInput
+        value={otpValue}
+        onChange={(v: string) => {
+          setOtpValue(v);
+          if (v.length === 6) {
+            submitOtp(v);
+          }
+        }}
+      />
 
-      <Button fullWidth onClick={submitOtp}>
+      <Button fullWidth onClick={() => submitOtp(otpValue)}>
         Verify OTP →
       </Button>
 

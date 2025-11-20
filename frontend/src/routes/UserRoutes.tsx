@@ -1,6 +1,5 @@
 import Login from '@/features/auth/pages/Login';
 import HomePage from '@/pages/Home';
-import React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import GuestRoute from './GuestRoute';
 import Signup from '@/features/auth/pages/Signup';
@@ -9,7 +8,7 @@ import ResetPassword from '@/features/auth/pages/ResetPassword';
 import ForgotPassword from '@/features/auth/pages/ForgotPassword';
 import GoogleCallback from '@/features/auth/pages/GoogleCallback';
 
-const UserRoutes: React.FC = () => {
+export default function UserRoutes() {
   return (
     <Routes>
       <Route path="/" element={<HomePage />} />
@@ -24,6 +23,4 @@ const UserRoutes: React.FC = () => {
       </Route>
     </Routes>
   );
-};
-
-export default UserRoutes;
+}

@@ -1,11 +1,10 @@
-import React from 'react';
 import { LogOut, User } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { useAppSelector } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 
-const HomePage: React.FC = () => {
+export default function HomePage() {
   const { user, isAuthenticated } = useAppSelector(state => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -29,7 +28,16 @@ const HomePage: React.FC = () => {
                 <>
                   <div className="flex items-center gap-2 text-gray-700">
                     <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                      {user && user.profileImage ? (
+                        <img
+                          src={user.profileImage}
+                          alt="Profile"
+                          className="w-8 h-8 rounded-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      ) : (
+                        <User className="w-5 h-5 text-white" />
+                      )}
                     </div>
                     <span className="font-medium">{user?.name}</span>
                   </div>
@@ -64,5 +72,4 @@ const HomePage: React.FC = () => {
       </main>
     </div>
   );
-};
-export default HomePage;
+}
