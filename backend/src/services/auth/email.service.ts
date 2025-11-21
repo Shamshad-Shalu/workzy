@@ -12,7 +12,7 @@ import { inject, injectable } from "inversify";
 
 @injectable()
 export class EmailService implements IEmailService {
-  constructor(@inject(TYPES.TokenService) private tokenService: ITokenService) {}
+  constructor(@inject(TYPES.TokenService) private _tokenService: ITokenService) {}
 
   async sendOtpEmail(userData: RegisterRequestDTO, otp: string): Promise<void> {
     const data = JSON.stringify({ userData, otp });
@@ -32,7 +32,7 @@ export class EmailService implements IEmailService {
   }
 
   async sendResetEmailWithToken(email: string): Promise<void> {
-    const token = this.tokenService.generateToken();
+    const token = this._tokenService.generateToken();
     const expiryTime = 15 * 60;
 
     await redisClient.set(`forgotPassword:${email}`, token, { EX: expiryTime });

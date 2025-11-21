@@ -6,8 +6,8 @@ import { inject, injectable } from "inversify";
 
 @injectable()
 export class WorkerService implements IWorkerService {
-  constructor(@inject(TYPES.WorkerRepository) private workerRepository: IWorkerRepository) {}
+  constructor(@inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository) {}
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
-    return this.workerRepository.findOne({ userId });
+    return this._workerRepository.findOne({ userId });
   };
 }

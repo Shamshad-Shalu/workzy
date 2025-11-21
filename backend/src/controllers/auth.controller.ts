@@ -21,25 +21,25 @@ import { Profile } from "passport";
 @injectable()
 export class AuthController implements IAuthController {
   constructor(
-    @inject(TYPES.AuthService) private authService: IAuthService,
-    @inject(TYPES.OTPService) private otpService: IOTPService,
-    @inject(TYPES.EmailService) private emailService: IEmailService,
-    @inject(TYPES.TokenService) private tokenService: ITokenService,
-    @inject(TYPES.WorkerService) private workerService: IWorkerService
+    @inject(TYPES.AuthService) private _authService: IAuthService,
+    @inject(TYPES.OTPService) private _otpService: IOTPService,
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.TokenService) private _tokenService: ITokenService,
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService
   ) {}
 
   // Register a new user and send OTP to email
   register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userData = req.body as RegisterRequestDTO;
 
-    const existingUser = await this.authService.findUserByEmail(userData.email);
+    const existingUser = await this._authService.findUserByEmail(userData.email);
     if (existingUser) {
       throw new CustomError(USER.EXISTS, HTTPSTATUS.BAD_REQUEST);
     }
 
-    const otp = this.otpService.generateOTP();
+    const otp = this._otpService.generateOTP();
 
-    await this.emailService.sendOtpEmail(userData, otp);
+    await this._emailService.sendOtpEmail(userData, otp);
 
     logger.info(`user: ${userData.email} , otp:${otp}`);
 
@@ -50,9 +50,9 @@ export class AuthController implements IAuthController {
   verifyOTP = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, otp } = req.body;
 
-    const userData = await this.otpService.verifyAndRetrieveUser(email, otp);
+    const userData = await this._otpService.verifyAndRetrieveUser(email, otp);
 
-    const user = await this.authService.register(userData);
+    const user = await this._authService.register(userData);
 
     setRefreshTokenCookie(res, { _id: user._id, role: user.role as Role });
 
@@ -68,15 +68,15 @@ export class AuthController implements IAuthController {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
-    await this.otpService.resendOtp(email);
+    await this._otpService.resendOtp(email);
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_RESENT });
   });
 
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const user = await this.authService.login(req.body as LoginRequestDTO);
+    const user = await this._authService.login(req.body as LoginRequestDTO);
 
-    const isBlocked = await this.authService.isUserBlocked(user._id);
+    const isBlocked = await this._authService.isUserBlocked(user._id);
     if (isBlocked) {
       res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
       return;
@@ -121,7 +121,7 @@ export class AuthController implements IAuthController {
 
     const { _id, role, name, email } = decodedToken.user;
 
-    const user = await this.authService.getUserByRoleAndId(role, _id);
+    const user = await this._authService.getUserByRoleAndId(role, _id);
     if (!user) {
       clearRefreshTokenCookie(res);
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
@@ -137,7 +137,7 @@ export class AuthController implements IAuthController {
     let fullUser = user.toObject ? user.toObject() : user;
 
     if (role === ROLE.WORKER) {
-      const worker = await this.workerService.getWorkerByUserId(user._id.toString());
+      const worker = await this._workerService.getWorkerByUserId(user._id.toString());
       if (!worker) {
         clearRefreshTokenCookie(res);
         throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
@@ -159,12 +159,12 @@ export class AuthController implements IAuthController {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
-    let user =  await this.authService.findUserByEmail(email);
+    let user =  await this._authService.findUserByEmail(email);
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
 
-    await this.emailService.sendResetEmailWithToken(email);
+    await this._emailService.sendResetEmailWithToken(email);
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.FORGOT_PASS_EMAIL_SENT });
   });
@@ -172,18 +172,17 @@ export class AuthController implements IAuthController {
   resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { email, token, password } = req.body;
 
-    console.log(`email: ${email}, token: ${token}, password: ${password}`);
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/;
     if (!password || !strongPasswordRegex.test(password)) {
       throw new CustomError(AUTH.WEAK_PASSWORD, HTTPSTATUS.BAD_REQUEST);
     }
 
-    const isValid = await this.tokenService.validateToken(email, token);
+    const isValid = await this._tokenService.validateToken(email, token);
     if (!isValid) {
       throw new CustomError(AUTH.TOKEN_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
 
-    await this.authService.updatePassword(email, password);
+    await this._authService.updatePassword(email, password);
 
     res.status(HTTPSTATUS.OK).json({ message: USER.PASSWORD_UPDATE_SUCCESS });
   });
@@ -199,13 +198,13 @@ export class AuthController implements IAuthController {
       throw new CustomError(AUTH.GOOGLE_NOT_PROVIDED, HTTPSTATUS.BAD_REQUEST);
     }
 
-    const user = await this.authService.handleGoogleUser({
+    const user = await this._authService.handleGoogleUser({
       googleId: googleProfile.id,
       email,
       name: googleProfile.displayName,
       profile: (googleProfile as any)._json?.picture || "",
     });
-    const isBlocked = await this.authService.isUserBlocked(user._id.toString());
+    const isBlocked = await this._authService.isUserBlocked(user._id.toString());
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }

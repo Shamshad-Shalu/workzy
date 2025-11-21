@@ -11,7 +11,7 @@ import { IEmailService } from "@/core/interfaces/services/IEmailService";
 
 @injectable()
 export class OTPService implements IOTPService {
-  constructor(@inject(TYPES.EmailService) private emailService: IEmailService) {}
+  constructor(@inject(TYPES.EmailService) private _emailService: IEmailService) {}
 
   // Generate a random 6-digit OTP
   generateOTP(): string {
@@ -28,7 +28,7 @@ export class OTPService implements IOTPService {
 
     logger.info(`newOtp:${newOtp}`);
 
-    await this.emailService.sendOtpEmail(existingData.userData, newOtp);
+    await this._emailService.sendOtpEmail(existingData.userData, newOtp);
   }
 
   async verifyAndRetrieveUser(email: string, otp: string): Promise<RegisterRequestDTO> {

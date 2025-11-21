@@ -6,9 +6,9 @@ import { inject, injectable } from "inversify";
 
 @injectable()
 export class UserService implements IUserService {
-  constructor(@inject(TYPES.UserRepository) private userRepository: IUserRepository) {}
+  constructor(@inject(TYPES.UserRepository) private _userRepository: IUserRepository) {}
 
   findByEmail(email: string): Promise<IUser | null> {
-    return this.userRepository.findByEmail(email);
+    return this._userRepository.findByEmail(email);
   }
 }

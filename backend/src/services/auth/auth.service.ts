@@ -15,12 +15,12 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 @injectable()
 export class AuthService implements IAuthService {
   constructor(
-    @inject(TYPES.UserRepository) private userRepository: IUserRepository,
-    @inject(TYPES.WorkerService) private workerService: IWorkerService
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService
   ) {}
 
   async findUserByEmail(email: string): Promise<boolean> {
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
     return !!user;
   }
 
@@ -28,7 +28,7 @@ export class AuthService implements IAuthService {
     const { name, email, password } = registerDto;
     const hashedPassword = await hash(password, 10);
 
-    const user = await this.userRepository.create({
+    const user = await this._userRepository.create({
       name,
       email,
       password: hashedPassword,
@@ -45,7 +45,7 @@ export class AuthService implements IAuthService {
   async login(data: LoginRequestDTO): Promise<LoginResponseDTO> {
     const { email, password } = data;
 
-    const user = await this.userRepository.findByEmail(email);
+    const user = await this._userRepository.findByEmail(email);
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
@@ -58,7 +58,7 @@ export class AuthService implements IAuthService {
     const userObj = user.toObject();
 
     if (user.role === ROLE.WORKER) {
-      const worker = await this.workerService.getWorkerByUserId(user._id);
+      const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
         const workerId = worker as { _id: string };
         userObj.workerId = workerId._id.toString();
@@ -69,7 +69,7 @@ export class AuthService implements IAuthService {
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
-    const user = await this.userRepository.findById(userId);
+    const user = await this._userRepository.findById(userId);
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
@@ -78,11 +78,11 @@ export class AuthService implements IAuthService {
   }
 
   async getUserByRoleAndId(role: Role, id: string): Promise<IUser | null> {
-    return this.userRepository.getUserByRoleAndId(role, id);
+    return this._userRepository.getUserByRoleAndId(role, id);
   }
 
   async updatePassword(email: string, newPassword: string): Promise<void> {
-    const user = await this.userRepository.findOne({ email });
+    const user = await this._userRepository.findOne({ email });
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
@@ -100,13 +100,13 @@ export class AuthService implements IAuthService {
     name: string;
     profile: string;
   }): Promise<LoginResponseDTO> {
-    let user = await this.userRepository.findByGoogleId(googleData.googleId);
+    let user = await this._userRepository.findByGoogleId(googleData.googleId);
 
     if (!user) {
       const dummyPassword = Math.random().toString(36).slice(-8);
       const hashedPassword = await hash(dummyPassword, 10);
 
-      user = await this.userRepository.create({
+      user = await this._userRepository.create({
         name: googleData.name,
         googleId: googleData.googleId,
         email: googleData.email,
@@ -118,7 +118,7 @@ export class AuthService implements IAuthService {
     const userObj = user.toObject();
 
     if (user.role === ROLE.WORKER) {
-      const worker = await this.workerService.getWorkerByUserId(user._id);
+      const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
         const workerId = worker as { _id: string };
         userObj.workerId = workerId._id.toString();
