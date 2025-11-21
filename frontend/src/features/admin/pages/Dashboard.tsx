@@ -1,11 +1,10 @@
-import React from 'react';
 import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector } from '@/store/hooks';
 import { useDispatch } from 'react-redux';
 import { clearUser } from '@/store/slices/authSlice';
 
-const Dashboard: React.FC = () => {
+export default function Dashboard() {
   const { user, isAuthenticated } = useAppSelector(state => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -56,5 +55,4 @@ const Dashboard: React.FC = () => {
       </header>
     </div>
   );
-};
-export default Dashboard;
+}

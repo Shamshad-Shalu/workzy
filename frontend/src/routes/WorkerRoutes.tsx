@@ -7,7 +7,7 @@ const WorkerRoutes: React.FC = () => {
   return (
     <Routes>
       <Route element={<ProtectedRoute />}>
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
       </Route>
     </Routes>
   );

@@ -7,7 +7,7 @@ const AdminRoutes: React.FC = () => {
   return (
     <Routes>
       <Route element={<ProtectedRoute />}>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
       </Route>
     </Routes>
   );

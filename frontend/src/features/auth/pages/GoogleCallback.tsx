@@ -4,7 +4,6 @@ import { useAppDispatch } from '@/store/hooks';
 import { setCredentials } from '@/store/slices/authSlice';
 import { toast } from 'sonner';
 import type { User } from '@/types/user';
-import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 import { AUTH_MESSAGES } from '@/constants';
 
 export default function GoogleCallback() {
@@ -26,8 +25,7 @@ export default function GoogleCallback() {
           const decoded = JSON.parse(atob(data));
           const { user, accessToken } = decoded as { user: User; accessToken: string };
           dispatch(setCredentials({ user, accessToken }));
-
-          redirectBasedOnRole(user.role, navigate);
+          navigate('/');
         } catch (err) {
           toast.error(AUTH_MESSAGES.AUTH_FAILED);
           navigate('/login');
