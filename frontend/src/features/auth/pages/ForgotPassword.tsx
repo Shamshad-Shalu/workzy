@@ -1,5 +1,5 @@
 import type React from 'react';
-import AuthLayout from '@/components/layout/AuthLayout';
+import AuthLayout from '@/layouts/auth/AuthLayout';
 import ForgotForm from '../components/ForgotPasswordForm';
 import loginImage from '@/assets/auth/login.jpg';
 

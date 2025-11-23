@@ -1,5 +1,5 @@
 import type React from 'react';
-import AuthLayout from '@/components/layout/AuthLayout';
+import AuthLayout from '@/layouts/auth/AuthLayout';
 import OtpForm from '../components/OtpForm';
 import otpImage from '@/assets/auth/otp.jpeg';
 

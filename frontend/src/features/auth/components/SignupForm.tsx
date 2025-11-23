@@ -10,7 +10,7 @@ import Input from '@/components/atoms/Input';
 import { Mail, User } from 'lucide-react';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import Button from '@/components/atoms/Button';
-import AuthHeader from './atoms/AuthHeader';
+import PageHeader from '@/components/molecules/PageHeader';
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -36,7 +36,7 @@ export default function SignupForm() {
 
   return (
     <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-      <AuthHeader
+      <PageHeader
         title="Create your Workzy account"
         description="Let's get started with your registration"
       />

@@ -1,4 +1,4 @@
-import Header from '@/components/layout/Header';
+import Header from '@/layouts/user/Header';
 
 export default function HomePage() {
   return (

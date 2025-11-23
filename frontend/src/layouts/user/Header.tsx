@@ -3,7 +3,7 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
 import { Bell, User as UserIcon, Users } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,7 +12,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import ModeToggle from '../ui/ModeToggle';
+import ModeToggle from '../../components/ui/ModeToggle';
 import { ROLE } from '@/constants';
 
 export default function Header() {

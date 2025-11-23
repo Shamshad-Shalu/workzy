@@ -7,7 +7,7 @@ import { forgotPasswordService } from '@/services/authService';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
 import { useNavigate } from 'react-router-dom';
-import AuthHeader from './atoms/AuthHeader';
+import PageHeader from '@/components/molecules/PageHeader';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
@@ -35,7 +35,7 @@ export default function ForgotPasswordForm() {
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <AuthHeader title="Forgot Password" description="Enter your email to reset your password" />
+      <PageHeader title="Forgot Password" description="Enter your email to reset your password" />
       <div>
         <Label>Email Address</Label>
         <Input

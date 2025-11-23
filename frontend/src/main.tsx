@@ -24,7 +24,7 @@ createRoot(document.getElementById('root')!).render(
         <AuthInitializer>
           <App />
         </AuthInitializer>
-        <Toaster />
+        <Toaster richColors closeButton />
       </QueryClientProvider>
     </Provider>
   </ThemeProvider>

@@ -1,9 +1,9 @@
-type AuthHeaderProps = {
+type PageHeaderProps = {
   title: string;
   description: string;
 };
 
-export default function AuthHeader({ title, description }: AuthHeaderProps) {
+export default function PageHeader({ title, description }: PageHeaderProps) {
   return (
     <>
       <h1 className="text-3xl font-bold text-foreground">{title}</h1>

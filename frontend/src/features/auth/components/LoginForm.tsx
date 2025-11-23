@@ -14,7 +14,7 @@ import Button from '@/components/atoms/Button';
 import GoogleIcon from '@/components/icons/GoogleIcon';
 import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 import { useEffect } from 'react';
-import AuthHeader from './atoms/AuthHeader';
+import PageHeader from '@/components/molecules/PageHeader';
 import { Checkbox } from '@/components/ui/checkbox';
 
 export default function LoginForm() {
@@ -49,7 +49,7 @@ export default function LoginForm() {
   };
   return (
     <form className="space-y-2" onSubmit={handleSubmit(onSubmit)}>
-      <AuthHeader
+      <PageHeader
         title="Welcome Back to Workzy!"
         description="Your workspace is just a click away"
       />

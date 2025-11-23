@@ -6,7 +6,7 @@ import { resetPasswordService } from '@/services/authService';
 import { toast } from 'sonner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { handleApiError } from '@/utils/handleApiError';
-import AuthHeader from './atoms/AuthHeader';
+import PageHeader from '@/components/molecules/PageHeader';
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -38,7 +38,7 @@ export default function ResetPasswordForm() {
 
   return (
     <form onSubmit={submit} className="space-y-6">
-      <AuthHeader title="Reset Password" description="Enter your new password" />
+      <PageHeader title="Reset Password" description="Enter your new password" />
 
       <div>
         <Label>New Password</Label>

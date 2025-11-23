@@ -8,7 +8,7 @@ import { useAuthOtp } from '../hooks/useOtpVerification';
 import { AUTH_MESSAGES } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
 import { useAuth } from '../hooks/useAuth';
-import AuthHeader from './atoms/AuthHeader';
+import PageHeader from '@/components/molecules/PageHeader';
 import { useOtpTimer } from '../hooks/useOtpTimer';
 
 export default function OtpForm() {
@@ -59,7 +59,7 @@ export default function OtpForm() {
 
   return (
     <div className="space-y-6">
-      <AuthHeader title="Verify OTP" description={`Enter the code sent to ${email}`} />
+      <PageHeader title="Verify OTP" description={`Enter the code sent to ${email}`} />
 
       <OtpInput
         value={otpValue}
