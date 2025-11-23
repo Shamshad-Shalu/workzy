@@ -15,6 +15,7 @@ import GoogleIcon from '@/components/icons/GoogleIcon';
 import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 import { useEffect } from 'react';
 import AuthHeader from './atoms/AuthHeader';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export default function LoginForm() {
   const location = useLocation();
@@ -74,11 +75,17 @@ export default function LoginForm() {
         />
 
         <div className="flex justify-between items-center mt-2 mb-4">
-          <label className="flex items-center gap-2 text-sm text-gray-600">
-            <input type="checkbox" className="rounded" />
+          <label className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Checkbox
+              className="
+              w-5 h-5
+              data-[state=checked]:bg-blue-600
+              data-[state=checked]:border-blue-600
+            "
+            />
             Remember me
           </label>
-          <Link className="text-sm hover:underline text-black" to="/forgot-password">
+          <Link className="text-sm hover:underline text-muted-foreground" to="/forgot-password">
             Forgot password?
           </Link>
         </div>
@@ -89,9 +96,9 @@ export default function LoginForm() {
       </Button>
 
       {/* Signup Link */}
-      <p className="text-center text-gray-600">
+      <p className="text-center text-muted-foreground">
         Don’t have an account?{' '}
-        <Link className="text-black font-medium hover:underline" to="/register">
+        <Link className="text-primary font-medium hover:underline" to="/register">
           Sign up
         </Link>
       </p>
@@ -102,7 +109,7 @@ export default function LoginForm() {
           <div className="w-full border-t border-gray-300"></div>
         </div>
         <div className="relative flex justify-center text-sm">
-          <span className="px-2 bg-white text-gray-500">Or continue with</span>
+          <span className="px-2 bg-card text-muted-foreground">Or continue with</span>
         </div>
       </div>
 

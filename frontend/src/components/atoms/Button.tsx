@@ -23,10 +23,10 @@ export default function Button({
     'flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-all';
 
   const variants = {
-    primary: 'bg-black text-white hover:bg-gray-800 disabled:bg-gray-600',
-    secondary: 'bg-gray-100 hover:bg-gray-200',
-    outline: 'border border-gray-300 hover:bg-gray-100',
-    ghost: 'hover:bg-gray-100',
+    primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
+    outline: 'border border-input bg-background hover:bg-accent',
+    ghost: 'hover:bg-accent',
   };
 
   return (

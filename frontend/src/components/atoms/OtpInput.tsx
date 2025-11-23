@@ -57,7 +57,7 @@ export default function OtpInput({ value, onChange, length = 6 }: OtpInputProps)
           value={value[i] || ''}
           onChange={e => handleChange(i, e.target.value)}
           onKeyDown={e => handleKeyDown(i, e)}
-          className="w-12 h-12 text-center text-xl border rounded-lg focus:ring-2 focus:ring-black"
+          className="w-12 h-12 text-center text-xl border  bg-card text-foreground rounded-md border-input focus:outline-none focus:ring-2 focus:ring-ring"
         />
       ))}
     </div>

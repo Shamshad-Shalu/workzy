@@ -1,5 +1,5 @@
 import type React from 'react';
-import AuthLayout from '@/components/molecules/AuthLayout';
+import AuthLayout from '@/components/layout/AuthLayout';
 import SignupForm from '../components/SignupForm';
 import signupImage from '@/assets/auth/signup.jpg';
 

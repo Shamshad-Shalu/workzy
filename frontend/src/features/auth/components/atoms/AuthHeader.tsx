@@ -6,8 +6,8 @@ type AuthHeaderProps = {
 export default function AuthHeader({ title, description }: AuthHeaderProps) {
   return (
     <>
-      <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
-      <p className="text-gray-600 mb-5">{description}</p>
+      <h1 className="text-3xl font-bold text-foreground">{title}</h1>
+      <p className="text-muted-foreground mb-5">{description}</p>
     </>
   );
 }

@@ -15,13 +15,13 @@ export default function PasswordInput({ error, value, onChange, ...props }: Pass
       value={value}
       onChange={onChange}
       error={error}
-      leftIcon={<Lock className="w-5 h-5 text-gray-400" />}
+      leftIcon={<Lock className="w-5 h-5 text-muted-foreground" />}
       rightIcon={
         <button type="button" onClick={() => setShow(!show)}>
           {show ? (
-            <EyeOff className="w-5 h-5 text-gray-400" />
+            <EyeOff className="w-5 h-5 text-muted-foreground" />
           ) : (
-            <Eye className="w-5 h-5 text-gray-400" />
+            <Eye className="w-5 h-5 text-muted-foreground" />
           )}
         </button>
       }

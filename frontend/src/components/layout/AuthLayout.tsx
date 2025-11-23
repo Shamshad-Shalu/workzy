@@ -8,8 +8,8 @@ interface Props {
 
 export default function AuthLayout({ children, image, logo }: Props) {
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-xl overflow-hidden w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen bg-background  flex items-center justify-center px-4">
+      <div className="bg-card border border-border rounded-2xl shadow-xl overflow-hidden w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2">
         {/* Left-form side  */}
         <div className="p-10 flex items-center justify-center">
           <div className="w-full max-w-md">{children}</div>

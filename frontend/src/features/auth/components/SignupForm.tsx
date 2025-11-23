@@ -76,9 +76,9 @@ export default function SignupForm() {
       </Button>
 
       {/* login Link */}
-      <p className="text-center text-gray-600">
+      <p className="text-center text-muted-foreground">
         Already have an account?{' '}
-        <Link className="text-black font-medium hover:underline" to="/login">
+        <Link className="text-primary font-medium hover:underline" to="/login">
           Log in
         </Link>
       </p>
