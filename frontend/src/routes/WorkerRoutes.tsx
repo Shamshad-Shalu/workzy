@@ -7,13 +7,8 @@ export default function WorkerRoutes() {
   return (
     <Routes>
       <Route element={<ProtectedRoute />}>
-        {/* Wrap ALL worker pages in WorkerLayout */}
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
-
-          {/* Add future worker pages here */}
-          {/* <Route path="jobs" element={<WorkerJobs />} /> */}
-          {/* <Route path="wallet" element={<WorkerWallet />} /> */}
         </Route>
       </Route>
     </Routes>

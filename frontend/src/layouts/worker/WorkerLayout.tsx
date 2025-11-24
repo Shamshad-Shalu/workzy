@@ -6,12 +6,10 @@ import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
 export function WorkerLayout() {
   return (
     <div className="flex h-screen bg-muted/30 ">
-      {/* DESKTOP SIDEBAR */}
       <div className="hidden lg:block">
         <WorkerSidebar />
       </div>
 
-      {/* MOBILE DRAWER */}
       <Sheet>
         <SheetTrigger id="drawer-trigger" className="hidden" />
 
@@ -20,14 +18,12 @@ export function WorkerLayout() {
         </SheetContent>
       </Sheet>
 
-      {/* RIGHT SIDE */}
       <div className="flex flex-col flex-1">
         <Topbar
           onMenuClick={() => {
             document.getElementById('drawer-trigger')?.click();
           }}
         />
-
         <main className="flex-1 overflow-y-auto p-6 no-scrollbar">
           <Outlet />
         </main>
