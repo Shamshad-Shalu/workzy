@@ -118,3 +118,10 @@
     color: var(--color-foreground);
   }
 }
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.sidebar-scroll::-webkit-scrollbar {
+  width: 0;
+}

@@ -1,16 +1,21 @@
-import type React from 'react';
 import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
-import Dashboard from '@/features/worker/pages/Dashboard';
+import WorkerDashboard from '@/features/worker/dashboard/pages/Dashboard';
+import { WorkerLayout } from '@/layouts/worker/WorkerLayout';
 
-const WorkerRoutes: React.FC = () => {
+export default function WorkerRoutes() {
   return (
     <Routes>
       <Route element={<ProtectedRoute />}>
-        <Route path="dashboard" element={<Dashboard />} />
+        {/* Wrap ALL worker pages in WorkerLayout */}
+        <Route element={<WorkerLayout />}>
+          <Route path="dashboard" element={<WorkerDashboard />} />
+
+          {/* Add future worker pages here */}
+          {/* <Route path="jobs" element={<WorkerJobs />} /> */}
+          {/* <Route path="wallet" element={<WorkerWallet />} /> */}
+        </Route>
       </Route>
     </Routes>
   );
-};
-
-export default WorkerRoutes;
+}
