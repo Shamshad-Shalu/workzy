@@ -7,6 +7,7 @@ import ResetPassword from '@/features/auth/pages/ResetPassword';
 import ForgotPassword from '@/features/auth/pages/ForgotPassword';
 import GoogleCallback from '@/features/auth/pages/GoogleCallback';
 import RoleBasedRoot from './RoleBasedRoot';
+import ProfilePage from '@/features/user/page/ProfilePage';
 
 export default function UserRoutes() {
   return (
@@ -21,6 +22,8 @@ export default function UserRoutes() {
         <Route path="/verify-otp" element={<OtpPage />} />
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Route>
+
+      <Route path="/profile" element={<ProfilePage />} />
     </Routes>
   );
 }

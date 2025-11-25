@@ -13,6 +13,9 @@ import {
 import { Separator } from '../ui/separator';
 import type { User } from '@/types/user';
 import type { MenuItem } from '@/types/navigation';
+import { clearUser } from '@/store/slices/authSlice';
+import { useNavigate } from 'react-router-dom';
+import { useAppDispatch } from '@/store/hooks';
 
 interface BaseSidebarProps {
   collapsed: boolean;
@@ -34,6 +37,18 @@ export function BaseSidebar({
   supportItems = [],
   user,
 }: BaseSidebarProps) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(clearUser());
+    navigate('/login');
+  };
+
+  const handleSwitchMode = () => {
+    navigate('/?as=user');
+  };
+
   return (
     <aside
       className={cn(
@@ -118,11 +133,11 @@ export function BaseSidebar({
 
           <DropdownMenuContent className="w-56 rounded-xl p-2" align="end">
             {user.role === ROLE.WORKER && (
-              <DropdownMenuItem className="p-3 text-sm">
+              <DropdownMenuItem className="p-3 text-sm" onClick={handleSwitchMode}>
                 <Repeat className="mr-2 h-4 w-4" /> Switch to User
               </DropdownMenuItem>
             )}
-            <DropdownMenuItem className="p-3 text-red-500 text-sm">
+            <DropdownMenuItem className="p-3 text-red-500 text-sm" onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" /> Logout
             </DropdownMenuItem>
           </DropdownMenuContent>
