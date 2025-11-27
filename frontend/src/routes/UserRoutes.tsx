@@ -7,7 +7,7 @@ import ResetPassword from '@/features/auth/pages/ResetPassword';
 import ForgotPassword from '@/features/auth/pages/ForgotPassword';
 import GoogleCallback from '@/features/auth/pages/GoogleCallback';
 import RoleBasedRoot from './RoleBasedRoot';
-import ProfilePage from '@/features/user/page/ProfilePage';
+import UserProfilePage from '@/features/user/profile/pages/UserProfilePage';
 
 export default function UserRoutes() {
   return (
@@ -23,7 +23,7 @@ export default function UserRoutes() {
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Route>
 
-      <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/profile" element={<UserProfilePage />} />
     </Routes>
   );
 }

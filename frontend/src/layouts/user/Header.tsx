@@ -60,7 +60,7 @@ export default function Header() {
 
                 <DropdownMenuSeparator />
 
-                <DropdownMenuItem onClick={() => navigate('/')}>
+                <DropdownMenuItem onClick={() => navigate('/profile')}>
                   <UserIcon className="h-4 w-4 mr-2" />
                   My Profile
                 </DropdownMenuItem>

@@ -31,7 +31,13 @@ export default function Button({
 
   return (
     <button
-      className={cn(base, variants[variant], fullWidth && 'w-full', className)}
+      className={cn(
+        base,
+        variants[variant],
+        (loading || props.disabled) && 'opacity-60 cursor-not-allowed',
+        fullWidth && 'w-full',
+        className
+      )}
       disabled={loading || props.disabled}
       {...props}
     >
