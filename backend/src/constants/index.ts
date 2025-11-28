@@ -13,6 +13,8 @@ export const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
 export const NODEMAILER_EMAIL = process.env.NODEMAILER_EMAIL;
 export const NODEMAILER_PASSWORD = process.env.NODEMAILER_PASSWORD;
 
+export const DEFAULT_IMAGE_URL = "profile/default.jpg";
+
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL as string;

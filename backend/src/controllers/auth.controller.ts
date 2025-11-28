@@ -17,6 +17,8 @@ import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import redisClient from "@/config/redisClient";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { Profile } from "passport";
+import { instanceToPlain } from "class-transformer";
+import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -119,24 +121,24 @@ export class AuthController implements IAuthController {
       return;
     }
 
-    const { _id, role, name, email } = decodedToken.user;
-
-    const user = await this._authService.getUserByRoleAndId(role, _id);
+    const user = await this._authService.getUserByRoleAndId(
+      decodedToken.user.role,
+      decodedToken.user._id
+    );
     if (!user) {
       clearRefreshTokenCookie(res);
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
+    let fullUser = user.toObject ? user.toObject() : user;
 
     const payload: any = {
       _id: user._id.toString(),
       name: user.name,
       email: user.email,
-      role,
+      role: user.role,
     };
 
-    let fullUser = user.toObject ? user.toObject() : user;
-
-    if (role === ROLE.WORKER) {
+    if (user.role === ROLE.WORKER) {
       const worker = await this._workerService.getWorkerByUserId(user._id.toString());
       if (!worker) {
         clearRefreshTokenCookie(res);
@@ -149,7 +151,9 @@ export class AuthController implements IAuthController {
 
     const accessToken = generateAccessToken(payload);
 
-    res.status(HTTPSTATUS.OK).json({ accessToken, user: fullUser });
+    const plainUser = await LoginResponseDTO.fromEntity(fullUser);
+
+    res.status(HTTPSTATUS.OK).json({ accessToken, user: plainUser });
   });
 
   forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -211,9 +215,16 @@ export class AuthController implements IAuthController {
 
     setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
 
-    const accessToken = generateAccessToken({ ...user });
+    const accessToken = generateAccessToken({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      workerId: user.workerId,
+    });
+    const plainUser = instanceToPlain(user);
 
-    const data = Buffer.from(JSON.stringify({ user, accessToken })).toString("base64");
+    const data = Buffer.from(JSON.stringify({ user: plainUser, accessToken })).toString("base64");
 
     res.redirect(`${CLIENT_URL}/auth/google/callback?data=${data}`);
   });

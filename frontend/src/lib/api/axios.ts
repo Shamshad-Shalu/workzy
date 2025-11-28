@@ -28,13 +28,13 @@ export function registerAuthHandlers(
 
 api.interceptors.request.use(
   config => {
-    if(accessToken) {
-      config.headers.Authorization =`Bearer ${accessToken}`;
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   error => Promise.reject(error)
-)
+);
 // Axios interceptors
 api.interceptors.response.use(
   res => res,

@@ -65,7 +65,7 @@ export class AuthService implements IAuthService {
       }
     }
 
-    return LoginResponseDTO.fromEntity(userObj);
+    return await LoginResponseDTO.fromEntity(userObj);
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
@@ -124,6 +124,6 @@ export class AuthService implements IAuthService {
         userObj.workerId = workerId._id.toString();
       }
     }
-    return LoginResponseDTO.fromEntity(userObj);
+    return await LoginResponseDTO.fromEntity(userObj);
   }
 }

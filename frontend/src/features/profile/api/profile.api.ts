@@ -51,7 +51,7 @@ export const profileApi = {
   uploadProfileImage: async (file: File) => {
     const form = new FormData();
     form.append('image', file);
-    const res = await api.post('/profile/upload-profile', form );
+    const res = await api.post('/profile/upload-profile', form);
     return res.data as { url: string };
   },
 };

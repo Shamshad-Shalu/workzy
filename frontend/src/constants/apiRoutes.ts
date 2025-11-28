@@ -9,5 +9,5 @@ export const AUTH_ROUTES = {
   RESET_PASSWORD: `${AUTH_ROUTE}/reset-password`,
   LOGOUT: `${AUTH_ROUTE}/logout`,
   GOOGLE: `${AUTH_ROUTE}/google`,
-  REFRESH_TOKEN:`${AUTH_ROUTE}/refresh-token`,
+  REFRESH_TOKEN: `${AUTH_ROUTE}/refresh-token`,
 } as const;

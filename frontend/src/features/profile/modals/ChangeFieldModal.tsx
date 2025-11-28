@@ -8,7 +8,13 @@ import type { ZodTypeAny } from 'zod';
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 type FieldForm = {
   value: string;
@@ -64,7 +70,9 @@ export default function ChangeFieldModal({
         </DialogHeader>
         <div className="bg-accent/30 border border-text-blue-300 rounded-lg p-3 flex items-start gap-2">
           <AlertCircle className="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" />
-          <p className="text-sm  dark:text-blue-500 text-muted-foreground">{description}</p>
+          <DialogDescription className="text-sm  dark:text-blue-500 text-muted-foreground">
+            {description}
+          </DialogDescription>
         </div>
         <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4">
           <div>
