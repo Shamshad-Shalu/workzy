@@ -12,6 +12,12 @@ const api = axios.create({
 let onTokenRefreshed: ((token: string) => void) | null = null;
 let onLogout: (() => void) | null = null;
 
+let accessToken: string | null = null;
+
+export function setAxiosToken(token: string | null) {
+  accessToken = token;
+}
+
 export function registerAuthHandlers(
   refreshHandler: (token: string) => void,
   logoutHandler: () => void
@@ -20,6 +26,15 @@ export function registerAuthHandlers(
   onLogout = logoutHandler;
 }
 
+api.interceptors.request.use(
+  config => {
+    if(accessToken) {
+      config.headers.Authorization =`Bearer ${accessToken}`;
+    }
+    return config;
+  },
+  error => Promise.reject(error)
+)
 // Axios interceptors
 api.interceptors.response.use(
   res => res,

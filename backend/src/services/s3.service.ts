@@ -1,0 +1,42 @@
+import { s3 } from "@/config/s3";
+import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
+import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import fs from "fs";
+
+export const uploadFileToS3 = async (
+  file: Express.Multer.File,
+  folder: string
+): Promise<string> => {
+  const fileContent = fs.readFileSync(file.path);
+  const Key = `${folder}/${Date.now()}-${file.originalname}`;
+
+  await s3.send(
+    new PutObjectCommand({
+      Bucket: AWS_S3_BUCKET,
+      Key,
+      Body: fileContent,
+      ContentType: file.mimetype,
+    })
+  );
+  fs.unlinkSync(file.path);
+
+  return `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${Key}`;
+};
+
+export const deleteFromS3 = async (key: string) => {
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: AWS_S3_BUCKET,
+      Key: key,
+    })
+  );
+};
+
+export const generateSignedUrl = async (key: string) => {
+  const command = new GetObjectCommand({
+    Bucket: AWS_S3_BUCKET,
+    Key: key,
+  });
+  return await getSignedUrl(s3, command, { expiresIn: 3600 });
+};

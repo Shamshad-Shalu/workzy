@@ -17,9 +17,10 @@ export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
 export const GOOGLE_CALLBACK_URL = process.env.GOOGLE_CALLBACK_URL as string;
 
-export const CLOUDINARY_CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME;
-export const CLOUDINARY_API_KEY = process.env.CLOUDINARY_API_KEY;
-export const CLOUDINARY_API_SECRET = process.env.CLOUDINARY_API_SECRET;
+export const AWS_REGION = process.env.AWS_REGION!;
+export const AWS_S3_BUCKET = process.env.AWS_S3_BUCKET!;
+export const AWS_S3_ACCESSKEY = process.env.AWS_S3_ACCESSKEY!;
+export const AWS_S3_SECRET = process.env.AWS_S3_SECRET!;
 
 export * from "./httpStatusCodes";
 export * from "./messages";

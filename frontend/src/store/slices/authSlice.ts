@@ -1,5 +1,5 @@
 import { SESSION_MESSAGES } from '@/constants';
-import api from '@/lib/api/axios';
+import api, { setAxiosToken } from '@/lib/api/axios';
 import type { User } from '@/types/user';
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
@@ -20,7 +20,7 @@ const initialState: AuthState = {
 // Refresh TokenThunk
 export const refreshAccessToken = createAsyncThunk(
   'auth/refreshAccessToken',
-  async (_NEVER, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       const res = await api.post('/auth/refresh-token', {}, { withCredentials: true });
       return res.data;
@@ -40,11 +40,13 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
 
+      setAxiosToken(action.payload.accessToken);
       localStorage.setItem('sessionActive', 'true');
     },
     // update access token after refresh
     updateToken: (state, action: PayloadAction<string>) => {
       state.accessToken = action.payload;
+      setAxiosToken(action.payload);
     },
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
@@ -71,6 +73,7 @@ const authSlice = createSlice({
         state.accessToken = accessToken;
         state.isAuthenticated = true;
         state.status = 'succeeded';
+        setAxiosToken(accessToken);
       })
       .addCase(refreshAccessToken.rejected, state => {
         state.user = null;

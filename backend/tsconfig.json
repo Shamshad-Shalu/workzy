@@ -22,7 +22,7 @@
     "moduleResolution": "node",              // Use Node.js module resolution
     "allowSyntheticDefaultImports": true,    // Allow default imports from modules with no default export
     "types": ["node"],                        // Include Node.js type definitions
-
+    "typeRoots": ["./src/core/types", "./node_modules/@types"],
     "baseUrl": ".", // Base directory for resolving paths
     "paths": {
       "@/*": ["./src/*"]

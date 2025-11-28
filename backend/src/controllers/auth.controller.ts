@@ -159,7 +159,7 @@ export class AuthController implements IAuthController {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
 
-    let user =  await this._authService.findUserByEmail(email);
+    const user = await this._authService.findUserByEmail(email);
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }

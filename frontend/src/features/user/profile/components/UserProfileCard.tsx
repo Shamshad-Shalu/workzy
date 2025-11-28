@@ -48,7 +48,7 @@ export default function UserProfileCard({
       <div className="relative w-28 h-28">
         <img
           onClick={onChangeImage}
-          src={user.profileImage}
+          src={user?.profileImage}
           className="w-28 h-28 rounded-full object-cover border-2 border-bg-accent/30"
         />
         {uploading && (
