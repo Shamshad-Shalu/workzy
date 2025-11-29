@@ -1,9 +1,10 @@
+import type { Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
 type ProtectedRouteProps = {
-  requiredRoles?: string[];
+  requiredRoles?: Role[];
 };
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {

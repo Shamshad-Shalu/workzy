@@ -8,6 +8,8 @@ import ForgotPassword from '@/features/auth/pages/ForgotPassword';
 import GoogleCallback from '@/features/auth/pages/GoogleCallback';
 import RoleBasedRoot from './RoleBasedRoot';
 import UserProfilePage from '@/features/user/profile/pages/UserProfilePage';
+import ProtectedRoute from './ProtectedRoute';
+import { ROLE } from '@/constants';
 
 export default function UserRoutes() {
   return (
@@ -23,7 +25,9 @@ export default function UserRoutes() {
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Route>
 
-      <Route path="/profile" element={<UserProfilePage />} />
+      <Route element={<ProtectedRoute requiredRoles={[ROLE.USER]} />}>
+        <Route path="/profile" element={<UserProfilePage />} />
+      </Route>
     </Routes>
   );
 }

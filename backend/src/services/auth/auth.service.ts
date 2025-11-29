@@ -11,6 +11,7 @@ import { IUser } from "@/types/user";
 import CustomError from "@/utils/customError";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
+import { getUserOrThrow } from "@/utils/getUserOrThrow";
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -69,11 +70,7 @@ export class AuthService implements IAuthService {
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
-    const user = await this._userRepository.findById(userId);
-    if (!user) {
-      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-    }
-
+    const user = await getUserOrThrow(this._userRepository, userId);
     return user.isBlocked || false;
   }
 
