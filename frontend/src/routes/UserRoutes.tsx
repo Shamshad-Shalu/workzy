@@ -25,7 +25,7 @@ export default function UserRoutes() {
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Route>
 
-      <Route element={<ProtectedRoute requiredRoles={[ROLE.USER]} />}>
+      <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
         <Route path="/profile" element={<UserProfilePage />} />
       </Route>
     </Routes>

@@ -11,3 +11,15 @@ export const AUTH_ROUTES = {
   GOOGLE: `${AUTH_ROUTE}/google`,
   REFRESH_TOKEN: `${AUTH_ROUTE}/refresh-token`,
 } as const;
+
+const PROFILE_ROUTE = '/profile';
+
+export const PROFILE_ROUTES = {
+  UPLOAD_IMAGE: `${PROFILE_ROUTE}/upload-profile`,
+  UPDATE_BASIC: `${PROFILE_ROUTE}`,
+  CHANGE_EMAIL: `${PROFILE_ROUTE}/change-email`,
+  VERIFY_EMAIL_OTP: `${PROFILE_ROUTE}/verify-email-otp`,
+  CHANGE_PHONE: `${PROFILE_ROUTE}/change-phone`,
+  VERIFY_PHONE_OTP: `${PROFILE_ROUTE}/verify-phone-otp`,
+  CHANGE_PASSWORD: `${PROFILE_ROUTE}/change-password`,
+} as const;

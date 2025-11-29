@@ -1,57 +1,44 @@
+import { PROFILE_ROUTES } from '@/constants';
 import api from '@/lib/api/axios';
 import type { User } from '@/types/user';
 
 export const profileApi = {
-  // get current user profile (if needed)
-  getProfile: async (): Promise<User> => {
-    const res = await api.get('/api/profile/me');
-    return res.data as User;
-  },
-
-  // update basic fields (name, phone, etc)
   updateBasicInfo: async (payload: Partial<User>): Promise<User> => {
-    const res = await api.put('/api/profile', payload);
+    const res = await api.patch(PROFILE_ROUTES.UPDATE_BASIC, payload);
     return res.data as User;
   },
 
-  // change email (start)
-  requestChangeEmail: async (newEmail: string) => {
-    const res = await api.post('/api/profile/change-email', { email: newEmail });
+  requestChangeEmail: async (email: string) => {
+    const res = await api.post(PROFILE_ROUTES.CHANGE_EMAIL, { email });
     return res.data;
   },
 
-  // verify email OTP
   verifyEmailOtp: async (email: string, otp: string) => {
-    const res = await api.post('/api/profile/verify-email-otp', { email, otp });
+    const res = await api.post(PROFILE_ROUTES.VERIFY_EMAIL_OTP, { email, otp });
     return res.data;
   },
 
-  // change phone (start)
   requestChangePhone: async (phone: string) => {
-    const res = await api.post('/api/profile/change-phone', { phone });
+    const res = await api.post(PROFILE_ROUTES.CHANGE_PHONE, { phone });
     return res.data;
   },
 
-  // verify phone OTP
   verifyPhoneOtp: async (phone: string, otp: string) => {
-    const res = await api.post('/api/profile/verify-phone-otp', { phone, otp });
+    const res = await api.post(PROFILE_ROUTES.VERIFY_PHONE_OTP, { phone, otp });
     return res.data;
   },
-
-  // change password
-  changePassword: async (currentPassword: string, newPassword: string) => {
-    const res = await api.post('/api/profile/change-password', {
-      currentPassword,
+  changePassword: async (password: string, newPassword: string) => {
+    const res = await api.post(PROFILE_ROUTES.CHANGE_PASSWORD, {
+      password,
       newPassword,
     });
     return res.data;
   },
 
-  // upload profile image (FormData)
   uploadProfileImage: async (file: File) => {
     const form = new FormData();
     form.append('image', file);
-    const res = await api.post('/profile/upload-profile', form);
+    const res = await api.post(PROFILE_ROUTES.UPLOAD_IMAGE, form);
     return res.data as { url: string };
   },
 };

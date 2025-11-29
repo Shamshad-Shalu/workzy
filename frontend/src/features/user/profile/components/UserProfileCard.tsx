@@ -3,8 +3,10 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
 import type { User } from '@/types/user';
+import { handleApiError } from '@/utils/handleApiError';
 import { Mail, Phone, Lock, Pencil, Camera } from 'lucide-react';
 import React, { useRef, useState } from 'react';
+import { toast } from 'sonner';
 
 interface UserProfileCardProps {
   user: User;
@@ -37,7 +39,7 @@ export default function UserProfileCard({
       const res = await uploadImage(file);
       dispatch(updateUser({ profileImage: res.url } as any));
     } catch (error) {
-      console.error(error);
+      toast.error(handleApiError(error));
     } finally {
       setUploading(false);
     }

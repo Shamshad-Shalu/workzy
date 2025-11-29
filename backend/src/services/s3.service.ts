@@ -2,24 +2,22 @@ import { s3 } from "@/config/s3";
 import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
 import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import fs from "fs";
 
 export const uploadFileToS3 = async (
   file: Express.Multer.File,
   folder: string
 ): Promise<string> => {
-  const fileContent = fs.readFileSync(file.path);
-  const Key = `${folder}/${Date.now()}-${file.originalname}`;
+  const cleanName = file.originalname.replace(/\s+/g, "_");
+  const Key = `${folder}/${Date.now()}-${cleanName}`;
 
   await s3.send(
     new PutObjectCommand({
       Bucket: AWS_S3_BUCKET,
       Key,
-      Body: fileContent,
+      Body: file.buffer,
       ContentType: file.mimetype,
     })
   );
-  fs.unlinkSync(file.path);
 
   return `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${Key}`;
 };
