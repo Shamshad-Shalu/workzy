@@ -9,7 +9,7 @@ interface Props {
 export default function ProfileImageModal({ open, onOpenChange, image }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent aria-describedby="full">
+      <DialogContent>
         <img src={image} alt="Profile image" className="rounded-lg w-full" />
       </DialogContent>
     </Dialog>

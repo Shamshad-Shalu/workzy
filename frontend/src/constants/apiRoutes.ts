@@ -18,8 +18,8 @@ export const PROFILE_ROUTES = {
   UPLOAD_IMAGE: `${PROFILE_ROUTE}/upload-profile`,
   UPDATE_BASIC: `${PROFILE_ROUTE}`,
   CHANGE_EMAIL: `${PROFILE_ROUTE}/change-email`,
-  VERIFY_EMAIL_OTP: `${PROFILE_ROUTE}/verify-email-otp`,
   CHANGE_PHONE: `${PROFILE_ROUTE}/change-phone`,
-  VERIFY_PHONE_OTP: `${PROFILE_ROUTE}/verify-phone-otp`,
+  VERIFY_OTP: `${PROFILE_ROUTE}/verify-otp`,
+  RESEND_OTP: `${PROFILE_ROUTE}/resend-otp`,
   CHANGE_PASSWORD: `${PROFILE_ROUTE}/change-password`,
 } as const;

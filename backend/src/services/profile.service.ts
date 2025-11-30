@@ -6,12 +6,21 @@ import { deleteFromS3, generateSignedUrl, uploadFileToS3 } from "./s3.service";
 import { getUserOrThrow } from "@/utils/getUserOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
-import { AUTH, HTTPSTATUS } from "@/constants";
+import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS } from "@/constants";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import redisClient from "@/config/redisClient";
+import validator from "validator";
+import logger from "@/config/logger";
 
 @injectable()
 export class ProfileService implements IProfileService {
-  constructor(@inject(TYPES.UserRepository) private _userRepository: IUserRepository) {}
+  constructor(
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.OTPService) private _otpService: IOTPService,
+    @inject(TYPES.EmailService) private _emailService: IEmailService
+  ) {}
   async updateProfileImage(userId: string, file: Express.Multer.File): Promise<string> {
     const user = await getUserOrThrow(this._userRepository, userId);
     if (user.profileImage) {
@@ -35,6 +44,54 @@ export class ProfileService implements IProfileService {
     }
     const hashedPassword = await hash(newPassword, 10);
     await this._userRepository.updateOne({ _id: user.id }, { $set: { password: hashedPassword } });
+    return true;
+  }
+
+  async sentMail(userId: string, email: string): Promise<boolean> {
+    await getUserOrThrow(this._userRepository, userId);
+
+    const existing  = await this._userRepository.findByEmail(email);
+    if(existing && existing._id.toString() !== userId){
+      throw new CustomError(EMAIL.BELONG_ANOTHER ,HTTPSTATUS.BAD_REQUEST)
+    }
+
+    const otp = this._otpService.generateOTP();
+    logger.info(`otp:${otp}`);
+    await this._emailService.sendEmail(email, otp);
+    return true;
+  }
+
+  async resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean> {
+    await getUserOrThrow(this._userRepository, userId);
+    const existingData = JSON.parse((await redisClient.get(`otp:${value}`)) as string);
+    if (!existingData) {
+      throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const newOtp = this._otpService.generateOTP();
+    logger.info(`newOtp:${newOtp}`);
+
+    if (type === "email") {
+      if (!validator.isEmail(value)) {
+        throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
+      }
+      await this._emailService.sendEmail(value, newOtp);
+    } else {
+    }
+    return true;
+  }
+
+  async updateEmailOrPhone(
+    userId: string,
+    type: "email" | "phone",
+    value: string
+  ): Promise<boolean> {
+    const user = await getUserOrThrow(this._userRepository, userId);
+    if (type === "email") {
+      await this._userRepository.updateOne({ _id: user._id }, { $set: { email: value } });
+    } else {
+      await this._userRepository.updateOne({ _id: user.id }, { $set: { phone: value } });
+    }
+    await redisClient.del(`otp:${value}`);
 
     return true;
   }

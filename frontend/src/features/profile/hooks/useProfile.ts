@@ -21,10 +21,10 @@ export function useProfile() {
     }
   }
 
-  async function changeEmail(newEmail: string) {
+  async function changeEmail(email: string) {
     setLoading(true);
     try {
-      return await profileApi.requestChangeEmail(newEmail);
+      return await profileApi.requestChangeEmail(email);
     } catch (err: any) {
       toast.error(handleApiError(err));
       throw err;
@@ -68,6 +68,29 @@ export function useProfile() {
       setLoading(false);
     }
   }
+  async function verifyOtp(type: 'email' | 'phone', value: string, otp: string) {
+    setLoading(true);
+    try {
+      return await profileApi.verifyOtp(type, value, otp);
+    } catch (err: any) {
+      toast.error(handleApiError(err));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function resendOtp(type: 'email' | 'phone', value: string) {
+    setLoading(true);
+    try {
+      return await profileApi.resendOtp(type, value);
+    } catch (err: any) {
+      toast.error(handleApiError(err));
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }
 
   //   async function updateWorker(payload: Parameters<typeof workerProfileApi.updateWorkerProfile>[0]) {
   //     setLoading(true);
@@ -90,6 +113,8 @@ export function useProfile() {
     changePhone,
     changePassword,
     uploadImage,
+    verifyOtp,
+    resendOtp,
     // updateWorker,
   };
 }

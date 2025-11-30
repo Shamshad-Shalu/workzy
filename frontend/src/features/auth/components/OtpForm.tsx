@@ -10,6 +10,7 @@ import { handleApiError } from '@/utils/handleApiError';
 import { useAuth } from '../hooks/useAuth';
 import PageHeader from '@/components/molecules/PageHeader';
 import { useOtpTimer } from '../hooks/useOtpTimer';
+import { ArrowRight } from 'lucide-react';
 
 export default function OtpForm() {
   const [otpValue, setOtpValue] = useState<string>('');
@@ -71,8 +72,8 @@ export default function OtpForm() {
         }}
       />
 
-      <Button fullWidth onClick={() => submitOtp(otpValue)}>
-        Verify OTP →
+      <Button fullWidth iconRight={<ArrowRight />} onClick={() => submitOtp(otpValue)}>
+        Verify OTP
       </Button>
 
       {timer > 0 ? (

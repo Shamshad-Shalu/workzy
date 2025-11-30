@@ -24,12 +24,13 @@ interface Props {
   onOpenChange: (v: boolean) => void;
   title: string;
   description: string;
+  loading: boolean;
   label: string;
   leftIcon?: React.ReactNode;
   placeholder?: string;
   initialValue?: string;
   schema: ZodType<FieldForm, any, any> | ZodTypeAny;
-  onSubmit: (value: string) => Promise<void>;
+  onSubmit: (value: string) => Promise<any>;
 }
 
 export default function ChangeFieldModal({
@@ -38,6 +39,7 @@ export default function ChangeFieldModal({
   title,
   description,
   label,
+  loading,
   leftIcon,
   placeholder = '',
   initialValue = '',
@@ -54,7 +56,6 @@ export default function ChangeFieldModal({
     defaultValues: { value: initialValue ?? '' },
     mode: 'onChange',
   });
-
   const currentValue = watch('value');
 
   async function onSubmitForm(data: FieldForm) {
@@ -81,7 +82,9 @@ export default function ChangeFieldModal({
               leftIcon={leftIcon}
               placeholder={placeholder}
               error={errors.value?.message}
-              {...register('value')}
+              {...register('value', {
+                setValueAs: v => v.trim(),
+              })}
             />
           </div>
 
@@ -91,7 +94,7 @@ export default function ChangeFieldModal({
             </Button>
             <Button
               type="submit"
-              loading={isSubmitting}
+              loading={isSubmitting || loading}
               disabled={!isValid || currentValue === initialValue}
             >
               Submit

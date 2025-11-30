@@ -1,6 +1,6 @@
 import { emailLayout } from "./layout";
 
-export function resetPasswordTemplate(resetLink: string) {
+export function resetPasswordTemplate(resetLink: string, expiryTime: number) {
   const content = `
       <h2>Password Reset Request</h2>
       <p>Click the button below to reset your password:</p>
@@ -11,7 +11,7 @@ export function resetPasswordTemplate(resetLink: string) {
          Reset Password
       </a>
 
-      <p>This link is valid for <strong>15 minutes</strong>.</p>
+      <p>This link is valid for <strong>${expiryTime} minutes</strong>.</p>
   `;
 
   return emailLayout(content);

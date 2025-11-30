@@ -1,6 +1,6 @@
 import { emailLayout } from "./layout";
 
-export function otpEmailTemplate(otp: string) {
+export function otpEmailTemplate(otp: string, expiryTime: number) {
   const content = `
       <h2>OTP Verification</h2>
       <p>Use the following OTP to continue:</p>
@@ -9,7 +9,7 @@ export function otpEmailTemplate(otp: string) {
           ${otp}
       </div>
 
-      <p>This OTP is valid for <strong>15 minutes</strong>.</p>
+      <p>This OTP is valid for <strong>${expiryTime} minutes</strong>.</p>
   `;
 
   return emailLayout(content);

@@ -8,13 +8,8 @@ export const profileApi = {
     return res.data as User;
   },
 
-  requestChangeEmail: async (email: string) => {
+  requestChangeEmail: async (email: string): Promise<any> => {
     const res = await api.post(PROFILE_ROUTES.CHANGE_EMAIL, { email });
-    return res.data;
-  },
-
-  verifyEmailOtp: async (email: string, otp: string) => {
-    const res = await api.post(PROFILE_ROUTES.VERIFY_EMAIL_OTP, { email, otp });
     return res.data;
   },
 
@@ -23,8 +18,8 @@ export const profileApi = {
     return res.data;
   },
 
-  verifyPhoneOtp: async (phone: string, otp: string) => {
-    const res = await api.post(PROFILE_ROUTES.VERIFY_PHONE_OTP, { phone, otp });
+  verifyOtp: async (type: 'email' | 'phone', value: string, otp: string) => {
+    const res = await api.post(PROFILE_ROUTES.VERIFY_OTP, { type, value, otp });
     return res.data;
   },
   changePassword: async (currentPassword: string, newPassword: string) => {
@@ -34,7 +29,10 @@ export const profileApi = {
     });
     return res.data;
   },
-
+  resendOtp: async (type: 'email' | 'phone', value: string) => {
+    const res = await api.post(PROFILE_ROUTES.RESEND_OTP, { type, value });
+    return res.data;
+  },
   uploadProfileImage: async (file: File) => {
     const form = new FormData();
     form.append('image', file);

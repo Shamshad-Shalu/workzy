@@ -14,6 +14,7 @@ export const NODEMAILER_EMAIL = process.env.NODEMAILER_EMAIL;
 export const NODEMAILER_PASSWORD = process.env.NODEMAILER_PASSWORD;
 
 export const DEFAULT_IMAGE_URL = "profile/default.avif";
+export const EMAIL_OTP_EXPIRY = Number(process.env.EMAIL_OTP_EXPIRY);
 
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
