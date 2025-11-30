@@ -7,7 +7,7 @@ import { handleApiError } from '@/utils/handleApiError';
 import { toast } from 'sonner';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
-import { Mail, User } from 'lucide-react';
+import { ArrowRight, Mail, User } from 'lucide-react';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import Button from '@/components/atoms/Button';
 import PageHeader from '@/components/molecules/PageHeader';
@@ -47,7 +47,9 @@ export default function SignupForm() {
           placeholder="Enter your full name"
           leftIcon={<User />}
           error={errors.name?.message}
-          {...register('name')}
+          {...register('name', {
+            setValueAs: v => v.trim(),
+          })}
         />
       </div>
       {/* email  */}
@@ -57,7 +59,9 @@ export default function SignupForm() {
           placeholder="Enter your email"
           leftIcon={<Mail />}
           error={errors.email?.message}
-          {...register('email')}
+          {...register('email', {
+            setValueAs: v => v.trim(),
+          })}
         />
       </div>
 
@@ -67,11 +71,13 @@ export default function SignupForm() {
         <PasswordInput
           placeholder="Create a strong password"
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            setValueAs: v => v.trim(),
+          })}
         />
       </div>
 
-      <Button type="submit" fullWidth loading={isSubmitting} iconRight={<span>→</span>}>
+      <Button type="submit" fullWidth loading={isSubmitting} iconRight={<ArrowRight />}>
         Sign Up
       </Button>
 

@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
-import { Mail } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { AUTH_MESSAGES, GOOGLE_CALLBACK, SERVER_URL } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
 import Button from '@/components/atoms/Button';
@@ -61,7 +61,9 @@ export default function LoginForm() {
           placeholder="Enter your email"
           leftIcon={<Mail />}
           error={errors.email?.message}
-          {...register('email')}
+          {...register('email', {
+            setValueAs: v => v.trim(),
+          })}
         />
       </div>
 
@@ -71,7 +73,9 @@ export default function LoginForm() {
         <PasswordInput
           placeholder="Enter your password"
           error={errors.password?.message}
-          {...register('password')}
+          {...register('password', {
+            setValueAs: v => v.trim(),
+          })}
         />
 
         <div className="flex justify-between items-center mt-2 mb-4">
@@ -91,8 +95,8 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <Button type="submit" fullWidth loading={isSubmitting}>
-        Sign In →
+      <Button type="submit" iconRight={<ArrowRight size={20} />} fullWidth loading={isSubmitting}>
+        Sign In
       </Button>
 
       {/* Signup Link */}

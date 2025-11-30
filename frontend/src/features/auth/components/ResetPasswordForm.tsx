@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { handleApiError } from '@/utils/handleApiError';
 import PageHeader from '@/components/molecules/PageHeader';
+import { ArrowRight } from 'lucide-react';
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState('');
@@ -49,8 +50,8 @@ export default function ResetPasswordForm() {
         />
       </div>
 
-      <Button type="submit" fullWidth loading={loading}>
-        Update Password →
+      <Button type="submit" iconRight={<ArrowRight />} fullWidth loading={loading}>
+        Update Password
       </Button>
     </form>
   );

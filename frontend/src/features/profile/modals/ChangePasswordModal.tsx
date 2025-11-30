@@ -40,13 +40,17 @@ export default function ChangePasswordModal({ open, onOpenChange }: Props) {
         </DialogHeader>
         <Label>Current password</Label>
         <PasswordInput
-          {...register('currentPassword')}
+          {...register('currentPassword', {
+            setValueAs: v => v.trim(),
+          })}
           error={errors.currentPassword?.message}
           placeholder="Enter your password"
         />
         <Label>New password</Label>
         <PasswordInput
-          {...register('newPassword')}
+          {...register('newPassword', {
+            setValueAs: v => v.trim(),
+          })}
           error={errors.newPassword?.message}
           placeholder="Enter new password"
         />

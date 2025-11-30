@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Input from '@/components/atoms/Input';
 import Button from '@/components/atoms/Button';
 import Label from '@/components/atoms/Label';
-import { Mail } from 'lucide-react';
+import { ArrowRight, Mail } from 'lucide-react';
 import { forgotPasswordService } from '@/services/authService';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
@@ -45,8 +45,8 @@ export default function ForgotPasswordForm() {
           onChange={e => setEmail(e.target.value)}
         />
       </div>
-      <Button type="submit" fullWidth loading={loading}>
-        Send Reset Link →
+      <Button type="submit" iconRight={<ArrowRight />} fullWidth loading={loading}>
+        Send Reset Link
       </Button>
     </form>
   );

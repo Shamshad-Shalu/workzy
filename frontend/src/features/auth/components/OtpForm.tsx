@@ -14,7 +14,6 @@ import { ArrowRight } from 'lucide-react';
 
 export default function OtpForm() {
   const [otpValue, setOtpValue] = useState<string>('');
-
   const { timer, resetTimer } = useOtpTimer(30);
 
   const navigate = useNavigate();
@@ -47,9 +46,7 @@ export default function OtpForm() {
     if (timer !== 0) {
       return;
     }
-
     resetTimer();
-
     try {
       await resendOtpService(email);
       toast.success(AUTH_MESSAGES.OTP_RESET_SUCCESS);
@@ -61,7 +58,6 @@ export default function OtpForm() {
   return (
     <div className="space-y-6">
       <PageHeader title="Verify OTP" description={`Enter the code sent to ${email}`} />
-
       <OtpInput
         value={otpValue}
         onChange={(v: string) => {
@@ -71,11 +67,9 @@ export default function OtpForm() {
           }
         }}
       />
-
       <Button fullWidth iconRight={<ArrowRight />} onClick={() => submitOtp(otpValue)}>
         Verify OTP
       </Button>
-
       {timer > 0 ? (
         <p className="text-gray-600 text-center">
           Resend OTP in <b>{timer}s</b>
