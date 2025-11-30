@@ -6,6 +6,7 @@ import PasswordInput from '@/components/atoms/PasswordInput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { changePasswordSchema, type ChangePasswordSchema } from '@/lib/validation/passwordRules';
+import { toast } from 'sonner';
 
 interface Props {
   open: boolean;
@@ -23,10 +24,12 @@ export default function ChangePasswordModal({ open, onOpenChange }: Props) {
     resolver: zodResolver(changePasswordSchema),
     mode: 'onChange',
   });
+
   async function onSubmit(data: ChangePasswordSchema) {
-    await changePassword(data.currentPassword, data.newPassword);
+    const res = await changePassword(data.currentPassword, data.newPassword);
     reset();
     onOpenChange(false);
+    toast.success(res.message);
   }
 
   return (

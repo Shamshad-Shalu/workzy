@@ -1,10 +1,9 @@
+import { NameRule, PasswordRule } from "@/validations/rules";
 import { IsEmail, IsNotEmpty, IsString, Matches } from "class-validator";
 
 export class RegisterRequestDTO {
   @IsString()
-  @Matches(/^[A-Za-z]{3,25}$/, {
-    message: "Name must be 3-25 characters long and contain only letters",
-  })
+  @NameRule()
   name!: string;
 
   @IsEmail()
@@ -12,10 +11,7 @@ export class RegisterRequestDTO {
   email!: string;
 
   @IsString()
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/, {
-    message:
-      "Password must be at least 8 characters long and include uppercase, lowercase, number, and special character",
-  })
+  @PasswordRule()
   password!: string;
 }
 

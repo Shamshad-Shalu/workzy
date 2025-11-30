@@ -2,6 +2,7 @@ export const AUTH = {
   ALL_FIELDS_REQUIRED: "All fields are required",
   INVALID_INPUT: "Invalid inputs",
   INVALID_CREDENTIALS: "Invalid credentials",
+  INVALID_PASSWORD: "Incorrect Password",
 
   INVALID_OTP: "Invalid OTP",
   OTP_EXPIRED: "OTP has expired .pls register again!",
@@ -15,7 +16,7 @@ export const AUTH = {
 
   FORGOT_PASS_EMAIL_SENT: "Email sent successfully for forgot password",
   FORGOT_PASS_EMAIL_FAILED: "Failed to send OTP. Please try again later",
-  PASSWORD_RESET: "Password reset successfully",
+  PASSWORD_UPDATED: "Password updated successfully",
 
   NO_REFRESH_TOKEN: "No refresh token found",
   INVALID_TOKEN: "Invalid or expired token",
@@ -26,6 +27,7 @@ export const AUTH = {
   LOGOUT_SUCCESS: "User logged out successfully",
   REGISTER_SUCCESS: "User registered successfully",
   TOKEN_EXPIRED: "Authentication token has expired",
+  TOKEN_INVALID: "Invalid or expired access token",
   UNAUTHORIZED: "Unauthorized access",
   WEAK_PASSWORD: "Please enter strong password",
 };

@@ -11,9 +11,12 @@ const router = Router();
 
 const profileController = container.get<IProfileController>(TYPES.ProfileController);
 
+router.use(authenticate([ROLE.USER, ROLE.WORKER]));
+
+router.post("/change-password", profileController.changePassword);
+
 router.post(
   "/upload-profile",
-  authenticate([ROLE.USER, ROLE.WORKER]),
   upload.single("image"),
   validateFileSize,
   profileController.uploadImage

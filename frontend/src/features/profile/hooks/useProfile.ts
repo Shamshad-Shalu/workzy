@@ -3,77 +3,69 @@ import { useState } from 'react';
 import { profileApi } from '../api/profile.api';
 // import { workerProfileApi } from '@/features/worker/profile/api/workerProfile.api';
 import type { User } from '@/types/user';
+import { toast } from 'sonner';
+import { handleApiError } from '@/utils/handleApiError';
 
 export function useProfile() {
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   async function updateBasic(payload: Partial<User>) {
     setLoading(true);
-    setError(null);
     try {
       const user = await profileApi.updateBasicInfo(payload);
-      setLoading(false);
       return user;
     } catch (err: any) {
+      toast.error(handleApiError(err));
+    } finally {
       setLoading(false);
-      setError(err?.message || 'Something went wrong');
-      throw err;
     }
   }
 
   async function changeEmail(newEmail: string) {
     setLoading(true);
-    setError(null);
     try {
-      const res = await profileApi.requestChangeEmail(newEmail);
-      setLoading(false);
-      return res;
+      return await profileApi.requestChangeEmail(newEmail);
     } catch (err: any) {
-      setLoading(false);
-      setError(err?.message || 'Something went wrong');
+      toast.error(handleApiError(err));
       throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function changePhone(phone: string) {
     setLoading(true);
-    setError(null);
     try {
-      const res = await profileApi.requestChangePhone(phone);
-      setLoading(false);
-      return res;
+      return await profileApi.requestChangePhone(phone);
     } catch (err: any) {
-      setLoading(false);
-      setError(err?.message || 'Something went wrong');
+      toast.error(handleApiError(err));
       throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function changePassword(currentPassword: string, newPassword: string) {
     setLoading(true);
-    setError(null);
     try {
-      const res = await profileApi.changePassword(currentPassword, newPassword);
-      setLoading(false);
-      return res;
+      return await profileApi.changePassword(currentPassword, newPassword);
     } catch (err: any) {
-      setLoading(false);
-      setError(err?.message || 'Something went wrong');
+      toast.error(handleApiError(err));
       throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
   async function uploadImage(file: File) {
     setLoading(true);
     try {
-      const res = await profileApi.uploadProfileImage(file);
-      setLoading(false);
-      return res;
+      return await profileApi.uploadProfileImage(file);
     } catch (err: any) {
-      setLoading(false);
-      setError(err?.message || 'Upload failed');
+      toast.error(handleApiError(err));
       throw err;
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -93,7 +85,6 @@ export function useProfile() {
 
   return {
     loading,
-    error,
     updateBasic,
     changeEmail,
     changePhone,

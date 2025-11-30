@@ -23,8 +23,6 @@ export const authenticate = (roles: Array<Role>) => {
   return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
-
-      console.log("token ,in the authonticate ", token);
       if (!token) {
         res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: "Access token not found" });
         return;
@@ -40,9 +38,7 @@ export const authenticate = (roles: Array<Role>) => {
       }
       next();
     } catch (error) {
-      res
-        .status(HTTPSTATUS.UNAUTHORIZED)
-        .json({ message: "Invalid or expired access token", error });
+      res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.TOKEN_INVALID, error });
     }
   };
 };

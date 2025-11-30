@@ -27,9 +27,9 @@ export const profileApi = {
     const res = await api.post(PROFILE_ROUTES.VERIFY_PHONE_OTP, { phone, otp });
     return res.data;
   },
-  changePassword: async (password: string, newPassword: string) => {
+  changePassword: async (currentPassword: string, newPassword: string) => {
     const res = await api.post(PROFILE_ROUTES.CHANGE_PASSWORD, {
-      password,
+      currentPassword,
       newPassword,
     });
     return res.data;

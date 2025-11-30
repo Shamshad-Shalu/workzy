@@ -69,7 +69,6 @@ const workerSchema: Schema = new Schema<IWorker>(
   { timestamps: true }
 );
 
-workerSchema.index({ userId: 1 });
 workerSchema.index({ displayName: "text" });
 
 const Worker = mongoose.model<IWorker>("Worker", workerSchema);

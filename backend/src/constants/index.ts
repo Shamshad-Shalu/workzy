@@ -27,3 +27,4 @@ export const AWS_S3_SECRET = process.env.AWS_S3_SECRET!;
 export * from "./httpStatusCodes";
 export * from "./messages";
 export * from "./roles";
+export * from "./validation";
