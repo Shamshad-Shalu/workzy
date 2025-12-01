@@ -47,28 +47,29 @@ export default function UserProfileCard({
 
   return (
     <div className="bg-card rounded-xl border p-6 flex flex-col items-center gap-4">
-      <div className="relative w-28 h-28">
-        <img
-          onClick={onChangeImage}
-          src={user?.profileImage}
-          className="w-28 h-28 rounded-full object-cover border-2 border-bg-accent/30"
-        />
-        {uploading && (
-          <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
-            <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-          </div>
-        )}
-        <button
-          onClick={() => fileRef.current?.click()}
-          className="absolute bottom-0 right-0 bg-white border rounded-full p-2 shadow"
-        >
-          <Camera size={18} className="text-gray-700" />
-        </button>
-        <input ref={fileRef} type="file" hidden accept="image/*" onChange={handleImageChange} />
-      </div>
       <div className="text-center">
-        <h2 className="text-xl font-semibold">{user.name}</h2>
-        <p className="text-sm text-muted-foreground">{user.email}</p>
+        <div className="relative w-28 h-28">
+          <img
+            onClick={onChangeImage}
+            src={user?.profileImage}
+            className="w-28 h-28 rounded-full object-cover border-2 border-bg-accent/30"
+          />
+          {uploading && (
+            <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
+              <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+          <button
+            onClick={() => fileRef.current?.click()}
+            className="absolute bottom-0 right-0 bg-white border rounded-full p-2 shadow"
+          >
+            <Camera size={18} className="text-gray-700" />
+          </button>
+          <input ref={fileRef} type="file" hidden accept="image/*" onChange={handleImageChange} />
+        </div>
+
+        <h2 className="text-2xl font-bold text-muted-foreground-900 mt-4">{user.name}</h2>
+        <p className="text-muted-foreground-500mt-1">{user.email}</p>
       </div>
       <Separator />
       <div className="w-full space-y-3">

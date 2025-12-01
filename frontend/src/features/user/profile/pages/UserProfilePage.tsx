@@ -49,7 +49,7 @@ export default function ProfilePage() {
           onChangeImage={() => setOpenImage(true)}
         />
 
-        <ProfileInfoCard user={user} onEdit={() => {}} />
+        <ProfileInfoCard user={user} />
 
         {/* email  */}
         <ChangeFieldModal

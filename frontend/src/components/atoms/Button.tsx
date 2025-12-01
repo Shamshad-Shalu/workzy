@@ -2,7 +2,7 @@ import { cn } from '@/lib/utils';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'blue' | 'green' | 'red';
   fullWidth?: boolean;
   loading?: boolean;
   iconLeft?: ReactNode;
@@ -27,6 +27,9 @@ export default function Button({
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
     outline: 'border border-input bg-background hover:bg-accent',
     ghost: 'hover:bg-accent',
+    blue: 'bg-blue-600 text-white hover:bg-blue-700',
+    green: 'bg-green-600 text-white hover:bg-green-700',
+    red: 'bg-red-600 text-white hover:bg-red-700',
   };
 
   return (
