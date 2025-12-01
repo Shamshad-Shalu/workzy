@@ -1,5 +1,5 @@
 import mongoose, { Schema } from "mongoose";
-import { ILocation, IUser } from "@/types/user";
+import { IAdress, ILocation, IUser } from "@/types/user";
 import { ROLE } from "@/constants";
 
 const LocationSchema = new Schema<ILocation>(
@@ -7,12 +7,29 @@ const LocationSchema = new Schema<ILocation>(
     type: {
       type: String,
       enum: ["Point"],
-      required: true,
       default: "Point",
     },
     coordinates: {
       type: [Number],
-      required: true,
+    },
+  },
+  { _id: false }
+);
+
+const AddressSchema = new Schema<IAdress>(
+  {
+    house: { type: String },
+    place: {
+      type: String,
+    },
+    city: {
+      type: String,
+    },
+    state: {
+      type: String,
+    },
+    pincode: {
+      type: String,
     },
   },
   { _id: false }
@@ -57,8 +74,9 @@ const userSchema: Schema<IUser> = new Schema(
       default: false,
     },
     profile: {
-      bio: { type: String },
-      address: { type: String },
+      address: {
+        type: AddressSchema,
+      },
       location: {
         type: LocationSchema,
       },

@@ -1,7 +1,8 @@
+import { emailRule } from '@/lib/validation/rules';
 import { z } from 'zod';
 
 export const loginSchema = z.object({
-  email: z.string().email('Invalid email format'),
+  email: emailRule,
   password: z.string().min(8, 'Password must be at least 8 chars'),
 });
 

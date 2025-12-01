@@ -34,5 +34,5 @@ export const AUTH = {
 export const EMAIL = {
   INVALID: "Invalid email ",
   NOT_VERIFIED: "Email not verified. Please verify your OTP.",
-  BELONG_ANOTHER: "Email is belongs to another User"
+  BELONG_ANOTHER: "Email is belongs to another User",
 };

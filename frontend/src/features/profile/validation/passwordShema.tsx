@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { passwordRule } from './rules';
+import { passwordRule } from '../../../lib/validation/rules';
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),

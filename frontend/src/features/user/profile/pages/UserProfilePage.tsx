@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { useAppSelector } from '@/store/hooks';
-import ProfileInfoCard from '../components/ProfileInfoCard';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import ProfileInfoCard from '../../../profile/components/ProfileInfoCard';
 import UserProfileCard from '../components/UserProfileCard';
 import PageHeader from '@/components/molecules/PageHeader';
 import Header from '@/layouts/user/Header';
@@ -13,10 +13,12 @@ import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { toast } from 'sonner';
 import OtpModal from '@/features/profile/modals/OtpModal';
+import { updateUser } from '@/store/slices/authSlice';
 
 export default function ProfilePage() {
   const { user } = useAppSelector((s: any) => s.auth);
-  const { changeEmail, changePhone, loading } = useProfile();
+  const { changeEmail, changePhone, loading, updateBasic } = useProfile();
+  const dispatch = useAppDispatch();
 
   const [openImage, setOpenImage] = useState(false);
   const [openEmail, setOpenEmail] = useState(false);
@@ -49,7 +51,14 @@ export default function ProfilePage() {
           onChangeImage={() => setOpenImage(true)}
         />
 
-        <ProfileInfoCard user={user} />
+        <ProfileInfoCard
+          user={user}
+          onSave={async payload => {
+            const res = await updateBasic(payload);
+            dispatch(updateUser(res?.user));
+            toast.success(res.message);
+          }}
+        />
 
         {/* email  */}
         <ChangeFieldModal

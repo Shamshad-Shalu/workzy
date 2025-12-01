@@ -5,7 +5,10 @@ import { useProfile } from '../hooks/useProfile';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { changePasswordSchema, type ChangePasswordSchema } from '@/lib/validation/passwordRules';
+import {
+  changePasswordSchema,
+  type ChangePasswordSchema,
+} from '@/features/profile/validation/passwordShema';
 import { toast } from 'sonner';
 
 interface Props {

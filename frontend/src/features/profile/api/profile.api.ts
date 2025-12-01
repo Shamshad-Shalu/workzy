@@ -3,9 +3,13 @@ import api from '@/lib/api/axios';
 import type { User } from '@/types/user';
 
 export const profileApi = {
-  updateBasicInfo: async (payload: Partial<User>): Promise<User> => {
-    const res = await api.patch(PROFILE_ROUTES.UPDATE_BASIC, payload);
-    return res.data as User;
+  getProfilePage: async (): Promise<User> => {
+    const res = await api.get(PROFILE_ROUTES.PROFILE);
+    return res.data;
+  },
+  updateBasicInfo: async (payload: Partial<User>): Promise<any> => {
+    const res = await api.patch(PROFILE_ROUTES.PROFILE, payload);
+    return res.data;
   },
 
   requestChangeEmail: async (email: string): Promise<any> => {

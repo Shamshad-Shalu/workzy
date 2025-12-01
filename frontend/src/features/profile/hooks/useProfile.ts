@@ -1,13 +1,23 @@
-// src/features/profile/common/hooks/useProfile.ts
 import { useState } from 'react';
 import { profileApi } from '../api/profile.api';
-// import { workerProfileApi } from '@/features/worker/profile/api/workerProfile.api';
 import type { User } from '@/types/user';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
 
 export function useProfile() {
   const [loading, setLoading] = useState(false);
+
+  async function getUserProfilePage() {
+    setLoading(true);
+    try {
+      const user = await profileApi.getProfilePage();
+      return user;
+    } catch (err: any) {
+      toast.error(handleApiError(err));
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function updateBasic(payload: Partial<User>) {
     setLoading(true);
@@ -92,22 +102,9 @@ export function useProfile() {
     }
   }
 
-  //   async function updateWorker(payload: Parameters<typeof workerProfileApi.updateWorkerProfile>[0]) {
-  //     setLoading(true);
-  //     setError(null);
-  //     try {
-  //       const u = await workerProfileApi.updateWorkerProfile(payload);
-  //       setLoading(false);
-  //       return u;
-  //     } catch (err: any) {
-  //       setLoading(false);
-  //       setError(err?.message || 'Update failed');
-  //       throw err;
-  //     }
-  //   }
-
   return {
     loading,
+    getUserProfilePage,
     updateBasic,
     changeEmail,
     changePhone,
@@ -115,6 +112,5 @@ export function useProfile() {
     uploadImage,
     verifyOtp,
     resendOtp,
-    // updateWorker,
   };
 }

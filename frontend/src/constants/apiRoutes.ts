@@ -16,7 +16,7 @@ const PROFILE_ROUTE = '/profile';
 
 export const PROFILE_ROUTES = {
   UPLOAD_IMAGE: `${PROFILE_ROUTE}/upload-profile`,
-  UPDATE_BASIC: `${PROFILE_ROUTE}`,
+  PROFILE: `${PROFILE_ROUTE}/me`,
   CHANGE_EMAIL: `${PROFILE_ROUTE}/change-email`,
   CHANGE_PHONE: `${PROFILE_ROUTE}/change-phone`,
   VERIFY_OTP: `${PROFILE_ROUTE}/verify-otp`,

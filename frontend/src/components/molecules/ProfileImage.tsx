@@ -1,5 +1,5 @@
 import { Camera } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 interface Props {
   src: string | undefined;
@@ -7,6 +7,7 @@ interface Props {
   editable?: boolean;
   onChange?: (file: File) => Promise<void>;
   onClickImage?: () => void;
+  loading?: boolean;
 }
 
 export default function ProfileImage({
@@ -15,23 +16,19 @@ export default function ProfileImage({
   editable = false,
   onChange,
   onClickImage,
+  loading = false,
 }: Props) {
-  const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement | null>(null);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (!editable || !onChange) {
       return;
     }
-
     const file = e.target.files?.[0];
     if (!file) {
       return;
     }
-
-    setUploading(true);
     await onChange(file);
-    setUploading(false);
   }
   return (
     <div className="relative cursor-pointer group inline-block">
@@ -41,7 +38,7 @@ export default function ProfileImage({
         style={{ width: size, height: size }}
         className="rounded-full object-cover border-2 border-bg-accent/30"
       />
-      {uploading && (
+      {loading && (
         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
           <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
         </div>

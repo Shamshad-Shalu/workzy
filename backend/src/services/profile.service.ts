@@ -50,9 +50,9 @@ export class ProfileService implements IProfileService {
   async sentMail(userId: string, email: string): Promise<boolean> {
     await getUserOrThrow(this._userRepository, userId);
 
-    const existing  = await this._userRepository.findByEmail(email);
-    if(existing && existing._id.toString() !== userId){
-      throw new CustomError(EMAIL.BELONG_ANOTHER ,HTTPSTATUS.BAD_REQUEST)
+    const existing = await this._userRepository.findByEmail(email);
+    if (existing && existing._id.toString() !== userId) {
+      throw new CustomError(EMAIL.BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
     }
 
     const otp = this._otpService.generateOTP();

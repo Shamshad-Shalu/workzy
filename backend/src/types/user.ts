@@ -6,6 +6,14 @@ export interface ILocation {
   coordinates: [number, number];
 }
 
+export interface IAdress {
+  house?: string;
+  place?: string;
+  city?: string;
+  state?: string;
+  pincode?: string;
+}
+
 export interface IUser extends Document<string> {
   name: string;
   email: string;
@@ -16,8 +24,7 @@ export interface IUser extends Document<string> {
   password: string;
   isPremium: boolean;
   profile?: {
-    bio: string;
-    address: string;
+    address?: IAdress;
     location: ILocation;
   };
   isBlocked: boolean;
