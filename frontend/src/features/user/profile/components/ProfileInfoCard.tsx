@@ -75,7 +75,7 @@ export default function ProfileInfoCard({ user }: Props) {
               <Input
                 leftIcon={<Phone size={15} />}
                 value={user.phone ? user.phone : 'Phone Number not provided'}
-                disabled={true}
+                disabled
                 readOnly={true}
               />
             </div>
@@ -120,7 +120,7 @@ export default function ProfileInfoCard({ user }: Props) {
                     options={INDIAN_STATES.map(s => ({ label: s, value: s }))}
                   />
                 ) : (
-                  <Input disabled={true} placeholder={'Kerala'} className="px-3" />
+                  <Input disabled placeholder={'Kerala'} className="px-3" />
                 )}
               </div>
               <div>

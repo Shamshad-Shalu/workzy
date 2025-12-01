@@ -88,14 +88,7 @@ export default function ProfilePage() {
           }}
         />
         <ChangePasswordModal open={openPass} onOpenChange={setOpenPass} />
-        <ProfileImageModal
-          open={openImage}
-          onOpenChange={setOpenImage}
-          image={
-            user.profileImage ||
-            'https://res.cloudinary.com/dhvlhpg55/image/upload/v1740028408/nexus/images/oamn3bzchpmixago65yf.jpg'
-          }
-        />
+        <ProfileImageModal open={openImage} onOpenChange={setOpenImage} image={user.profileImage} />
         <OtpModal open={openOtpModal} onOpenChange={setOpenOtpModal} otpData={otpData} />
       </div>
     </div>
