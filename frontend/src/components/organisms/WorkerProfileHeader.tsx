@@ -41,7 +41,7 @@ export default function WorkerProfileHeader({
   } = workerInfo;
 
   return (
-    <div className="w-full">
+    <div className="w-full ">
       {/* Top Banner*/}
       <div className="relative w-screen h-[260px] md:h-[320px] left-1/2 right-1/2   -ml-[50vw] -mr-[50vw] overflow-hidden">
         <img src={bannerImage} className="w-full h-full object-cover" alt="banner" />
@@ -50,7 +50,7 @@ export default function WorkerProfileHeader({
 
       <div className="px-4 lg:px-8">
         <div className="relative mx-auto -mt-15">
-          <div className="bg-white dark:bg-card rounded-2xl shadow-lg p-6 md:p-8">
+          <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8">
             {/* MAIN FLEX WRAPPER */}
             <div className="flex flex-col md:flex-row justify-between gap-10">
               {/* LEFT SIDE — IMAGE + INFO */}

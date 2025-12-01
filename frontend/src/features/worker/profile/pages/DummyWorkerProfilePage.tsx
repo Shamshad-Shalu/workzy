@@ -17,6 +17,7 @@ import {
   Award,
   Clock,
 } from 'lucide-react';
+import WorkerProfessionalSections from '../components/DummyWorkerSec';
 
 interface WorkerProfileData {
   fullName: string;
@@ -41,7 +42,7 @@ interface WorkerProfileData {
   completionRate: number;
 }
 
-const DummyWorkerProfilePage: React.FC = () => {
+const WorkerProfilePage: React.FC = () => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
   const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
@@ -480,6 +481,8 @@ const DummyWorkerProfilePage: React.FC = () => {
           </div>
         </div>
       </div>
+      <WorkerProfessionalSections />
+
       {/* </div> */}
 
       {/* Modals */}
@@ -778,4 +781,4 @@ const Modal: React.FC<ModalProps> = ({ onClose, title, children, maxWidth = 'max
   );
 };
 
-export default DummyWorkerProfilePage;
+export default WorkerProfilePage;

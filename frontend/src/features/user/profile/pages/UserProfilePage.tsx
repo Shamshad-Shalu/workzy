@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import OtpModal from '@/features/profile/modals/OtpModal';
 
 export default function ProfilePage() {
-  const { user } = useAppSelector(s => s.auth);
+  const { user } = useAppSelector((s: any) => s.auth);
   const { changeEmail, changePhone, loading } = useProfile();
 
   const [openImage, setOpenImage] = useState(false);

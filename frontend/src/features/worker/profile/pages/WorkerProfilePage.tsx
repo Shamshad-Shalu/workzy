@@ -1,9 +1,12 @@
 import ProfileImage from '@/components/molecules/ProfileImage';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
+import StatCard from '@/components/molecules/StatCard';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
 import { useProfile } from '@/features/profile/hooks/useProfile';
+import ProfileInfoCard from '@/features/user/profile/components/ProfileInfoCard';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
+import { Check, Edit2, Lock, Mail, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 
 export default function WorkerProfilePage() {
@@ -11,6 +14,7 @@ export default function WorkerProfilePage() {
   const { uploadImage } = useProfile();
   const [openImage, setOpenImage] = useState<boolean>(false);
   const { user } = useAppSelector(s => s.auth);
+
   if (!user) {
     return;
   }
@@ -39,22 +43,68 @@ export default function WorkerProfilePage() {
         }
       />
       <div className="px-4 lg:px-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-7 ">
+          <StatCard icon={<Check className="w-6 h-6" />} value="450" label="Jobs Completed" />
+          <StatCard icon={<Check className="w-6 h-6" />} value="450" label="Jobs Completed" />
+          <StatCard icon={<Check className="w-6 h-6" />} value="450" label="Jobs Completed" />
+        </div>
         {/* Tabs */}
-        <div className="bg-white rounded-2xl shadow-sm mb-6">
-          <div className="border-b border-gray-200">
-            <div className="flex gap-8 px-8">
-              <button className="py-4 border-b-2 border-indigo-600 text-indigo-600 font-semibold">
-                About
-              </button>
-              <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-                Skills & Services
-              </button>
-              <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-                Documents & Verification
-              </button>
-              <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-                Subscription
-              </button>
+        <div className="bg-card rounded-2xl shadow-sm mb-6">
+          <div className="bg-card p-4 text-bg text-muted-foreground ">About</div>
+        </div>
+      </div>
+
+      <div className="px-4 lg:px-8 pt-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <ProfileInfoCard user={user} />
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="lg:col-span-1 space-y-6">
+            {/* Account Settings Card */}
+            <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Account Settings</h3>
+              <div className="space-y-3">
+                <button
+                  // onClick={() => setShowEmailModal(true)}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-700">Change Email</span>
+                  </div>
+                  <Edit2 className="w-4 h-4 text-gray-400" />
+                </button>
+
+                <button
+                  // onClick={() => setShowPhoneModal(true)}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Smartphone className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-700">Change Phone</span>
+                  </div>
+                  <Edit2 className="w-4 h-4 text-gray-400" />
+                </button>
+
+                <button
+                  // onClick={() => setShowPasswordModal(true)}
+                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                >
+                  <div className="flex items-center gap-3">
+                    <Lock className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
+                    <span className="text-sm font-medium text-gray-700">Change Password</span>
+                  </div>
+                  <Edit2 className="w-4 h-4 text-gray-400" />
+                </button>
+              </div>
+            </div>
+
+            {/* Certifications - Placeholder */}
+            <div className="bg-white rounded-2xl shadow-sm p-6">
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Certifications</h3>
+              <div className="h-48 bg-gray-100 rounded-lg"></div>
             </div>
           </div>
         </div>
@@ -64,261 +114,6 @@ export default function WorkerProfilePage() {
     </div>
   );
 }
-
-// interface WorkerProfileData {
-//   fullName: string;
-//   email: string;
-//   phone: string;
-//   address: string;
-//   city: string;
-//   state: string;
-//   pincode: string;
-//   place: string;
-//   hasLocation: boolean;
-//   profileImage?: string;
-//   profession: string;
-//   location: string;
-//   experience: string;
-//   responseTime: string;
-//   rating: number;
-//   reviewsCount: number;
-//   hourlyRate: number;
-//   availability: 'Available' | 'Busy' | 'Offline';
-//   jobsCompleted: number;
-//   completionRate: number;
-// }
-
-// const WorkerProfilePage: React.FC = () => {
-//   const [isEditing, setIsEditing] = useState<boolean>(false);
-//   const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
-//   const [showEmailModal, setShowEmailModal] = useState<boolean>(false);
-//   const [showPhoneModal, setShowPhoneModal] = useState<boolean>(false);
-//   const [showOtpModal, setShowOtpModal] = useState<boolean>(false);
-//   const [showImageModal, setShowImageModal] = useState<boolean>(false);
-//   const [otpContext, setOtpContext] = useState<'email' | 'phone' | null>(null);
-//   const [newEmail, setNewEmail] = useState<string>('');
-//   const [newPhone, setNewPhone] = useState<string>('');
-//   const [currentPassword, setCurrentPassword] = useState<string>('');
-//   const [newPassword, setNewPassword] = useState<string>('');
-//   const [otp, setOtp] = useState<string>('');
-
-//   const [profileData, setProfileData] = useState<WorkerProfileData>({
-//     fullName: 'Mike Johnson',
-//     email: 'mike.johnson@gmail.com',
-//     phone: '7510923889',
-//     address: 'Apt 47, Jatwal',
-//     city: 'Jubele',
-//     state: 'Kerala',
-//     pincode: '676326',
-//     place: 'Calicut',
-//     hasLocation: true,
-//     profileImage: undefined,
-//     profession: 'Professional Plumber',
-//     location: 'Jubele, Calicut, Kerala',
-//     experience: '15+ Years Experience',
-//     responseTime: '< 1 Hour response',
-//     rating: 4.9,
-//     reviewsCount: 127,
-//     hourlyRate: 150,
-//     availability: 'Available',
-//     jobsCompleted: 450,
-//     completionRate: 98
-//   });
-
-//   const [editData, setEditData] = useState<WorkerProfileData>({ ...profileData });
-
-//   const handleEdit = (): void => {
-//     setEditData({ ...profileData });
-//     setIsEditing(true);
-//   };
-
-//   const handleCancel = (): void => {
-//     setEditData({ ...profileData });
-//     setIsEditing(false);
-//   };
-
-//   const handleSave = (): void => {
-//     setProfileData({ ...editData });
-//     setIsEditing(false);
-//   };
-
-//   const handleInputChange = (field: keyof WorkerProfileData, value: string | boolean): void => {
-//     setEditData(prev => ({ ...prev, [field]: value }));
-//   };
-
-//   const handleSendEmailOtp = (): void => {
-//     setOtpContext('email');
-//     setShowEmailModal(false);
-//     setShowOtpModal(true);
-//   };
-
-//   const handleSendPhoneOtp = (): void => {
-//     setOtpContext('phone');
-//     setShowPhoneModal(false);
-//     setShowOtpModal(true);
-//   };
-
-//   const handleVerifyOtp = (): void => {
-//     if (otpContext === 'email') {
-//       setProfileData(prev => ({ ...prev, email: newEmail }));
-//     } else if (otpContext === 'phone') {
-//       setProfileData(prev => ({ ...prev, phone: newPhone }));
-//     }
-//     setShowOtpModal(false);
-//     setOtp('');
-//     setNewEmail('');
-//     setNewPhone('');
-//     setOtpContext(null);
-//   };
-
-//   const handleChangePassword = (): void => {
-//     setShowPasswordModal(false);
-//     setCurrentPassword('');
-//     setNewPassword('');
-//   };
-
-//   return (
-//     <div className="-mx-4 md:-mx-6 lg:-mx-8 xl:-mx-10 -mt-6 ">
-
-//         <WorkerProfileHeader workerInfo={workerInfo} />;
-//       {/* <div className="flex-1 "> */}
-//           {/* Profile Header Card */}
-//           <div className="bg-white rounded-2xl shadow-sm p-8 mb-6">
-//             <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
-//               {/* Left Side - Profile Info */}
-//               <div className="flex gap-6">
-//                 {/* Profile Image */}
-//                 <div className="relative flex-shrink-0">
-//                   <div
-//                     onClick={() => setShowImageModal(true)}
-//                     className="w-32 h-32 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg cursor-pointer hover:opacity-90 transition-opacity overflow-hidden"
-//                   >
-//                     {profileData.profileImage ? (
-//                       <img
-//                         src={profileData.profileImage}
-//                         alt="Profile"
-//                         className="w-full h-full object-cover"
-//                       />
-//                     ) : (
-//                       profileData.fullName?.charAt(0) || 'U'
-//                     )}
-//                   </div>
-//                   <button className="absolute bottom-0 right-0 w-10 h-10 bg-white rounded-full shadow-lg flex items-center justify-center hover:bg-gray-50 transition-colors border-2 border-gray-100">
-//                     <Camera className="w-5 h-5 text-gray-700" />
-//                   </button>
-//                 </div>
-
-//                 {/* Name and Details */}
-//                 <div className="flex-1">
-//                   <div className="flex items-center gap-3 mb-2">
-//                     <h1 className="text-3xl font-bold text-gray-900">{profileData.fullName}</h1>
-//                     <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full flex items-center gap-1">
-//                       <Check className="w-3 h-3" />
-//                       Verified
-//                     </span>
-//                     <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
-//                       <Check className="w-4 h-4 text-white" />
-//                     </div>
-//                   </div>
-
-//                   <p className="text-xl text-gray-600 mb-4">{profileData.profession}</p>
-
-//                   <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-//                     <div className="flex items-center gap-2">
-//                       <MapPin className="w-4 h-4" />
-//                       <span>{profileData.location}</span>
-//                     </div>
-//                     <div className="flex items-center gap-2">
-//                       <Award className="w-4 h-4" />
-//                       <span>{profileData.experience}</span>
-//                     </div>
-//                     <div className="flex items-center gap-2">
-//                       <Clock className="w-4 h-4" />
-//                       <span>{profileData.responseTime}</span>
-//                     </div>
-//                   </div>
-//                 </div>
-//               </div>
-
-//               {/* Right Side - Rating and Price */}
-//               <div className="flex flex-col items-end gap-4">
-//                 <div className="flex items-center gap-2">
-//                   <div className="flex">
-//                     {[1, 2, 3, 4, 5].map((star) => (
-//                       <Star key={star} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-//                     ))}
-//                   </div>
-//                   <span className="text-2xl font-bold text-gray-900">{profileData.rating}</span>
-//                   <span className="text-gray-500">({profileData.reviewsCount} reviews)</span>
-//                 </div>
-
-//                 <div className="text-right">
-//                   <div className="text-3xl font-bold text-gray-900">₹{profileData.hourlyRate}</div>
-//                   <div className="text-gray-500">per hour</div>
-//                   <span className={`inline-block mt-2 px-4 py-1 rounded-full text-sm font-semibold ${
-//                     profileData.availability === 'Available' ? 'bg-green-100 text-green-700' :
-//                     profileData.availability === 'Busy' ? 'bg-yellow-100 text-yellow-700' :
-//                     'bg-gray-100 text-gray-700'
-//                   }`}>
-//                     {profileData.availability}
-//                   </span>
-//                 </div>
-//               </div>
-//             </div>
-//           </div>
-
-//           {/* Stats Cards */}
-//           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-//             <div className="bg-white rounded-2xl shadow-sm p-6">
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-//                   <CheckCircle className="w-6 h-6 text-blue-600" />
-//                 </div>
-//               </div>
-//               <div className="text-4xl font-bold text-gray-900 mb-1">{profileData.jobsCompleted}</div>
-//               <div className="text-gray-500 text-sm">Jobs Completed</div>
-//             </div>
-
-//             <div className="bg-white rounded-2xl shadow-sm p-6">
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-//                   <Star className="w-6 h-6 text-yellow-600" />
-//                 </div>
-//               </div>
-//               <div className="text-4xl font-bold text-gray-900 mb-1">{profileData.rating}/5</div>
-//               <div className="text-gray-500 text-sm">Average Rating</div>
-//             </div>
-
-//             <div className="bg-white rounded-2xl shadow-sm p-6">
-//               <div className="flex items-center justify-between mb-4">
-//                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-//                   <TrendingUp className="w-6 h-6 text-green-600" />
-//                 </div>
-//               </div>
-//               <div className="text-4xl font-bold text-gray-900 mb-1">{profileData.completionRate}%</div>
-//               <div className="text-gray-500 text-sm">Completion Rate</div>
-//             </div>
-//           </div>
-
-//           {/* Tabs */}
-//           <div className="bg-white rounded-2xl shadow-sm mb-6">
-//             <div className="border-b border-gray-200">
-//               <div className="flex gap-8 px-8">
-//                 <button className="py-4 border-b-2 border-indigo-600 text-indigo-600 font-semibold">
-//                   About
-//                 </button>
-//                 <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-//                   Skills & Services
-//                 </button>
-//                 <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-//                   Documents & Verification
-//                 </button>
-//                 <button className="py-4 border-b-2 border-transparent text-gray-500 font-semibold hover:text-gray-700">
-//                   Subscription
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
 
 //           {/* Profile Information Section */}
 //           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
