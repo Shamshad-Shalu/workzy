@@ -78,7 +78,6 @@ export class ProfileController implements IProfileController {
     const userId = req.user?._id;
     if (!userId) return;
     const data = req.body;
-    console.log("data", data);
     const user = await this._profileService.updateProfile(userId, data);
     res.status(HTTPSTATUS.OK).json({ message: "profile updated successfully", user });
   });

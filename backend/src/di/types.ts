@@ -16,6 +16,8 @@ const TYPES = {
   ProfileController: Symbol.for("ProfileController"),
   ProfileService: Symbol.for("ProfileService"),
 
+  AdminController: Symbol.for("AdminController"),
+
   // Miscellaneous / Utilities
   OTPService: Symbol.for("IOTPService"),
   EmailService: Symbol.for("IEmailService"),

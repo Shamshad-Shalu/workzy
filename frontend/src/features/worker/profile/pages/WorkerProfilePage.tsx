@@ -26,7 +26,7 @@ export default function WorkerProfilePage() {
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
   const { user } = useAppSelector(s => s.auth);
-  
+
   useEffect(() => {
     async function loadProfile() {
       const res = await getUserProfilePage();
@@ -40,7 +40,7 @@ export default function WorkerProfilePage() {
   if (!user) {
     return;
   }
-  
+
   function handleOtpRequest(type: 'email' | 'phone', value: string) {
     setOtpData({ type, value });
     setOpenOtpModal(true);

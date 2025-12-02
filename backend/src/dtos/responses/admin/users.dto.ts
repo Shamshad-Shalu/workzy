@@ -1,28 +1,9 @@
 import { DEFAULT_IMAGE_URL, Role } from "@/constants";
 import { generateSignedUrl } from "@/services/s3.service";
 import { IUser } from "@/types/user";
-import { Expose } from "class-transformer";
-import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
 
-export class RegisterResponseDTO {
-  @Expose()
-  @IsString()
-  _id!: string;
-
-  @Expose()
-  @IsString()
-  name!: string;
-
-  @Expose()
-  @IsEmail()
-  email!: string;
-
-  @Expose()
-  @IsString()
-  role!: Role;
-}
-
-export class LoginResponseDTO {
+export class UsersResponseDTO {
   @IsString()
   _id!: string;
 
@@ -31,29 +12,35 @@ export class LoginResponseDTO {
 
   @IsEmail()
   email!: string;
+
+  @IsEmail()
+  phone!: string;
 
   @IsString()
   profileImage!: string | undefined;
 
-  @IsString()
-  role!: Role;
-
   @IsBoolean()
   isPremium!: boolean;
 
-  @IsOptional()
-  @IsString()
-  workerId?: string;
+  @IsNotEmpty()
+  @IsBoolean()
+  isBlocked!: boolean;
 
-  static async fromEntity(entity: IUser & { workerId?: string }): Promise<LoginResponseDTO> {
-    const dto = new LoginResponseDTO();
+  @IsNotEmpty()
+  @IsString()
+  createdAt!: string;
+
+  static async fromEntity(entity: IUser): Promise<UsersResponseDTO> {
+    const dto = new UsersResponseDTO();
 
     dto._id = entity._id;
     dto.name = entity.name;
     dto.email = entity.email;
-    dto.role = entity.role;
     dto.isPremium = entity.isPremium;
-    dto.workerId = entity.workerId;
+    dto.isBlocked = entity.isBlocked;
+    dto.phone = entity.phone || "-";
+    const date = new Date(entity.createdAt);
+    dto.createdAt = date.toLocaleDateString("en-GB").replace(/\//g, " - ");
 
     const image = entity.profileImage;
 
@@ -67,5 +54,10 @@ export class LoginResponseDTO {
     }
 
     return dto;
+  }
+
+  static async fromEntities(entities: IUser[]): Promise<UsersResponseDTO[]> {
+    const promises = entities.map((entity) => this.fromEntity(entity));
+    return Promise.all(promises);
   }
 }

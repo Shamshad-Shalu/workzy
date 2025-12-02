@@ -8,6 +8,7 @@ export interface ApiUser {
   name: string;
   email: string;
   phone?: number;
+  isPremium: boolean;
   profileImage?: string;
   isBlocked: boolean;
   createdAt: string;
@@ -15,10 +16,8 @@ export interface ApiUser {
 
 export interface ApiResponse {
   users: ApiUser[];
-  totalCount: number;
-  currentPage: number;
-  itemsPerPage: number;
-  totalPages: number;
+  total: number;
+  page: number;
 }
 
 export interface FilterParams {

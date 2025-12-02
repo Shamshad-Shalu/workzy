@@ -66,13 +66,7 @@ function UserMangementPage() {
         </span>
       ),
     },
-    {
-      key: 'role',
-      label: 'Role',
-      render: (value: string) => {
-        return <span className={`text-xs font-medium px-2.5 py-1 rounded-full`}>{value}</span>;
-      },
-    },
+
     {
       key: 'isBlocked',
       label: 'Status',
@@ -146,10 +140,10 @@ function UserMangementPage() {
           isLoading={loading}
           error={error}
           pagination={{
-            currentPage: data?.currentPage || currentPage,
-            totalItems: data?.totalCount || 0,
-            totalPages: data?.totalPages || 1,
-            itemsPerPage: data?.itemsPerPage || 5,
+            currentPage: data?.total || currentPage,
+            totalItems: data?.total || 0,
+            totalPages: Math.ceil((data?.total || 0) / 5),
+            itemsPerPage: 5,
             onPageChange: setCurrentPage,
           }}
           onRowClick={row => {

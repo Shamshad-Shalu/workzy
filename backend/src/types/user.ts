@@ -29,4 +29,5 @@ export interface IUser extends Document<string> {
   };
   isBlocked: boolean;
   googleId?: string;
+  createdAt: Date;
 }

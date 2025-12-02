@@ -22,6 +22,8 @@ import { IProfileController } from "@/core/interfaces/controllers/IProfileContro
 import { ProfileController } from "@/controllers/profile.controller";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ProfileService } from "@/services/profile.service";
+import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
+import { AdminController } from "@/controllers/admin/admin.controller";
 
 const container = new Container();
 
@@ -40,5 +42,7 @@ container.bind<IWorkerService>(TYPES.WorkerService).to(WorkerService);
 
 container.bind<IProfileController>(TYPES.ProfileController).to(ProfileController);
 container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
+
+container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
 
 export { container };
