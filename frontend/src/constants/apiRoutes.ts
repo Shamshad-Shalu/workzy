@@ -23,3 +23,8 @@ export const PROFILE_ROUTES = {
   RESEND_OTP: `${PROFILE_ROUTE}/resend-otp`,
   CHANGE_PASSWORD: `${PROFILE_ROUTE}/change-password`,
 } as const;
+
+const ADMIN_ROUTE = '/admin';
+export const ADMIN_ROUTES = {
+  GETUSER: `${ADMIN_ROUTE}/users`,
+};
