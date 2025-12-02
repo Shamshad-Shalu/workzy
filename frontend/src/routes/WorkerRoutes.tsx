@@ -4,7 +4,6 @@ import WorkerDashboard from '@/features/worker/dashboard/pages/Dashboard';
 import { WorkerLayout } from '@/layouts/worker/WorkerLayout';
 import { ROLE } from '@/constants';
 import WorkerProfilePage from '@/features/worker/profile/pages/WorkerProfilePage';
-import DummyWorkerProfilePage from '@/features/worker/profile/pages/DummyWorkerProfilePage';
 
 export default function WorkerRoutes() {
   return (
@@ -13,7 +12,6 @@ export default function WorkerRoutes() {
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="profile" element={<WorkerProfilePage />} />
-          <Route path="wallet" element={<DummyWorkerProfilePage />} />
         </Route>
       </Route>
     </Routes>

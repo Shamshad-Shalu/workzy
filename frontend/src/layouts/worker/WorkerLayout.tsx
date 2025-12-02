@@ -24,7 +24,7 @@ export function WorkerLayout() {
             document.getElementById('drawer-trigger')?.click();
           }}
         />
-        <main className="flex-1 overflow-y-auto p-6 no-scrollbar">
+        <main className="flex-1 overflow-y-auto p-6 no-scrollbar bg-background">
           <Outlet />
         </main>
       </div>

@@ -6,13 +6,16 @@ import { deleteFromS3, generateSignedUrl, uploadFileToS3 } from "./s3.service";
 import { getUserOrThrow } from "@/utils/getUserOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS } from "@/constants";
+import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS, USER } from "@/constants";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import redisClient from "@/config/redisClient";
 import validator from "validator";
 import logger from "@/config/logger";
+import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
+import { IUser } from "@/types/user";
+import { UpdateProfilePayload } from "@/core/types/profilePayload";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -94,5 +97,22 @@ export class ProfileService implements IProfileService {
     await redisClient.del(`otp:${value}`);
 
     return true;
+  }
+
+  async getProfile(userId: string): Promise<UserProfileResponseDTO> {
+    const user = await getUserOrThrow(this._userRepository, userId);
+    return await UserProfileResponseDTO.fromEntity(user);
+  }
+
+  async updateProfile(
+    userId: string,
+    payload: Partial<UpdateProfilePayload>
+  ): Promise<UserProfileResponseDTO> {
+    const user = await getUserOrThrow(this._userRepository, userId);
+    if (payload.name) {
+      user.name = payload.name;
+    }
+    await user.save();
+    return await UserProfileResponseDTO.fromEntity(user);
   }
 }

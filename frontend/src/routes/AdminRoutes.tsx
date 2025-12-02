@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import AdminDashboard from '@/features/admin/dashboard/pages/Dashboard';
 import { AdminLayout } from '@/layouts/admin/AdminLayout';
+import UserManagementPage from '@/features/admin/user/pages/UserMangementPage';
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -10,6 +11,7 @@ const AdminRoutes: React.FC = () => {
       <Route element={<ProtectedRoute />}>
         <Route element={<AdminLayout />}>
           <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="users" element={<UserManagementPage />} />
         </Route>
       </Route>
     </Routes>

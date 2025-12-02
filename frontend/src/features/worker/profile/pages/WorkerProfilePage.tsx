@@ -6,29 +6,52 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 import ProfileInfoCard from '@/features/profile/components/ProfileInfoCard';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import { Check, Edit2, Lock, Mail, Smartphone } from 'lucide-react';
-import { useState } from 'react';
+import { Check, Lock, Mail, Pencil, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
+import { emailRule, phoneRule } from '@/lib/validation/rules';
+import z from 'zod';
+import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
+import OtpModal from '@/features/profile/modals/OtpModal';
 
 export default function WorkerProfilePage() {
   const dispatch = useAppDispatch();
-  const { uploadImage, loading, updateBasic } = useProfile();
-  const [openImage, setOpenImage] = useState<boolean>(false);
+  const { uploadImage, loading, updateBasic, getUserProfilePage, changeEmail, changePhone } =
+    useProfile();
+  const [openImage, setOpenImage] = useState(false);
+  const [openEmail, setOpenEmail] = useState(false);
+  const [openPhone, setOpenPhone] = useState(false);
+  const [openPass, setOpenPass] = useState(false);
+  const [openOtpModal, setOpenOtpModal] = useState(false);
+  const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
   const { user } = useAppSelector(s => s.auth);
+  if (!user) return;
 
-  if (!user) {
-    return;
+  useEffect(() => {
+    async function loadProfile() {
+      const res = await getUserProfilePage();
+      if (res) {
+        dispatch(updateUser(res));
+      }
+    }
+    loadProfile();
+  }, []);
+
+  function handleOtpRequest(type: 'email' | 'phone', value: string) {
+    setOtpData({ type, value });
+    setOpenOtpModal(true);
+  }
+
+  async function handleImageUpload(file: any) {
+    const res = await uploadImage(file);
+    dispatch(updateUser({ profileImage: res.url }));
   }
 
   const workerInfo = {
     displayName: user.name,
     profileImage: user.profileImage,
   };
-
-  async function handleImageUpload(file: any) {
-    const res = await uploadImage(file);
-    dispatch(updateUser({ profileImage: res.url }));
-  }
 
   return (
     <div className="-mx-4 md:-mx-6 lg:-mx-8 xl:-mx-10 -my-6 pb-12 bg-background">
@@ -71,54 +94,88 @@ export default function WorkerProfilePage() {
 
           {/* Right Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            {/* Account Settings Card */}
-            <div className="bg-white rounded-2xl shadow-sm p-6 sticky top-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Account Settings</h3>
-              <div className="space-y-3">
+            <div className="bg-card rounded-2xl shadow-sm p-6 sticky top-6">
+              <h3 className="text-lg font-bold text-primary mb-4">Account Settings</h3>
+              <div className="w-full space-y-3">
                 <button
-                  // onClick={() => setShowEmailModal(true)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                  onClick={() => setOpenEmail(true)}
+                  className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
                 >
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-700">Change Email</span>
-                  </div>
-                  <Edit2 className="w-4 h-4 text-gray-400" />
+                  <span className="flex items-center gap-2">
+                    <Mail size={18} /> Change Email
+                  </span>
+                  <Pencil className="w-4 h-4" />
                 </button>
 
                 <button
-                  // onClick={() => setShowPhoneModal(true)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                  onClick={() => setOpenPhone(true)}
+                  className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
                 >
-                  <div className="flex items-center gap-3">
-                    <Smartphone className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-700">Change Phone</span>
-                  </div>
-                  <Edit2 className="w-4 h-4 text-gray-400" />
+                  <span className="flex items-center gap-2">
+                    <Phone size={18} /> Change Phone
+                  </span>
+                  <Pencil className="w-4 h-4" />
                 </button>
 
                 <button
-                  // onClick={() => setShowPasswordModal(true)}
-                  className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-colors text-left group"
+                  onClick={() => setOpenPass(true)}
+                  className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
                 >
-                  <div className="flex items-center gap-3">
-                    <Lock className="w-5 h-5 text-gray-400 group-hover:text-blue-500 transition-colors" />
-                    <span className="text-sm font-medium text-gray-700">Change Password</span>
-                  </div>
-                  <Edit2 className="w-4 h-4 text-gray-400" />
+                  <span className="flex items-center gap-2">
+                    <Lock size={18} /> Change Password
+                  </span>
+                  <Pencil className="w-4 h-4" />
                 </button>
               </div>
             </div>
 
-            {/* Certifications - Placeholder */}
-            <div className="bg-white rounded-2xl shadow-sm p-6">
+            {/* <div className="bg-white rounded-2xl shadow-sm p-6">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Certifications</h3>
               <div className="h-48 bg-gray-100 rounded-lg"></div>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>
 
+      {/* email  */}
+      <ChangeFieldModal
+        open={openEmail}
+        onOpenChange={setOpenEmail}
+        title="Change Email"
+        label="New Email"
+        loading={loading}
+        schema={z.object({ value: emailRule })}
+        leftIcon={<Mail size={18} />}
+        description="We'll send a verification code to your new email address."
+        placeholder="Enter new email"
+        initialValue={user.email}
+        onSubmit={async email => {
+          const res = await changeEmail(email);
+          console.log('res', res);
+          toast.success(res.message);
+          handleOtpRequest('email', email);
+        }}
+      />
+
+      <ChangeFieldModal
+        open={openPhone}
+        onOpenChange={setOpenPhone}
+        title="Change Phone"
+        label="New Phone Number"
+        leftIcon={<Phone size={18} />}
+        description="We'll send a verification code to your WhatsApp number."
+        placeholder="Enter phone number"
+        loading={loading}
+        schema={z.object({ value: phoneRule })}
+        initialValue={user.phone}
+        onSubmit={async phone => {
+          const res = await changePhone(phone);
+          toast.success(res.message);
+          handleOtpRequest('phone', phone);
+        }}
+      />
+      <ChangePasswordModal open={openPass} onOpenChange={setOpenPass} />
+      <OtpModal open={openOtpModal} onOpenChange={setOpenOtpModal} otpData={otpData} />
       <ProfileImageModal open={openImage} image={user.profileImage} onOpenChange={setOpenImage} />
     </div>
   );

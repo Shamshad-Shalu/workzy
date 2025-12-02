@@ -15,6 +15,8 @@ const profileController = container.get<IProfileController>(TYPES.ProfileControl
 
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
+router.get("/me", profileController.getProfile);
+router.patch("/me", profileController.updateProfile);
 router.post("/change-password", validateDto(ChangePasswordDTO), profileController.changePassword);
 router.post("/change-email", profileController.changeEmail);
 router.post("/resend-otp", profileController.resentOtp);

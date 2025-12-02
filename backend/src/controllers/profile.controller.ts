@@ -9,14 +9,12 @@ import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
 import validator from "validator";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
-import { IEmailService } from "@/core/interfaces/services/IEmailService";
 
 @injectable()
 export class ProfileController implements IProfileController {
   constructor(
     @inject(TYPES.ProfileService) private _profileService: IProfileService,
-    @inject(TYPES.OTPService) private _otpService: IOTPService,
-    @inject(TYPES.EmailService) private _emailService: IEmailService
+    @inject(TYPES.OTPService) private _otpService: IOTPService
   ) {}
 
   uploadImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -67,5 +65,21 @@ export class ProfileController implements IProfileController {
 
     await this._profileService.updateEmailOrPhone(userId, type, value);
     res.status(HTTPSTATUS.OK).json({ message: `${type} Updated successfully`, type, value });
+  });
+
+  getProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?._id;
+    if (!userId) return;
+    const user = await this._profileService.getProfile(userId);
+    res.status(HTTPSTATUS.OK).json({ user });
+  });
+
+  updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?._id;
+    if (!userId) return;
+    const data = req.body;
+    console.log("data", data);
+    const user = await this._profileService.updateProfile(userId, data);
+    res.status(HTTPSTATUS.OK).json({ message: "profile updated successfully", user });
   });
 }

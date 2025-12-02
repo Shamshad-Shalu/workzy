@@ -5,7 +5,7 @@ import type { User } from '@/types/user';
 export const profileApi = {
   getProfilePage: async (): Promise<User> => {
     const res = await api.get(PROFILE_ROUTES.PROFILE);
-    return res.data;
+    return res.data.user;
   },
   updateBasicInfo: async (payload: Partial<User>): Promise<any> => {
     const res = await api.patch(PROFILE_ROUTES.PROFILE, payload);

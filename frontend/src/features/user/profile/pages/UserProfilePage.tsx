@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProfileInfoCard from '../../../profile/components/ProfileInfoCard';
 import UserProfileCard from '../components/UserProfileCard';
@@ -17,7 +17,7 @@ import { updateUser } from '@/store/slices/authSlice';
 
 export default function ProfilePage() {
   const { user } = useAppSelector((s: any) => s.auth);
-  const { changeEmail, changePhone, loading, updateBasic } = useProfile();
+  const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
   const dispatch = useAppDispatch();
 
   const [openImage, setOpenImage] = useState(false);
@@ -32,9 +32,15 @@ export default function ProfilePage() {
     setOpenOtpModal(true);
   }
 
-  if (!user) {
-    return null;
-  }
+  useEffect(() => {
+    async function loadProfile() {
+      const res = await getUserProfilePage();
+      if (res) {
+        dispatch(updateUser(res));
+      }
+    }
+    loadProfile();
+  }, []);
 
   return (
     <div>
