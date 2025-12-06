@@ -5,7 +5,7 @@ import PageHeader from '@/components/molecules/PageHeader';
 import type { UserResponse, UserRow } from '@/types/admin/user';
 import { Filter, Search } from 'lucide-react';
 import { useState } from 'react';
-import userColumns from '../columns';
+import userColumns from '../components/columns';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import AdminUserService from '@/services/admin/userManagement.service';
 
@@ -43,7 +43,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="bg-baground py-6 px-0 lg:p-6">
+    <div className="bg-baground py-6 px-0 xl:p-6">
       <PageHeader title="User Management" description="Manage your platform users" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">

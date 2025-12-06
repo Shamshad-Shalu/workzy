@@ -30,7 +30,7 @@ export class UsersResponseDTO {
   @IsString()
   createdAt!: string;
 
-  static async fromEntity(entity: IUser): Promise<UsersResponseDTO> {
+  static async fromEntity(entity: IUser, defaultSignedUrl: string): Promise<UsersResponseDTO> {
     const dto = new UsersResponseDTO();
 
     dto._id = entity._id;
@@ -50,14 +50,15 @@ export class UsersResponseDTO {
     } else if (image && image.startsWith("http")) {
       dto.profileImage = image;
     } else {
-      dto.profileImage = await generateSignedUrl(DEFAULT_IMAGE_URL);
+      dto.profileImage = defaultSignedUrl;
     }
 
     return dto;
   }
 
   static async fromEntities(entities: IUser[]): Promise<UsersResponseDTO[]> {
-    const promises = entities.map((entity) => this.fromEntity(entity));
+    const defaultSignedUrl = await generateSignedUrl(DEFAULT_IMAGE_URL);
+    const promises = entities.map((entity) => this.fromEntity(entity, defaultSignedUrl));
     return Promise.all(promises);
   }
 }

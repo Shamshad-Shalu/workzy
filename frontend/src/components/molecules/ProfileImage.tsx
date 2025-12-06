@@ -1,5 +1,6 @@
 import { Camera } from 'lucide-react';
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { Skeleton } from '../ui/skeleton';
 
 interface Props {
   src: string | undefined;
@@ -9,7 +10,6 @@ interface Props {
   onClickImage?: () => void;
   loading?: boolean;
 }
-
 export default function ProfileImage({
   src,
   size = 120,
@@ -19,6 +19,7 @@ export default function ProfileImage({
   loading = false,
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (!editable || !onChange) {
@@ -31,12 +32,22 @@ export default function ProfileImage({
     await onChange(file);
   }
   return (
-    <div className="relative cursor-pointer group inline-block">
+    <div
+      className="relative cursor-pointer group inline-block"
+      style={{ width: size, height: size }}
+    >
+      {(!imgLoaded || loading) && (
+        <Skeleton style={{ width: size, height: size }} className="absolute inset-0 rounded-full" />
+      )}
+
       <img
         src={src}
         onClick={onClickImage}
-        style={{ width: size, height: size }}
+        onLoad={() => setImgLoaded(true)}
+        onError={() => setImgLoaded(true)}
+        style={{ width: size, height: size, display: imgLoaded && !loading ? 'block' : 'none' }}
         className="rounded-full object-cover border-2 border-bg-accent/30"
+        alt="User Profile Avatar"
       />
       {loading && (
         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
@@ -44,7 +55,7 @@ export default function ProfileImage({
         </div>
       )}
 
-      {editable && (
+      {editable && imgLoaded && !loading && (
         <>
           <button
             onClick={() => fileRef.current?.click()}

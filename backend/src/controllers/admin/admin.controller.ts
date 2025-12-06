@@ -22,8 +22,6 @@ export class AdminController implements IAdminController {
       page: currentPage,
     } = await this._userService.getUsers(page, limit, search, status, ROLE.USER);
 
-    const totalPages = Math.ceil(total / limit);
-
     res.json({
       users,
       total,
