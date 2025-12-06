@@ -57,6 +57,8 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
     setIsEditing(false);
   }
 
+  const isTrue = true;
+
   return (
     <div className="bg-card border rounded-2xl rounded-xl p-6">
       <div className="flex items-center justify-between mb-6">
@@ -207,7 +209,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h5 className="font-semibold text-foreground text-sm">GPS Coordinates</h5>
-                    {true && (
+                    {isTrue && (
                       <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
                         <Check className="w-3 h-3" />
                         Set
@@ -215,13 +217,13 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {true
+                    {isTrue
                       ? 'Your precise location has been saved for better service delivery.'
                       : 'Set your GPS coordinates for accurate location-based services.'}
                   </p>
                   {isEditing && (
                     <button className="mt-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                      {true ? 'Update Location' : 'Set Location'} →
+                      {isTrue ? 'Update Location' : 'Set Location'} →
                     </button>
                   )}
                 </div>

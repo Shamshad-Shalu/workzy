@@ -1,159 +1,237 @@
-import PageHeader from '@/components/molecules/PageHeader';
-import { useEffect, useState } from 'react';
-import { useUserData, type ApiUser } from '../hooks/useUserData';
-import type { Column } from '@/components/organisms/Table';
-import Button from '@/components/atoms/Button';
-import { Eye, Filter, MoreVertical, Search } from 'lucide-react';
-import Select from '@/components/atoms/Select';
 import Input from '@/components/atoms/Input';
-import Table from '@/components/organisms/Table';
+import Select from '@/components/atoms/Select';
+import Table from '@/components/data-table/Table';
+import PageHeader from '@/components/molecules/PageHeader';
+import type { UserResponse, UserRow } from '@/types/admin/user';
+import { Filter, Search } from 'lucide-react';
+import { useState } from 'react';
+import userColumns from '../columns';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import AdminUserService from '@/services/admin/userManagement.service';
 
-function UserMangementPage() {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [searchInput, setSearchInput] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const { data, loading, error, fetchUsers } = useUserData();
+export default function UserManagementPage() {
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(5);
+  const [search, setSearch] = useState('');
+  const [status, setStatus] = useState('all');
+  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  useEffect(() => {
-    fetchUsers({
-      page: currentPage,
-      search: searchInput,
-      status: statusFilter,
-      limit: 5,
-    });
-  }, [currentPage, searchInput, statusFilter, fetchUsers]);
+  const queryClient = useQueryClient();
 
-  const coloums: Column<ApiUser>[] = [
-    {
-      key: 'id',
-      label: '#',
-      width: '50px',
-      render: (_, row: ApiUser) => (
-        <span className="text-muted-foreground">
-          {data?.users.indexOf(row) ? data.users.indexOf(row) + 1 : 1}
-        </span>
-      ),
-    },
-    {
-      key: 'name',
-      label: 'User',
-      width: '200px',
-      render: (_: string, row: ApiUser) => (
-        <div className="flex items-center gap-3">
-          <img src={row.profileImage} alt={row.name} className="w-10 h-10 rounded-full" />
-          <span className="font-medium">{row.name}</span>
-        </div>
-      ),
-    },
-    {
-      key: 'email',
-      label: 'Email',
-      render: (value: string) => <span className="text-muted-foreground text-sm">{value}</span>,
-    },
-    {
-      key: 'phone',
-      label: 'Phone',
-      render: (value: number) => (
-        <span className="text-muted-foreground text-sm">{value || '-'}</span>
-      ),
-    },
-    {
-      key: 'createdAt',
-      label: 'Created',
-      render: (value: string) => (
-        <span className="text-muted-foreground text-sm">
-          {new Date(value).toLocaleDateString()}
-        </span>
-      ),
-    },
+  const { data, isLoading } = useQuery<UserResponse, Error>({
+    queryKey: ['admin-users', pageIndex, pageSize, search, status],
+    queryFn: () => AdminUserService.getUsers(pageIndex + 1, pageSize, search, status),
+    placeholderData: prev => prev,
+  });
 
-    {
-      key: 'isBlocked',
-      label: 'Status',
-      render: (value: boolean) => {
-        return (
-          <span className={`text-xs font-medium px-3 py-1.5 rounded-full`}>
-            {value ? 'Blocked' : 'Active'}
-          </span>
-        );
-      },
+  const toggleStatusMutation = useMutation<void, Error, string>({
+    mutationFn: id => AdminUserService.toggleStatus(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      setModalOpen(false);
     },
-    {
-      key: 'id',
-      label: 'Action',
-      render: () => (
-        <div className="flex items-center gap-2">
-          <Button
-            variant="blue"
-            className="text-xs py-1 px-3"
-            iconLeft={<Eye className="w-3 h-3" />}
-          >
-            View
-          </Button>
-          <button className="p-2 hover:bg-muted rounded-lg transition-colors">
-            <MoreVertical className="w-4 h-4 text-muted-foreground" />
-          </button>
-        </div>
-      ),
-    },
-  ];
+  });
+
+  const openStatusModal = (user: UserRow) => {
+    setSelectedUser(user);
+    setModalOpen(true);
+  };
+
+  const openView = (id: string) => {
+    console.log('open User view,', id);
+  };
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        <PageHeader title="User Management" description="Manage your platform users" />
-        <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-            <div className="lg:col-span-2">
-              <Input
-                type="text"
-                placeholder="Search by name or email..."
-                value={searchInput}
-                onChange={e => {
-                  setSearchInput(e.target.value);
-                  setCurrentPage(1);
-                }}
-                leftIcon={<Search className="w-4 h-4" />}
-              />
-            </div>
-
-            <Select
-              value={statusFilter}
-              onChange={v => {
-                setStatusFilter(v);
-                setCurrentPage(1);
+    <div className="bg-baground py-6 px-0 lg:p-6">
+      <PageHeader title="User Management" description="Manage your platform users" />
+      <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
+        <div className="grid sm:grid-cols-12 gap-4">
+          <div className="sm:col-span-7">
+            <Input
+              placeholder="Search by name or email..."
+              value={search}
+              onChange={e => {
+                setPageIndex(0);
+                setSearch(e.target.value);
               }}
-              placeholder="All Status"
+              leftIcon={<Search />}
+            />
+          </div>
+          <div className="sm:col-span-5">
+            <Select
+              value={status}
+              onChange={v => {
+                setPageIndex(0);
+                setStatus(v);
+              }}
+              leftIcon={<Filter />}
               options={[
                 { label: 'All Status', value: 'all' },
                 { label: 'Active', value: 'active' },
                 { label: 'Blocked', value: 'blocked' },
               ]}
-              leftIcon={<Filter className="w-4 h-4" />}
             />
           </div>
         </div>
-
-        <Table
-          columns={coloums}
-          data={data?.users || []}
-          isLoading={loading}
-          error={error}
-          pagination={{
-            currentPage: data?.total || currentPage,
-            totalItems: data?.total || 0,
-            totalPages: Math.ceil((data?.total || 0) / 5),
-            itemsPerPage: 5,
-            onPageChange: setCurrentPage,
-          }}
-          onRowClick={row => {
-            console.log('userclikc', row);
-          }}
-          emptyMessage="No User Found"
-        />
       </div>
+      <Table
+        columns={userColumns(openStatusModal, openView)}
+        data={data?.users ?? []}
+        total={data?.total}
+        pageIndex={pageIndex}
+        pageSize={pageSize}
+        pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
+        manual={{
+          serverSidePagination: true,
+        }}
+        isLoading={isLoading}
+        onPageChange={p => setPageIndex(p)}
+        onPageSizeChange={s => {
+          setPageSize(s);
+          setPageIndex(0);
+        }}
+      />
+
+      {/* <StatusChangeModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        loading={toggleStatusMutation.isPending}
+        name={selectedUser?.name}
+        fromStatus={selectedUser?.isBlocked ? 'Blocked' : 'Active'}
+        toStatus={selectedUser?.isBlocked ? 'Active' : 'Blocked'}
+        onConfirm={() => {
+          if (!selectedUser) {
+            return;
+          }
+          toggleStatusMutation.mutate(selectedUser._id);
+        }}
+      /> */}
     </div>
   );
 }
 
-export default UserMangementPage;
+///////////////////////////
+
+// import { useState } from "react";
+// import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+
+// import AdminUserService from "@/services/admin/userManagement.service";
+// import { userColumns } from "../columns";
+
+// import type { BackendUserResponse, UserRow } from "@/types/admin/user";
+
+// import DataTable from "@/components/data-table/DataTable";
+// import StatusChangeModal from "@/components/molecules/StatusChangeModal";
+
+// import Select from "@/components/atoms/Select";
+// import Input from "@/components/atoms/Input";
+// import { Search, Filter } from "lucide-react";
+// import PageHeader from "@/components/molecules/PageHeader";
+
+// export default function UserManagementPage() {
+//   const [pageIndex, setPageIndex] = useState(0);
+//   const [pageSize, setPageSize] = useState(5);
+//   const [search, setSearch] = useState("");
+//   const [status, setStatus] = useState("all");
+//   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
+//   const [modalOpen, setModalOpen] = useState(false);
+
+//   const queryClient = useQueryClient();
+
+//   // ✅ Correct React Query v5 syntax
+//   const { data, isLoading } = useQuery<BackendUserResponse, Error>({
+//     queryKey: ["admin-users", pageIndex, pageSize, search, status],
+//     queryFn: () =>
+//       AdminUserService.getUsers(
+//         pageIndex + 1,
+//         pageSize,
+//         search,
+//         status
+//       ),
+//     placeholderData: (prev) => prev,
+//   });
+
+//   // Mutation (v5 uses isPending instead of isLoading)
+//   const toggleStatusMutation = useMutation<void, Error, string>({
+//     mutationFn: (id) => AdminUserService.toggleStatus(id),
+//     onSuccess: () => {
+//       queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+//       setModalOpen(false);
+//     },
+//   });
+
+//   const openStatusModal = (user: UserRow) => {
+//     setSelectedUser(user);
+//     setModalOpen(true);
+//   };
+
+//   const openView = (id: string) => {
+//     console.log("Open user view:", id);
+//   };
+
+//   return (
+//     <div className="p-6 space-y-6">
+//       {/* Filters */}
+//       <div className="bg-card border rounded-xl p-6">
+//         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+//           <Input
+//             placeholder="Search by name/email..."
+//             value={search}
+//             onChange={(e) => {
+//               setPageIndex(0);
+//               setSearch(e.target.value);
+//             }}
+//             leftIcon={<Search />}
+//           />
+
+//           <Select
+//             value={status}
+//             onChange={(v) => {
+//               setPageIndex(0);
+//               setStatus(v);
+//             }}
+//             leftIcon={<Filter />}
+//             options={[
+//               { label: "All Status", value: "all" },
+//               { label: "Active", value: "active" },
+//               { label: "Blocked", value: "blocked" },
+//             ]}
+//           />
+//         </div>
+//       </div>
+
+//       {/* Table */}
+//       <DataTable
+//         columns={userColumns(openStatusModal, openView)}
+//         data={data?.users ?? []}
+//         pageIndex={pageIndex}
+//         pageSize={pageSize}
+//         pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
+//         manual={{
+//           serverSidePagination: true,
+//         }}
+//         isLoading={isLoading}
+//         onPageChange={(p) => setPageIndex(p)}
+//         onPageSizeChange={(s) => {
+//           setPageSize(s);
+//           setPageIndex(0);
+//         }}
+//       />
+
+//       {/* Status Modal */}
+//       <StatusChangeModal
+//         open={modalOpen}
+//         onClose={() => setModalOpen(false)}
+//         loading={toggleStatusMutation.isPending}
+//         name={selectedUser?.name}
+//         fromStatus={selectedUser?.isBlocked ? "Blocked" : "Active"}
+//         toStatus={selectedUser?.isBlocked ? "Active" : "Blocked"}
+//         onConfirm={() => {
+//           if (!selectedUser) return;
+//           toggleStatusMutation.mutate(selectedUser._id);
+//         }}
+//       />
+//     </div>
+//   );
+// }
