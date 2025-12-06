@@ -1,5 +1,5 @@
 import { Camera } from 'lucide-react';
-import { useRef } from 'react';
+import React, { useRef } from 'react';
 
 interface Props {
   src: string | undefined;

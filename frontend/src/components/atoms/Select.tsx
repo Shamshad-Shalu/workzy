@@ -36,7 +36,7 @@ export default function Select({ value, onChange, placeholder, error, options, l
         <ShadSelect value={value} onValueChange={onChange}>
           <SelectTrigger
             className={cn(
-              'w-full py-3 px-3 rounded-lg bg-background border border-input text-foreground',
+              'w-full py-5 px-3 rounded-lg bg-background border border-input text-foreground',
               'transition-all outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0',
               leftIcon && 'pl-10',
               error && 'border-destructive bg-destructive/10'

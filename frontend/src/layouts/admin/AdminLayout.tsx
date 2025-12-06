@@ -1,6 +1,13 @@
 import { Outlet } from 'react-router-dom';
 import { Topbar } from '@/components/organisms/Topbar';
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { AdminSidebar } from './AdminSidebar';
 
 export function AdminLayout() {
@@ -12,8 +19,11 @@ export function AdminLayout() {
 
       <Sheet>
         <SheetTrigger id="drawer-trigger" className="hidden" />
-
         <SheetContent side="left" className="p-0 w-72">
+          <VisuallyHidden>
+            <SheetTitle>Admin Sidebar</SheetTitle>
+            <SheetDescription>Mobile navigation drawer</SheetDescription>
+          </VisuallyHidden>
           <AdminSidebar mobile />
         </SheetContent>
       </Sheet>

@@ -52,7 +52,7 @@ export function BaseSidebar({
   return (
     <aside
       className={cn(
-        'h-screen flex flex-col bg-background border-r shadow-sm overflow-hidden no-scrollbar',
+        'h-screen flex flex-col bg-card border-r shadow-sm overflow-hidden no-scrollbar',
         !initialRender && 'transition-[width] duration-300 ease-in-out',
         collapsed ? 'w-20' : 'w-72',
         mobile && 'w-72'
