@@ -4,6 +4,7 @@ import ProfileImage from '@/components/molecules/ProfileImage';
 import type { UserRow } from '@/types/admin/user';
 import type { TableColumnDef } from '@/types/table.types';
 import { Eye } from 'lucide-react';
+import dayjs from 'dayjs';
 
 const userColumns = (
   onToggleStatus: (user: UserRow) => void,
@@ -17,8 +18,8 @@ const userColumns = (
       return <span className="text-muted-foreground">{pageIndex * pageSize + row.index + 1}</span>;
     },
     hideOnSmall: true,
-    width: '60px',
-    minWidth: '50px',
+    width: '40px',
+    minWidth: '30px',
     maxWidth: '80px',
   },
   {
@@ -38,6 +39,7 @@ const userColumns = (
     mobileOrder: 1,
     mobileLabel: '',
     minWidth: '200px',
+    maxWidth: '250px',
   },
   {
     id: 'phone',
@@ -86,14 +88,14 @@ const userColumns = (
     header: 'Joined',
     accessorKey: 'createdAt',
     cell: ({ row }) => {
-      const date = new Date(row.original.createdAt);
-      return <span className="text-muted-foreground">{date.toLocaleDateString()}</span>;
+      const date = row.original.createdAt;
+      return <span className="text-muted-foreground">{dayjs(date).format('YYYY-MM-DD')}</span>;
     },
     hideOnSmall: true,
     showInMobileHeader: false,
     mobileOrder: 5,
     mobileLabel: 'Joined Date',
-    width: '120px',
+    width: '170px',
   },
   {
     id: 'actions',

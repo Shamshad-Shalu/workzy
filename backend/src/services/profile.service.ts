@@ -95,7 +95,6 @@ export class ProfileService implements IProfileService {
       await this._userRepository.updateOne({ _id: user.id }, { $set: { phone: value } });
     }
     await redisClient.del(`otp:${value}`);
-
     return true;
   }
 

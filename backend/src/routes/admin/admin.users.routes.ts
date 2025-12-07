@@ -8,5 +8,6 @@ const router = Router();
 const adminController = container.get<IAdminController>(TYPES.AdminController);
 
 router.get("/", adminController.getUsers);
+router.patch("/toggle/:userId", adminController.toggleStatus);
 
 export default router;

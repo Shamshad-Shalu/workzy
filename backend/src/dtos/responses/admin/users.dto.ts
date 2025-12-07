@@ -28,7 +28,7 @@ export class UsersResponseDTO {
 
   @IsNotEmpty()
   @IsString()
-  createdAt!: string;
+  createdAt!: Date;
 
   static async fromEntity(entity: IUser, defaultSignedUrl: string): Promise<UsersResponseDTO> {
     const dto = new UsersResponseDTO();
@@ -39,8 +39,7 @@ export class UsersResponseDTO {
     dto.isPremium = entity.isPremium;
     dto.isBlocked = entity.isBlocked;
     dto.phone = entity.phone || "-";
-    const date = new Date(entity.createdAt);
-    dto.createdAt = date.toLocaleDateString("en-GB").replace(/\//g, " - ");
+    dto.createdAt = entity.createdAt;
 
     const image = entity.profileImage;
 

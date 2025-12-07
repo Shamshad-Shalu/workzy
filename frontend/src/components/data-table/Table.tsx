@@ -92,14 +92,12 @@ export default function Table({
     if (column.width) {
       styles.width = typeof column.width === 'number' ? `${column.width}px` : column.width;
     }
-    if (column.minWidth) {
-    {styles.minWidth =
+    if (column.minWidth)
+      styles.minWidth =
         typeof column.minWidth === 'number' ? `${column.minWidth}px` : column.minWidth;
-    }
-    if (column.maxWidth) {
-    {styles.maxWidth =
+    if (column.maxWidth)
+      styles.maxWidth =
         typeof column.maxWidth === 'number' ? `${column.maxWidth}px` : column.maxWidth;
-    }
 
     return styles;
   };
@@ -108,7 +106,7 @@ export default function Table({
     return (
       <div>
         {isLoading ? (
-          <DataTableSkeletonRow isSmallScreen={false} />
+          <DataTableSkeletonRow isSmallScreen={true} />
         ) : data.length === 0 ? (
           <div className="bg-card border rounded-lg p-8 text-center text-muted-foreground">
             No results found

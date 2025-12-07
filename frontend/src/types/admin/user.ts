@@ -9,12 +9,6 @@ export interface UserRow {
   createdAt: string;
 }
 
-export interface BackendUserResponse {
-  users: UserRow[];
-  total: number;
-  currentPage: number;
-}
-
 export interface UserResponse {
   users: UserRow[];
   total: number;

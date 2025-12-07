@@ -24,15 +24,11 @@ export const DataTableSkeletonRow: React.FC<SkeletonRowProps> = ({
     );
   }
 
-  return (
-    <>
-      {Array.from({ length: rowCount }).map((_, i) => (
-        <tr key={i} className="border-t hover:bg-secondary/50 transition-colors">
-          <td colSpan={100} className="px-6 py-6">
-            <Skeleton className={cn('w-full h-8 rounded-full animate-skeleton-sweep')} />
-          </td>
-        </tr>
-      ))}
-    </>
-  );
+  return Array.from({ length: rowCount }).map((_, i) => (
+    <tr key={i} className="border-t hover:bg-secondary/50 transition-colors">
+      <td colSpan={100} className="px-6 py-6">
+        <Skeleton className={cn('w-full h-8 rounded-full animate-skeleton-sweep')} />
+      </td>
+    </tr>
+  ));
 };

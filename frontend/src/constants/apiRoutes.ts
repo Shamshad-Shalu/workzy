@@ -27,5 +27,5 @@ export const PROFILE_ROUTES = {
 const ADMIN_ROUTE = '/admin';
 export const ADMIN_ROUTES = {
   GETUSER: `${ADMIN_ROUTE}/users`,
-  TOGGLESTATUS: `${ADMIN_ROUTE}/user/toggle`,
+  TOGGLESTATUS: `${ADMIN_ROUTE}/users/toggle`,
 };
