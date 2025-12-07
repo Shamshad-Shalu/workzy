@@ -5,9 +5,9 @@ export interface TableColumnMeta {
   mobileOrder?: number;
   mobileLabel?: string;
   showInMobileHeader?: boolean;
-  width?: string | number;
-  minWidth?: string | number;
-  maxWidth?: string | number;
+  width?: number;
+  minWidth?: number;
+  maxWidth?: number;
 }
 
 export type TableColumnDef<T> = ColumnDef<T, any> & TableColumnMeta;

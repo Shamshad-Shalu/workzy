@@ -1,4 +1,3 @@
-import type { UserRow } from '@/types/admin/user';
 import type { TableColumnDef } from '@/types/table.types';
 import {
   useReactTable,
@@ -12,9 +11,9 @@ import { DataTablePagination } from './DataTablePagination';
 import DataTableMobileCard from './DataTableMobileCard';
 import { DataTableSkeletonRow } from './TableSkeletonRow';
 
-interface TableProps {
-  columns: TableColumnDef<UserRow>[];
-  data: UserRow[];
+interface TableProps<TData> {
+  columns: TableColumnDef<TData>[];
+  data: TData[];
   pageIndex: number;
   total?: number;
   pageSize: number;
@@ -30,7 +29,7 @@ interface TableProps {
   onSortChange?: (next: SortingState) => void;
 }
 
-export default function Table({
+export default function Table<TData extends { _id: string }>({
   columns,
   data,
   pageIndex,
@@ -42,7 +41,7 @@ export default function Table({
   onPageChange,
   onPageSizeChange,
   onSortChange,
-}: TableProps) {
+}: TableProps<TData>) {
   const [isSmallScreen, setIsSmallScreen] = useState<boolean>(
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
   );
@@ -87,17 +86,18 @@ export default function Table({
     },
   });
 
-  const getColumnWidth = (column: TableColumnDef<UserRow>) => {
+  const getColumnWidth = (column: TableColumnDef<TData>) => {
     const styles: React.CSSProperties = {};
+
     if (column.width) {
-      styles.width = typeof column.width === 'number' ? `${column.width}px` : column.width;
+      styles.width = `${column.width}px`;
     }
-    if (column.minWidth)
-      styles.minWidth =
-        typeof column.minWidth === 'number' ? `${column.minWidth}px` : column.minWidth;
-    if (column.maxWidth)
-      styles.maxWidth =
-        typeof column.maxWidth === 'number' ? `${column.maxWidth}px` : column.maxWidth;
+    if (column.minWidth) {
+      styles.minWidth = `${column.minWidth}px`;
+    }
+    if (column.maxWidth) {
+      styles.maxWidth = `${column.maxWidth}px`;
+    }
 
     return styles;
   };

@@ -1,16 +1,18 @@
-import type { UserRow } from '@/types/admin/user';
 import type { TableColumnDef } from '@/types/table.types';
 import { flexRender } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-interface Props {
-  item: UserRow;
-  columns: TableColumnDef<UserRow>[];
+interface Props<TData extends { _id: string }> {
+  item: TData;
+  columns: TableColumnDef<TData>[];
   index?: number;
 }
-
-export default function DataTableMobileCard({ item, columns, index }: Props) {
+export default function DataTableMobileCard<TData extends { _id: string }>({
+  item,
+  columns,
+  index,
+}: Props<TData>) {
   const [open, setOpen] = useState(false);
   const baseColumns = columns.filter(
     col => col.mobileOrder !== undefined || col.showInMobileHeader === true
@@ -32,19 +34,23 @@ export default function DataTableMobileCard({ item, columns, index }: Props) {
   const detailActions = detailColumns.find(col => col.id === 'actions');
   const detailInfo = detailColumns.filter(col => col.id !== detailActions?.id);
 
-  const renderColumnContent = (column: TableColumnDef<UserRow>) => {
+  const renderColumnContent = (column: TableColumnDef<TData>) => {
     if (column.cell) {
       const context = {
         row: {
           original: item,
           index: index || 0,
           id: item._id,
-          getValue: (key: string) => item[key as keyof UserRow],
-        },
+          getIsSelected: () => false,
+          getIsExpanded: () => false,
+          getCanExpand: () => false,
+          getVisibleCells: () => [],
+          getValue: (key: string) => item[key as keyof TData],
+        } as any,
         column: {
           id: column.id,
           columnDef: column,
-        },
+        } as any,
         table: {
           getState: () => ({
             pagination: { pageIndex: 0, pageSize: 10 },
@@ -53,14 +59,14 @@ export default function DataTableMobileCard({ item, columns, index }: Props) {
         cell: {} as any,
         getValue: () => {
           const col = column as any;
-          return col.accessorKey ? item[col.accessorKey as keyof UserRow] : undefined;
+          return col.accessorKey ? item[col.accessorKey as keyof TData] : undefined;
         },
       };
       return flexRender(column.cell, context as any);
     }
     const col = column as any;
     if (col.accessorKey) {
-      const value = item[col.accessorKey as keyof UserRow];
+      const value = item[col.accessorKey as keyof TData];
       return value !== undefined && value !== null ? String(value) : '-';
     }
     return '-';

@@ -2,15 +2,15 @@ import Select from '@/components/atoms/Select';
 import Table from '@/components/data-table/Table';
 import PageHeader from '@/components/molecules/PageHeader';
 import type { UserResponse, UserRow } from '@/types/admin/user';
-import { Filter, Search } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { useState } from 'react';
 import userColumns from '../components/columns';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import AdminUserService from '@/services/admin/userManagement.service';
 import { AppModal } from '@/components/molecules/AppModal';
-import { toast } from 'sonner';
-import { handleApiError } from '@/utils/handleApiError';
 import SearchInput from '@/components/molecules/SearchInput';
+import { useToggleStatus } from '../../hooks/useUserToggleStatus';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserManagementPage() {
   const [pageIndex, setPageIndex] = useState(0);
@@ -19,8 +19,7 @@ export default function UserManagementPage() {
   const [status, setStatus] = useState('all');
   const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-
-  const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery<UserResponse, Error>({
     queryKey: ['admin-users', pageIndex, pageSize, search, status],
@@ -28,17 +27,7 @@ export default function UserManagementPage() {
     placeholderData: prev => prev,
   });
 
-  const toggleStatusMutation = useMutation<{ message: string }, Error, string>({
-    mutationFn: id => AdminUserService.toggleStatus(id),
-    onSuccess: data => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ['admin-users'] });
-      setModalOpen(false);
-    },
-    onError: error => {
-      toast.error(handleApiError(error));
-    },
-  });
+  const toggleStatusMutation = useToggleStatus(() => setModalOpen(false));
 
   const openStatusModal = (user: UserRow) => {
     setSelectedUser(user);
@@ -46,6 +35,7 @@ export default function UserManagementPage() {
   };
 
   const openView = (id: string) => {
+    navigate(id);
     console.log('open User view,', id);
   };
 
@@ -62,7 +52,6 @@ export default function UserManagementPage() {
                 setPageIndex(0);
                 setSearch(v);
               }}
-              leftIcon={<Search />}
             />
           </div>
           <div className="sm:col-span-5">

@@ -18,9 +18,9 @@ const userColumns = (
       return <span className="text-muted-foreground">{pageIndex * pageSize + row.index + 1}</span>;
     },
     hideOnSmall: true,
-    width: '40px',
-    minWidth: '30px',
-    maxWidth: '80px',
+    width: 40,
+    minWidth: 30,
+    maxWidth: 80,
   },
   {
     id: 'user',
@@ -38,8 +38,8 @@ const userColumns = (
     showInMobileHeader: true,
     mobileOrder: 1,
     mobileLabel: '',
-    minWidth: '200px',
-    maxWidth: '250px',
+    minWidth: 200,
+    maxWidth: 250,
   },
   {
     id: 'phone',
@@ -50,7 +50,7 @@ const userColumns = (
     showInMobileHeader: false,
     mobileOrder: 3,
     mobileLabel: 'Phone',
-    width: '150px',
+    width: 150,
   },
   {
     id: 'premium',
@@ -66,7 +66,7 @@ const userColumns = (
     showInMobileHeader: false,
     mobileOrder: 4,
     mobileLabel: 'Account Type',
-    width: '120px',
+    width: 120,
   },
   {
     id: 'status',
@@ -81,7 +81,7 @@ const userColumns = (
     showInMobileHeader: true,
     mobileOrder: 2,
     mobileLabel: 'Status',
-    width: '120px',
+    width: 120,
   },
   {
     id: 'joinedDate',
@@ -95,7 +95,7 @@ const userColumns = (
     showInMobileHeader: false,
     mobileOrder: 5,
     mobileLabel: 'Joined Date',
-    width: '170px',
+    width: 170,
   },
   {
     id: 'actions',
@@ -117,8 +117,8 @@ const userColumns = (
     ),
     showInMobileHeader: false,
     mobileOrder: 6,
-    width: '200px',
-    minWidth: '180px',
+    width: 200,
+    minWidth: 180,
   },
 ];
 
