@@ -1,4 +1,4 @@
-import { IAvailabilitySlots, IWorker } from "@/types/worker";
+import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 import mongoose, { Schema } from "mongoose";
 
 const AvailabilitySchema = new Schema<IAvailabilitySlots>(
@@ -10,6 +10,16 @@ const AvailabilitySchema = new Schema<IAvailabilitySlots>(
     friday: [{ startTime: String, endTime: String }],
     saturday: [{ startTime: String, endTime: String }],
     sunday: [{ startTime: String, endTime: String }],
+  },
+  { _id: false }
+);
+
+const DocumentSchema = new Schema<IDocument>(
+  {
+    type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
+    url: { type: String, required: true },
+    status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
+    rejectReason: { type: String },
   },
   { _id: false }
 );
@@ -26,24 +36,20 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: String,
       required: true,
     },
-    displayImage: {
+    tagline: { type: String },
+    about: { type: String },
+    coverImage: {
       type: String,
-      default: "",
     },
-    rate: {
+    defaultRate: {
       amount: {
         type: Number,
-        required: true,
       },
       type: {
         type: String,
         enum: ["hourly", "fixed"],
         default: "fixed",
       },
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
     },
     skills: {
       type: [String],
@@ -62,7 +68,7 @@ const workerSchema: Schema = new Schema<IWorker>(
       },
     },
     documents: {
-      type: [String],
+      type: [DocumentSchema],
       default: [],
     },
   },
