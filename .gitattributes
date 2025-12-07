@@ -1,4 +1,4 @@
 frontend/index.html linguist-detectable=false
-frontend/index.css linguist-detectable=false
+**/index.css linguist-detectable=false
 **/*.config.js linguist-detectable=false
 **/*.config.mjs linguist-detectable=false
