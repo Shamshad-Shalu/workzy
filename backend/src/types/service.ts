@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-export interface IService extends Document {
+export interface IService extends Document<string> {
   name: string;
   description?: string;
   iconUrl?: string;
@@ -8,4 +8,5 @@ export interface IService extends Document {
   parentId?: mongoose.Types.ObjectId | null;
   platformFee: number;
   isAvailable: boolean;
+  createdAt: Date;
 }

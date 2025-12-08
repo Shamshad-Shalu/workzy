@@ -1,7 +1,7 @@
 import { IService } from "@/types/service";
 import mongoose, { Schema } from "mongoose";
 
-const ServiceSchema = new Schema<IService>(
+const ServiceSchema: Schema<IService> = new Schema(
   {
     name: { type: String, required: true, unique: true, trim: true },
     description: { type: String },
@@ -14,4 +14,5 @@ const ServiceSchema = new Schema<IService>(
   { timestamps: true }
 );
 
-export default mongoose.model<IService>("Services", ServiceSchema);
+const Services = mongoose.model<IService>("Services", ServiceSchema);
+export default Services;

@@ -24,6 +24,12 @@ import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ProfileService } from "@/services/profile.service";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { AdminController } from "@/controllers/admin/admin.controller";
+import { IAdminServiceController } from "@/core/interfaces/controllers/admin/IAdminServiceController";
+import { AdminServiceController } from "@/controllers/admin/adminService.controller";
+import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
+import { ServiceManagementService } from "@/services/admin/serviceManagement.service";
+import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
+import { ServiceRepository } from "@/repositories/service.repository";
 
 const container = new Container();
 
@@ -44,5 +50,11 @@ container.bind<IProfileController>(TYPES.ProfileController).to(ProfileController
 container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
 
 container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
+
+container.bind<IAdminServiceController>(TYPES.adminServiceController).to(AdminServiceController);
+container
+  .bind<IServiceManagementService>(TYPES.ServiceManagementService)
+  .to(ServiceManagementService);
+container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
 
 export { container };

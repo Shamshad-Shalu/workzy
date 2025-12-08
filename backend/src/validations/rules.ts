@@ -8,7 +8,7 @@ export const PasswordRule = () =>
 
 export const NameRule = () =>
   Matches(NAME_REGEX, {
-    message: "Name must be 3–25 characters and contain only letters",
+    message: "Name must be 3–30 characters and contain only letters",
   });
 
 export const PhoneRule = () =>
