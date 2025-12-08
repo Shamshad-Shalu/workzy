@@ -22,6 +22,10 @@ export default function SearchInput({
   }, [value]);
 
   useEffect(() => {
+    if (inputValue === value) {
+      return;
+    }
+
     const handler = setTimeout(() => {
       onChange(inputValue);
     }, debounce);
@@ -29,7 +33,7 @@ export default function SearchInput({
     return () => {
       clearTimeout(handler);
     };
-  }, [inputValue, debounce, onChange]);
+  }, [inputValue, debounce]);
 
   return (
     <Input

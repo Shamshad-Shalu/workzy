@@ -14,7 +14,6 @@ import redisClient from "@/config/redisClient";
 import validator from "validator";
 import logger from "@/config/logger";
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
-import { IUser } from "@/types/user";
 import { UpdateProfilePayload } from "@/core/types/profilePayload";
 
 @injectable()
@@ -30,9 +29,9 @@ export class ProfileService implements IProfileService {
       const oldImage = user.profileImage.split(".amazonaws.com/")[1];
       if (oldImage) await deleteFromS3(oldImage);
     }
-    const newImage = await uploadFileToS3(file, "profile");
+    const newImage = await uploadFileToS3(file, "private/user/profiles");
     const key = newImage.split(".amazonaws.com/")[1];
-    user.profileImage = newImage;
+    user.profileImage = key;
     await user.save();
 
     return await generateSignedUrl(key);

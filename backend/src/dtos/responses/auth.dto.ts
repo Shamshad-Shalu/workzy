@@ -57,13 +57,12 @@ export class LoginResponseDTO {
 
     const image = entity.profileImage;
 
-    if (image && image.includes("amazonaws.com")) {
-      const key = image.split(".amazonaws.com/")[1];
-      dto.profileImage = await generateSignedUrl(key);
-    } else if (image && image.startsWith("http")) {
+    if (!image) {
+      dto.profileImage = DEFAULT_IMAGE_URL;
+    } else if (image?.startsWith("private/user")) {
+      dto.profileImage = await generateSignedUrl(image);
+    } else if (image?.startsWith("http")) {
       dto.profileImage = image;
-    } else {
-      dto.profileImage = await generateSignedUrl(DEFAULT_IMAGE_URL);
     }
 
     return dto;

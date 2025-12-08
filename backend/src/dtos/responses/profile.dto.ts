@@ -26,11 +26,12 @@ export class UserProfileResponseDTO {
 
     const img = user.profileImage;
 
-    if (img && img.includes("amazonaws.com")) {
-      const key = img.split(".amazonaws.com/")[1];
-      dto.profileImage = await generateSignedUrl(key);
-    } else {
-      dto.profileImage = await generateSignedUrl(DEFAULT_IMAGE_URL);
+    if (!img) {
+      dto.profileImage = DEFAULT_IMAGE_URL;
+    } else if (img?.startsWith("private/user")) {
+      dto.profileImage = await generateSignedUrl(img);
+    } else if (img?.startsWith("http")) {
+      dto.profileImage = img;
     }
 
     return dto;

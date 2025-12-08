@@ -1,5 +1,5 @@
 import { s3 } from "@/config/s3";
-import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
+import { AWS_REGION, AWS_S3_BUCKET, AWS_S3_EXPIRY } from "@/constants";
 import { PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -36,5 +36,5 @@ export const generateSignedUrl = async (key: string) => {
     Bucket: AWS_S3_BUCKET,
     Key: key,
   });
-  return await getSignedUrl(s3, command, { expiresIn: 3600 });
+  return await getSignedUrl(s3, command, { expiresIn: AWS_S3_EXPIRY });
 };

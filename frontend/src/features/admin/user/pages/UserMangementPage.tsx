@@ -3,7 +3,7 @@ import Table from '@/components/data-table/Table';
 import PageHeader from '@/components/molecules/PageHeader';
 import type { UserResponse, UserRow } from '@/types/admin/user';
 import { Filter } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import userColumns from '../components/columns';
 import { useQuery } from '@tanstack/react-query';
 import AdminUserService from '@/services/admin/userManagement.service';
@@ -34,6 +34,11 @@ export default function UserManagementPage() {
     setModalOpen(true);
   };
 
+  const handleSearchChange = useCallback((v: string) => {
+    setPageIndex(0);
+    setSearch(v);
+  }, []);
+
   const openView = (id: string) => {
     navigate(id);
     console.log('open User view,', id);
@@ -48,10 +53,7 @@ export default function UserManagementPage() {
             <SearchInput
               placeholder="Search by name or email..."
               value={search}
-              onChange={v => {
-                setPageIndex(0);
-                setSearch(v);
-              }}
+              onChange={handleSearchChange}
             />
           </div>
           <div className="sm:col-span-5">
