@@ -82,6 +82,6 @@ export class AdminServiceController implements IAdminServiceController {
     const serviceId = req.params.serviceId;
     const { newStatus, message } = await this._serviceManagement.toggleServiceStatus(serviceId);
 
-    res.status(HTTPSTATUS.OK).json({ message, isAvailable:newStatus });
+    res.status(HTTPSTATUS.OK).json({ message, isAvailable: newStatus });
   });
 }

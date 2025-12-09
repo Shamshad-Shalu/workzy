@@ -110,7 +110,7 @@ export class ServiceManagementService implements IServiceManagementService {
     if (imgFile) {
       filePromises.push(
         uploadFileToS3(imgFile, "public/services/images").then((newImageUrl) => {
-          const key = service.iconUrl.split(".amazonaws.com/")[1];
+          const key = service.imageUrl.split(".amazonaws.com/")[1];
           deleteFromS3(key);
           updates.imageUrl = newImageUrl;
         })
@@ -148,6 +148,7 @@ export class ServiceManagementService implements IServiceManagementService {
     await this._serviceRepository.update(service.id, { isAvailable: newStatus });
 
     const message = newStatus ? SERVICE.UNBLOCKED : SERVICE.BLOCKED;
+    await clearRedisListCache("services:list");
 
     return { newStatus, message };
   }
