@@ -41,6 +41,6 @@ export class UserService implements IUserService {
     return this._userRepository.findById(userId);
   }
   async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
-    return this._userRepository.update(userId, userData);
+    return this._userRepository.updateUser(userId, userData);
   }
 }

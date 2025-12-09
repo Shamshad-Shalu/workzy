@@ -68,4 +68,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   async restore(id: Types.ObjectId | string): Promise<T | null> {
     return this.model.findByIdAndUpdate(id, { isActive: true }, { new: true });
   }
+  countDocuments(filter: FilterQuery<T>): Promise<number> {
+    return this.model.countDocuments(filter).exec();
+  }
 }

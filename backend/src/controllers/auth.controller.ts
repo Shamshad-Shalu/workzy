@@ -10,8 +10,8 @@ import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import logger from "@/config/logger";
-import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/cookieUtils";
-import { generateAccessToken, verifyRefreshToken } from "@/utils/jwt.util";
+import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
+import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import validator from "validator";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import redisClient from "@/config/redisClient";

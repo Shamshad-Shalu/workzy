@@ -1,6 +1,7 @@
 import { Document, ObjectId } from "mongoose";
 import { IUser } from "./user";
 
+export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
 export type RateType = "hourly" | "fixed";
 
 export interface IRate {
@@ -23,13 +24,22 @@ export interface IAvailabilitySlots {
   sunday: ITimeSlot[];
 }
 
+export interface IDocument {
+  type: "id_proof" | "license" | "certificate" | "other";
+  url: string;
+  status: "pending" | "verified" | "rejected";
+  rejectReason?: string;
+}
+
 export interface IWorker extends Document<string> {
   userId: ObjectId | IUser;
   displayName: string;
-  displayImage: string;
-  rate: IRate;
-  isVerified: boolean;
-  documents: string[];
+  tagline?: string;
+  about?: string;
+  coverImage?: string;
+  status: WorkerStatus;
+  defaultRate?: IRate;
+  documents: IDocument[];
   skills: string[];
   availability: IAvailabilitySlots;
 }

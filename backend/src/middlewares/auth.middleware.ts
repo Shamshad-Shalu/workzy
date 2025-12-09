@@ -1,6 +1,6 @@
 import logger from "@/config/logger";
 import { AUTH, HTTPSTATUS, Role } from "@/constants";
-import { verifyAccessToken, verifyRefreshToken } from "@/utils/jwt.util";
+import { verifyAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import { NextFunction, Request, Response } from "express";
 
 export const validateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
