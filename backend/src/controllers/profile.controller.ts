@@ -23,8 +23,10 @@ export class ProfileController implements IProfileController {
     if (!req.file) {
       throw new CustomError("Image not found", HTTPSTATUS.BAD_REQUEST);
     }
-    const url = await this._profileService.updateProfileImage(userId, req.file);
-    res.json({ url });
+    console.log("profielimage:", req.file);
+    res.json("success");
+    // const url = await this._profileService.updateProfileImage(userId, req.file);
+    // res.json({ url });
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {

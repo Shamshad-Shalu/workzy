@@ -18,4 +18,6 @@ export interface IBaseRepository<T> {
 
   softDelete(id: Types.ObjectId | string): Promise<T | null>;
   restore(id: Types.ObjectId | string): Promise<T | null>;
+
+  countDocuments(filter: FilterQuery<T>): Promise<number>;
 }

@@ -1,16 +1,30 @@
-export function buildServiceFilter(search?: string, status?: string, parentId?: string | null) {
-  const filter: any = {};
+import mongoose from "mongoose";
+
+interface ServiceFilterParams {
+  name?: { $regex: string; $options: string };
+  isAvailable?: boolean;
+  parentId?: string | null | mongoose.Types.ObjectId;
+}
+
+export function buildServiceFilter(
+  search?: string,
+  status?: string,
+  parentId?: string | null
+): ServiceFilterParams {
+  const query: ServiceFilterParams = {};
 
   if (search && search.trim() !== "") {
-    const re = new RegExp(search.trim(), "i");
-    filter.$or = [{ name: re }];
+    query.name = { $regex: search, $options: "i" };
   }
 
   if (status && status !== "all") {
-    if (status === "active") filter.isAvailable = true;
-    else if (status === "blocked") filter.isAvailable = false;
+    if (status === "active") query.isAvailable = true;
+    else if (status === "blocked") query.isAvailable = false;
   }
-
-  filter.parentId = parentId;
-  return filter;
+  if (parentId) {
+    query.parentId = new mongoose.Types.ObjectId(parentId);
+  } else {
+    query.parentId = null;
+  }
+  return query;
 }

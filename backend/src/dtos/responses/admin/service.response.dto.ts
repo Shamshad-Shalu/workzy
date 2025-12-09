@@ -8,17 +8,14 @@ export class ServiceResponseDTO {
   @IsString()
   name!: string;
 
-  @IsOptional()
   @IsString()
-  description?: string;
+  description!: string;
 
-  @IsOptional()
   @IsString()
-  iconUrl?: string;
+  iconUrl!: string;
 
-  @IsOptional()
   @IsString()
-  imageUrl?: string;
+  imageUrl!: string;
 
   @IsOptional()
   @IsMongoId()
@@ -38,14 +35,18 @@ export class ServiceResponseDTO {
 
     dto._id = entity._id;
     dto.name = entity.name;
-    dto.description = entity.description;
-    dto.iconUrl = entity.iconUrl;
-    dto.imageUrl = entity.imageUrl;
+    dto.description = entity.description || "";
+    dto.iconUrl = entity.iconUrl || "";
+    dto.imageUrl = entity.imageUrl || "";
     dto.parentId = entity.parentId ? entity.parentId.toString() : null;
     dto.platformFee = entity.platformFee;
     dto.isAvailable = entity.isAvailable;
     dto.createdAt = entity.createdAt;
 
     return dto;
+  }
+
+  static fromEntities(entities: IService[]): ServiceResponseDTO[] {
+    return entities.map((entity) => this.fromEntity(entity));
   }
 }

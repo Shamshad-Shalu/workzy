@@ -7,6 +7,7 @@ import { IServiceManagementService } from "@/core/interfaces/services/admin/ISer
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
 import { HTTPSTATUS } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class AdminServiceController implements IAdminServiceController {
@@ -15,11 +16,45 @@ export class AdminServiceController implements IAdminServiceController {
   ) {}
 
   createService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const newService = await this._serviceManagement.createService(req.body as ServiceRequestDTO);
-    res.status(HTTPSTATUS.OK).json({ message: SERVICE.CREATED, newService });
+    const files = req.files as {
+      iconUrl?: Express.Multer.File[];
+      imgUrl?: Express.Multer.File[];
+    };
+    const iconFile = files.iconUrl?.[0];
+    const imgFile = files.imgUrl?.[0];
+
+    if (!iconFile || !imgFile) {
+      throw new CustomError(SERVICE.MISSING_FILES, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const newService = await this._serviceManagement.createService(req.body as ServiceRequestDTO, {
+      iconFile,
+      imgFile,
+    });
+    res.status(HTTPSTATUS.CREATED).json({ message: SERVICE.CREATED, newService });
   });
 
-  getServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 5;
+    const search = (req.query.search as string) || "";
+    const status = (req.query.status as string) || "all";
+    const parentId = !req.query.parentId ? null : (req.query.parentId as string);
+
+    const { services, total } = await this._serviceManagement.getAllServices(
+      page,
+      limit,
+      search,
+      status,
+      parentId
+    );
+
+    res.status(HTTPSTATUS.OK).json({
+      services,
+      total,
+      page,
+    });
+  });
 
   updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
 
