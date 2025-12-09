@@ -4,14 +4,14 @@ import { SERVICE } from "@/constants/messages/service";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
 import { TYPES } from "@/di/types";
-import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
+import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/service.dto";
 import { ServiceResponseDTO } from "@/dtos/responses/admin/service.response.dto";
 import { IService } from "@/types/service";
 import { buildServiceFilter } from "@/utils/admin/buildServiceFilter";
 import CustomError from "@/utils/customError";
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
-import { uploadFileToS3 } from "../s3.service";
+import { deleteFromS3, uploadFileToS3 } from "../s3.service";
 import { clearRedisListCache } from "@/utils/cache.util";
 
 @injectable()
@@ -82,5 +82,57 @@ export class ServiceManagementService implements IServiceManagementService {
     await redisClient.set(cacheKey, JSON.stringify(response), { EX: REDIS_EXPIRY });
 
     return response;
+  }
+
+  async updateService(
+    serviceId: string,
+    updateData: ServiceUpdateRequestDTO,
+    iconFile?: Express.Multer.File,
+    imgFile?: Express.Multer.File
+  ): Promise<ServiceResponseDTO> {
+    const service = await this._serviceRepository.findById(serviceId);
+    if (!service) {
+      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
+    const isAlreadyExists = await this._serviceRepository.findOne({
+      name: updateData.name,
+      parentId: updateData.parentId || null,
+      _id: { $ne: serviceId },
+    });
+
+    if (isAlreadyExists) {
+      throw new CustomError(SERVICE.EXISTS, HTTPSTATUS.FORBIDDEN);
+    }
+    const updates: Partial<IService> = { ...(updateData as Partial<IService>) };
+    const filePromises: Promise<void>[] = [];
+
+    if (imgFile) {
+      filePromises.push(
+        uploadFileToS3(imgFile, "public/services/images").then((newImageUrl) => {
+          const key = service.iconUrl.split(".amazonaws.com/")[1];
+          deleteFromS3(key);
+          updates.imageUrl = newImageUrl;
+        })
+      );
+    }
+    if (iconFile) {
+      filePromises.push(
+        uploadFileToS3(iconFile, "public/services/icons").then((newIconUrl) => {
+          const key = service.iconUrl.split(".amazonaws.com/")[1];
+          deleteFromS3(key);
+          updates.iconUrl = newIconUrl;
+        })
+      );
+    }
+    await Promise.all(filePromises);
+
+    const updatedService = await this._serviceRepository.update(serviceId, updates);
+    if (!updatedService) {
+      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    await clearRedisListCache("services:list");
+
+    return ServiceResponseDTO.fromEntity(updatedService);
   }
 }

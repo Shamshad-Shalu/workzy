@@ -1,4 +1,4 @@
-import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
+import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/service.dto";
 import { ServiceResponseDTO } from "@/dtos/responses/admin/service.response.dto";
 
 export interface IServiceManagementService {
@@ -13,4 +13,11 @@ export interface IServiceManagementService {
     status: string,
     parentId: string | null
   ): Promise<{ services: ServiceResponseDTO[]; total: number }>;
+
+  updateService(
+    serviceId: string,
+    updateData: ServiceUpdateRequestDTO,
+    iconFile?: Express.Multer.File,
+    imgFile?: Express.Multer.File
+  ): Promise<ServiceResponseDTO>;
 }

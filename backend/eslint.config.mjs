@@ -14,11 +14,11 @@ export default [
     plugins: {
       prettier: eslintPluginPrettier,
     },
-    files :["**/*.ts"],
+    files: ["**/*.ts"],
     rules: {
       "prettier/prettier": "error",
       "no-console": "off",
-      "no-undef": "off", 
+      "no-undef": "off",
       eqeqeq: "error", // Enforces strict equality (=== and !==)
       curly: "error", // Enforces consistent brace style for control statements
       quotes: ["error", "single"], // Enforces single quotes for strings

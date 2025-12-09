@@ -4,7 +4,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { TYPES } from "@/di/types";
 import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
-import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
+import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/service.dto";
 import { HTTPSTATUS } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
 import CustomError from "@/utils/customError";
@@ -18,10 +18,10 @@ export class AdminServiceController implements IAdminServiceController {
   createService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const files = req.files as {
       iconUrl?: Express.Multer.File[];
-      imgUrl?: Express.Multer.File[];
+      imageUrl?: Express.Multer.File[];
     };
     const iconFile = files.iconUrl?.[0];
-    const imgFile = files.imgUrl?.[0];
+    const imgFile = files.imageUrl?.[0];
 
     if (!iconFile || !imgFile) {
       throw new CustomError(SERVICE.MISSING_FILES, HTTPSTATUS.BAD_REQUEST);
@@ -56,7 +56,27 @@ export class AdminServiceController implements IAdminServiceController {
     });
   });
 
-  updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const serviceId = req.params.serviceId;
+    const files = req.files as {
+      iconUrl?: Express.Multer.File[];
+      imageUrl?: Express.Multer.File[];
+    };
+
+    const iconFile = files.iconUrl?.[0];
+    const imgFile = files.imageUrl?.[0];
+
+    const updateData = req.body as ServiceUpdateRequestDTO;
+
+    const updatedService = await this._serviceManagement.updateService(
+      serviceId,
+      updateData,
+      iconFile,
+      imgFile
+    );
+
+    res.status(HTTPSTATUS.OK).json({ message: SERVICE.UPDATED, updatedService });
+  });
 
   deleteService = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
 }
