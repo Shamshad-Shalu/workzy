@@ -4,5 +4,5 @@ export interface IAdminServiceController {
   createService: RequestHandler;
   getServices: RequestHandler;
   updateService: RequestHandler;
-  deleteService: RequestHandler;
+  toggleStatus: RequestHandler;
 }

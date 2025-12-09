@@ -7,12 +7,13 @@ import { validateFileSize } from "@/middlewares/upload/validateFileSize";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 import { Router } from "express";
 
-const serviceRouter = Router();
+const router = Router();
 
 const adminServiceController = container.get<IAdminServiceController>(TYPES.adminServiceController);
 
-serviceRouter.get("/", adminServiceController.getServices);
-serviceRouter.post(
+router.get("/", adminServiceController.getServices);
+router.patch("/toggle-status/:serviceId", adminServiceController.toggleStatus);
+router.post(
   "/add",
   upload.fields([
     { name: "iconUrl", maxCount: 1 },
@@ -23,7 +24,7 @@ serviceRouter.post(
   adminServiceController.createService
 );
 
-serviceRouter.patch(
+router.patch(
   "/edit/:serviceId",
   upload.fields([
     { name: "iconUrl", maxCount: 1 },
@@ -34,4 +35,4 @@ serviceRouter.patch(
   adminServiceController.updateService
 );
 
-export default serviceRouter;
+export default router;

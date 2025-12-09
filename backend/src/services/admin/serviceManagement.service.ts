@@ -135,4 +135,20 @@ export class ServiceManagementService implements IServiceManagementService {
 
     return ServiceResponseDTO.fromEntity(updatedService);
   }
+
+  async toggleServiceStatus(serviceId: string): Promise<{ message: string; newStatus: boolean }> {
+    const service = await this._serviceRepository.findById(serviceId);
+
+    if (!service) {
+      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const newStatus = !service.isAvailable;
+
+    await this._serviceRepository.update(service.id, { isAvailable: newStatus });
+
+    const message = newStatus ? SERVICE.UNBLOCKED : SERVICE.BLOCKED;
+
+    return { newStatus, message };
+  }
 }

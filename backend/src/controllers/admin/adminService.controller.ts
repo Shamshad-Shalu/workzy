@@ -78,5 +78,10 @@ export class AdminServiceController implements IAdminServiceController {
     res.status(HTTPSTATUS.OK).json({ message: SERVICE.UPDATED, updatedService });
   });
 
-  deleteService = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const serviceId = req.params.serviceId;
+    const { newStatus, message } = await this._serviceManagement.toggleServiceStatus(serviceId);
+
+    res.status(HTTPSTATUS.OK).json({ message, isAvailable:newStatus });
+  });
 }
