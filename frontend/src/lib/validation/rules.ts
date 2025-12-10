@@ -4,8 +4,8 @@ export const emailRule = z.string().email('Invalid email format');
 export const nameRule = z
   .string()
   .min(3, 'Name must be at least 3 characters')
-  .max(25, 'Name cannot exceed 25 characters')
-  .regex(/^[A-Za-z]+$/, 'Name must contain only letters');
+  .max(30, 'Name cannot exceed 30 characters')
+  .regex(/^[A-Za-z ]+$/, 'Name must contain only letters and spaces');
 
 export const passwordRule = z
   .string()

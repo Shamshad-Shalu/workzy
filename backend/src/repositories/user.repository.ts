@@ -1,4 +1,3 @@
-import { USER } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import User from "@/models/user.model";
@@ -28,14 +27,6 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
 
   async findByGoogleId(googleId: string): Promise<IUser | null> {
     return await User.findOne({ googleId });
-  }
-  async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
-    const updatedUser = this.model.findByIdAndUpdate(userId, userData, { new: true });
-
-    if (!updatedUser) {
-      throw new Error(USER.NOT_FOUND);
-    }
-    return updatedUser;
   }
 
   async getAllUsers(

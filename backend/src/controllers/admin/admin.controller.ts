@@ -4,9 +4,7 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { TYPES } from "@/di/types";
 import { IUserService } from "@/core/interfaces/services/IUserService";
-import { HTTPSTATUS, REDIS_EXPIRY, ROLE, USER } from "@/constants";
-import CustomError from "@/utils/customError";
-import redisClient from "@/config/redisClient";
+import { ROLE } from "@/constants";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -39,20 +37,8 @@ export class AdminController implements IAdminController {
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
 
-    const user = await this._userService.getUserById(userId);
-    if (!user) {
-      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-    }
-    const newStatus = !user.isBlocked;
+    const message = await this._userService.toggleUserStatus(userId);
 
-    await this._userService.updateUser(userId, { isBlocked: newStatus });
-
-    if (newStatus) {
-      await redisClient.set(`blocked_user:${user}`, 1, { EX: REDIS_EXPIRY });
-      res.status(HTTPSTATUS.OK).json({ message: "User blocked successfully" });
-    } else {
-      await redisClient.del(`blocked_user:${userId}`);
-      res.status(HTTPSTATUS.OK).json({ message: "User unblocked successfully" });
-    }
+    res.status(200).json({ message });
   });
 }

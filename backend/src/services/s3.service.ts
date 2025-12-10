@@ -22,7 +22,8 @@ export const uploadFileToS3 = async (
   return `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${Key}`;
 };
 
-export const deleteFromS3 = async (key: string) => {
+export const deleteFromS3 = async (fileUrl: string) => {
+  const key = fileUrl.split(".amazonaws.com/")[1];
   await s3.send(
     new DeleteObjectCommand({
       Bucket: AWS_S3_BUCKET,
@@ -31,7 +32,8 @@ export const deleteFromS3 = async (key: string) => {
   );
 };
 
-export const generateSignedUrl = async (key: string) => {
+export const generateSignedUrl = async (fileUrl: string) => {
+  const key = fileUrl.split(".amazonaws.com/")[1];
   const command = new GetObjectCommand({
     Bucket: AWS_S3_BUCKET,
     Key: key,

@@ -5,7 +5,6 @@ export interface IUserRepository extends BaseRepository<IUser> {
   findByEmail(email: string): Promise<IUser | null>;
   getUserByRoleAndId(role: string, id: string): Promise<IUser | null>;
   findByGoogleId(googleId: string): Promise<IUser | null>;
-  updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null>;
   getAllUsers(
     skip: number,
     limit: number,

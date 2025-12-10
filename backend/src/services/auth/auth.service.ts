@@ -6,12 +6,12 @@ import { inject, injectable } from "inversify";
 import { compare, hash } from "bcryptjs";
 import redisClient from "@/config/redisClient";
 import { plainToInstance } from "class-transformer";
-import { AUTH, EMAIL, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
+import { AUTH, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
 import { IUser } from "@/types/user";
 import CustomError from "@/utils/customError";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
-import { getUserOrThrow } from "@/utils/getUserOrThrow";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class AuthService implements IAuthService {
@@ -70,7 +70,7 @@ export class AuthService implements IAuthService {
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
-    const user = await getUserOrThrow(this._userRepository, userId);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     return user.isBlocked || false;
   }
 

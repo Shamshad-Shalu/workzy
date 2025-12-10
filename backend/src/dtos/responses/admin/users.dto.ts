@@ -1,7 +1,7 @@
-import { DEFAULT_IMAGE_URL, Role } from "@/constants";
+import { DEFAULT_IMAGE_URL } from "@/constants";
 import { generateSignedUrl } from "@/services/s3.service";
 import { IUser } from "@/types/user";
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class UsersResponseDTO {
   @IsString()
@@ -44,9 +44,10 @@ export class UsersResponseDTO {
     const image = entity.profileImage;
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (image?.startsWith("private/user")) {
+    } else if (image?.includes(".amazonaws.com")) {
       dto.profileImage = await generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
+      // google user
       dto.profileImage = image;
     }
 

@@ -59,7 +59,7 @@ export class LoginResponseDTO {
 
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (image?.startsWith("private/user")) {
+    } else if (image?.includes(".amazonaws.com")) {
       dto.profileImage = await generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
       dto.profileImage = image;

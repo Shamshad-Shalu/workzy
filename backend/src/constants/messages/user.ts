@@ -8,4 +8,6 @@ export const USER = {
   BLOCKED: "This account is blocked by Admin.",
   SIGNUP_EXPIRED: "Signup session expired",
   PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
+  UNBLOCKED: "User unblocked successfully",
+  BLOCKEDSUCCESS: "User blocked successfully",
 };

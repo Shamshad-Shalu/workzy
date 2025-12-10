@@ -1,30 +1,26 @@
 import mongoose from "mongoose";
 
-interface ServiceFilterParams {
-  name?: { $regex: string; $options: string };
+export interface ServiceFilter {
+  name?: { $regex: string; $options: "i" };
   isAvailable?: boolean;
-  parentId?: string | null | mongoose.Types.ObjectId;
+  parentId?: mongoose.Types.ObjectId | null;
 }
 
 export function buildServiceFilter(
   search?: string,
   status?: string,
   parentId?: string | null
-): ServiceFilterParams {
-  const query: ServiceFilterParams = {};
+): ServiceFilter {
+  const filter: ServiceFilter = {};
 
   if (search && search.trim() !== "") {
-    query.name = { $regex: search, $options: "i" };
+    filter.name = { $regex: search, $options: "i" };
   }
 
-  if (status && status !== "all") {
-    if (status === "active") query.isAvailable = true;
-    else if (status === "blocked") query.isAvailable = false;
-  }
-  if (parentId) {
-    query.parentId = new mongoose.Types.ObjectId(parentId);
-  } else {
-    query.parentId = null;
-  }
-  return query;
+  if (status === "active") filter.isAvailable = true;
+  if (status === "blocked") filter.isAvailable = false;
+
+  filter.parentId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
+
+  return filter;
 }

@@ -201,12 +201,13 @@ export class AuthController implements IAuthController {
     if (!email) {
       throw new CustomError(AUTH.GOOGLE_NOT_PROVIDED, HTTPSTATUS.BAD_REQUEST);
     }
+    const jsonData = (googleProfile as unknown as { _json?: { picture?: string } })._json;
 
     const user = await this._authService.handleGoogleUser({
       googleId: googleProfile.id,
       email,
       name: googleProfile.displayName,
-      profile: (googleProfile as any)._json?.picture || "",
+      profile: jsonData?.picture || "",
     });
     const isBlocked = await this._authService.isUserBlocked(user._id.toString());
     if (isBlocked) {

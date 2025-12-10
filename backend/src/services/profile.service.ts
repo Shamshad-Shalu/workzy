@@ -3,10 +3,10 @@ import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { TYPES } from "@/di/types";
 import { inject, injectable } from "inversify";
 import { deleteFromS3, generateSignedUrl, uploadFileToS3 } from "./s3.service";
-import { getUserOrThrow } from "@/utils/getUserOrThrow";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS, USER } from "@/constants";
+import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
@@ -24,21 +24,19 @@ export class ProfileService implements IProfileService {
     @inject(TYPES.EmailService) private _emailService: IEmailService
   ) {}
   async updateProfileImage(userId: string, file: Express.Multer.File): Promise<string> {
-    const user = await getUserOrThrow(this._userRepository, userId);
-    if (user.profileImage) {
-      const oldImage = user.profileImage.split(".amazonaws.com/")[1];
-      if (oldImage) await deleteFromS3(oldImage);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
+    if (user.profileImage?.includes(".amazonaws.com/")) {
+      await deleteFromS3(user.profileImage);
     }
     const newImage = await uploadFileToS3(file, "private/user/profiles");
-    const key = newImage.split(".amazonaws.com/")[1];
-    user.profileImage = key;
+    user.profileImage = newImage;
     await user.save();
 
-    return await generateSignedUrl(key);
+    return await generateSignedUrl(newImage);
   }
   async updatePassword(userId: string, passwordDto: ChangePasswordDTO): Promise<boolean> {
     const { currentPassword, newPassword } = passwordDto;
-    const user = await getUserOrThrow(this._userRepository, userId);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
 
     const isPasswordValid = await compare(currentPassword, user.password);
     if (!isPasswordValid) {
@@ -50,7 +48,7 @@ export class ProfileService implements IProfileService {
   }
 
   async sentMail(userId: string, email: string): Promise<boolean> {
-    await getUserOrThrow(this._userRepository, userId);
+    await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
 
     const existing = await this._userRepository.findByEmail(email);
     if (existing && existing._id.toString() !== userId) {
@@ -64,7 +62,7 @@ export class ProfileService implements IProfileService {
   }
 
   async resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean> {
-    await getUserOrThrow(this._userRepository, userId);
+    await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     const existingData = JSON.parse((await redisClient.get(`otp:${value}`)) as string);
     if (!existingData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
@@ -87,7 +85,7 @@ export class ProfileService implements IProfileService {
     type: "email" | "phone",
     value: string
   ): Promise<boolean> {
-    const user = await getUserOrThrow(this._userRepository, userId);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     if (type === "email") {
       await this._userRepository.updateOne({ _id: user._id }, { $set: { email: value } });
     } else {
@@ -98,7 +96,7 @@ export class ProfileService implements IProfileService {
   }
 
   async getProfile(userId: string): Promise<UserProfileResponseDTO> {
-    const user = await getUserOrThrow(this._userRepository, userId);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     return await UserProfileResponseDTO.fromEntity(user);
   }
 
@@ -106,7 +104,7 @@ export class ProfileService implements IProfileService {
     userId: string,
     payload: Partial<UpdateProfilePayload>
   ): Promise<UserProfileResponseDTO> {
-    const user = await getUserOrThrow(this._userRepository, userId);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     if (payload.name) {
       user.name = payload.name;
     }

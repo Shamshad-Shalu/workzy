@@ -1,13 +1,16 @@
 import { AUTH, HTTPSTATUS } from "@/constants";
 import CustomError from "@/utils/customError";
 import { plainToInstance } from "class-transformer";
-import { validate, ValidatorOptions } from "class-validator";
+import { validate, ValidationError, ValidatorOptions } from "class-validator";
 import { NextFunction, Request, Response } from "express";
 
-export const validateDto = (dtoClass: any, options: ValidatorOptions = {}) => {
+export const validateDto = <T extends object>(
+  dtoClass: new () => T,
+  options: ValidatorOptions = {}
+) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const dtoInstance = plainToInstance(dtoClass, req.body);
-    const errors = await validate(dtoInstance, options);
+    const errors: ValidationError[] = await validate(dtoInstance, options);
 
     if (errors.length > 0) {
       const formattedErrors = errors.map((error) => {
@@ -18,8 +21,13 @@ export const validateDto = (dtoClass: any, options: ValidatorOptions = {}) => {
         };
       });
 
-      const validationError = new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
-      (validationError as any).errors = formattedErrors;
+      const validationError = new CustomError(
+        AUTH.INVALID_INPUT,
+        HTTPSTATUS.BAD_REQUEST
+      ) as CustomError & {
+        validationErrors?: unknown;
+      };
+      validationError.validationErrors = formattedErrors;
 
       return next(validationError);
     }

@@ -13,6 +13,7 @@ import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 import { deleteFromS3, uploadFileToS3 } from "../s3.service";
 import { clearRedisListCache } from "@/utils/cache.util";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class ServiceManagementService implements IServiceManagementService {
@@ -90,10 +91,7 @@ export class ServiceManagementService implements IServiceManagementService {
     iconFile?: Express.Multer.File,
     imgFile?: Express.Multer.File
   ): Promise<ServiceResponseDTO> {
-    const service = await this._serviceRepository.findById(serviceId);
-    if (!service) {
-      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-    }
+    const service = await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND);
 
     const isAlreadyExists = await this._serviceRepository.findOne({
       name: updateData.name,
@@ -110,8 +108,7 @@ export class ServiceManagementService implements IServiceManagementService {
     if (imgFile) {
       filePromises.push(
         uploadFileToS3(imgFile, "public/services/images").then((newImageUrl) => {
-          const key = service.imageUrl.split(".amazonaws.com/")[1];
-          deleteFromS3(key);
+          deleteFromS3(service.imageUrl);
           updates.imageUrl = newImageUrl;
         })
       );
@@ -119,8 +116,7 @@ export class ServiceManagementService implements IServiceManagementService {
     if (iconFile) {
       filePromises.push(
         uploadFileToS3(iconFile, "public/services/icons").then((newIconUrl) => {
-          const key = service.iconUrl.split(".amazonaws.com/")[1];
-          deleteFromS3(key);
+          deleteFromS3(service.iconUrl);
           updates.iconUrl = newIconUrl;
         })
       );
@@ -137,11 +133,7 @@ export class ServiceManagementService implements IServiceManagementService {
   }
 
   async toggleServiceStatus(serviceId: string): Promise<{ message: string; newStatus: boolean }> {
-    const service = await this._serviceRepository.findById(serviceId);
-
-    if (!service) {
-      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
+    const service = await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND);
 
     const newStatus = !service.isAvailable;
 

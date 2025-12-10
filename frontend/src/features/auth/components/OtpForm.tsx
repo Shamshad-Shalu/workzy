@@ -71,14 +71,14 @@ export default function OtpForm() {
         Verify OTP
       </Button>
       {timer > 0 ? (
-        <p className="text-gray-600 text-center">
+        <p className="text-muted-foreground text-center">
           Resend OTP in <b>{timer}s</b>
         </p>
       ) : (
         <button
           type="button"
           onClick={resendOtp}
-          className="text-black hover:underline mx-auto block"
+          className="text-primary hover:underline mx-auto block"
         >
           Resend OTP
         </button>

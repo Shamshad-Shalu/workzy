@@ -14,7 +14,8 @@ export const AUTH = {
   FORGOT_PASS_FAILED: "Password reset failed",
   RESEND_OTP_FAILED: "Error while resend OTP.",
 
-  FORGOT_PASS_EMAIL_SENT: "Email sent successfully for forgot password",
+  FORGOT_PASS_EMAIL_SENT:
+    "A password reset link has been sent to your email. Please check your inbox to continue.",
   EMAIL_FAILED: "Failed to send OTP. Please try again later",
   PASSWORD_UPDATED: "Password updated successfully",
 

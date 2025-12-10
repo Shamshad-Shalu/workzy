@@ -4,16 +4,11 @@ import Services from "@/models/service.model";
 import { IService } from "@/types/service";
 import { buildServiceFilter } from "@/utils/admin/buildServiceFilter";
 import { injectable } from "inversify";
-import { FilterQuery } from "mongoose";
 
 @injectable()
 export class ServiceRepository extends BaseRepository<IService> implements IServiceRepository {
   constructor() {
     super(Services);
-  }
-
-  countDocuments(filter: FilterQuery<IService>): Promise<number> {
-    return this.model.countDocuments(filter).exec();
   }
 
   async getAllServices(

@@ -1,5 +1,5 @@
 import { Expose } from "class-transformer";
-import { IUser } from "@/types/user";
+import { IAdress, ILocation, IUser } from "@/types/user";
 import { generateSignedUrl } from "@/services/s3.service";
 import { DEFAULT_IMAGE_URL } from "@/constants";
 
@@ -11,7 +11,7 @@ export class UserProfileResponseDTO {
   @Expose() role!: string;
   @Expose() profileImage!: string;
   @Expose() isPremium!: boolean;
-  @Expose() profile!: any;
+  @Expose() profile?: { address?: IAdress; location: ILocation };
 
   static async fromEntity(user: IUser): Promise<UserProfileResponseDTO> {
     const dto = new UserProfileResponseDTO();
@@ -24,14 +24,14 @@ export class UserProfileResponseDTO {
     dto.isPremium = user.isPremium;
     dto.profile = user.profile;
 
-    const img = user.profileImage;
+    const image = user.profileImage;
 
-    if (!img) {
+    if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (img?.startsWith("private/user")) {
-      dto.profileImage = await generateSignedUrl(img);
-    } else if (img?.startsWith("http")) {
-      dto.profileImage = img;
+    } else if (image?.includes(".amazonaws.com")) {
+      dto.profileImage = await generateSignedUrl(image);
+    } else if (image?.startsWith("http")) {
+      dto.profileImage = image;
     }
 
     return dto;

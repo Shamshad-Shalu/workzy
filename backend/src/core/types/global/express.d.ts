@@ -1,5 +1,4 @@
 import { JwtPayloadWithUser } from "./jwt";
-import multer from "multer";
 
 interface IToken extends JwtPayloadWithUser {
   workerId?: string;

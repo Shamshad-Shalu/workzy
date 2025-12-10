@@ -6,7 +6,7 @@ import { Router } from "express";
 
 const router = Router();
 
-// router.use(authenticate([ROLE.ADMIN]));
+router.use(authenticate([ROLE.ADMIN]));
 
 router.use("/users", adminUserRoutes);
 router.use("/services", adminServiceRoutes);
