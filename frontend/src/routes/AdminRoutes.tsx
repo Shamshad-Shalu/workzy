@@ -6,6 +6,7 @@ import { AdminLayout } from '@/layouts/admin/AdminLayout';
 import UserManagementPage from '@/features/admin/user/pages/UserMangementPage';
 import WorkerManagementPage from '@/features/admin/worker/pages/WorkerMangementPage';
 import UserDetailsLayout from '@/features/admin/user/pages/UserDetailsPage';
+import ServiceManagementPage from '@/features/admin/service/pages/ServiceMangementPage';
 
 const AdminRoutes: React.FC = () => {
   return (
@@ -17,6 +18,8 @@ const AdminRoutes: React.FC = () => {
           <Route path="users/:userId" element={<UserDetailsLayout />}></Route>
 
           <Route path="workers" element={<WorkerManagementPage />} />
+
+          <Route path="services" element={<ServiceManagementPage />} />
         </Route>
       </Route>
     </Routes>
