@@ -1,9 +1,9 @@
 type PageHeaderProps = {
   title: string;
-  description: string;
+  description?: string;
 };
 
-export default function PageHeader({ title, description }: PageHeaderProps) {
+export default function PageHeader({ title, description = '' }: PageHeaderProps) {
   return (
     <div className="space-y-4">
       <h1 className="text-3xl font-bold text-foreground">{title}</h1>

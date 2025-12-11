@@ -24,6 +24,9 @@ export class ServiceResponseDTO {
   @IsNumber()
   platformFee!: number;
 
+  @IsNumber()
+  level!: number;
+
   @IsBoolean()
   isAvailable!: boolean;
 
@@ -36,6 +39,7 @@ export class ServiceResponseDTO {
     dto._id = entity._id;
     dto.name = entity.name;
     dto.description = entity.description || "";
+    dto.level = entity.level;
     dto.iconUrl = entity.iconUrl || "";
     dto.imageUrl = entity.imageUrl || "";
     dto.parentId = entity.parentId ? entity.parentId.toString() : null;

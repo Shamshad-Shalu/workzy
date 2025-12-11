@@ -5,6 +5,7 @@ export interface IService extends Document<string> {
   description?: string;
   iconUrl: string;
   imageUrl: string;
+  level: number;
   parentId?: mongoose.Types.ObjectId | null;
   platformFee: number;
   isAvailable: boolean;

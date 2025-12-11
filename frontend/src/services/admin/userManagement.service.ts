@@ -7,7 +7,6 @@ const AdminUserService = {
     const res = await api.get(ADMIN_ROUTES.GETUSER, {
       params: { page, limit, search, status },
     });
-    console.log('us', res.data);
     return res.data;
   },
 

@@ -35,6 +35,10 @@ export class ServiceRequestDTO {
 
   @Type(() => Number)
   @IsNumber()
+  level!: number;
+
+  @Type(() => Number)
+  @IsNumber()
   @Min(0, { message: "Platform fee must be non-negative." })
   @Max(50, { message: "Platform fee cannot exceed 50%." })
   platformFee!: number;
@@ -55,6 +59,10 @@ export class ServiceUpdateRequestDTO {
   @ValidateIf((o) => o.description !== undefined && o.description !== "")
   @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
   description?: string;
+
+  @Type(() => Number)
+  @IsNumber()
+  level!: number;
 
   @IsOptional()
   @IsMongoId({ message: "Invalid parent ID format." })
