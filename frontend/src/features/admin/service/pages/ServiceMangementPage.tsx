@@ -3,29 +3,29 @@ import Table from '@/components/data-table/Table';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import AdminService from '@/services/admin/serviceManagement.service';
-import type { ServiceResponse, ServiceRow } from '@/types/admin/service';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Filter } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import type { ServiceDTO, ServiceResponse, ServiceRow } from '@/types/admin/service';
+import { useQuery } from '@tanstack/react-query';
+import { Filter, Layers } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 import serviceColumns from '../components/columns';
 import { AppModal } from '@/components/molecules/AppModal';
-import { toast } from 'sonner';
-import { handleApiError } from '@/utils/handleApiError';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+import Button from '@/components/atoms/Button';
+import { ServiceModal } from '../components/ServiceModal';
+import { useServiceMutations } from '../hooks/useServiceMutations';
 
-interface CustomParams {
-  parentId: string | null;
-}
+type CustomParams = { parentId: string | null };
 
 export default function ServiceManagementPage() {
   const [selectedService, setSelectedService] = useState<ServiceRow | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-
+  const [serviceModalOpen, setServiceModalOpen] = useState(false);
+  const [parentVal, setParentVal] = useState<ServiceRow | null>(null);
+  const [editingService, setEditingService] = useState<ServiceRow | null>(null);
   const { pageIndex, pageSize, search, status, parentId, updateParams } =
     useUrlFilterParams<CustomParams>([{ key: 'parentId' }]);
 
-  const navigate = useNavigate();
+  const { addServiceMutation, updateServiceMutation, toggleStatusMutation } = useServiceMutations();
 
   const { data, isLoading } = useQuery<ServiceResponse, Error>({
     queryKey: ['admin-services', pageIndex, pageSize, search, status, parentId],
@@ -38,30 +38,20 @@ export default function ServiceManagementPage() {
     setStatusModalOpen(true);
   };
 
-  const handleSearchChange = useCallback((v: string) => {
-    updateParams({ search: v, page: 0 });
-  }, []);
+  const handleSearchChange = useCallback(
+    (v: string) => {
+      updateParams({ search: v, page: 0, parentId });
+    },
+    [parentId]
+  );
 
   const onEdit = (service: ServiceRow) => {
-    navigate(service._id);
-    console.log('open service view,', service);
+    setEditingService(service);
+    setServiceModalOpen(true);
   };
 
-  const queryClient = useQueryClient();
-
-  const toggleStatusMutation = useMutation<{ message: string }, Error, string>({
-    mutationFn: id => AdminService.toggleStatus(id),
-    onSuccess: data => {
-      toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ['admin-services'] });
-      setStatusModalOpen(false);
-    },
-    onError: error => {
-      toast.error(handleApiError(error));
-    },
-  });
-
   const onViewChild = (service: ServiceRow) => {
+    setParentVal(service);
     updateParams({
       parentId: service._id,
       search: null,
@@ -69,11 +59,48 @@ export default function ServiceManagementPage() {
       page: 0,
     });
   };
+  useEffect(() => {
+    if (!parentId) {
+      setParentVal(null);
+    }
+  }, [parentId]);
+
+  const handleServiceSubmit = async (serviceData: ServiceDTO) => {
+    if (editingService) {
+      if (typeof serviceData.iconUrl === 'string') {
+        serviceData.iconUrl = null;
+      }
+      if (typeof serviceData.imageUrl === 'string') {
+        serviceData.imageUrl = null;
+      }
+
+      await updateServiceMutation.mutateAsync({
+        id: editingService._id,
+        data: serviceData,
+      });
+    } else {
+      await addServiceMutation.mutateAsync(serviceData);
+    }
+  };
+
+  const handleCloseServiceModal = () => {
+    setServiceModalOpen(false);
+    setEditingService(null);
+  };
 
   return (
     <div className="bg-baground py-6 px-0 xl:p-6">
-      <PageHeader title="Service Management" />
-      <div></div>
+      <div className="flex items-center justify-between">
+        <PageHeader title="Service Management" />
+        <Button
+          variant="blue"
+          size="lg"
+          onClick={() => setServiceModalOpen(true)}
+          iconLeft={<Layers />}
+        >
+          Add Service
+        </Button>
+      </div>
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">
           <div className="sm:col-span-7">
@@ -121,7 +148,9 @@ export default function ServiceManagementPage() {
           if (!selectedService?._id) {
             return;
           }
-          toggleStatusMutation.mutate(selectedService?._id);
+          toggleStatusMutation.mutate(selectedService?._id, {
+            onSuccess: () => setStatusModalOpen(false),
+          });
         }}
         className="sm:mx-1"
       >
@@ -130,6 +159,14 @@ export default function ServiceManagementPage() {
           <b>{selectedService?.name}</b>
         </span>
       </AppModal>
+
+      <ServiceModal
+        open={serviceModalOpen}
+        onClose={handleCloseServiceModal}
+        onSubmit={handleServiceSubmit}
+        parentServices={parentVal}
+        service={editingService}
+      />
     </div>
   );
 }

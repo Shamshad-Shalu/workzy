@@ -4,20 +4,20 @@ import { useSearchParams } from 'react-router-dom';
 interface CustomParamConfig {
   key: string;
   defaultValue?: string | number | null;
-  parser?: (value: string) => any;
+  parser?: (value: string) => unknown;
 }
+type Updates = Record<string, string | number | null | undefined>;
 
 type StandardParams = {
   pageIndex: number;
   pageSize: number;
   search: string;
   status: string;
-  updateParams: (updates: Record<string, string | number | null | undefined>) => void;
+  updateParams: (updates: Updates) => void;
 };
 
 const createUpdateParamsFunction =
-  (setSearchParams: ReturnType<typeof useSearchParams>[1]) =>
-  (updates: Record<string, string | number | null | undefined>) => {
+  (setSearchParams: ReturnType<typeof useSearchParams>[1]) => (updates: Updates) => {
     setSearchParams(
       prev => {
         const newParams = new URLSearchParams(prev);
@@ -34,7 +34,11 @@ const createUpdateParamsFunction =
             return;
           }
 
-          newParams.set(paramKey, String(value));
+          if (paramKey === 'page') {
+            newParams.set('page', String(Number(value) + 1));
+          } else {
+            newParams.set(paramKey, String(value));
+          }
         });
 
         const isPageUpdatedManually = updates.page !== undefined || updates.pageIndex !== undefined;
@@ -50,7 +54,9 @@ const createUpdateParamsFunction =
     );
   };
 
-export const useUrlFilterParams = <TCustom extends Record<string, any> = {}>(
+export const useUrlFilterParams = <
+  TCustom extends Record<string, unknown> = Record<string, unknown>,
+>(
   customParams: CustomParamConfig[] = []
 ): StandardParams & TCustom => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -59,7 +65,7 @@ export const useUrlFilterParams = <TCustom extends Record<string, any> = {}>(
 
   const filterState = useMemo(() => {
     const standardParams = {
-      pageIndex: parseInt(searchParams.get('page') ?? '0', 10),
+      pageIndex: Math.max(parseInt(searchParams.get('page') ?? '1', 10) - 1, 0),
       pageSize: parseInt(searchParams.get('limit') ?? '5', 10),
       search: searchParams.get('search') ?? '',
       status: searchParams.get('status') ?? 'all',
@@ -67,13 +73,12 @@ export const useUrlFilterParams = <TCustom extends Record<string, any> = {}>(
 
     const customState = customParams.reduce((acc, config) => {
       const value = searchParams.get(config.key);
-      let finalValue: any;
-
-      if (value !== null) {
-        finalValue = config.parser ? config.parser(value) : value;
-      } else {
-        finalValue = config.defaultValue === undefined ? null : config.defaultValue;
-      }
+      const finalValue =
+        value !== null
+          ? config.parser
+            ? config.parser(value)
+            : value
+          : (config.defaultValue ?? null);
 
       return { ...acc, [config.key]: finalValue };
     }, {} as TCustom);

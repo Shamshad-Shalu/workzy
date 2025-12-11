@@ -37,7 +37,7 @@ export class ServiceManagementService implements IServiceManagementService {
       uploadFileToS3(files.iconFile, "public/services/icons"),
     ]);
 
-    const { name, platformFee, description, isAvailable, parentId } = serviceData;
+    const { name, platformFee, description, parentId } = serviceData;
 
     const parentObjectId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
 
@@ -45,7 +45,7 @@ export class ServiceManagementService implements IServiceManagementService {
       name,
       platformFee,
       description,
-      isAvailable,
+      isAvailable: true,
       parentId: parentObjectId,
       imageUrl: imgUrl,
       iconUrl: iconUrl,
@@ -104,6 +104,9 @@ export class ServiceManagementService implements IServiceManagementService {
     }
     const updates: Partial<IService> = { ...(updateData as Partial<IService>) };
     const filePromises: Promise<void>[] = [];
+    updates.parentId = updateData.parentId
+      ? new mongoose.Types.ObjectId(updateData.parentId)
+      : null;
 
     if (imgFile) {
       filePromises.push(

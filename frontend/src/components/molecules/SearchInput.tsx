@@ -27,7 +27,7 @@ export default function SearchInput({
     }
 
     const handler = setTimeout(() => {
-      onChange(inputValue);
+      onChange(inputValue.trim());
     }, debounce);
 
     return () => {

@@ -1,6 +1,7 @@
 import api from '@/lib/api/axios';
 import { ADMIN_ROUTES } from '@/constants';
-import type { ServiceResponse } from '@/types/admin/service';
+import type { ServiceDTO, ServiceResponse } from '@/types/admin/service';
+import { serviceToFormData } from '@/utils/admin/serviceFormData';
 
 const AdminService = {
   getServices: async (
@@ -13,13 +14,27 @@ const AdminService = {
     const res = await api.get(ADMIN_ROUTES.GETSERVICE, {
       params: { page, limit, search, status, parentId },
     });
-    console.log('data', res.data);
     return res.data;
   },
 
   toggleStatus: async (serviceId: string): Promise<{ message: string }> => {
     const res = await api.patch(`${ADMIN_ROUTES.TOGGLESERVICESTATUS}/${serviceId}`);
     return res.data;
+  },
+
+  createService: async (data: ServiceDTO) => {
+    const formData = serviceToFormData(data);
+    const response = await api.post('/admin/services/add', formData);
+    console.log('response:', response);
+    return response.data;
+  },
+
+  updateService: async (id: string, data: ServiceDTO) => {
+    const formData = serviceToFormData(data);
+    console.log('foem:', formData);
+    const response = await api.patch(`/admin/services/edit/${id}`, formData);
+    console.log('response:', response);
+    return response.data;
   },
 };
 

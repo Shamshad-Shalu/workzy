@@ -3,7 +3,7 @@ import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/service.dto";
 import { upload } from "@/middlewares/upload/multer";
-import { validateFileSize } from "@/middlewares/upload/validateFileSize";
+import { validateFieldFilesSize } from "@/middlewares/upload/validateFileSize";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 import { Router } from "express";
 
@@ -19,7 +19,7 @@ router.post(
     { name: "iconUrl", maxCount: 1 },
     { name: "imageUrl", maxCount: 1 },
   ]),
-  validateFileSize,
+  validateFieldFilesSize,
   validateDto(ServiceRequestDTO),
   adminServiceController.createService
 );
@@ -30,7 +30,7 @@ router.patch(
     { name: "iconUrl", maxCount: 1 },
     { name: "imageUrl", maxCount: 1 },
   ]),
-  validateFileSize,
+  validateFieldFilesSize,
   validateDto(ServiceUpdateRequestDTO, { skipMissingProperties: true }),
   adminServiceController.updateService
 );

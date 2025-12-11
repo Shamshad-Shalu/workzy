@@ -14,6 +14,7 @@ const errorMiddleware = (
   _next: NextFunction
 ) => {
   logger.error("Error occurred:", err);
+  console.log(err);
 
   const statusCode = err instanceof CustomError ? err.statusCode : 500;
   const message = err.message || SERVER.ERROR;

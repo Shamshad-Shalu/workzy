@@ -26,12 +26,7 @@ export class ServiceRequestDTO {
   description?: string;
 
   @IsOptional()
-  @IsMongoId({ message: "Invalid parent ID format." })
-  parentId?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isAvailable?: boolean;
+  parentId?: string | null;
 
   @Type(() => Number)
   @IsNumber()
@@ -65,8 +60,7 @@ export class ServiceUpdateRequestDTO {
   level!: number;
 
   @IsOptional()
-  @IsMongoId({ message: "Invalid parent ID format." })
-  parentId?: string;
+  parentId?: string | null;
 
   @IsOptional()
   @IsBoolean()

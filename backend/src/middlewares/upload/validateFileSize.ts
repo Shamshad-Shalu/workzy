@@ -29,6 +29,22 @@ export function validateMultipleFilesSize(req: Request, res: Response, next: Nex
   }
   next();
 }
+
+export function validateFieldFilesSize(req: Request, res: Response, next: NextFunction) {
+  const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
+
+  if (!files) return next();
+
+  for (const fieldname in files) {
+    const fileArray = files[fieldname];
+    for (const file of fileArray) {
+      const error = validateHelper(file);
+      if (error) return res.status(400).json({ message: error });
+    }
+  }
+  next();
+}
+
 function validateHelper(file: Express.Multer.File): string | null {
   const category = getCategory(file.mimetype);
   if (!category) {
