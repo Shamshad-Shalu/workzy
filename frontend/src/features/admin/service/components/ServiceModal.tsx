@@ -3,7 +3,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AppModal } from '@/components/molecules/AppModal';
-import { serviceSchema } from '../validation/serviceShema';
+import { serviceSchema } from '../validation/serviceSchema';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
@@ -140,7 +140,7 @@ export function ServiceModal({
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <div>
+          <div className="w-40">
             <Label>Service Icon</Label>
             <Controller
               name="iconUrl"
@@ -153,11 +153,12 @@ export function ServiceModal({
                   value={field.value}
                   onChange={file => field.onChange(file)}
                   error={fieldState.error?.message}
+                  className="h-40"
                 />
               )}
             />
           </div>
-          <div>
+          <div className="w-40">
             <Label>Service Image</Label>
             <Controller
               name="imageUrl"
@@ -170,6 +171,7 @@ export function ServiceModal({
                   value={field.value}
                   onChange={file => field.onChange(file)}
                   error={fieldState.error?.message}
+                  className="h-40 w-40"
                 />
               )}
             />

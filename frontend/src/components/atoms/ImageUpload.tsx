@@ -10,6 +10,7 @@ interface ImageUploadProps {
   error?: string;
   className?: string;
   maxSizeMB?: number;
+  isEditable?: boolean;
 }
 
 export function ImageUpload({
@@ -18,6 +19,7 @@ export function ImageUpload({
   error,
   className,
   maxSizeMB = 5,
+  isEditable = true,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(
     typeof value === 'string' && value ? value : null
@@ -65,11 +67,12 @@ export function ImageUpload({
   };
 
   return (
-    <div className={cn('flex flex-col gap-2 w-fit', className)}>
+    <div className={cn('flex flex-col gap-2 w-full')}>
       <div
         className={cn(
-          'relative w-40 h-40 rounded-md border overflow-hidden bg-muted',
-          error && 'border-destructive'
+          'relative h-[250px] rounded-md border overflow-hidden bg-muted',
+          error && 'border-destructive',
+          className
         )}
       >
         {preview ? (
@@ -81,7 +84,7 @@ export function ImageUpload({
           </div>
         )}
 
-        {preview && (
+        {preview && isEditable && (
           <button
             type="button"
             onClick={handleRemove}
@@ -98,15 +101,12 @@ export function ImageUpload({
         ref={fileRef}
         onChange={handleFileSelect}
       />
+      {isEditable && (
+        <Button type="button" onClick={() => fileRef.current?.click()} variant="secondary">
+          {preview ? 'Change Image' : 'Upload Image'}
+        </Button>
+      )}
 
-      <Button
-        type="button"
-        onClick={() => fileRef.current?.click()}
-        variant="secondary"
-        className="w-fit"
-      >
-        {preview ? 'Change Image' : 'Upload Image'}
-      </Button>
       <div className="min-h-[1.2rem] flex items-center">
         {error ? (
           <p className="text-sm text-destructive flex items-center gap-1">

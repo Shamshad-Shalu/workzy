@@ -23,9 +23,9 @@ export const phoneRule = z.string().regex(/^[0-9]{10}$/, 'Phone number must be e
 
 export const serviceNameRule = z
   .string()
-  .min(3, 'Service name must be at least 3 characters')
-  .max(40, 'Service name cannot exceed 40 characters')
-  .regex(SERVICE_NAME_REGEX, 'Invalid service name format');
+  .min(3, ' name must be at least 3 characters')
+  .max(80, ' name cannot exceed 40 characters')
+  .regex(SERVICE_NAME_REGEX, 'Invalid name format');
 export const descriptionRuleRequired = z
   .string()
   .min(10, 'Description must be at least 10 characters')

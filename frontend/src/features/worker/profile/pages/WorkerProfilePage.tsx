@@ -14,8 +14,36 @@ import { emailRule, phoneRule } from '@/lib/validation/rules';
 import z from 'zod';
 import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
 import OtpModal from '@/features/profile/modals/OtpModal';
+import WorkerSection, { type WorkerProfessionalData } from '../components/WorkerSection';
 
 export default function WorkerProfilePage() {
+  const [workerData] = useState<WorkerProfessionalData>({
+    displayName: 'Mike Johnson ',
+    tagline: 'Professional Plumber',
+    about:
+      'Professional contractor with over 15 years of experience in high-end kitchen and bathroom renovations. Specializing in custom cabinetry, modern designs, and complete home transformations. Licensed, insured, and committed to exceptional craftsmanship.',
+    coverImage: 'helo',
+    defaultRate: {
+      amount: 12,
+      type: 'fixed',
+    },
+    skills: ['Plumbing', 'Pipe Installation', 'Water Heater Repair'],
+    cities: ['Calicut', 'Malappuram', 'Kannur'],
+    availability: {
+      monday: [
+        { startTime: '09:00', endTime: '17:00' },
+        { startTime: '09:00', endTime: '17:00' },
+        { startTime: '09:00', endTime: '17:00' },
+      ],
+      tuesday: [{ startTime: '09:00', endTime: '17:00' }],
+      wednesday: [{ startTime: '09:00', endTime: '17:00' }],
+      thursday: [{ startTime: '09:00', endTime: '17:00' }],
+      friday: [{ startTime: '09:00', endTime: '17:00' }],
+      saturday: [{ startTime: '10:00', endTime: '14:00' }],
+      sunday: [],
+    },
+  });
+
   const dispatch = useAppDispatch();
   const { uploadImage, loading, updateBasic, getUserProfilePage, changeEmail, changePhone } =
     useProfile();
@@ -25,7 +53,7 @@ export default function WorkerProfilePage() {
   const [openPass, setOpenPass] = useState(false);
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
-  const { user } = useAppSelector(s => s.auth);
+  const { user } = useAppSelector((s: any) => s.auth);
 
   useEffect(() => {
     async function loadProfile() {
@@ -131,11 +159,6 @@ export default function WorkerProfilePage() {
                 </button>
               </div>
             </div>
-
-            {/* <div className="bg-white rounded-2xl shadow-sm p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Certifications</h3>
-              <div className="h-48 bg-gray-100 rounded-lg"></div>
-            </div> */}
           </div>
         </div>
       </div>
@@ -180,6 +203,8 @@ export default function WorkerProfilePage() {
       <ChangePasswordModal open={openPass} onOpenChange={setOpenPass} />
       <OtpModal open={openOtpModal} onOpenChange={setOpenOtpModal} otpData={otpData} />
       <ProfileImageModal open={openImage} image={user.profileImage} onOpenChange={setOpenImage} />
+
+      <WorkerSection workerData={workerData} />
     </div>
   );
 }
