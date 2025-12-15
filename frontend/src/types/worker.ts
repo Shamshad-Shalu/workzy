@@ -44,14 +44,14 @@ export interface Worker {
 }
 
 export interface WorkerProfile {
-  _id: string;
-  userId: string;
+  _id?: string;
   displayName: string;
   tagline?: string;
-  about?: string;
-  coverImage?: string;
-  defaultRate?: Rate;
+  about: string;
+  coverImage: string;
+  defaultRate: Rate;
   skills: string[];
+  cities: string[];
   availability: AvailabilitySlots;
 }
 
@@ -62,9 +62,9 @@ export interface WorkerInfo {
   location: string;
   experience?: string;
   responseTime?: string;
-  rating?: number;
+  rating: number;
   reviewsCount?: number;
-  hourlyRate?: number;
+  rate: Rate;
   availability: string;
   profileImage: string;
   coverImage?: string;

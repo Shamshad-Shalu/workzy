@@ -35,9 +35,9 @@ export default function WorkerProfileLayout({
     }`;
 
   return (
-    <div className="-max-4 md:-mx-6 lg:-mx-8 xl:-mx-10 -my-6 pb-12 bg-background">
+    <div className="pb-12 bg-background -mt-6">
       <WorkerProfileHeader workerInfo={workerInfo} workerAction={workerAction} />
-      <div className="px-4 lg:px-8">
+      <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-7">
           {workerStats.map((stat: StatItem, index: number) => (
             <StatCard
@@ -48,7 +48,7 @@ export default function WorkerProfileLayout({
             />
           ))}
         </div>
-        <div className="bg-card rounded-2xl shadow-sm mb-6 flex px-6 border-b border-border">
+        <div className="bg-card rounded-2xl shadow-sm mb-6 flex px-6 flex justify-between border-b border-border">
           {TABS.map(tab => (
             <NavLink key={tab.path} to={tab.path} className={getNavLinkClass} end={tab.path === ''}>
               {tab.name}

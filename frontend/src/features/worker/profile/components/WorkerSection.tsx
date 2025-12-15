@@ -4,7 +4,7 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
 import { Textarea } from '@/components/atoms/Textarea';
-import type { AvailabilitySlots } from '@/types/worker';
+import type { WorkerProfile } from '@/types/worker';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil, Save, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -17,22 +17,8 @@ import { useAvailability } from '../../hooks/useAvailability';
 import { AvailabilitySection } from '../../components/AvailabilitySection';
 import { TagManager } from '@/components/molecules/TagManager';
 
-export interface WorkerProfessionalData {
-  displayName: string;
-  tagline?: string;
-  about: string;
-  coverImage: string | null;
-  defaultRate: {
-    amount: number;
-    type: 'hourly' | 'fixed';
-  };
-  cities: string[];
-  skills: string[];
-  availability: AvailabilitySlots;
-}
-
 interface WorkerSectionProps {
-  workerData: WorkerProfessionalData;
+  workerData: WorkerProfile;
 }
 
 export default function WorkerSection({ workerData }: WorkerSectionProps) {
@@ -67,7 +53,7 @@ export default function WorkerSection({ workerData }: WorkerSectionProps) {
   };
 
   return (
-    <div className="px-4 lg:px-8 pt-2 mt-6">
+    <div className="pt-2 mt-6">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="bg-card rounded-2xl shadow-sm p-8 border border-border">
           <div className="flex items-center justify-between mb-6">

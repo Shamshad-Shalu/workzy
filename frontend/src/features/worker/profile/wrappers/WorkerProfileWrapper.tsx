@@ -3,7 +3,6 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
 import { useEffect, useState } from 'react';
-import { Outlet } from 'react-router-dom';
 import WorkerProfileLayout, { type StatItem } from '../layouts/WorkerProfileLayout';
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
 import type { WorkerInfo } from '@/types/worker';
@@ -18,17 +17,17 @@ export default function WorkerProfileRouteWrapper() {
   const [workerInfo, setWorkerInfo] = useState<WorkerInfo | null>(null);
   const [workerStats, setWorkerStats] = useState<StatItem[]>([]);
 
-  useEffect(() => {
-    async function load() {
-      const { workerInfo, workerStats } = await getWorkerProfile();
+  async function load() {
+    const { workerInfo, workerStats } = await getWorkerProfile();
 
-      setWorkerInfo(workerInfo);
-      setWorkerStats([
-        { value: workerStats.jobsCompleted.toString() || '0', label: 'Jobs Completed' },
-        { value: workerStats.averageRating.toString() || 'N/A', label: 'Average Rating' },
-        { value: workerStats.completionRate.toString() || '0%', label: 'Completion Rate' },
-      ]);
-    }
+    setWorkerInfo(workerInfo);
+    setWorkerStats([
+      { value: workerStats.jobsCompleted.toString() || '0', label: 'Jobs Completed' },
+      { value: workerStats.averageRating.toString() || 'N/A', label: 'Average Rating' },
+      { value: workerStats.completionRate.toString() || '0%', label: 'Completion Rate' },
+    ]);
+  }
+  useEffect(() => {
     load();
   }, []);
 
@@ -39,6 +38,7 @@ export default function WorkerProfileRouteWrapper() {
   async function handleImageUpload(file: File) {
     const res = await uploadImage(file);
     dispatch(updateUser({ profileImage: res.url }));
+    load();
   }
 
   return (
@@ -56,7 +56,6 @@ export default function WorkerProfileRouteWrapper() {
           />
         }
       />
-      <Outlet />
       <ProfileImageModal
         open={openImage}
         onOpenChange={setOpenImage}

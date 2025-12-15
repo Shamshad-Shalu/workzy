@@ -5,7 +5,8 @@ const WorkerProfileService = {
   getWorkerProfileById: async (
     workerId: string
   ): Promise<{ workerInfo: WorkerInfo; workerStats: WorkerStats }> => {
-    const res = await api.get(`/workers/${workerId}/profile`);
+    const res = await api.get(`/worker/${workerId}/profile`);
+    console.log('Worker Profile Response:', res.data);
     return res.data;
   },
 };

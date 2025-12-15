@@ -11,7 +11,7 @@ const TYPES = {
   // worker
   WorkerRepository: Symbol.for("WorkerRepository"),
   WorkerService: Symbol.for("WorkerService"),
-  // WorkerController: Symbol.for("WorkerController"),
+  WorkerController: Symbol.for("WorkerController"),
 
   ProfileController: Symbol.for("ProfileController"),
   ProfileService: Symbol.for("ProfileService"),

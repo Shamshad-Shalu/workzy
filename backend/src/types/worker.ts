@@ -27,6 +27,7 @@ export interface IAvailabilitySlots {
 export interface IDocument {
   type: "id_proof" | "license" | "certificate" | "other";
   url: string;
+  name?: string;
   status: "pending" | "verified" | "rejected";
   rejectReason?: string;
 }
@@ -38,9 +39,11 @@ export interface IWorker extends Document<string> {
   about?: string;
   coverImage?: string;
   status: WorkerStatus;
-  defaultRate?: IRate;
+  experience: number;
+  defaultRate: IRate;
   documents: IDocument[];
   skills: string[];
   cities: string[];
   availability: IAvailabilitySlots;
+  createdAt: Date;
 }

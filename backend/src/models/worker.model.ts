@@ -51,6 +51,10 @@ const workerSchema: Schema = new Schema<IWorker>(
         default: "fixed",
       },
     },
+    experience: {
+      type: Number,
+      default: 0,
+    },
     skills: {
       type: [String],
       default: [],

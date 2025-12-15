@@ -14,6 +14,7 @@ export const NODEMAILER_EMAIL = process.env.NODEMAILER_EMAIL;
 export const NODEMAILER_PASSWORD = process.env.NODEMAILER_PASSWORD;
 
 export const DEFAULT_IMAGE_URL = `https://workzy-app-storage.s3.ap-south-1.amazonaws.com/public/common/user/userprofile.avif`;
+export const DEFAULT_WORKER_COVER_IMAGE = `https://workzy-app-storage.s3.ap-south-1.amazonaws.com/public/common/worker/profile_coverImage.jpg`;
 export const EMAIL_OTP_EXPIRY = Number(process.env.EMAIL_OTP_EXPIRY);
 export const REDIS_EXPIRY = Number(process.env.REDIS_EXPIRY);
 

@@ -30,6 +30,8 @@ import { IServiceManagementService } from "@/core/interfaces/services/admin/ISer
 import { ServiceManagementService } from "@/services/admin/serviceManagement.service";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { ServiceRepository } from "@/repositories/service.repository";
+import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
+import { WorkerController } from "@/controllers/worker.controller";
 
 const container = new Container();
 
@@ -45,6 +47,7 @@ container.bind<ITokenService>(TYPES.TokenService).to(TokenService);
 
 container.bind<IWorkerRepository>(TYPES.WorkerRepository).to(WorkerRepository);
 container.bind<IWorkerService>(TYPES.WorkerService).to(WorkerService);
+container.bind<IWorkerController>(TYPES.WorkerController).to(WorkerController);
 
 container.bind<IProfileController>(TYPES.ProfileController).to(ProfileController);
 container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
