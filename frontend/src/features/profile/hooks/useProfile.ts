@@ -12,7 +12,7 @@ export function useProfile() {
     try {
       const user = await profileApi.getProfilePage();
       return user;
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
     } finally {
       setLoading(false);
@@ -24,7 +24,7 @@ export function useProfile() {
     try {
       const user = await profileApi.updateBasicInfo(payload);
       return user;
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
     } finally {
       setLoading(false);
@@ -35,7 +35,7 @@ export function useProfile() {
     setLoading(true);
     try {
       return await profileApi.requestChangeEmail(email);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
@@ -47,7 +47,7 @@ export function useProfile() {
     setLoading(true);
     try {
       return await profileApi.requestChangePhone(phone);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
@@ -59,7 +59,7 @@ export function useProfile() {
     setLoading(true);
     try {
       return await profileApi.changePassword(currentPassword, newPassword);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {

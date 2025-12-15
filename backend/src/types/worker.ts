@@ -41,5 +41,6 @@ export interface IWorker extends Document<string> {
   defaultRate?: IRate;
   documents: IDocument[];
   skills: string[];
+  cities: string[];
   availability: IAvailabilitySlots;
 }

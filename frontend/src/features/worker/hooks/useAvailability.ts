@@ -1,9 +1,6 @@
 import { useState } from 'react';
 import type { AvailabilitySlots, TimeSlot } from '@/types/worker';
 
-// ------------------------
-// Types
-// ------------------------
 export type Day =
   | 'monday'
   | 'tuesday'

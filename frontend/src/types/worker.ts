@@ -54,3 +54,24 @@ export interface WorkerProfile {
   skills: string[];
   availability: AvailabilitySlots;
 }
+
+export interface WorkerInfo {
+  _id: string;
+  displayName: string;
+  tagline: string;
+  location: string;
+  experience?: string;
+  responseTime?: string;
+  rating?: number;
+  reviewsCount?: number;
+  hourlyRate?: number;
+  availability: string;
+  profileImage: string;
+  coverImage?: string;
+}
+
+export interface WorkerStats {
+  jobsCompleted: number;
+  averageRating: number;
+  completionRate: number;
+}

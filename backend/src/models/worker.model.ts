@@ -55,6 +55,10 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: [String],
       default: [],
     },
+    cities: {
+      type: [String],
+      default: [],
+    },
     availability: {
       type: AvailabilitySchema,
       default: {

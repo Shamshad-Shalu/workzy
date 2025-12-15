@@ -1,19 +1,6 @@
+import type { WorkerInfo } from '@/types/worker';
 import { Check, MapPin, Clock, Star, Award } from 'lucide-react';
 import type React from 'react';
-
-interface WorkerInfo {
-  displayName: string;
-  profession?: string;
-  location?: string;
-  experience?: string;
-  responseTime?: string;
-  rating?: number;
-  reviewsCount?: number;
-  hourlyRate?: number;
-  availability?: string;
-  profileImage?: string;
-  bannerImage?: string;
-}
 
 interface Props {
   workerInfo: WorkerInfo;
@@ -28,7 +15,7 @@ export default function WorkerProfileHeader({
 }: Props) {
   const {
     displayName,
-    profession = 'Kitchen Renovation Expert',
+    tagline = 'Kitchen Renovation Expert',
     location = 'Austin, Texas',
     experience = '15+ Years experience',
     responseTime = '< 1 hour response',
@@ -37,25 +24,22 @@ export default function WorkerProfileHeader({
     hourlyRate = 300,
     availability = 'Available this week',
     profileImage,
-    bannerImage = 'https://res.cloudinary.com/dhvlhpg55/image/upload/v1740028408/nexus/images/oamn3bzchpmixago65yf.jpg',
+    coverImage = 'https://res.cloudinary.com/dhvlhpg55/image/upload/v1740028408/nexus/images/oamn3bzchpmixago65yf.jpg',
   } = workerInfo;
 
   return (
     <div className="w-full ">
       {/* Top Banner*/}
-      <div className="relative w-screen h-[260px] md:h-[320px] left-1/2 right-1/2   -ml-[50vw] -mr-[50vw] overflow-hidden">
-        <img src={bannerImage} className="w-full h-full object-cover" alt="banner" />
+      <div className="relative w-screen h-[260px] md:h-[320px] left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] overflow-hidden">
+        <img src={coverImage} className="w-full h-full object-cover" alt="banner" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
 
       <div className="px-4 lg:px-8">
         <div className="relative mx-auto -mt-15">
           <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8">
-            {/* MAIN FLEX WRAPPER */}
             <div className="flex flex-col md:flex-row justify-between gap-10">
-              {/* LEFT SIDE — IMAGE + INFO */}
               <div className="flex flex-col md:flex-row gap-6 w-full">
-                {/* IMAGE */}
                 <div className="flex justify-center md:justify-start w-full md:w-auto">
                   <div className="relative">
                     <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow">
@@ -72,9 +56,7 @@ export default function WorkerProfileHeader({
                   </div>
                 </div>
 
-                {/* TEXT INFORMATION */}
                 <div className="flex flex-col justify-center text-left w-full">
-                  {/* NAME + VERIFIED */}
                   <div className="flex items-center flex-wrap gap-3">
                     <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                       {displayName}
@@ -84,10 +66,8 @@ export default function WorkerProfileHeader({
                     </span>
                   </div>
 
-                  {/* PROFESSION */}
-                  <p className="text-muted-foreground text-lg">{profession}</p>
+                  <p className="text-muted-foreground text-lg">{tagline}</p>
 
-                  {/* LOCATION / EXPERIENCE / RESPONSE */}
                   <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm mt-3">
                     <div className="flex items-center gap-2">
                       <MapPin size={16} /> {location}
@@ -102,9 +82,7 @@ export default function WorkerProfileHeader({
                 </div>
               </div>
 
-              {/* RIGHT SIDE — RATING + PRICE */}
               <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
-                {/* RATING */}
                 <div className="flex items-center gap-2">
                   <div className="flex text-yellow-500">
                     {[1, 2, 3, 4, 5].map((_, i) => (
@@ -114,8 +92,6 @@ export default function WorkerProfileHeader({
                   <span className="text-xl font-bold text-foreground">{rating}</span>
                   <span className="text-muted-foreground text-sm">({reviewsCount} reviews)</span>
                 </div>
-
-                {/* PRICE */}
                 <div className="text-left md:text-right">
                   <p className="text-3xl font-bold text-foreground">₹{hourlyRate}</p>
                   <p className="text-muted-foreground text-sm">per hour</p>
@@ -125,8 +101,6 @@ export default function WorkerProfileHeader({
                 </div>
               </div>
             </div>
-
-            {/* USER BUTTONS */}
             {showUserButtons && (
               <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
                 <button className="px-10 py-3 bg-[#4c3f36] text-white rounded-full font-medium hover:bg-[#3a2f29] transition">

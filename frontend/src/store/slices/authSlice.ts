@@ -25,6 +25,7 @@ export const refreshAccessToken = createAsyncThunk(
       const res = await api.post('/auth/refresh-token', {}, { withCredentials: true });
       return res.data;
     } catch (error) {
+      console.error('Error refreshing access token:', error);
       return rejectWithValue(SESSION_MESSAGES.EXPIRED);
     }
   }

@@ -22,5 +22,5 @@ export const availabilitySchema = z
     sunday: z.array(slotSchema),
   })
   .refine(data => Object.values(data).some(daySlots => daySlots.length > 0), {
-{ message: 'At least one availability slot is required' }
-);
+    message: 'At least one availability slot is required',
+  });
