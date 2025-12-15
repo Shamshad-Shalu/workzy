@@ -7,11 +7,12 @@ import { emailRule, phoneRule } from '@/lib/validation/rules';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
 import { Lock, Mail, Pencil, Phone } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import z from 'zod';
 import WorkerSection from '../components/WorkerSection';
 import type { WorkerProfile } from '@/types/worker';
+import { useWorkerProfile } from '../hooks/useWorkerProfile';
 
 export default function WorkeAboutContentPage() {
   const [openEmail, setOpenEmail] = useState(false);
@@ -19,39 +20,28 @@ export default function WorkeAboutContentPage() {
   const [openPass, setOpenPass] = useState(false);
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
+  const [workerInfo, setWorkerInfo] = useState<WorkerProfile | null>(null);
 
   const { user } = useAppSelector((s: any) => s.auth);
-  const { changeEmail, changePhone, loading, updateBasic } = useProfile();
+  const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
+  const { getWorkerProfile } = useWorkerProfile();
   const dispatch = useAppDispatch();
 
   if (!user) {
     return null;
   }
-
-  const [dummyData] = useState<WorkerProfile>({
-    displayName: 'John Doe',
-    tagline: 'Experienced Plumber',
-    about: 'I have over 10 years...',
-    coverImage: '',
-    defaultRate: { amount: 250, type: 'fixed' },
-
-    skills: ['Pipe Installation', 'Leak Repairs', 'Maintenance Services'],
-
-    cities: ['New York', 'Los Angeles'],
-
-    availability: {
-      monday: [
-        { startTime: '09:00', endTime: '13:00' },
-        { startTime: '15:00', endTime: '18:00' },
-      ],
-      tuesday: [{ startTime: '10:00', endTime: '16:00' }],
-      wednesday: [],
-      thursday: [{ startTime: '09:00', endTime: '12:00' }],
-      friday: [{ startTime: '09:00', endTime: '17:00' }],
-      saturday: [],
-      sunday: [],
-    },
-  });
+  async function loadProfile() {
+    const [userInfo, workerInfo] = await Promise.all([getUserProfilePage(), getWorkerProfile()]);
+    if (userInfo) {
+      dispatch(updateUser(userInfo));
+    }
+    if (workerInfo) {
+      setWorkerInfo(workerInfo);
+    }
+  }
+  useEffect(() => {
+    loadProfile();
+  }, []);
 
   function handleOtpRequest(type: 'email' | 'phone', value: string) {
     setOtpData({ type, value });
@@ -108,7 +98,9 @@ export default function WorkeAboutContentPage() {
           </div>
         </div>
       </div>
-      <WorkerSection workerData={dummyData} />
+
+      {workerInfo && <WorkerSection workerData={workerInfo} />}
+
       {/* email  */}
       <ChangeFieldModal
         open={openEmail}

@@ -44,7 +44,6 @@ export interface Worker {
 }
 
 export interface WorkerProfile {
-  _id?: string;
   displayName: string;
   tagline?: string;
   about: string;

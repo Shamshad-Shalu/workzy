@@ -11,14 +11,14 @@ import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 export default function WorkerProfileRouteWrapper() {
   const dispatch = useAppDispatch();
   const { uploadImage, loading } = useProfile();
-  const { getWorkerProfile } = useWorkerProfile();
+  const { getWorkerSummary } = useWorkerProfile();
 
   const [openImage, setOpenImage] = useState(false);
   const [workerInfo, setWorkerInfo] = useState<WorkerInfo | null>(null);
   const [workerStats, setWorkerStats] = useState<StatItem[]>([]);
 
   async function load() {
-    const { workerInfo, workerStats } = await getWorkerProfile();
+    const { workerInfo, workerStats } = await getWorkerSummary();
 
     setWorkerInfo(workerInfo);
     setWorkerStats([
