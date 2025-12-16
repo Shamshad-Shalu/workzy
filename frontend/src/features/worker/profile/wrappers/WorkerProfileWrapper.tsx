@@ -7,10 +7,11 @@ import WorkerProfileLayout, { type StatItem } from '../layouts/WorkerProfileLayo
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
 import type { WorkerInfo } from '@/types/worker';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
+import WorkerProfileLayoutSkeleton from '../components/WorkerProfileSkeleton';
 
 export default function WorkerProfileRouteWrapper() {
   const dispatch = useAppDispatch();
-  const { uploadImage, loading } = useProfile();
+  const { uploadImage, imageLoading } = useProfile();
   const { getWorkerSummary } = useWorkerProfile();
 
   const [openImage, setOpenImage] = useState(false);
@@ -32,7 +33,7 @@ export default function WorkerProfileRouteWrapper() {
   }, []);
 
   if (!workerInfo) {
-    return <div> Loading worker Profile...</div>;
+    return <WorkerProfileLayoutSkeleton />;
   }
 
   async function handleImageUpload(file: File) {
@@ -50,7 +51,7 @@ export default function WorkerProfileRouteWrapper() {
           <ProfileImage
             src={workerInfo?.profileImage}
             editable
-            loading={loading}
+            loading={imageLoading}
             onClickImage={() => setOpenImage(true)}
             onChange={handleImageUpload}
           />

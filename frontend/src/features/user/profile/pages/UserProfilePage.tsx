@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProfileInfoCard from '../../../profile/components/ProfileInfoCard';
-import UserProfileCard from '../components/UserProfileCard';
 import PageHeader from '@/components/molecules/PageHeader';
 import Header from '@/layouts/user/Header';
 import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
@@ -14,10 +13,21 @@ import { useProfile } from '@/features/profile/hooks/useProfile';
 import { toast } from 'sonner';
 import OtpModal from '@/features/profile/modals/OtpModal';
 import { updateUser } from '@/store/slices/authSlice';
+import ProfileImage from '@/components/molecules/ProfileImage';
+import { Separator } from '@/components/ui/separator';
+import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
 
 export default function ProfilePage() {
   const { user } = useAppSelector((s: any) => s.auth);
-  const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
+  const {
+    changeEmail,
+    changePhone,
+    loading,
+    updateBasic,
+    getUserProfilePage,
+    uploadImage,
+    imageLoading,
+  } = useProfile();
   const dispatch = useAppDispatch();
 
   const [openImage, setOpenImage] = useState(false);
@@ -42,6 +52,11 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  async function handleImageUpload(file: File) {
+    const res = await uploadImage(file);
+    dispatch(updateUser({ profileImage: res.url }));
+  }
+
   return (
     <div>
       <Header />
@@ -49,13 +64,25 @@ export default function ProfilePage() {
         <PageHeader title="My Profile" description="Manage your personal information" />
       </div>
       <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
-        <UserProfileCard
-          user={user}
-          onChangeEmail={() => setOpenEmail(true)}
-          onChangePhone={() => setOpenPhone(true)}
-          onChangePassword={() => setOpenPass(true)}
-          onChangeImage={() => setOpenImage(true)}
-        />
+        <div className="bg-card rounded-xl border p-6 flex flex-col items-center gap-4">
+          <div className="text-center">
+            <ProfileImage
+              src={user?.profileImage}
+              editable
+              loading={imageLoading}
+              onClickImage={() => setOpenImage(true)}
+              onChange={handleImageUpload}
+            />
+            <h2 className="text-2xl font-bold text-muted-foreground-700 mt-4">{user.name}</h2>
+            <p className="text-muted-foreground-500 mt-1">{user.email}</p>
+          </div>
+          <Separator />
+          <AccountChangeActions
+            onChangeEmail={() => setOpenEmail(true)}
+            onChangePhone={() => setOpenPhone(true)}
+            onChangePassword={() => setOpenPass(true)}
+          />
+        </div>
 
         <ProfileInfoCard
           user={user}

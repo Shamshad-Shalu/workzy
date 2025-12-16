@@ -11,7 +11,8 @@ export class WorkerController implements IWorkerController {
 
   getWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = req.params.workerId;
-    // const workerProfileDetails =
+    const workerProfileDetails = await this._workerService.getWorkerProfile(workerId);
+    res.status(200).json(workerProfileDetails);
   });
 
   getWorkerSummary = asyncHandler(async (req: Request, res: Response): Promise<void> => {

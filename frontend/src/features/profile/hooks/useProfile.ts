@@ -6,6 +6,7 @@ import { handleApiError } from '@/utils/handleApiError';
 
 export function useProfile() {
   const [loading, setLoading] = useState(false);
+  const [imageLoading, setImageLoading] = useState(false);
 
   async function getUserProfilePage() {
     setLoading(true);
@@ -68,14 +69,14 @@ export function useProfile() {
   }
 
   async function uploadImage(file: File) {
-    setLoading(true);
+    setImageLoading(true);
     try {
       return await profileApi.uploadProfileImage(file);
     } catch (err: any) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
-      setLoading(false);
+      setImageLoading(false);
     }
   }
   async function verifyOtp(type: 'email' | 'phone', value: string, otp: string) {
@@ -110,6 +111,7 @@ export function useProfile() {
     changePhone,
     changePassword,
     uploadImage,
+    imageLoading,
     verifyOtp,
     resendOtp,
   };

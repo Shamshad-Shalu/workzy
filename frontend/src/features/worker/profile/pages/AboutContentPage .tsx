@@ -6,13 +6,14 @@ import OtpModal from '@/features/profile/modals/OtpModal';
 import { emailRule, phoneRule } from '@/lib/validation/rules';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import { Lock, Mail, Pencil, Phone } from 'lucide-react';
+import { Mail, Phone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import z from 'zod';
 import WorkerSection from '../components/WorkerSection';
 import type { WorkerProfile } from '@/types/worker';
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
+import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
 
 export default function WorkeAboutContentPage() {
   const [openEmail, setOpenEmail] = useState(false);
@@ -30,16 +31,16 @@ export default function WorkeAboutContentPage() {
   if (!user) {
     return null;
   }
-  async function loadProfile() {
-    const [userInfo, workerInfo] = await Promise.all([getUserProfilePage(), getWorkerProfile()]);
-    if (userInfo) {
-      dispatch(updateUser(userInfo));
-    }
-    if (workerInfo) {
-      setWorkerInfo(workerInfo);
-    }
-  }
   useEffect(() => {
+    async function loadProfile() {
+      const [userInfo, workerInfo] = await Promise.all([getUserProfilePage(), getWorkerProfile()]);
+      if (userInfo) {
+        dispatch(updateUser(userInfo));
+      }
+      if (workerInfo) {
+        setWorkerInfo(workerInfo);
+      }
+    }
     loadProfile();
   }, []);
 
@@ -47,6 +48,7 @@ export default function WorkeAboutContentPage() {
     setOtpData({ type, value });
     setOpenOtpModal(true);
   }
+
   return (
     <div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
@@ -64,37 +66,11 @@ export default function WorkeAboutContentPage() {
         <div className="lg:col-span-1 space-y-6">
           <div className="bg-card rounded-2xl shadow-sm p-6 sticky top-6">
             <h3 className="text-lg font-bold text-primary mb-4">Account Settings</h3>
-            <div className="w-full space-y-3">
-              <button
-                onClick={() => setOpenEmail(true)}
-                className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
-              >
-                <span className="flex items-center gap-2">
-                  <Mail size={18} /> Change Email
-                </span>
-                <Pencil className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => setOpenPhone(true)}
-                className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
-              >
-                <span className="flex items-center gap-2">
-                  <Phone size={18} /> Change Phone
-                </span>
-                <Pencil className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => setOpenPass(true)}
-                className="w-full flex items-center justify-between bg-muted/40 p-3 rounded-lg"
-              >
-                <span className="flex items-center gap-2">
-                  <Lock size={18} /> Change Password
-                </span>
-                <Pencil className="w-4 h-4" />
-              </button>
-            </div>
+            <AccountChangeActions
+              onChangeEmail={() => setOpenEmail(true)}
+              onChangePhone={() => setOpenPhone(true)}
+              onChangePassword={() => setOpenPass(true)}
+            />
           </div>
         </div>
       </div>

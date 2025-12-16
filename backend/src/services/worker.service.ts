@@ -3,6 +3,7 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
+import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import {
   WorkerAdditionalInfo,
   WorkerSummaryResponseDTO,
@@ -38,5 +39,11 @@ export class WorkerService implements IWorkerService {
       responseTime: "2 hours",
     };
     return WorkerSummaryResponseDTO.format(worker, user, WorkerAdditionalInfo);
+  }
+
+  async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, "Worker not found");
+
+    return WorkerProfileResponseDTO.fromEntity(worker);
   }
 }
