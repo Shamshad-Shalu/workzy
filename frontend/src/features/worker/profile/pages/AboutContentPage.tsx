@@ -14,6 +14,13 @@ import WorkerSection from '../components/WorkerSection';
 import type { WorkerProfile } from '@/types/worker';
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
 import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
+import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
+import { handleApiError } from '@/utils/handleApiError';
+import { useOutletContext } from 'react-router-dom';
+
+type OutletContext = {
+  reloadWorkerData: () => Promise<void>;
+};
 
 export default function WorkeAboutContentPage() {
   const [openEmail, setOpenEmail] = useState(false);
@@ -24,8 +31,9 @@ export default function WorkeAboutContentPage() {
   const [workerInfo, setWorkerInfo] = useState<WorkerProfile | null>(null);
 
   const { user } = useAppSelector((s: any) => s.auth);
+  const { reloadWorkerData } = useOutletContext<OutletContext>();
   const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
-  const { getWorkerProfile } = useWorkerProfile();
+  const { getWorkerProfile, updateWorkerProfile } = useWorkerProfile();
   const dispatch = useAppDispatch();
 
   if (!user) {
@@ -47,6 +55,28 @@ export default function WorkeAboutContentPage() {
   function handleOtpRequest(type: 'email' | 'phone', value: string) {
     setOtpData({ type, value });
     setOpenOtpModal(true);
+  }
+
+  async function handleWorkerProfileSubmit(data: WorkerProfileSchemaType) {
+    const formData = new FormData();
+    Object.entries(data).forEach(([key, value]) => {
+      if (key === 'coverImage') {
+        if (value instanceof File) {
+          formData.append('coverImage', value);
+        }
+        return;
+      } else {
+        formData.append(key, JSON.stringify(value));
+      }
+    });
+
+    try {
+      await updateWorkerProfile(formData);
+      reloadWorkerData();
+      toast.success('successfully updated worker profile');
+    } catch (error) {
+      toast.error(handleApiError(error));
+    }
   }
 
   return (
@@ -75,7 +105,7 @@ export default function WorkeAboutContentPage() {
         </div>
       </div>
 
-      {workerInfo && <WorkerSection workerData={workerInfo} />}
+      {workerInfo && <WorkerSection workerData={workerInfo} onSubmit={handleWorkerProfileSubmit} />}
 
       {/* email  */}
       <ChangeFieldModal

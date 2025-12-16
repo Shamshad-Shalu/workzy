@@ -25,13 +25,11 @@ const AdminService = {
   createService: async (data: ServiceDTO) => {
     const formData = serviceToFormData(data);
     const response = await api.post('/admin/services/add', formData);
-    console.log('response:', response);
     return response.data;
   },
 
   updateService: async (id: string, data: ServiceDTO) => {
     const formData = serviceToFormData(data);
-    console.log('foem:', formData);
     const response = await api.patch(`/admin/services/edit/${id}`, formData);
     console.log('response:', response);
     return response.data;

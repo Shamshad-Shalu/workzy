@@ -14,6 +14,11 @@ const WorkerProfileService = {
     const res = await api.get(`/worker/${workerId}/profile/about`);
     return res.data;
   },
+
+  updateWorkerProfile: async (workerId: string, data: any): Promise<string> => {
+    const res = await api.patch(`/worker/${workerId}/profile`, data);
+    return res.data;
+  },
 };
 
 export default WorkerProfileService;

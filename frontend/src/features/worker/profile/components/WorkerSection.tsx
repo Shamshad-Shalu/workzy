@@ -19,9 +19,10 @@ import { TagManager } from '@/components/molecules/TagManager';
 
 interface WorkerSectionProps {
   workerData: WorkerProfile;
+  onSubmit: (data: WorkerProfileSchemaType) => Promise<void>;
 }
 
-export default function WorkerSection({ workerData }: WorkerSectionProps) {
+export default function WorkerSection({ workerData, onSubmit }: WorkerSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const {
     data: availability,
@@ -48,13 +49,14 @@ export default function WorkerSection({ workerData }: WorkerSectionProps) {
     setValue('availability', availability, { shouldValidate: false, shouldDirty: true });
   }, [availability, setValue]);
 
-  const onSubmit = (formData: WorkerProfileSchemaType) => {
-    console.log('FINAL SUBMIT DATA:', formData);
+  const handleFormSubmit = async (data: WorkerProfileSchemaType) => {
+    await onSubmit(data);
+    setIsEditing(false);
   };
 
   return (
     <div className="pt-2 mt-6">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(handleFormSubmit)}>
         <div className="bg-card rounded-2xl shadow-sm p-8 border border-border">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-bold text-foreground">Professional Profile</h3>
@@ -65,6 +67,7 @@ export default function WorkerSection({ workerData }: WorkerSectionProps) {
                   onClick={() => {
                     setIsEditing(true);
                   }}
+                  type="button"
                 >
                   Edit Profile
                 </Button>
@@ -73,6 +76,7 @@ export default function WorkerSection({ workerData }: WorkerSectionProps) {
                   <Button
                     variant="secondary"
                     iconRight={<X size={18} />}
+                    type="button"
                     onClick={() => {
                       setIsEditing(false);
                       reset(workerData as unknown as WorkerProfileSchemaType);

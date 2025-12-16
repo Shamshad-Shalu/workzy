@@ -41,6 +41,7 @@ export function TagManager({
               onClick={onAdd}
               disabled={max ? items.length >= max : false}
               iconLeft={<Plus size={16} />}
+              type="button"
             >
               Add {label}
             </Button>

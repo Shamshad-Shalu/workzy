@@ -13,6 +13,7 @@ interface WorkerProfileLayoutProps {
   workerInfo: WorkerInfo;
   workerAction?: React.ReactNode;
   workerStats: StatItem[];
+  reloadWorkerData?: () => void;
 }
 
 const TABS = [
@@ -26,6 +27,7 @@ export default function WorkerProfileLayout({
   workerInfo,
   workerAction,
   workerStats,
+  reloadWorkerData,
 }: WorkerProfileLayoutProps) {
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     `p-4 text-muted-foreground transition duration-150 border-b-2 ${
@@ -56,7 +58,7 @@ export default function WorkerProfileLayout({
           ))}
         </div>
         <div className="pt-2">
-          <Outlet />
+          <Outlet context={{ reloadWorkerData }} />
         </div>
       </div>
     </div>

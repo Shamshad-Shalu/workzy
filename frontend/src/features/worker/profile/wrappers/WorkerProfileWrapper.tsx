@@ -20,13 +20,15 @@ export default function WorkerProfileRouteWrapper() {
 
   async function load() {
     const { workerInfo, workerStats } = await getWorkerSummary();
-
     setWorkerInfo(workerInfo);
     setWorkerStats([
       { value: workerStats.jobsCompleted.toString() || '0', label: 'Jobs Completed' },
       { value: workerStats.averageRating.toString() || 'N/A', label: 'Average Rating' },
       { value: workerStats.completionRate.toString() || '0%', label: 'Completion Rate' },
     ]);
+  }
+  function reloadWorkerData() {
+    load();
   }
   useEffect(() => {
     load();
@@ -56,6 +58,7 @@ export default function WorkerProfileRouteWrapper() {
             onChange={handleImageUpload}
           />
         }
+        reloadWorkerData={reloadWorkerData}
       />
       <ProfileImageModal
         open={openImage}

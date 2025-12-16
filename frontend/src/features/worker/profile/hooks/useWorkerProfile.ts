@@ -3,18 +3,21 @@ import { useAppSelector } from '@/store/hooks';
 
 export function useWorkerProfile() {
   const { user } = useAppSelector((s: any) => s.auth);
+  if (!user?.workerId) {
+    throw new Error('Worker ID not available');
+  }
+
   async function getWorkerSummary() {
-    if (!user?.workerId) {
-      throw new Error('workerId not found');
-    }
     return await WorkerProfileService.getWorkerSummaryById(user.workerId);
   }
 
   async function getWorkerProfile() {
-    if (!user?.workerId) {
-      throw new Error('workerId not found');
-    }
     return await WorkerProfileService.getWorkerProfileById(user.workerId);
   }
-  return { getWorkerSummary, getWorkerProfile };
+
+  async function updateWorkerProfile(data: any) {
+    return await WorkerProfileService.updateWorkerProfile(user.workerId, data);
+  }
+
+  return { getWorkerSummary, getWorkerProfile, updateWorkerProfile };
 }

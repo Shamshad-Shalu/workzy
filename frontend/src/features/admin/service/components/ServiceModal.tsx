@@ -81,7 +81,6 @@ export function ServiceModal({
   };
 
   const onSubmitForm = async (data: ServiceFormData) => {
-    console.log('formdata:', data);
     setIsLoading(true);
     try {
       await onSubmit(data as ServiceDTO);

@@ -1,8 +1,9 @@
-import { USER } from "@/constants";
+import { HTTPSTATUS, USER, WORKER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
+import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import {
   WorkerAdditionalInfo,
@@ -11,6 +12,8 @@ import {
 import { IWorker } from "@/types/worker";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
+import { deleteFromS3, uploadFileToS3 } from "./s3.service";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class WorkerService implements IWorkerService {
@@ -22,7 +25,7 @@ export class WorkerService implements IWorkerService {
     return this._workerRepository.findOne({ userId });
   };
   async getWorkerSummary(workerId: string): Promise<WorkerSummaryResponseDTO> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, "Worker not found");
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
 
     const user = await getEntityOrThrow(
       this._userRepository,
@@ -42,8 +45,32 @@ export class WorkerService implements IWorkerService {
   }
 
   async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, "Worker not found");
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
 
     return WorkerProfileResponseDTO.fromEntity(worker);
+  }
+
+  async updateWorkerProfile(
+    workerId: string,
+    data: WorkerProfileRequestDTO,
+    file?: Express.Multer.File
+  ): Promise<WorkerProfileResponseDTO> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+
+    const updates: Partial<IWorker> = { ...data };
+
+    if (file) {
+      if (worker?.coverImage) {
+        await deleteFromS3(worker.coverImage);
+      }
+      updates.coverImage = await uploadFileToS3(file, "public/worker/coverImages");
+    }
+
+    const updatedWorker = await this._workerRepository.update(workerId, updates);
+    if (!updatedWorker) {
+      throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
 }

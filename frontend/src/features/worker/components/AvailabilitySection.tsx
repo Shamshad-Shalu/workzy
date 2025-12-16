@@ -84,6 +84,7 @@ export function AvailabilitySection({
                       className="flex-1 px-2 py-1 border border-input rounded text-xs focus:ring-2 focus:ring-ring focus:border-transparent outline-none bg-background text-foreground"
                     />
                     <button
+                      type="button"
                       onClick={() => onRemoveSlot(day, idx)}
                       className="p-1 text-destructive hover:bg-destructive/10 rounded transition-colors flex-shrink-0"
                     >

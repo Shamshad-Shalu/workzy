@@ -4,7 +4,7 @@ import WorkerDashboard from '@/features/worker/dashboard/pages/Dashboard';
 import { WorkerLayout } from '@/layouts/worker/WorkerLayout';
 import { ROLE } from '@/constants';
 import WorkerProfileRouteWrapper from '@/features/worker/profile/wrappers/WorkerProfileWrapper';
-import WorkerAboutContentPage from '@/features/worker/profile/pages/AboutContentPage ';
+import WorkerAboutContentPage from '@/features/worker/profile/pages/AboutContentPage';
 import WorkerServicesContentPage from '@/features/worker/profile/pages/ServicesContentPage';
 import WorkerDocumentsContentPage from '@/features/worker/profile/pages/DocumentsContentPage';
 import WorkerSubcriptionContentPage from '@/features/worker/profile/pages/SubscriptionContentPage';
