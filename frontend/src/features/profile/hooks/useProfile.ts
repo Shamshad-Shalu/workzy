@@ -36,8 +36,6 @@ export function useProfile() {
           delete payload.profile!.address;
         }
       }
-      console.log('Updating profile with payload:', payload);
-
       const user = await profileApi.updateBasicInfo(payload);
       return user;
     } catch (err) {

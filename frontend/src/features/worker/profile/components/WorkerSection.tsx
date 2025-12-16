@@ -16,6 +16,10 @@ import {
 import { useAvailability } from '../../hooks/useAvailability';
 import { AvailabilitySection } from '../../components/AvailabilitySection';
 import { TagManager } from '@/components/molecules/TagManager';
+import {
+  LocationSearchModal,
+  useLocationSearchModal,
+} from '@/components/molecules/LocationSearchModal';
 
 interface WorkerSectionProps {
   workerData: WorkerProfile;
@@ -24,6 +28,7 @@ interface WorkerSectionProps {
 
 export default function WorkerSection({ workerData, onSubmit }: WorkerSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
+  const { isOpen, openModal, closeModal } = useLocationSearchModal();
   const {
     data: availability,
     addSlot,
@@ -52,6 +57,13 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
   const handleFormSubmit = async (data: WorkerProfileSchemaType) => {
     await onSubmit(data);
     setIsEditing(false);
+  };
+
+  const handleLocationSelect = (location: string, field: any) => {
+    const currentCities = field.value || [];
+    if (!currentCities.includes(location)) {
+      field.onChange([...currentCities, location]);
+    }
   };
 
   return (
@@ -179,21 +191,27 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                 name="cities"
                 control={control}
                 render={({ field }) => (
-                  <TagManager
-                    label="Town Cities"
-                    items={field.value}
-                    isEditing={isEditing}
-                    max={8}
-                    error={errors.cities?.message}
-                    onAdd={() => {
-                      const newSkill = 'Malappuram';
-                      field.onChange([...field.value, newSkill]);
-                    }}
-                    onRemove={skill => {
-                      field.onChange(field.value.filter(s => s !== skill));
-                    }}
-                    className="bg-section-blue border-section-blue-border"
-                  />
+                  <>
+                    <TagManager
+                      label="Town Cities"
+                      items={field.value}
+                      isEditing={isEditing}
+                      max={8}
+                      error={errors.cities?.message}
+                      onAdd={openModal}
+                      onRemove={city => {
+                        field.onChange(field.value.filter(s => s !== city));
+                      }}
+                      className="bg-section-blue border-section-blue-border"
+                    />
+                    <LocationSearchModal
+                      open={isOpen}
+                      onClose={closeModal}
+                      onSelectLocation={location => handleLocationSelect(location, field)}
+                      title="Add City"
+                      description="Search and select a city"
+                    />
+                  </>
                 )}
               />
             </div>

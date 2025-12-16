@@ -38,6 +38,10 @@ const workerSchema: Schema = new Schema<IWorker>(
     },
     tagline: { type: String },
     about: { type: String },
+    status: {
+      type: String,
+      default: "pending",
+    },
     coverImage: {
       type: String,
     },
