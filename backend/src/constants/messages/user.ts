@@ -10,4 +10,6 @@ export const USER = {
   PASSWORD_UPDATE_SUCCESS: "Password updated successfully",
   UNBLOCKED: "User unblocked successfully",
   BLOCKEDSUCCESS: "User blocked successfully",
+  UPDATE_ERROR: "Error while updating profile",
+  PROFILE_SUCCESS: "Profile updated successfully",
 };

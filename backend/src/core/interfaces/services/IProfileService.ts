@@ -1,6 +1,5 @@
-import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
+import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
-import { IUser } from "@/types/user";
 
 export interface IProfileService {
   updateProfileImage(userId: string, file: Express.Multer.File): Promise<string>;
@@ -9,5 +8,5 @@ export interface IProfileService {
   resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean>;
   updateEmailOrPhone(userId: string, type: "email" | "phone", value: string): Promise<boolean>;
   getProfile(userId: string): Promise<UserProfileResponseDTO>;
-  updateProfile(userId: string, payload: Partial<IUser>): Promise<UserProfileResponseDTO>;
+  updateProfileBasic(userId: string, payload: ProfileRequestDTO): Promise<UserProfileResponseDTO>;
 }

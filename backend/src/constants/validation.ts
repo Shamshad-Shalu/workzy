@@ -8,3 +8,5 @@ export const SERVICE_NAME_REGEX =
   /^(?!.*(.)\1{2})(?=.{3,40}$)(?=(?:.*[A-Za-z]){2,})[A-Za-z0-9][A-Za-z0-9/&.'\- ]*[A-Za-z0-9]$/;
 
 export const DESCRIPTION_REGEX = /^(?!.*(.)\1{3})(?=.{10,500}$)[A-Za-z0-9.,!?&()'"/_\-:\s]+$/;
+
+export const PLACE_REGEX = /^[A-Za-z0-9\s#\-\/.,]+$/;

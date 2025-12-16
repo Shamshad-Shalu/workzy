@@ -36,13 +36,6 @@ export class UserService implements IUserService {
     return { users, total };
   }
 
-  async getUserById(userId: string): Promise<IUser | null> {
-    return this._userRepository.findById(userId);
-  }
-  async updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null> {
-    return this._userRepository.update(userId, userData);
-  }
-
   async toggleUserStatus(userId: string): Promise<string> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     const newStatus = !user.isBlocked;

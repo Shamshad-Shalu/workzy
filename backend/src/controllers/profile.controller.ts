@@ -3,10 +3,10 @@ import { inject, injectable } from "inversify";
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS } from "@/constants";
+import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
 import { TYPES } from "@/di/types";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
-import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
+import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
 import validator from "validator";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 
@@ -78,7 +78,10 @@ export class ProfileController implements IProfileController {
     const userId = req.user?._id;
     if (!userId) return;
     const data = req.body;
-    const user = await this._profileService.updateProfile(userId, data);
-    res.status(HTTPSTATUS.OK).json({ message: "profile updated successfully", user });
+    const updateUser = await this._profileService.updateProfileBasic(
+      userId,
+      data as ProfileRequestDTO
+    );
+    res.status(HTTPSTATUS.OK).json({ message: USER.PROFILE_SUCCESS, user: updateUser });
   });
 }

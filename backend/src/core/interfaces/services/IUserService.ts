@@ -3,8 +3,6 @@ import { IUser } from "@/types/user";
 
 export interface IUserService {
   findByEmail(email: string): Promise<IUser | null>;
-  getUserById(userId: string): Promise<IUser | null>;
-  updateUser(userId: string, userData: Partial<IUser>): Promise<IUser | null>;
   toggleUserStatus(userId: string): Promise<string>;
   getUsers(
     page: number,

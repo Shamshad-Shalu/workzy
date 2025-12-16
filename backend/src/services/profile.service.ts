@@ -7,14 +7,13 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
 import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
-import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
+import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import redisClient from "@/config/redisClient";
 import validator from "validator";
 import logger from "@/config/logger";
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
-import { UpdateProfilePayload } from "@/core/types/profilePayload";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -34,6 +33,7 @@ export class ProfileService implements IProfileService {
 
     return await generateSignedUrl(newImage);
   }
+
   async updatePassword(userId: string, passwordDto: ChangePasswordDTO): Promise<boolean> {
     const { currentPassword, newPassword } = passwordDto;
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
@@ -99,16 +99,14 @@ export class ProfileService implements IProfileService {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     return await UserProfileResponseDTO.fromEntity(user);
   }
-
-  async updateProfile(
+  async updateProfileBasic(
     userId: string,
-    payload: Partial<UpdateProfilePayload>
+    payload: ProfileRequestDTO
   ): Promise<UserProfileResponseDTO> {
-    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
-    if (payload.name) {
-      user.name = payload.name;
+    const updatedUser = await this._userRepository.update(userId, payload);
+    if (!updatedUser) {
+      throw new CustomError(USER.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    await user.save();
-    return await UserProfileResponseDTO.fromEntity(user);
+    return UserProfileResponseDTO.fromEntity(updatedUser);
   }
 }
