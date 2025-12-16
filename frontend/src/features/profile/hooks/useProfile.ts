@@ -23,6 +23,21 @@ export function useProfile() {
   async function updateBasic(payload: Partial<User>) {
     setLoading(true);
     try {
+      if (payload.profile?.address) {
+        const address = payload.profile.address;
+        Object.keys(address).forEach(key => {
+          const k = key as keyof typeof address;
+          if (address[k] === '' || address[k] === undefined) {
+            delete address[k];
+          }
+        });
+        // If address is now empty, remove it entirely
+        if (Object.keys(address).length === 0) {
+          delete payload.profile!.address;
+        }
+      }
+      console.log('Updating profile with payload:', payload);
+
       const user = await profileApi.updateBasicInfo(payload);
       return user;
     } catch (err) {

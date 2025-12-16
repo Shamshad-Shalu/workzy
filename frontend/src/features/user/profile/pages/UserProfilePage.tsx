@@ -45,6 +45,7 @@ export default function ProfilePage() {
   useEffect(() => {
     async function loadProfile() {
       const res = await getUserProfilePage();
+      console.log('User Profile Data:', res);
       if (res) {
         dispatch(updateUser(res));
       }

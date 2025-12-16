@@ -221,6 +221,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                     <Label>Service Amount</Label>
 
                     <Input
+                      className="p-3"
                       type="number"
                       placeholder="Enter amount"
                       error={errors.defaultRate?.amount?.message}
@@ -245,7 +246,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                     <div className="text-center">
                       <div className="text-3xl font-bold">₹{workerData.defaultRate.amount}</div>
                       <div className="text-xs mt-1 text-muted-baground">
-                        per {workerData.defaultRate.type === 'hourly' ? 'hour' : 'project'}
+                        per {workerData.defaultRate.type === 'fixed' ? 'day' : 'hour'}
                       </div>
                     </div>
                   </div>

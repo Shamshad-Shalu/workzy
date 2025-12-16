@@ -1,15 +1,15 @@
+import { Check, MapPin, Pencil, Phone, Save, User2, X } from 'lucide-react';
+import type { User } from '@/types/user';
+import { useProfileForm } from '../hooks/useProfileForm';
+
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
 import { Separator } from '@/components/ui/separator';
-import { INDIAN_STATES } from '@/constants';
-import type { User } from '@/types/user';
-import { Check, MapPin, Pencil, Phone, Save, User2, X } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { type ProfileFormType, ProfileSchema } from '../validation/profileSchema';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { INDIAN_STATES } from '@/constants/indianStates';
+import MapSelector from './MapSelector';
+import { toast } from 'sonner';
 
 interface Props {
   user: User;
@@ -17,50 +17,37 @@ interface Props {
 }
 
 export default function ProfileInfoCard({ user, onSave }: Props) {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  const defaultValues: ProfileFormType = {
-    name: user.name,
-    profile: {
-      address: {
-        house: user.profile?.address?.house || '',
-        place: user.profile?.address?.place || '',
-        city: user.profile?.address?.city || '',
-        state: user.profile?.address?.state || '',
-        pincode: user.profile?.address?.pincode || '',
-      },
-    },
-  };
-
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting, isValid },
-    reset,
+    errors,
+    isSubmitting,
     watch,
     setValue,
-  } = useForm<ProfileFormType>({
-    resolver: zodResolver(ProfileSchema),
-    defaultValues,
-    mode: 'onChange',
-  });
+    isEditing,
+    showMap,
+    currentLocation,
+    isLocationSet,
+    setIsEditing,
+    setShowMap,
+    handleLocationSelect,
+    handleSetLocation,
+    onSubmit,
+    handleCancel,
+  } = useProfileForm({ user, onSave });
 
-  useEffect(() => {
-    reset(defaultValues);
-  }, [user, reset]);
+  const addressError = errors.profile?.address;
 
-  async function onSubmit(data: ProfileFormType) {
-    await onSave({
-      name: data.name,
-      profile: data.profile,
-    });
-    setIsEditing(false);
+  if (errors.profile?.location) {
+    toast.error(errors.profile.location.message);
   }
 
-  const isTrue = true;
+  if (addressError?.message) {
+    toast.error(addressError.message);
+  }
 
   return (
-    <div className="bg-card border rounded-2xl rounded-xl p-6">
+    <div className="bg-card border rounded-2xl p-6">
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-xl font-bold text-foreground">Profile Information</h3>
         <div>
@@ -68,27 +55,18 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
             <Button
               iconRight={<Pencil size={18} />}
               variant="blue"
-              onClick={() => {
-                setIsEditing(true);
-              }}
+              onClick={() => setIsEditing(true)}
             >
               Edit Profile
             </Button>
           ) : (
             <div className="flex gap-3">
-              <Button
-                variant="secondary"
-                iconRight={<X size={18} />}
-                onClick={() => {
-                  setIsEditing(false);
-                }}
-              >
+              <Button variant="secondary" iconRight={<X size={18} />} onClick={handleCancel}>
                 Cancel
               </Button>
               <Button
                 variant="green"
                 iconRight={<Save size={19} />}
-                disabled={!isValid}
                 loading={isSubmitting}
                 onClick={handleSubmit(onSubmit)}
               >
@@ -99,7 +77,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
         </div>
       </div>
 
-      <div className="space-y-6">
+      <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
         <div>
           <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <User2 className="w-4 h-4 text-indigo-600" />
@@ -127,7 +105,9 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
             </div>
           </div>
         </div>
+
         <Separator className="mb-3" />
+
         <div className="pt-4">
           <h4 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
             <MapPin className="w-4 h-4 text-indigo-600" />
@@ -142,7 +122,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                 placeholder="Street address, apartment, suite"
                 className="px-3"
                 {...register('profile.address.house')}
-                error={errors.profile?.address?.house?.message}
+                error={addressError?.house?.message}
               />
             </div>
 
@@ -154,7 +134,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                   placeholder="Enter your place"
                   className="px-3"
                   {...register('profile.address.place')}
-                  error={errors.profile?.address?.place?.message}
+                  error={addressError?.place?.message}
                 />
               </div>
 
@@ -165,7 +145,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                   placeholder="Enter your city"
                   className="px-3"
                   {...register('profile.address.city')}
-                  error={errors.profile?.address?.city?.message}
+                  error={addressError?.city?.message}
                 />
               </div>
             </div>
@@ -180,7 +160,7 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                     options={INDIAN_STATES.map(s => ({ label: s, value: s }))}
                     value={watch('profile.address.state')}
                     onChange={v => setValue('profile.address.state', v)}
-                    error={errors.profile?.address?.state?.message}
+                    error={addressError?.state?.message}
                   />
                 ) : (
                   <Input
@@ -197,19 +177,19 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                   placeholder="Enter Pincode"
                   className="px-3"
                   {...register('profile.address.pincode')}
-                  error={errors.profile?.address?.pincode?.message}
+                  error={addressError?.pincode?.message}
                 />
               </div>
             </div>
 
-            {/* GPS Location Placeholder */}
-            <div className="mt-4 p-4 bg-gradient-to-r from-accent/20 to-primay/20 rounded-lg border border">
+            {/* GPS Location Section */}
+            <div className="mt-4 p-4 bg-gradient-to-r from-accent/20 to-primary/20 rounded-lg border">
               <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-indigo-600 mt-0.5" />
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <h5 className="font-semibold text-foreground text-sm">GPS Coordinates</h5>
-                    {isTrue && (
+                    {isLocationSet && (
                       <span className="flex items-center gap-1 text-xs text-green-600 font-medium">
                         <Check className="w-3 h-3" />
                         Set
@@ -217,21 +197,34 @@ export default function ProfileInfoCard({ user, onSave }: Props) {
                     )}
                   </div>
                   <p className="text-sm text-muted-foreground mt-1">
-                    {isTrue
+                    {isLocationSet
                       ? 'Your precise location has been saved for better service delivery.'
                       : 'Set your GPS coordinates for accurate location-based services.'}
                   </p>
                   {isEditing && (
-                    <button className="mt-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors">
-                      {isTrue ? 'Update Location' : 'Set Location'} →
+                    <button
+                      type="button"
+                      className="mt-2 text-sm font-medium text-primary hover:text-primary/80 transition-colors"
+                      onClick={handleSetLocation}
+                    >
+                      {isLocationSet ? 'Update Location' : 'Set Location'} →
                     </button>
+                  )}
+                  {isLocationSet && currentLocation?.coordinates && (
+                    <div className="mt-2 p-2 bg-background rounded text-xs font-mono">
+                      Lat: {currentLocation.coordinates[1].toFixed(4)}, Lng:{' '}
+                      {currentLocation.coordinates[0].toFixed(4)}
+                    </div>
                   )}
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </form>
+      {showMap && (
+        <MapSelector onLocationSelect={handleLocationSelect} onClose={() => setShowMap(false)} />
+      )}
     </div>
   );
 }
