@@ -21,7 +21,7 @@ const WorkerProfileService = {
   },
 
   addWorkerProfile: async (userId: string, data: any): Promise<string> => {
-    const res = await api.post(`joinUs:${userId}`, data);
+    const res = await api.post(`/worker/joinUs/${userId}`, data);
     return res.data;
   },
 };

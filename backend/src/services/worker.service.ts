@@ -14,6 +14,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
 import { deleteFromS3, uploadFileToS3 } from "./s3.service";
 import CustomError from "@/utils/customError";
+import mongoose from "mongoose";
 
 @injectable()
 export class WorkerService implements IWorkerService {
@@ -72,5 +73,21 @@ export class WorkerService implements IWorkerService {
     }
 
     return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+  }
+
+  async createWorkerProfile(userId: string, data: any, file: Express.Multer.File): Promise<WorkerProfileResponseDTO> {
+    const user  = await getEntityOrThrow(this._userRepository ,userId)
+    const { age , ...workerData } = data;
+    user.age = age;
+    await user.save();
+    const updates : Partial<IWorker> = { ...workerData };
+    
+    const url = await uploadFileToS3(file, "private/worker/documents");
+    updates.documents?.push({ url ,type :"id_proof" , status:"pending" })
+    updates.userId = new mongoose.Types.ObjectId(userId) as unknown as IWorker['userId'];
+    const worker = await this._workerRepository.create({
+        ...updates
+    })
+    return WorkerProfileResponseDTO.fromEntity(worker)
   }
 }

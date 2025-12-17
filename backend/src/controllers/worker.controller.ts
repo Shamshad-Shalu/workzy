@@ -34,4 +34,13 @@ export class WorkerController implements IWorkerController {
     );
     res.status(200).json({ message: WORKER.UPDATE_SUCCESS, workerData });
   });
+
+  createWorkerProfile  = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId
+    const file = req?.file
+    if(!file) return ;
+    const worker = await this._workerService.createWorkerProfile (userId ,req.body,file )
+    res.status(200).json({ message: WORKER.CREATE_SUCCES , worker });
+  })
+  
 }

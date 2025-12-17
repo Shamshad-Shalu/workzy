@@ -14,6 +14,12 @@ const router = Router();
 
 const workerController = container.get<IWorkerController>(TYPES.WorkerController);
 
+router.post("/joinUs/:userId",
+  upload.single("document"),
+  validateFileSize,
+  parseMultipart({ forceJson: ["defaultRate"] }),
+  workerController.createWorkerProfile
+)
 router.use(authenticate([ROLE.WORKER]));
 
 router.get("/:workerId/profile", workerController.getWorkerSummary);

@@ -8,6 +8,7 @@ export class UserProfileResponseDTO {
   @Expose() name!: string;
   @Expose() email!: string;
   @Expose() phone?: string;
+  @Expose() age?: number;
   @Expose() role!: string;
   @Expose() profileImage!: string;
   @Expose() isPremium!: boolean;
@@ -21,6 +22,7 @@ export class UserProfileResponseDTO {
     dto.email = user.email;
     dto.phone = user.phone;
     dto.role = user.role;
+    dto.age = user.age || undefined;
     dto.isPremium = user.isPremium;
     dto.profile = user.profile;
 

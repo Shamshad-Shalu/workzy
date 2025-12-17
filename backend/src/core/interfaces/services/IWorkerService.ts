@@ -12,4 +12,9 @@ export interface IWorkerService {
     data: WorkerProfileRequestDTO,
     file?: Express.Multer.File
   ): Promise<WorkerProfileResponseDTO>;
+  createWorkerProfile(
+    userId : string ,
+    data : any ,
+    file : Express.Multer.File
+  ) : Promise <WorkerProfileResponseDTO>;
 }

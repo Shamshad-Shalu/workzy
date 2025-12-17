@@ -87,7 +87,6 @@ export default function JoinUsPage() {
       }
     });
 
-    console.log('form data', data);
     try {
       await WorkerProfileService.addWorkerProfile(userId, formData);
       toast.success('successfully uploaded worker profile');
