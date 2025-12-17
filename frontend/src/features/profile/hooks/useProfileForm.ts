@@ -18,12 +18,12 @@ export function useProfileForm({ user, onSave }: UseProfileFormProps) {
     profile: {
       address: user.profile?.address
         ? {
-          house: user.profile.address.house || '',
-          place: user.profile.address.place || '',
-          city: user.profile.address.city || '',
-          state: user.profile.address.state || '',
-          pincode: user.profile.address.pincode || '',
-        }
+            house: user.profile.address.house || '',
+            place: user.profile.address.place || '',
+            city: user.profile.address.city || '',
+            state: user.profile.address.state || '',
+            pincode: user.profile.address.pincode || '',
+          }
         : undefined,
       location:
         user.profile?.location?.coordinates && user.profile.location.coordinates.length === 2

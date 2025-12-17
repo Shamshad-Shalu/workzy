@@ -10,6 +10,7 @@ import RoleBasedRoot from './RoleBasedRoot';
 import UserProfilePage from '@/features/user/profile/pages/UserProfilePage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROLE } from '@/constants';
+import JoinUsPage from '@/pages/JoinUsPage';
 
 export default function UserRoutes() {
   return (
@@ -27,6 +28,7 @@ export default function UserRoutes() {
 
       <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
         <Route path="/profile" element={<UserProfilePage />} />
+        <Route path="/join-us" element={<JoinUsPage />} />
       </Route>
     </Routes>
   );

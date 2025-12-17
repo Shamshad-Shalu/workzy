@@ -19,6 +19,11 @@ const WorkerProfileService = {
     const res = await api.patch(`/worker/${workerId}/profile`, data);
     return res.data;
   },
+
+  addWorkerProfile: async (userId: string, data: any): Promise<string> => {
+    const res = await api.post(`joinUs:${userId}`, data);
+    return res.data;
+  },
 };
 
 export default WorkerProfileService;

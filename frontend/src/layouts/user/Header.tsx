@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
 import { Bell, User as UserIcon, Users } from 'lucide-react';
@@ -15,10 +15,18 @@ import {
 import ModeToggle from '../../components/ui/ModeToggle';
 import { ROLE } from '@/constants';
 
+const NAV_LINKS = [
+  { path: '/', label: 'Home' },
+  { path: '/services', label: 'Services' },
+  { path: '/about', label: 'About Us' },
+  { path: '/join-us', label: 'Join Us' },
+];
+
 export default function Header() {
   const { user, isAuthenticated } = useAppSelector(s => s.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     dispatch(clearUser());
@@ -29,12 +37,31 @@ export default function Header() {
     navigate('/worker/dashboard');
   };
 
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <header className="w-full bg-card border-border shadow-sm ">
       <div className="max-w-7xl mx-auto h-16 px-4 flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-foreground">
           Workzy
         </Link>
+        {isAuthenticated && (
+          <nav className="hidden md:flex items-center gap-6">
+            {NAV_LINKS.map(link => (
+              <Link
+                key={link.path}
+                to={link.path}
+                className={`text-sm font-medium transition-colors hover:text-primary ${
+                  isActiveRoute(link.path) ? 'text-primary' : 'text-muted-foreground'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+        )}
         <div className="flex items-center gap-4">
           <button className="relative p-2 hover:bg-accent dark:hover:bg-accent/50 rounded-full">
             <Bell className="h-5 w-5 text-foreground" />
