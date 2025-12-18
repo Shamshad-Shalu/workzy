@@ -71,4 +71,18 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   countDocuments(filter: FilterQuery<T>): Promise<number> {
     return this.model.countDocuments(filter).exec();
   }
+  async findWithPopulate(
+    filter: FilterQuery<T>,
+    populate: string,
+    select: string,
+    skip: number,
+    limit: number
+  ): Promise<T[]> {
+    return this.model
+      .find(filter)
+      .populate(populate, select)
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+  }
 }

@@ -4,11 +4,15 @@ import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import { TYPES } from "@/di/types";
 import { IUserService } from "@/core/interfaces/services/IUserService";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { ROLE } from "@/constants";
 
 @injectable()
 export class AdminController implements IAdminController {
-  constructor(@inject(TYPES.UserService) private _userService: IUserService) {}
+  constructor(
+    @inject(TYPES.UserService) private _userService: IUserService,
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService
+  ) {}
 
   getUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
@@ -29,16 +33,38 @@ export class AdminController implements IAdminController {
     res.json({
       users,
       total,
-      page,
       totalPages,
     });
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
-
     const message = await this._userService.toggleUserStatus(userId);
-
     res.status(200).json({ message });
+  });
+
+  getAllWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const status = (req.query.status as string) || "all";
+    const workerStatus = (req.query.workerStatus as string) || "all";
+
+    const { workers, total } = await this._workerService.getAllWorkers(
+      page,
+      limit,
+      search,
+      status,
+      workerStatus
+    );
+
+    res.json({
+      workers,
+      total,
+    });
+  });
+
+  verifyWorker = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    console.log("reqBody:", req.body);
   });
 }

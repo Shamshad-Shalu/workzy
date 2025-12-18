@@ -31,4 +31,7 @@ export const ADMIN_ROUTES = {
 
   GETSERVICE: `${ADMIN_ROUTE}/services`,
   TOGGLESERVICESTATUS: `${ADMIN_ROUTE}/services/toggle-status`,
+
+  GETWORKER: `${ADMIN_ROUTE}/workers/all`,
+  VERIFYWORKER: `${ADMIN_ROUTE}/workers/verify`,
 };

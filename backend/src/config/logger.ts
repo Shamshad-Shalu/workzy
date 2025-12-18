@@ -1,6 +1,7 @@
 import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 import winston from "winston";
+import { NODE_ENV } from "@/constants";
 
 const customColors = {
   error: "brightRed",
@@ -10,21 +11,21 @@ const customColors = {
   debug: "brightBlue",
 };
 
-winston.addColors(customColors);
+const isProd = NODE_ENV === "production";
 
+winston.addColors(customColors);
 const logger = createLogger({
-  level: "info",
+  level: isProd ? "info" : "debug",
   format: format.combine(
     format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
-    format.printf(({ timestamp, level, message }) => {
-      return `${timestamp} [${level.toUpperCase()}]: ${message}`;
-    })
+    format.errors({ stack: true }),
+    format.splat(),
+    format.json()
   ),
   transports: [
     new transports.Console({
       format: format.combine(
-        format.colorize(),
-        format.timestamp({ format: "YYYY-MM-DD HH:mm:ss" }),
+        format.colorize({ all: true }),
         format.printf(({ timestamp, level, message }) => {
           return `${timestamp} [${level}]: ${message}`;
         })
@@ -33,7 +34,10 @@ const logger = createLogger({
     new DailyRotateFile({
       filename: "logs/app-%DATE%.log",
       datePattern: "YYYY-MM-DD",
+      zippedArchive: true,
+      maxSize: "20m",
       maxFiles: "30d",
+      level: "info",
     }),
   ],
 });

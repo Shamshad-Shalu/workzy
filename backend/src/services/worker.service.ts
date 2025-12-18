@@ -1,4 +1,4 @@
-import { HTTPSTATUS, USER, WORKER } from "@/constants";
+import { HTTPSTATUS, SERVER, USER, WORKER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -14,7 +14,8 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
 import { deleteFromS3, uploadFileToS3 } from "./s3.service";
 import CustomError from "@/utils/customError";
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
+import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
 
 @injectable()
 export class WorkerService implements IWorkerService {
@@ -75,19 +76,62 @@ export class WorkerService implements IWorkerService {
     return WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
 
-  async createWorkerProfile(userId: string, data: any, file: Express.Multer.File): Promise<WorkerProfileResponseDTO> {
-    const user  = await getEntityOrThrow(this._userRepository ,userId)
-    const { age , ...workerData } = data;
+  async createWorkerProfile(
+    userId: string,
+    data: any,
+    file: Express.Multer.File
+  ): Promise<WorkerProfileResponseDTO> {
+    const isAlredyWorker = await this._workerRepository.findOne({ userId });
+    if (isAlredyWorker) {
+      throw new CustomError("Already Provided", HTTPSTATUS.BAD_REQUEST);
+    }
+    const user = await getEntityOrThrow(this._userRepository, userId);
+    const { age, ...workerData } = data;
     user.age = age;
     await user.save();
-    const updates : Partial<IWorker> = { ...workerData };
-    
+    const updates: Partial<IWorker> = { ...workerData };
+
     const url = await uploadFileToS3(file, "private/worker/documents");
-    updates.documents?.push({ url ,type :"id_proof" , status:"pending" })
-    updates.userId = new mongoose.Types.ObjectId(userId) as unknown as IWorker['userId'];
+    updates.documents = [{ url, type: "id_proof", status: "pending" }];
+    updates.userId = new mongoose.Types.ObjectId(userId) as any;
     const worker = await this._workerRepository.create({
-        ...updates
-    })
-    return WorkerProfileResponseDTO.fromEntity(worker)
+      ...updates,
+    });
+    return WorkerProfileResponseDTO.fromEntity(worker);
+  }
+
+  async getAllWorkers(
+    page: number,
+    limit: number,
+    search: string,
+    status: string,
+    workerStatus: string
+  ): Promise<{ workers: WorkerResponseDTO[]; total: number }> {
+    const skip = (page - 1) * limit;
+
+    const query: FilterQuery<IWorker> = {};
+    if (search && search.trim() !== "") {
+      query.displayName = { $regex: search, $options: "i" };
+    }
+    if (status && status !== "all") {
+      const isBlocked = status === "blocked";
+      const matchingUsers = await this._userRepository.find({ isBlocked });
+      const userIds = matchingUsers.map((user) => user._id);
+      query.userId = { $in: userIds };
+    }
+    if (workerStatus && workerStatus !== "all") {
+      query.status = workerStatus;
+    }
+
+    const [workers, total] = await Promise.all([
+      this._workerRepository.getAllWorkers(query, skip, limit),
+      this._workerRepository.countDocuments(query),
+    ]);
+    if (!workers) {
+      throw new CustomError(SERVER.ERROR, HTTPSTATUS.BAD_REQUEST);
+    }
+    const workerDtos = await WorkerResponseDTO.fromEntities(workers);
+
+    return { workers: workerDtos, total };
   }
 }
