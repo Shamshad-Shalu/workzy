@@ -83,6 +83,7 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: [DocumentSchema],
       default: [],
     },
+    rejectReason: { type: String },
   },
   { timestamps: true }
 );

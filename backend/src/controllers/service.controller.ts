@@ -84,6 +84,4 @@ export class AdminServiceController implements IAdminServiceController {
 
     res.status(HTTPSTATUS.OK).json({ message, isAvailable: newStatus });
   });
-
-  
 }

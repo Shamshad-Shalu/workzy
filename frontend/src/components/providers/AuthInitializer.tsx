@@ -9,7 +9,7 @@ export default function AuthInitializer({ children }: { children: React.ReactNod
   useEffect(() => {
     const active = localStorage.getItem('sessionActive');
 
-    if (active === 'true'&& status === 'idle') {
+    if (active === 'true' && status === 'idle') {
       dispatch(refreshAccessToken());
     }
   }, [dispatch]);

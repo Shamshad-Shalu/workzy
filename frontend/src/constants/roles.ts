@@ -5,3 +5,5 @@ export const ROLE = {
 } as const;
 
 export type Role = (typeof ROLE)[keyof typeof ROLE];
+
+export const WORKER_STATUSES = ['pending', 'verified', 'needs_revision', 'rejected'] as const;

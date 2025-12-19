@@ -30,10 +30,7 @@ export default function AppBreadcrumb({ items }: AppBreadcrumbProps) {
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
               ) : (
                 <>
-                  <BreadcrumbLink 
-                    href={item.href || '#'} 
-                    onClick={item.onClick}
-                  >
+                  <BreadcrumbLink href={item.href || '#'} onClick={item.onClick}>
                     {item.label}
                   </BreadcrumbLink>
                   <BreadcrumbSeparator />

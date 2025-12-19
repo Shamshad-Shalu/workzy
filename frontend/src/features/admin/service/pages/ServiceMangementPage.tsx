@@ -29,7 +29,7 @@ export default function ServiceManagementPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const path = (location.state?.path as ServiceCrumb[]) || [];
-  
+
   const { pageIndex, pageSize, search, status, parentId, updateParams } =
     useUrlFilterParams<CustomParams>([{ key: 'parentId' }]);
 
@@ -56,12 +56,12 @@ export default function ServiceManagementPage() {
     path.forEach((crumb, index) => {
       breadcrumbItems.push({
         label: crumb.name,
-        href: '#', 
+        href: '#',
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
           const newPath = path.slice(0, index + 1);
           navigate(`?parentId=${crumb.id}&page=1`, { state: { path: newPath } });
-        }
+        },
       });
     });
   }
@@ -86,8 +86,8 @@ export default function ServiceManagementPage() {
   const onViewChild = (service: ServiceRow) => {
     setParentVal(service);
     const newPath = [...path, { id: service._id, name: service.name }];
-    navigate(`?parentId=${service._id}&page=1`, { 
-       state: { path: newPath } 
+    navigate(`?parentId=${service._id}&page=1`, {
+      state: { path: newPath },
     });
   };
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function ServiceManagementPage() {
   };
 
   return (
-    <div className="bg-baground py-6 px-0 xl:p-6">
+    <div>
       <div className="flex items-center justify-between">
         <PageHeader title="Service Management" />
         <Button

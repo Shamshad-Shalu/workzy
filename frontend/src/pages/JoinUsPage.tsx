@@ -158,7 +158,9 @@ export default function JoinUsPage() {
                     placeholder="e.g., John's Plumbing Services"
                     className="px-3"
                     error={errors.displayName?.message}
-                    {...register('displayName')}
+                    {...register('displayName', {
+                      setValueAs: v => v.trim(),
+                    })}
                   />
                 </div>
                 <div>
@@ -180,7 +182,9 @@ export default function JoinUsPage() {
                     placeholder="e.g., Expert Plumber with 10+ Years Experience"
                     className="px-3"
                     error={errors.tagline?.message}
-                    {...register('tagline')}
+                    {...register('tagline', {
+                      setValueAs: v => v.trim(),
+                    })}
                   />
                 </div>
                 <div>
@@ -200,7 +204,9 @@ export default function JoinUsPage() {
                   placeholder="Tell us about your experience, expertise, and what makes you stand out..."
                   className="min-h-32"
                   error={errors.about?.message}
-                  {...register('about')}
+                  {...register('about', {
+                    setValueAs: v => v.trim(),
+                  })}
                 />
               </div>
             </div>

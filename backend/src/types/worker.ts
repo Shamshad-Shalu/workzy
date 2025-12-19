@@ -46,4 +46,5 @@ export interface IWorker extends Document<string> {
   cities: string[];
   availability: IAvailabilitySlots;
   createdAt: Date;
+  rejectReason: string;
 }

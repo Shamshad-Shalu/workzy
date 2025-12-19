@@ -19,16 +19,16 @@ const workerColumns = (
       return <span className="text-muted-foreground">{pageIndex * pageSize + row.index + 1}</span>;
     },
     hideOnSmall: true,
-    width: 40,
-    minWidth: 30,
-    maxWidth: 80,
+    width: 20,
+    minWidth: 20,
+    maxWidth: 30,
   },
   {
     id: 'worker',
     header: 'Worker',
     accessorKey: 'displayName',
     cell: ({ row }) => (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2">
         <ProfileImage src={row.original.profileImage} size={40} />
         <div>
           <div className="font-medium">{row.original.displayName}</div>
@@ -40,7 +40,7 @@ const workerColumns = (
     mobileOrder: 1,
     mobileLabel: '',
     minWidth: 200,
-    maxWidth: 250,
+    maxWidth: 300,
   },
   {
     id: 'phone',
@@ -79,18 +79,18 @@ const workerColumns = (
       let statusType: 'success' | 'warning' | 'error' | 'info' | 'neutral' = 'neutral';
 
       switch (status) {
-      case 'verified':
-        statusType = 'success';
-        break;
-      case 'pending':
-        statusType = 'warning';
-        break;
-      case 'rejected':
-        statusType = 'error';
-        break;
-      case 'needs_revision':
-        statusType = 'info';
-        break;
+        case 'verified':
+          statusType = 'success';
+          break;
+        case 'pending':
+          statusType = 'warning';
+          break;
+        case 'rejected':
+          statusType = 'error';
+          break;
+        case 'needs_revision':
+          statusType = 'info';
+          break;
       }
 
       return <StatusBadge label={statusLabel || ''} status={statusType} />;

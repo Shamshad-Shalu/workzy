@@ -1,5 +1,5 @@
 import { useMemo, useCallback } from 'react';
-import { useSearchParams, useLocation } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 interface CustomParamConfig {
   key: string;
@@ -17,7 +17,7 @@ type StandardParams = {
 };
 
 const createUpdateParamsFunction =
-  (setSearchParams: ReturnType<typeof useSearchParams>[1], currentLocationState: unknown) => (updates: Updates) => {
+  (setSearchParams: ReturnType<typeof useSearchParams>[1]) => (updates: Updates) => {
     setSearchParams(
       prev => {
         const newParams = new URLSearchParams(prev);
@@ -50,7 +50,7 @@ const createUpdateParamsFunction =
 
         return newParams;
       },
-      { replace: true, state: currentLocationState }
+      { replace: true }
     );
   };
 
@@ -60,7 +60,6 @@ export const useUrlFilterParams = <
   customParams: CustomParamConfig[] = []
 ): StandardParams & TCustom => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
 
   const customParamsString = useMemo(() => JSON.stringify(customParams), [customParams]);
 
@@ -87,7 +86,7 @@ export const useUrlFilterParams = <
     return { ...standardParams, ...customState };
   }, [searchParams, customParamsString]);
 
-  const updateParams = useCallback(createUpdateParamsFunction(setSearchParams, location.state), [setSearchParams, location.state]);
+  const updateParams = useCallback(createUpdateParamsFunction(setSearchParams), [setSearchParams]);
 
   return {
     ...filterState,

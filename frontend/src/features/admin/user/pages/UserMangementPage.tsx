@@ -45,7 +45,7 @@ export default function UserManagementPage() {
   };
 
   return (
-    <div className="bg-baground py-6 px-0 xl:p-6">
+    <div>
       <PageHeader title="User Management" description="Manage your platform users" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">
