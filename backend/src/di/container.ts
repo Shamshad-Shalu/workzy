@@ -25,7 +25,7 @@ import { ProfileService } from "@/services/profile.service";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { AdminController } from "@/controllers/admin/admin.controller";
 import { IAdminServiceController } from "@/core/interfaces/controllers/admin/IAdminServiceController";
-import { AdminServiceController } from "@/controllers/admin/adminService.controller";
+import { AdminServiceController } from "@/controllers/service.controller";
 import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
 import { ServiceManagementService } from "@/services/admin/serviceManagement.service";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";

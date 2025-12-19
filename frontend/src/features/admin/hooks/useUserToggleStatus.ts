@@ -11,6 +11,7 @@ export const useToggleStatus = (onClose: () => void) => {
     onSuccess: data => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ['admin-users'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-workers'] });
       onClose();
     },
     onError: error => {

@@ -13,7 +13,10 @@ import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import Button from '@/components/atoms/Button';
 import { ServiceModal } from '../components/ServiceModal';
 import { useServiceMutations } from '../hooks/useServiceMutations';
+import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
+import { useLocation, useNavigate } from 'react-router-dom';
 
+type ServiceCrumb = { id: string; name: string };
 type CustomParams = { parentId: string | null };
 
 export default function ServiceManagementPage() {
@@ -22,6 +25,11 @@ export default function ServiceManagementPage() {
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
   const [parentVal, setParentVal] = useState<ServiceRow | null>(null);
   const [editingService, setEditingService] = useState<ServiceRow | null>(null);
+
+  const location = useLocation();
+  const navigate = useNavigate();
+  const path = (location.state?.path as ServiceCrumb[]) || [];
+  
   const { pageIndex, pageSize, search, status, parentId, updateParams } =
     useUrlFilterParams<CustomParams>([{ key: 'parentId' }]);
 
@@ -32,6 +40,31 @@ export default function ServiceManagementPage() {
     queryFn: () => AdminService.getServices(pageIndex + 1, pageSize, search, status, parentId),
     placeholderData: prev => prev,
   });
+
+  const breadcrumbItems = [
+    {
+      label: 'Services',
+      href: '/admin/services',
+      onClick: (e: React.MouseEvent) => {
+        e.preventDefault();
+        navigate('/admin/services', { state: { path: [] } });
+      },
+    },
+  ];
+
+  if (path && Array.isArray(path)) {
+    path.forEach((crumb, index) => {
+      breadcrumbItems.push({
+        label: crumb.name,
+        href: '#', 
+        onClick: (e: React.MouseEvent) => {
+          e.preventDefault();
+          const newPath = path.slice(0, index + 1);
+          navigate(`?parentId=${crumb.id}&page=1`, { state: { path: newPath } });
+        }
+      });
+    });
+  }
 
   const openStatusModal = (service: ServiceRow) => {
     setSelectedService(service);
@@ -52,11 +85,9 @@ export default function ServiceManagementPage() {
 
   const onViewChild = (service: ServiceRow) => {
     setParentVal(service);
-    updateParams({
-      parentId: service._id,
-      search: null,
-      status: 'all',
-      page: 0,
+    const newPath = [...path, { id: service._id, name: service.name }];
+    navigate(`?parentId=${service._id}&page=1`, { 
+       state: { path: newPath } 
     });
   };
   useEffect(() => {
@@ -100,6 +131,9 @@ export default function ServiceManagementPage() {
         >
           Add Service
         </Button>
+      </div>
+      <div className="mb-4">
+        <AppBreadcrumb items={breadcrumbItems} />
       </div>
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">

@@ -10,6 +10,7 @@ import {
 export interface CrumbItem {
   label: string;
   href?: string;
+  onClick?: (e: React.MouseEvent) => void;
 }
 
 interface AppBreadcrumbProps {
@@ -29,7 +30,12 @@ export default function AppBreadcrumb({ items }: AppBreadcrumbProps) {
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
               ) : (
                 <>
-                  <BreadcrumbLink href={item.href || '#'}>{item.label}</BreadcrumbLink>
+                  <BreadcrumbLink 
+                    href={item.href || '#'} 
+                    onClick={item.onClick}
+                  >
+                    {item.label}
+                  </BreadcrumbLink>
                   <BreadcrumbSeparator />
                 </>
               )}
