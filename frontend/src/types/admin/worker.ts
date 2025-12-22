@@ -29,6 +29,7 @@ export interface WorkerRow {
   experience?: number;
 
   documents: {
+    _id:string;
     type: string;
     url: string;
     name?: string;

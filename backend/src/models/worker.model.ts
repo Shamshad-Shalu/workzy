@@ -14,15 +14,12 @@ const AvailabilitySchema = new Schema<IAvailabilitySlots>(
   { _id: false }
 );
 
-const DocumentSchema = new Schema<IDocument>(
-  {
-    type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
-    url: { type: String, required: true },
-    status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
-    rejectReason: { type: String },
-  },
-  { _id: false }
-);
+const DocumentSchema = new Schema<IDocument>({
+  type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
+  url: { type: String, required: true },
+  status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
+  rejectReason: { type: String },
+});
 
 const workerSchema: Schema = new Schema<IWorker>(
   {

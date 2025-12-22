@@ -14,6 +14,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import workerColumns from '../components/columns';
 import ReviewWorkerModal from '../components/ReviewWorkerModal';
 import { useVerifyWorker } from '../hooks/useWorkerMutations';
+import type { ReviewWorkerSchemaType } from '../validation/reviewWorkerShema';
 
 type CustomParams = { workerStatus: string };
 
@@ -53,17 +54,9 @@ export default function WorkerManagementPage() {
     setVerifyModalOpen(true);
   };
 
-  const handleSubmitReview = async (data: any) => {
-    const payload = {
-      status: data.status,
-      adminNote: data.reason,
-      documentName: data.docName,
-      rejectReason: data.rejectReason,
-    };
-    if (!selectedWorker?._id) {
-      return;
-    }
-    verifyWorkerMutation.mutate({ id: selectedWorker._id, data: payload });
+  const handleSubmitReview = async (data: ReviewWorkerSchemaType ) => {
+    if (!selectedWorker?._id)return;
+    verifyWorkerMutation.mutate({ id: selectedWorker._id, data});
   };
 
   return (

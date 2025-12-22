@@ -5,7 +5,8 @@ import { Request, Response } from "express";
 import { TYPES } from "@/di/types";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
-import { ROLE } from "@/constants";
+import { ROLE, WORKER } from "@/constants";
+import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -65,6 +66,8 @@ export class AdminController implements IAdminController {
   });
 
   verifyWorker = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    console.log("reqBody:", req.body);
+    const { workerId } = req.params;
+    const updatedWorker = await this._workerService.verifyWorker(workerId, req.body as VerifyWorkerRequestDTO);
+    res.status(200).json({ message: WORKER.VERIFIED ,worker: updatedWorker});
   });
 }

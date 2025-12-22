@@ -21,6 +21,15 @@ router.post(
   parseMultipart({ forceJson: ["defaultRate"] }),
   workerController.createWorkerProfile
 );
+router.get("/me", authenticate([ROLE.WORKER, ROLE.USER]), workerController.getMe);
+
+router.patch(
+  "/:workerId/reApply",
+  authenticate([ROLE.WORKER, ROLE.USER]),
+  upload.single("document"),
+  validateFileSize,
+  workerController.reSubmitWorkerDocument
+);
 router.use(authenticate([ROLE.WORKER]));
 
 router.get("/:workerId/profile", workerController.getWorkerSummary);

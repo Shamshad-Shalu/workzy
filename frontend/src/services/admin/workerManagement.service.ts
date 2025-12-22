@@ -2,6 +2,8 @@ import api from '@/lib/api/axios';
 
 import { ADMIN_ROUTES } from '@/constants';
 import type { ReviewWorkerSchemaType } from '@/features/admin/worker/validation/reviewWorkerShema';
+import type { VerifyWorkerResponse } from '@/features/admin/worker/hooks/useWorkerMutations';
+
 
 const AdminWorkerService = {
   getWorkers: async (
@@ -17,7 +19,7 @@ const AdminWorkerService = {
     return res.data;
   },
 
-  verifyWorker: async (workerId: string, data: ReviewWorkerSchemaType): Promise<any> => {
+  verifyWorker: async (workerId: string, data: ReviewWorkerSchemaType): Promise<VerifyWorkerResponse> => {
     const res = await api.patch(`${ADMIN_ROUTES.VERIFYWORKER}/${workerId}`, data);
     return res.data;
   },

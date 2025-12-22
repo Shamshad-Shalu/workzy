@@ -1,5 +1,5 @@
 import api from '@/lib/api/axios';
-import type { WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
+import type { Worker, WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
 
 const WorkerProfileService = {
   getWorkerSummaryById: async (
@@ -20,8 +20,24 @@ const WorkerProfileService = {
     return res.data;
   },
 
-  addWorkerProfile: async (userId: string, data: any): Promise<string> => {
+  addWorkerProfile: async (
+    userId: string,
+    data: any
+  ): Promise<{ worker: Worker; message: string }> => {
     const res = await api.post(`/worker/joinUs/${userId}`, data);
+    return res.data;
+  },
+
+  getMe: async (): Promise<Worker> => {
+    const res = await api.get('/worker/me');
+    return res.data;
+  },
+
+  reSubmitWorkerInfo: async (
+    workerId: string,
+    data: any
+  ): Promise<{ worker: Worker; message: string }> => {
+    const res = await api.patch(`/worker/${workerId}/reApply`, data);
     return res.data;
   },
 };

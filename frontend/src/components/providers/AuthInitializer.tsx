@@ -4,7 +4,7 @@ import { refreshAccessToken } from '@/store/slices/authSlice';
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { status } = useAppSelector(s => s.auth);
+  const { status } = useAppSelector((s: any) => s.auth);
 
   useEffect(() => {
     const active = localStorage.getItem('sessionActive');

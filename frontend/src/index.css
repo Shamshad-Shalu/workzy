@@ -48,6 +48,8 @@
   --color-section-red-border: var(--section-red-border);
   --color-section-green: var(--section-green);
   --color-section-green-border: var(--section-green-border);
+  --color-golden: var(--golden);
+  --color-section-dark: var(--section-dark);
 }
 
 :root {
@@ -95,6 +97,9 @@
   --section-red-border: oklch(0.85 0.08 15);
   --section-green: oklch(0.97 0.07 122);
   --section-green-border: oklch(0.85 0.08 140);
+
+  --golden: oklch(0.72 0.08 65);
+  --section-dark: oklch(0.18 0.02 250);
 }
 
 .dark {
@@ -141,6 +146,9 @@
   --section-red-border: oklch(77.232% 0.11976 346.008);
   --section-green: oklch(0.27 0.07 132);
   --section-green-border: oklch(0.94 0.12 124);
+
+  --golden: oklch(0.72 0.08 65);
+  --section-dark: oklch(0.18 0.02 250);
 }
 
 @layer base {

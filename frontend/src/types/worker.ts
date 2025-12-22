@@ -22,6 +22,7 @@ export interface AvailabilitySlots {
 }
 
 export interface IDocument {
+  _id: string;
   type: 'id_proof' | 'license' | 'certificate' | 'other';
   url: string;
   status: 'pending' | 'verified' | 'rejected';
@@ -41,6 +42,7 @@ export interface Worker {
   skills: string[];
   cities: string[];
   availability: AvailabilitySlots;
+  rejectReason?: string;
 }
 
 export interface WorkerProfile {

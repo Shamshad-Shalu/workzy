@@ -1,15 +1,10 @@
 import z from 'zod';
-import { descriptionRuleRequired, phoneRule, serviceNameRule } from '@/lib/validation/rules';
+import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
 
 export const JoinWorkerSchema = z.object({
   displayName: serviceNameRule,
   tagline: serviceNameRule,
   about: descriptionRuleRequired,
-  phone: phoneRule,
-  age: z
-    .number({ message: 'age is required' })
-    .min(18, 'You must be at least 18 years old')
-    .max(100, 'Invalid age'),
   document: z
     .union([z.literal(''), z.instanceof(File), z.null()])
     .refine(val => val !== null && val !== '', {

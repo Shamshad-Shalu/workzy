@@ -3,11 +3,17 @@ import { handleApiError } from '@/utils/handleApiError';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { ReviewWorkerSchemaType } from '../validation/reviewWorkerShema';
+import type { WorkerRow } from '@/types/admin/worker';
+
+export interface VerifyWorkerResponse {
+  message: string;
+  worker: WorkerRow; 
+}
 
 export const useVerifyWorker = (onClose: () => void) => {
   const queryClient = useQueryClient();
 
-  return useMutation<{ message: string }, Error, { id: string; data: ReviewWorkerSchemaType }>({
+  return useMutation<VerifyWorkerResponse, Error, { id: string; data: ReviewWorkerSchemaType }>({
     mutationFn: ({ id, data }) => AdminWorkerService.verifyWorker(id, data),
     onSuccess: data => {
       toast.success(data.message);

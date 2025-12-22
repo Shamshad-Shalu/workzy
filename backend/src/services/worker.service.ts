@@ -1,4 +1,4 @@
-import { HTTPSTATUS, SERVER, USER, WORKER } from "@/constants";
+import { HTTPSTATUS, ROLE, SERVER, USER, WORKER, WORKER_STATUS } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -9,13 +9,14 @@ import {
   WorkerAdditionalInfo,
   WorkerSummaryResponseDTO,
 } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker } from "@/types/worker";
+import { DocumentType, IWorker, WorkerStatus } from "@/types/worker";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
 import { deleteFromS3, uploadFileToS3 } from "./s3.service";
 import CustomError from "@/utils/customError";
 import mongoose, { FilterQuery } from "mongoose";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
+import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 
 @injectable()
 export class WorkerService implements IWorkerService {
@@ -49,7 +50,7 @@ export class WorkerService implements IWorkerService {
   async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
 
-    return WorkerProfileResponseDTO.fromEntity(worker);
+    return await WorkerProfileResponseDTO.fromEntity(worker);
   }
 
   async updateWorkerProfile(
@@ -85,14 +86,11 @@ export class WorkerService implements IWorkerService {
     if (isAlredyWorker) {
       throw new CustomError("Already Provided", HTTPSTATUS.BAD_REQUEST);
     }
-    const user = await getEntityOrThrow(this._userRepository, userId);
-    const { age, ...workerData } = data;
-    user.age = age;
-    await user.save();
-    const updates: Partial<IWorker> = { ...workerData };
+    await getEntityOrThrow(this._userRepository, userId);
+    const updates: Partial<IWorker> = data;
 
     const url = await uploadFileToS3(file, "private/worker/documents");
-    updates.documents = [{ url, type: "id_proof", status: "pending" }];
+    updates.documents = [{ url, type: "id_proof" }];
     updates.userId = new mongoose.Types.ObjectId(userId) as any;
     const worker = await this._workerRepository.create({
       ...updates,
@@ -133,5 +131,86 @@ export class WorkerService implements IWorkerService {
     const workerDtos = await WorkerResponseDTO.fromEntities(workers);
 
     return { workers: workerDtos, total };
+  }
+  
+  async verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerResponseDTO> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    const { status , docName ,reason , docId } = data;
+    const updates: Partial<IWorker> = {};
+    const document = worker.documents.find((doc) => doc._id?.toString() === docId );
+    if(!document){
+      throw new CustomError(WORKER.VERIFY_ERROR,HTTPSTATUS.BAD_REQUEST)
+    }
+    if(status === WORKER_STATUS.VERIFIED){
+      document.name = docName;
+      document.status = "verified";
+      updates.status = "verified"
+    }
+    if(status === WORKER_STATUS.NEEDS_REVISION){
+      document.rejectReason = reason;
+      document.status = "rejected";
+      updates.status = "needs_revision"
+    }
+    if(status === WORKER_STATUS.REJECTED){
+      document.rejectReason = reason;
+      document.status = "rejected";
+      updates.rejectReason = reason;
+      updates.status = "rejected"
+    }
+    updates.documents = worker.documents.map((doc) =>
+      doc._id?.toString() === docId ? document : doc 
+    );
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId ,updates);
+    if(!updatedWorker){
+      throw new CustomError(WORKER.VERIFY_ERROR);
+    }
+    if(status === WORKER_STATUS.VERIFIED){
+      await this._userRepository.findByIdAndUpdate(worker.userId.toString(),{role: ROLE.WORKER});
+    }
+    return await WorkerResponseDTO.fromEntity(updatedWorker);
+  }
+
+  async reSubmitWorkerDocument(
+    workerId: string,
+    data: { id: string; WorkerStatus?: WorkerStatus; type?: DocumentType },
+    file: Express.Multer.File
+  ): Promise<WorkerProfileResponseDTO> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    const { id, WorkerStatus, type } = data;
+
+    if (!id) {
+      throw new CustomError(WORKER.DOCUMENT_REQUIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const updates: Partial<IWorker> = {};
+
+    const newUrl = await uploadFileToS3(file, "private/worker/documents");
+
+    const document = worker.documents.find((doc) => doc._id?.toString() === id);
+    if (!document) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    await deleteFromS3(document.url);
+
+    updates.documents = worker.documents.map((doc) =>
+      doc._id?.toString() === id
+        ? {
+            _id: doc._id,
+            name: doc.name,
+            type: type || doc.type,
+            url: newUrl,
+            status: "pending",
+            rejectReason: undefined,
+          }
+        : doc
+    );
+    if (WorkerStatus) {
+      updates.status = WorkerStatus;
+    }
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(worker.id, updates);
+    if (!updatedWorker) {
+      throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
+    }
+    return await WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
 }
