@@ -1,6 +1,6 @@
-import { JwtPayloadWithUser } from "./jwt";
+import type { AccessTokenPayload } from "./jwt";
 
-interface IToken extends JwtPayloadWithUser {
+interface IToken extends AccessTokenPayload {
   workerId?: string;
 }
 declare module "express-serve-static-core" {

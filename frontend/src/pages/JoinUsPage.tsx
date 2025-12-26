@@ -3,7 +3,6 @@ import { ImageUpload } from '@/components/atoms/ImageUpload';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import { type JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
-import Header from '@/layouts/user/Header';
 import WorkerProfileService from '@/services/worker/workerProfile.service';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
@@ -23,23 +22,13 @@ import {
   MetricCard,
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
+import type { RootState } from '@/store/store';
 
 export default function JoinUsPage() {
-  const { user } = useAppSelector((s: any) => s.auth);
+  const { user } = useAppSelector((s: RootState) => s.auth);
   const navigate = useNavigate();
   const { getUserProfilePage } = useProfile();
   const dispatch = useAppDispatch();
-
-  const hasLocation = !!user?.profile?.location?.coordinates;
-  const hasPhoneNumber = !!user?.phone;
-
-  if (!user) {
-    return null;
-  }
-  const userId = user._id;
-  if (!userId) {
-    return null;
-  }
 
   const [showApplicationForm, setShowApplicationForm] = useState(false);
   const [workerStatus, setWorkerStatus] = useState<WorkerStatus | null>(null);
@@ -50,6 +39,10 @@ export default function JoinUsPage() {
     existingDoc?.url ?? null
   );
 
+  const hasLocation = !!user?.profile?.location?.coordinates;
+  const hasPhoneNumber = !!user?.phone;
+
+  
   useEffect(() => {
     async function loadData() {
       try {
@@ -57,9 +50,11 @@ export default function JoinUsPage() {
           getUserProfilePage(),
           WorkerProfileService.getMe(),
         ]);
+
         if (userInfo) {
           dispatch(updateUser(userInfo));
         }
+
         if (workerInfo) {
           setWorkerId(workerInfo._id);
           setWorkerStatus(workerInfo.status);
@@ -69,17 +64,20 @@ export default function JoinUsPage() {
               setExistingDoc(doc);
               setDocumentValue(doc.url);
             }
-          } else if (workerInfo.status === 'pending') {
-            setWorkerStatus('pending');
           }
         }
       } catch (error) {
         console.error(error);
       }
     }
+    
     loadData();
-  }, []);
-
+  }, [dispatch, getUserProfilePage]);
+  
+  if (!user) {return null;}
+  const userId = user._id;
+  if (!userId) {return null;}
+  
   async function onSubmit(data: JoinWorkerSchemaType) {
     if (workerStatus === 'pending') {
       toast.info('Your application is already pending review.');
@@ -119,7 +117,9 @@ export default function JoinUsPage() {
       formData.append('id', existingDoc._id);
     }
     formData.append('WorkerStatus', 'pending');
-    if (!workerId) return;
+    if (!workerId) {
+      return;
+    }
     setLoading(true);
     try {
       const res = await WorkerProfileService.reSubmitWorkerInfo(workerId, formData);
@@ -134,7 +134,6 @@ export default function JoinUsPage() {
 
   return (
     <main className="min-h-screen bg-background">
-      <Header />
       <section className="relative bg-gradient-to-br from-[var(--golden-dark)] to-[var(--golden-dark)]/80 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-golden animate-pulse"></div>

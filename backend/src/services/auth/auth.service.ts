@@ -117,8 +117,7 @@ export class AuthService implements IAuthService {
     if (user.role === ROLE.WORKER) {
       const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
-        const workerId = worker as { _id: string };
-        userObj.workerId = workerId._id.toString();
+        userObj.workerId = worker._id.toString();
       }
     }
     return await LoginResponseDTO.fromEntity(userObj);

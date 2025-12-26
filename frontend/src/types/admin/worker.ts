@@ -1,16 +1,3 @@
-// export interface WorkerRow {
-//   _id: string;
-//   userId:string;
-//   name: string;
-//   email:string;
-//   phone?: string;
-//   isPremium: boolean;
-//   isBlocked: boolean;
-//   profileImage?: string;
-//   createdAt: string;
-//   status ?:string;
-//   displayName:string
-// }
 export interface WorkerRow {
   _id: string;
   userId: string;
@@ -29,7 +16,7 @@ export interface WorkerRow {
   experience?: number;
 
   documents: {
-    _id:string;
+    _id: string;
     type: string;
     url: string;
     name?: string;

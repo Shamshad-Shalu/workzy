@@ -6,6 +6,10 @@ export const LocationSchema = z.object({
   coordinates: z.tuple([z.number(), z.number()]),
 });
 
+const HOUSE_ADDRESS_REGEX = /^[A-Za-z0-9\s#\-/. ,]+$/;
+const PLACE_CITY_REGEX = /^[A-Za-z\s\-_+.,]+$/;
+const PINCODE_REGEX = /^[0-9]{6}$/;
+
 export const ProfileSchema = z.object({
   name: nameRule,
   profile: z
@@ -18,33 +22,37 @@ export const ProfileSchema = z.object({
             .refine(val => !val || val.length >= 3, {
               message: 'House address must be at least 3 characters',
             })
-            .refine(val => !val || /^[A-Za-z0-9\s#\-\/.,]+$/.test(val), {
+            .refine(val => !val || HOUSE_ADDRESS_REGEX.test(val), {
               message:
                 'House address can only contain letters, numbers, spaces, and common symbols (# - / . ,)',
             }),
+
           place: z
             .string()
             .optional()
             .refine(val => !val || val.length >= 3, {
               message: 'Place must be at least 3 characters',
             })
-            .refine(val => !val || /^[A-Za-z\s\-\_\+\.\,]+$/.test(val), {
+            .refine(val => !val || PLACE_CITY_REGEX.test(val), {
               message: 'Place should contain letters and spaces only',
             }),
+
           city: z
             .string()
             .optional()
             .refine(val => !val || val.length >= 3, {
               message: 'City must be at least 3 characters',
             })
-            .refine(val => !val || /^[A-Za-z\s\-\_\+\.\,]+$/.test(val), {
+            .refine(val => !val || PLACE_CITY_REGEX.test(val), {
               message: 'City should contain letters and spaces only',
             }),
+
           state: z.string().optional(),
+
           pincode: z
             .string()
             .optional()
-            .refine(val => !val || /^[0-9]{6}$/.test(val), {
+            .refine(val => !val || PINCODE_REGEX.test(val), {
               message: 'Pincode must be exactly 6 digits',
             }),
         })
@@ -53,13 +61,16 @@ export const ProfileSchema = z.object({
           if (!addr) {
             return true;
           }
-          const fields = ['house', 'place', 'city', 'state', 'pincode'];
+
+          const fields = ['house', 'place', 'city', 'state', 'pincode'] as const;
           const filledFields = fields.filter(field => {
-            const value = addr[field as keyof typeof addr];
+            const value = addr[field];
             return value && value.trim() !== '';
           });
+
           return filledFields.length === 0 || filledFields.length === fields.length;
         }, 'Address incomplete. Please fill all address fields.'),
+
       location: LocationSchema.optional(),
     })
     .superRefine((profile, ctx) => {

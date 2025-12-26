@@ -31,13 +31,13 @@ export default function ReviewWorkerModal({
     watch,
     setValue,
     formState: { errors, isLoading },
-    reset
+    reset,
   } = useForm<ReviewWorkerSchemaType>({
     resolver: zodResolver(ReviewWorkerSchema),
     mode: 'onChange',
     defaultValues: {
       status: 'pending',
-      docId:selectedWorker?.documents[0]._id,
+      docId: selectedWorker?.documents[0]._id,
     },
   });
 
@@ -47,7 +47,7 @@ export default function ReviewWorkerModal({
       return;
     }
     onSubmit(data);
-    reset()
+    reset();
   };
 
   useEffect(() => {
@@ -58,7 +58,6 @@ export default function ReviewWorkerModal({
       });
     }
   }, [selectedWorker, setValue]);
-
 
   return (
     <AppModal
@@ -102,8 +101,7 @@ export default function ReviewWorkerModal({
               No verification document uploaded by worker.
             </div>
           )}
-
-        </div>                                         
+        </div>
         <form onSubmit={handleSubmit(handleFormSubmit)}>
           <div className="px-1">
             <input type="hidden" {...register('docId')} />
@@ -127,7 +125,7 @@ export default function ReviewWorkerModal({
                 <div>
                   <Label>Document Name </Label>
                   <Input
-                    placeholder="e.g. Verified Worker" 
+                    placeholder="e.g. Verified Worker"
                     {...register('docName', {
                       setValueAs: v => v.trim(),
                     })}
@@ -137,17 +135,16 @@ export default function ReviewWorkerModal({
                 </div>
               )}
             </div>
-            {(watch('status') === 'rejected' || watch('status') === 'needs_revision' )&& (
+            {(watch('status') === 'rejected' || watch('status') === 'needs_revision') && (
               <div className="col-span-2">
                 <Label>Rejection Reason</Label>
-                <Textarea 
-                    placeholder="Reason for rejection"
-                    {...register('reason', {
-                      setValueAs: v => v.trim(),
-                    })}
-                    error={errors.reason?.message}
+                <Textarea
+                  placeholder="Reason for rejection"
+                  {...register('reason', {
+                    setValueAs: v => v.trim(),
+                  })}
+                  error={errors.reason?.message}
                 />
-              
               </div>
             )}
           </div>

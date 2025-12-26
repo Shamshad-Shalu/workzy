@@ -67,7 +67,10 @@ export class AdminController implements IAdminController {
 
   verifyWorker = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
-    const updatedWorker = await this._workerService.verifyWorker(workerId, req.body as VerifyWorkerRequestDTO);
-    res.status(200).json({ message: WORKER.VERIFIED ,worker: updatedWorker});
+    const updatedWorker = await this._workerService.verifyWorker(
+      workerId,
+      req.body as VerifyWorkerRequestDTO
+    );
+    res.status(200).json({ message: WORKER.VERIFIED, worker: updatedWorker });
   });
 }

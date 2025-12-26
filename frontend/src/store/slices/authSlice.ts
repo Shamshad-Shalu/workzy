@@ -1,5 +1,5 @@
-import { SESSION_MESSAGES } from '@/constants';
-import api, { setAxiosToken } from '@/lib/api/axios';
+import { AUTH_ROUTES, HOST, SESSION_MESSAGES } from '@/constants';
+import { setAxiosToken } from '@/lib/api/axios';
 import type { User } from '@/types/user';
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
@@ -22,8 +22,19 @@ export const refreshAccessToken = createAsyncThunk(
   'auth/refreshAccessToken',
   async (_, { rejectWithValue }) => {
     try {
-      const res = await api.post('/auth/refresh-token', {}, { withCredentials: true });
-      return res.data;
+      const baseURL = import.meta.env.MODE === 'development' ? `${HOST}/api` : '/api';
+
+      const res = await fetch(`${baseURL}${AUTH_ROUTES.REFRESH_TOKEN}`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!res.ok) {
+        throw new Error(SESSION_MESSAGES.EXPIRED);
+      }
+
+      const data = await res.json();
+      return data;
     } catch (error) {
       console.error('Error refreshing access token:', error);
       return rejectWithValue(SESSION_MESSAGES.EXPIRED);
@@ -40,9 +51,8 @@ const authSlice = createSlice({
       state.user = action.payload.user;
       state.accessToken = action.payload.accessToken;
       state.isAuthenticated = true;
-
+      state.status = 'succeeded';
       setAxiosToken(action.payload.accessToken);
-      localStorage.setItem('sessionActive', 'true');
     },
     // update access token after refresh
     updateToken: (state, action: PayloadAction<string>) => {
@@ -59,8 +69,7 @@ const authSlice = createSlice({
       state.user = null;
       state.accessToken = null;
       state.isAuthenticated = false;
-
-      localStorage.removeItem('sessionActive');
+      state.status = 'failed';
     },
   },
   extraReducers: builder => {

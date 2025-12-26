@@ -54,9 +54,11 @@ export default function WorkerManagementPage() {
     setVerifyModalOpen(true);
   };
 
-  const handleSubmitReview = async (data: ReviewWorkerSchemaType ) => {
-    if (!selectedWorker?._id)return;
-    verifyWorkerMutation.mutate({ id: selectedWorker._id, data});
+  const handleSubmitReview = async (data: ReviewWorkerSchemaType) => {
+    if (!selectedWorker?._id) {
+      return;
+    }
+    verifyWorkerMutation.mutate({ id: selectedWorker._id, data });
   };
 
   return (

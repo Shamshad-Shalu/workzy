@@ -1,9 +1,15 @@
 import { Role } from "@/constants";
 import { JwtPayload } from "jsonwebtoken";
 
-export interface JwtPayloadWithUser extends JwtPayload {
+export interface AccessTokenPayload extends JwtPayload {
   _id: string;
-  name: string;
-  email: string;
   role: Role;
+  workerId?: string;
+}
+
+export interface RefreshTokenPayload extends JwtPayload {
+  user: {
+    _id: string;
+    role: Role;
+  };
 }

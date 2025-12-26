@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import ModeToggle from '../../components/ui/ModeToggle';
 import { ROLE } from '@/constants';
+import { setAxiosToken } from '@/lib/api/axios';
+import { logoutService } from '@/services/authService';
+import type { RootState } from '@/store/store';
 
 const NAV_LINKS = [
   { path: '/', label: 'Home' },
@@ -23,14 +26,21 @@ const NAV_LINKS = [
 ];
 
 export default function Header() {
-  const { user, isAuthenticated } = useAppSelector(s => s.auth);
+  const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logoutService();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      dispatch(clearUser());
+      setAxiosToken(null);
+      navigate('/login');
+    }
   };
 
   const handleSwitchMode = () => {
@@ -42,7 +52,7 @@ export default function Header() {
   };
 
   return (
-    <header className="w-full bg-card border-border shadow-sm ">
+    <header className="sticky top-0 z-1000 w-full bg-card border-border shadow-sm ">
       <div className="max-w-7xl mx-auto h-16 px-4 flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-foreground">
           Workzy

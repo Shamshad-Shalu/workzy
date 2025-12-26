@@ -16,6 +16,8 @@ import type { MenuItem } from '@/types/navigation';
 import { clearUser } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
+import { logoutService } from '@/services/authService';
+import { setAxiosToken } from '@/lib/api/axios';
 
 interface BaseSidebarProps {
   collapsed: boolean;
@@ -40,9 +42,16 @@ export function BaseSidebar({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = () => {
-    dispatch(clearUser());
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      await logoutService();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      dispatch(clearUser());
+      setAxiosToken(null);
+      navigate('/login');
+    }
   };
 
   const handleSwitchMode = () => {

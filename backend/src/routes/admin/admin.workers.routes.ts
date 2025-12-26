@@ -10,6 +10,10 @@ const router = Router();
 const adminController = container.get<IAdminController>(TYPES.AdminController);
 
 router.get("/all", adminController.getAllWorkers);
-router.patch("/verify/:workerId",validateDto(VerifyWorkerRequestDTO), adminController.verifyWorker);
+router.patch(
+  "/verify/:workerId",
+  validateDto(VerifyWorkerRequestDTO),
+  adminController.verifyWorker
+);
 
 export default router;

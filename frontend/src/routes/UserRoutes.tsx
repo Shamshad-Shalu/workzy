@@ -11,12 +11,11 @@ import UserProfilePage from '@/features/user/profile/pages/UserProfilePage';
 import ProtectedRoute from './ProtectedRoute';
 import { ROLE } from '@/constants';
 import JoinUsPage from '@/pages/JoinUsPage';
+import { UserLayout } from '@/layouts/user/UserLayout';
 
 export default function UserRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<RoleBasedRoot />} />
-
       <Route element={<GuestRoute />}>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Signup />} />
@@ -26,9 +25,12 @@ export default function UserRoutes() {
         <Route path="/auth/google/callback" element={<GoogleCallback />} />
       </Route>
 
-      <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
-        <Route path="/profile" element={<UserProfilePage />} />
-        <Route path="/join-us" element={<JoinUsPage />} />
+      <Route element={<UserLayout />}>
+        <Route path="/" element={<RoleBasedRoot />} />
+        <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
+          <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/join-us" element={<JoinUsPage />} />
+        </Route>
       </Route>
     </Routes>
   );

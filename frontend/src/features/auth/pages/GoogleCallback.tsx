@@ -1,9 +1,8 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
-import { setCredentials } from '@/store/slices/authSlice';
+import { refreshAccessToken } from '@/store/slices/authSlice';
 import { toast } from 'sonner';
-import type { User } from '@/types/user';
 import { AUTH_MESSAGES } from '@/constants';
 
 export default function GoogleCallback() {
@@ -12,38 +11,35 @@ export default function GoogleCallback() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const handleGoogleAuth = () => {
-      const error = searchParams.get('error');
-      const data = searchParams.get('data');
+    const error = searchParams.get('error');
+    if (error === 'blocked') {
+      navigate('/login', { state: { blocked: true } });
+      return;
+    }
+    dispatch(refreshAccessToken())
+      .unwrap()
+      .then(data => {
+        const role = data.user.role;
 
-      if (error === 'blocked') {
-        navigate('/login', { state: { blocked: true } });
-        return;
-      }
-      if (data) {
-        try {
-          const decoded = JSON.parse(atob(data));
-          const { user, accessToken } = decoded as { user: User; accessToken: string };
-          dispatch(setCredentials({ user, accessToken }));
-          navigate('/');
-        } catch (err) {
-          toast.error(AUTH_MESSAGES.AUTH_FAILED);
-          navigate('/login');
+        if (role === 'worker') {
+          navigate('/worker/dashboard', { replace: true });
+        } else if (role === 'admin') {
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          navigate('/', { replace: true });
         }
-      } else {
-        toast.error(AUTH_MESSAGES.AUTH_NOT_RECIEVED);
-        navigate('/login');
-      }
-    };
-
-    handleGoogleAuth();
+      })
+      .catch(() => {
+        toast.error(AUTH_MESSAGES.AUTH_FAILED);
+        navigate('/login', { replace: true });
+      });
   }, [searchParams, navigate, dispatch]);
 
   return (
     <div className="flex items-center justify-center min-h-screen">
       <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Completing Google sign in...</p>
+        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900" />
+        <p className="mt-4 text-muted-foreground">Completing Google sign in...</p>
       </div>
     </div>
   );

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import ProfileInfoCard from '../../../profile/components/ProfileInfoCard';
 import PageHeader from '@/components/molecules/PageHeader';
-import Header from '@/layouts/user/Header';
 import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
 import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
 import { Mail, Phone } from 'lucide-react';
@@ -60,7 +59,6 @@ export default function ProfilePage() {
 
   return (
     <div>
-      <Header />
       <div className="max-w-7xl mx-auto p-4 lg:text-left md:text-center s:text-center">
         <PageHeader title="My Profile" description="Manage your personal information" />
       </div>

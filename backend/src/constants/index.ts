@@ -9,6 +9,8 @@ export const NODE_ENV = process.env.NODE_ENV;
 export const MONGO_URI = process.env.MONGO_URI;
 export const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
 export const REFRESH_TOKEN = process.env.REFRESH_TOKEN;
+export const ACCESS_TOKEN_EXPIRY = process.env.ACCESS_TOKEN_EXPIRY;
+export const REFRESH_TOKEN_EXPIRY = process.env.REFRESH_TOKEN_EXPIRY;
 
 export const NODEMAILER_EMAIL = process.env.NODEMAILER_EMAIL;
 export const NODEMAILER_PASSWORD = process.env.NODEMAILER_PASSWORD;

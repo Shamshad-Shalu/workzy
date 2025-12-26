@@ -1,24 +1,22 @@
 import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { refreshAccessToken } from '@/store/slices/authSlice';
+import type { RootState } from '@/store/store';
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { status } = useAppSelector((s: any) => s.auth);
+  const { status } = useAppSelector((s: RootState) => s.auth);
 
   useEffect(() => {
-    const active = localStorage.getItem('sessionActive');
-
-    if (active === 'true' && status === 'idle') {
+    if (status === 'idle') {
       dispatch(refreshAccessToken());
     }
-  }, [dispatch]);
+  }, [dispatch, status]);
 
-  const active = localStorage.getItem('sessionActive');
-  if (active === 'true' && (status === 'idle' || status === 'loading')) {
+  if (status === 'idle' || status === 'loading') {
     return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="h-9 w-9 animate-spin rounded-full border-4 border-gray-200 border-t-blue-500" />
+      <div className="h-screen flex items-center justify-center bg-background">
+        <span className="text-xl font-semibold text-muted-foreground"></span>
       </div>
     );
   }

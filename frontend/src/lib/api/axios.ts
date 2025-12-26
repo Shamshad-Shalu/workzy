@@ -1,6 +1,5 @@
-import axios from 'axios';
+import axios, { AxiosError, type AxiosResponse, type AxiosRequestConfig } from 'axios';
 import { HOST } from '@/constants';
-import { refreshTokenRequest } from './tokenRefresh';
 
 const baseURL = import.meta.env.MODE === 'development' ? `${HOST}/api` : '/api';
 
@@ -9,61 +8,99 @@ const api = axios.create({
   withCredentials: true,
 });
 
-let onTokenRefreshed: ((token: string) => void) | null = null;
-let onLogout: (() => void) | null = null;
-
 let accessToken: string | null = null;
 
 export function setAxiosToken(token: string | null) {
   accessToken = token;
+  if (token) {
+    api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+  } else {
+    delete api.defaults.headers.common['Authorization'];
+  }
 }
 
-export function registerAuthHandlers(
-  refreshHandler: (token: string) => void,
-  logoutHandler: () => void
-) {
-  onTokenRefreshed = refreshHandler;
-  onLogout = logoutHandler;
+interface RefreshResponse {
+  accessToken: string;
+  user?: any;
 }
+
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 api.interceptors.request.use(
   config => {
     if (accessToken) {
+      config.headers = config.headers || {};
       config.headers.Authorization = `Bearer ${accessToken}`;
     }
     return config;
   },
   error => Promise.reject(error)
 );
+
 // Axios interceptors
 api.interceptors.response.use(
   res => res,
 
-  async error => {
-    const originalRequest = error.config;
+  async (error: AxiosError) => {
+    const originalConfig = error.config as AxiosRequestConfig & { _retry?: boolean };
 
-    if (!error.response) {
-      return Promise.reject(error);
-    }
+    if (error.response?.status === 401 && !originalConfig._retry) {
+      if (isRefreshing) {
+        return new Promise<AxiosResponse>((resolve, reject) => {
+          failedQueue.push({
+            resolve: value => {
+              const token = value as string | null;
+              if (token) {
+                originalConfig.headers = originalConfig.headers || {};
+                originalConfig.headers.Authorization = `Bearer ${token}`;
+              }
+              resolve(api(originalConfig));
+            },
+            reject,
+          });
+        });
+      }
 
-    if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+      originalConfig._retry = true;
+      isRefreshing = true;
 
       try {
-        const data = await refreshTokenRequest();
+        const response = await api.post<RefreshResponse>(
+          '/auth/refresh-token',
+          {},
+          {
+            withCredentials: true,
+          }
+        );
+        const { accessToken: newToken } = response.data;
+        setAxiosToken(newToken);
+        processQueue(null, newToken);
 
-        if (onTokenRefreshed) {
-          onTokenRefreshed(data.accessToken);
-        }
+        originalConfig.headers = originalConfig.headers || {};
+        originalConfig.headers.Authorization = `Bearer ${newToken}`;
 
-        originalRequest.headers.Authorization = `Bearer ${data.accessToken}`;
-
-        return api(originalRequest);
+        return api(originalConfig);
       } catch (refreshError) {
-        if (onLogout) {
-          onLogout();
-        }
+        processQueue(refreshError, null);
+        window.dispatchEvent(new Event('auth:logout'));
         return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
       }
     }
 

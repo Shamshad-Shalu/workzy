@@ -17,8 +17,8 @@ import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import redisClient from "@/config/redisClient";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { Profile } from "passport";
-import { instanceToPlain } from "class-transformer";
 import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
+import { AccessTokenPayload } from "@/core/types/global/jwt";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -88,8 +88,6 @@ export class AuthController implements IAuthController {
 
     const accessToken = generateAccessToken({
       _id: user._id.toString(),
-      email: user.email,
-      name: user.name,
       role: user.role as Role,
       workerId: user.workerId,
     });
@@ -115,26 +113,24 @@ export class AuthController implements IAuthController {
       throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.FORBIDDEN);
     }
 
-    const isBlocked = await redisClient.get(`blocked_user:${decodedToken.user._id}`);
+    const userId = decodedToken.user._id;
+    const role = decodedToken.user.role;
+
+    const isBlocked = await redisClient.get(`blocked_user:${userId}`);
     if (isBlocked) {
       res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
       return;
     }
 
-    const user = await this._authService.getUserByRoleAndId(
-      decodedToken.user.role,
-      decodedToken.user._id
-    );
+    const user = await this._authService.getUserByRoleAndId(role, userId);
     if (!user) {
       clearRefreshTokenCookie(res);
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
     let fullUser = user.toObject ? user.toObject() : user;
 
-    const payload: any = {
+    const payload: AccessTokenPayload = {
       _id: user._id.toString(),
-      name: user.name,
-      email: user.email,
       role: user.role,
     };
 
@@ -144,9 +140,8 @@ export class AuthController implements IAuthController {
         clearRefreshTokenCookie(res);
         throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
       }
-      const workerId = worker as { _id: string };
-      payload["workerId"] = worker._id;
-      fullUser = { ...fullUser, workerId: workerId._id.toString() };
+      payload["workerId"] = worker._id.toString();
+      fullUser = { ...fullUser, workerId: worker._id.toString() };
     }
 
     const accessToken = generateAccessToken(payload);
@@ -216,17 +211,6 @@ export class AuthController implements IAuthController {
 
     setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
 
-    const accessToken = generateAccessToken({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      workerId: user.workerId,
-    });
-    const plainUser = instanceToPlain(user);
-
-    const data = Buffer.from(JSON.stringify({ user: plainUser, accessToken })).toString("base64");
-
-    res.redirect(`${CLIENT_URL}/auth/google/callback?data=${data}`);
+    res.redirect(`${CLIENT_URL}/auth/google/callback`);
   });
 }

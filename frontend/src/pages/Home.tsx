@@ -1,9 +1,6 @@
-import Header from '@/layouts/user/Header';
-
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
-      <Header />
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="bg-card rounded-lg border border-border shadow p-8">

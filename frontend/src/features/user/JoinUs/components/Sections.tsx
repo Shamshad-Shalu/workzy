@@ -1,6 +1,6 @@
 import type { FAQItemProps, FeatureCardProps } from '@/constants/landingItems';
 import { ArrowRight, ChevronDown } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface AnimatedCounterProps {
   value: string | number;
@@ -108,7 +108,9 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
     let start = 0;
     const end = Number.parseInt(value.toString());
 
-    if (start === end) return;
+    if (start === end) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       entries => {

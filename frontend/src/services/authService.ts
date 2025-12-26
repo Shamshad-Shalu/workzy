@@ -37,6 +37,6 @@ export const resetPasswordService = async (email: string, token: string, passwor
 };
 
 export const logoutService = async () => {
-  const res = await api.get(AUTH_ROUTES.LOGOUT, {});
+  const res = await api.post(AUTH_ROUTES.LOGOUT, {});
   return res.data;
 };

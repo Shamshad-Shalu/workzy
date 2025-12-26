@@ -1,5 +1,6 @@
 import type { Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
+import type { RootState } from '@/store/store';
 import type React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 
@@ -8,7 +9,7 @@ type ProtectedRouteProps = {
 };
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
-  const { user, accessToken, status } = useAppSelector(s => s.auth);
+  const { user, accessToken, status } = useAppSelector((s: RootState) => s.auth);
 
   if (status === 'loading') {
     return (

@@ -7,7 +7,7 @@ import type { WorkerRow } from '@/types/admin/worker';
 
 export interface VerifyWorkerResponse {
   message: string;
-  worker: WorkerRow; 
+  worker: WorkerRow;
 }
 
 export const useVerifyWorker = (onClose: () => void) => {

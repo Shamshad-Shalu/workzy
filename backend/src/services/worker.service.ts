@@ -132,40 +132,40 @@ export class WorkerService implements IWorkerService {
 
     return { workers: workerDtos, total };
   }
-  
+
   async verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerResponseDTO> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-    const { status , docName ,reason , docId } = data;
+    const { status, docName, reason, docId } = data;
     const updates: Partial<IWorker> = {};
-    const document = worker.documents.find((doc) => doc._id?.toString() === docId );
-    if(!document){
-      throw new CustomError(WORKER.VERIFY_ERROR,HTTPSTATUS.BAD_REQUEST)
+    const document = worker.documents.find((doc) => doc._id?.toString() === docId);
+    if (!document) {
+      throw new CustomError(WORKER.VERIFY_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    if(status === WORKER_STATUS.VERIFIED){
+    if (status === WORKER_STATUS.VERIFIED) {
       document.name = docName;
       document.status = "verified";
-      updates.status = "verified"
+      updates.status = "verified";
     }
-    if(status === WORKER_STATUS.NEEDS_REVISION){
+    if (status === WORKER_STATUS.NEEDS_REVISION) {
       document.rejectReason = reason;
       document.status = "rejected";
-      updates.status = "needs_revision"
+      updates.status = "needs_revision";
     }
-    if(status === WORKER_STATUS.REJECTED){
+    if (status === WORKER_STATUS.REJECTED) {
       document.rejectReason = reason;
       document.status = "rejected";
       updates.rejectReason = reason;
-      updates.status = "rejected"
+      updates.status = "rejected";
     }
     updates.documents = worker.documents.map((doc) =>
-      doc._id?.toString() === docId ? document : doc 
+      doc._id?.toString() === docId ? document : doc
     );
-    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId ,updates);
-    if(!updatedWorker){
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId, updates);
+    if (!updatedWorker) {
       throw new CustomError(WORKER.VERIFY_ERROR);
     }
-    if(status === WORKER_STATUS.VERIFIED){
-      await this._userRepository.findByIdAndUpdate(worker.userId.toString(),{role: ROLE.WORKER});
+    if (status === WORKER_STATUS.VERIFIED) {
+      await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
     }
     return await WorkerResponseDTO.fromEntity(updatedWorker);
   }

@@ -15,7 +15,7 @@ router.post("/register", validateDto(RegisterRequestDTO), authController.registe
 router.post("/verify-otp", authController.verifyOTP);
 router.post("/resend-otp", authController.resendOtp);
 router.post("/login", validateDto(LoginRequestDTO), authController.login);
-router.get("/logout", authController.logout);
+router.post("/logout", authController.logout);
 
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);

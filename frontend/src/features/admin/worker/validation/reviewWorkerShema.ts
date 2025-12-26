@@ -5,13 +5,12 @@ import { WORKER_STATUSES } from '@/constants';
 export const ReviewWorkerSchema = z
   .object({
     docName: z
-      .string() 
+      .string()
       .optional()
       .refine(val => !val || /^(?=(?:.*[A-Za-z]){3,})[A-Za-z0-9\s#\-\/.,]{3,50}$/.test(val), {
         message: 'Name must be 3–50 characters and valid',
       }),
-    docId: z
-    .string(),
+    docId: z.string(),
     reason: z
       .string()
       .optional()
@@ -23,7 +22,7 @@ export const ReviewWorkerSchema = z
       }),
     status: z.enum(WORKER_STATUSES, {
       message: 'status is required',
-    })
+    }),
   })
   .superRefine((data, ctx) => {
     if (data.status === 'verified') {
