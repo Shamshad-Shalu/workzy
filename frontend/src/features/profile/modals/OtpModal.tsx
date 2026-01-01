@@ -47,7 +47,7 @@ export default function OtpModal({ open, onOpenChange, otpData }: Props) {
   }
   useEffect(() => {
     resetTimer();
-  }, [open]);
+  }, [open, resetTimer]);
 
   const handleResendOtp = async () => {
     if (timer !== 0) {

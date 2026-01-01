@@ -1,5 +1,5 @@
 import { DEFAULT_IMAGE_URL } from "@/constants";
-import { generateSignedUrl } from "@/services/s3.service";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUser } from "@/types/user";
 import { IsBoolean, IsEmail, IsNotEmpty, IsString } from "class-validator";
 
@@ -30,7 +30,7 @@ export class UsersResponseDTO {
   @IsString()
   createdAt!: Date;
 
-  static async fromEntity(entity: IUser): Promise<UsersResponseDTO> {
+  static async fromEntity(entity: IUser, s3Service: IS3Service): Promise<UsersResponseDTO> {
     const dto = new UsersResponseDTO();
 
     dto._id = entity._id;
@@ -45,7 +45,7 @@ export class UsersResponseDTO {
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
     } else if (image?.includes(".amazonaws.com")) {
-      dto.profileImage = await generateSignedUrl(image);
+      dto.profileImage = await s3Service.generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
       // google user
       dto.profileImage = image;
@@ -54,8 +54,8 @@ export class UsersResponseDTO {
     return dto;
   }
 
-  static async fromEntities(entities: IUser[]): Promise<UsersResponseDTO[]> {
-    const promises = entities.map((entity) => this.fromEntity(entity));
+  static async fromEntities(entities: IUser[], s3Service: IS3Service): Promise<UsersResponseDTO[]> {
+    const promises = entities.map((entity) => this.fromEntity(entity, s3Service));
     return Promise.all(promises);
   }
 }

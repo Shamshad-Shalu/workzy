@@ -37,9 +37,12 @@ export default function WorkerManagementPage() {
   const toggleStatusMutation = useToggleStatus(() => setModalOpen(false));
   const verifyWorkerMutation = useVerifyWorker(() => setVerifyModalOpen(false));
 
-  const handleSearchChange = useCallback((v: string) => {
-    updateParams({ search: v, page: 0 });
-  }, []);
+  const handleSearchChange = useCallback(
+    (v: string) => {
+      updateParams({ search: v, page: 0 });
+    },
+    [updateParams]
+  );
 
   const openStatusModal = (worker: WorkerRow) => {
     setSelectedWorker(worker);
@@ -87,11 +90,12 @@ export default function WorkerManagementPage() {
           </div>
           <div className="sm:col-span-4">
             <Select
+              placeholder="All Status"
               value={workerStatus}
               onChange={v => updateParams({ workerStatus: v, page: 0 })}
               leftIcon={<Filter />}
               options={[
-                { label: 'All Worker Status', value: 'all' },
+                { label: 'All Status', value: 'all' },
                 { label: 'Pending', value: 'pending' },
                 { label: 'Verified', value: 'verified' },
                 { label: 'Rejected', value: 'rejected' },

@@ -42,7 +42,6 @@ export default function JoinUsPage() {
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
 
-  
   useEffect(() => {
     async function loadData() {
       try {
@@ -70,14 +69,18 @@ export default function JoinUsPage() {
         console.error(error);
       }
     }
-    
+
     loadData();
-  }, [dispatch, getUserProfilePage]);
-  
-  if (!user) {return null;}
+  }, []);
+
+  if (!user) {
+    return null;
+  }
   const userId = user._id;
-  if (!userId) {return null;}
-  
+  if (!userId) {
+    return null;
+  }
+
   async function onSubmit(data: JoinWorkerSchemaType) {
     if (workerStatus === 'pending') {
       toast.info('Your application is already pending review.');

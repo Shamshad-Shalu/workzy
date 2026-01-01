@@ -1,6 +1,5 @@
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { useEffect, useState } from 'react';
-
 import type { WorkerInfo } from '@/types/worker';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 import { useWorkerProfile } from '@/features/worker/profile/hooks/useWorkerProfile';
@@ -29,7 +28,7 @@ export default function WorkerProfileRouteWrapper() {
   }
   useEffect(() => {
     load();
-  }, []);
+  }, [load]);
 
   if (!workerInfo) {
     return <WorkerProfileLayoutSkeleton />;

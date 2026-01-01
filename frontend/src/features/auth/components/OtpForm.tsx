@@ -52,6 +52,7 @@ export default function OtpForm() {
       toast.success(AUTH_MESSAGES.OTP_RESET_SUCCESS);
     } catch (err) {
       toast.error(AUTH_MESSAGES.FAILED_OTP_SEND);
+      console.error(handleApiError(err));
     }
   };
 

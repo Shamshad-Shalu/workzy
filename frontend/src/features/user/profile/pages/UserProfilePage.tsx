@@ -15,9 +15,10 @@ import { updateUser } from '@/store/slices/authSlice';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Separator } from '@/components/ui/separator';
 import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
+import type { RootState } from '@/store/store';
 
 export default function ProfilePage() {
-  const { user } = useAppSelector((s: any) => s.auth);
+  const { user } = useAppSelector((s: RootState) => s.auth);
   const {
     changeEmail,
     changePhone,
@@ -52,6 +53,9 @@ export default function ProfilePage() {
     loadProfile();
   }, []);
 
+  if (!user) {
+    return null;
+  }
   async function handleImageUpload(file: File) {
     const res = await uploadImage(file);
     dispatch(updateUser({ profileImage: res.url }));

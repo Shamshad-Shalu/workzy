@@ -34,3 +34,4 @@ export * from "./httpStatusCodes";
 export * from "./messages";
 export * from "./roles";
 export * from "./validation";
+export * from "./upload";

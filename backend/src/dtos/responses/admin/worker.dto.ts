@@ -1,7 +1,7 @@
 import { IDocument, IRate, IWorker } from "@/types/worker";
 import { IUser } from "@/types/user";
-import { generateSignedUrl } from "@/services/s3.service";
 import { DEFAULT_IMAGE_URL } from "@/constants";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 export class WorkerResponseDTO {
   _id!: string;
@@ -23,7 +23,7 @@ export class WorkerResponseDTO {
   isBlocked!: boolean;
   profileImage!: string;
 
-  static async fromEntity(entity: any): Promise<WorkerResponseDTO> {
+  static async fromEntity(entity: any, s3Service: IS3Service): Promise<WorkerResponseDTO> {
     const dto = new WorkerResponseDTO();
 
     const user = entity.userId as IUser;
@@ -38,7 +38,7 @@ export class WorkerResponseDTO {
       dto.documents = await Promise.all(
         entity.documents.map(async (doc: IDocument) => ({
           ...doc,
-          url: await generateSignedUrl(doc.url),
+          url: await s3Service.generateSignedUrl(doc.url),
         }))
       );
     } else {
@@ -60,7 +60,7 @@ export class WorkerResponseDTO {
       if (!image) {
         dto.profileImage = DEFAULT_IMAGE_URL;
       } else if (image.includes(".amazonaws.com")) {
-        dto.profileImage = await generateSignedUrl(image);
+        dto.profileImage = await s3Service.generateSignedUrl(image);
       } else {
         dto.profileImage = image;
       }
@@ -69,7 +69,10 @@ export class WorkerResponseDTO {
     return dto;
   }
 
-  static async fromEntities(entities: IWorker[]): Promise<WorkerResponseDTO[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity)));
+  static async fromEntities(
+    entities: IWorker[],
+    s3Service: IS3Service
+  ): Promise<WorkerResponseDTO[]> {
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }

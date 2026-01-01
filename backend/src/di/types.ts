@@ -26,6 +26,10 @@ const TYPES = {
   OTPService: Symbol.for("IOTPService"),
   EmailService: Symbol.for("IEmailService"),
   TokenService: Symbol.for("ITokenService"),
+
+  // Upload
+  UploadController: Symbol.for("UploadController"),
+  S3Service: Symbol.for("S3Service"),
 };
 
 export { TYPES };

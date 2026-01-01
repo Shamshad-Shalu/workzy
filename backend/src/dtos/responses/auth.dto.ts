@@ -1,5 +1,6 @@
 import { DEFAULT_IMAGE_URL, Role } from "@/constants";
-import { generateSignedUrl } from "@/services/s3.service";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { generateSignedUrl } from "@/services/s3.dservice";
 import { IUser } from "@/types/user";
 import { Expose } from "class-transformer";
 import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
@@ -45,7 +46,10 @@ export class LoginResponseDTO {
   @IsString()
   workerId?: string;
 
-  static async fromEntity(entity: IUser & { workerId?: string }): Promise<LoginResponseDTO> {
+  static async fromEntity(
+    entity: IUser & { workerId?: string },
+    s3Service: IS3Service
+  ): Promise<LoginResponseDTO> {
     const dto = new LoginResponseDTO();
 
     dto._id = entity._id;
@@ -60,7 +64,8 @@ export class LoginResponseDTO {
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
     } else if (image?.includes(".amazonaws.com")) {
-      dto.profileImage = await generateSignedUrl(image);
+      // dto.profileImage = await generateSignedUrl(image)
+      dto.profileImage = await s3Service.generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
       dto.profileImage = image;
     }

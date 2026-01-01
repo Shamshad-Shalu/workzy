@@ -32,6 +32,10 @@ import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepos
 import { ServiceRepository } from "@/repositories/service.repository";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
 import { WorkerController } from "@/controllers/worker.controller";
+import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
+import { UploadController } from "@/controllers/upload.controller";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { S3Service } from "@/services/s3.service";
 
 const container = new Container();
 
@@ -59,5 +63,8 @@ container
   .bind<IServiceManagementService>(TYPES.ServiceManagementService)
   .to(ServiceManagementService);
 container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
+
+container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
+container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
 
 export { container };

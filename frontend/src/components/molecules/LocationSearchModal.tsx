@@ -3,6 +3,7 @@ import { MapPin } from 'lucide-react';
 import { AppModal } from './AppModal';
 import SearchInput from './SearchInput';
 import { MAPBOX_TOKEN } from '@/constants';
+import { handleApiError } from '@/utils/handleApiError';
 const INDIA_BBOX = '68.1766,6.7479,97.4025,35.5087';
 
 interface LocationResult {
@@ -60,6 +61,7 @@ export function LocationSearchModal({
         setResults(data.features || []);
       } catch (err) {
         setError('Failed to search locations. Please try again.');
+        console.error(handleApiError(err));
         setResults([]);
       } finally {
         setIsLoading(false);
@@ -98,6 +100,7 @@ export function LocationSearchModal({
           }
         } catch (err) {
           setError('Failed to get your current location');
+          console.error(handleApiError(err));
         } finally {
           setUseCurrentLocation(false);
         }

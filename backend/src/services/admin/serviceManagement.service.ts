@@ -11,13 +11,17 @@ import { buildServiceFilter } from "@/utils/admin/buildServiceFilter";
 import CustomError from "@/utils/customError";
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
-import { deleteFromS3, uploadFileToS3 } from "../s3.service";
+import { uploadFileToS3 } from "../s3.dservice";
 import { clearRedisListCache } from "@/utils/cache.util";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class ServiceManagementService implements IServiceManagementService {
-  constructor(@inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository) {}
+  constructor(
+    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
+  ) {}
 
   async createService(
     serviceData: ServiceRequestDTO,
@@ -111,7 +115,7 @@ export class ServiceManagementService implements IServiceManagementService {
     if (imgFile) {
       filePromises.push(
         uploadFileToS3(imgFile, "public/services/images").then((newImageUrl) => {
-          deleteFromS3(service.imageUrl);
+          this._s3Service.deleteFile(service.imageUrl);
           updates.imageUrl = newImageUrl;
         })
       );
@@ -119,7 +123,7 @@ export class ServiceManagementService implements IServiceManagementService {
     if (iconFile) {
       filePromises.push(
         uploadFileToS3(iconFile, "public/services/icons").then((newIconUrl) => {
-          deleteFromS3(service.iconUrl);
+          this._s3Service.deleteFile(service.iconUrl);
           updates.iconUrl = newIconUrl;
         })
       );

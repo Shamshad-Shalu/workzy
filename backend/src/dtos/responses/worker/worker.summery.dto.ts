@@ -1,8 +1,8 @@
 import { Expose } from "class-transformer";
-import { generateSignedUrl } from "@/services/s3.service";
 import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
 import { IRate, IWorker } from "@/types/worker";
 import { IUser } from "@/types/user";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 export interface WorkerAdditionalInfo {
   jobsCompleted: number;
@@ -43,7 +43,8 @@ export class WorkerSummaryResponseDTO {
   static async format(
     worker: IWorker,
     user: IUser,
-    stats: WorkerAdditionalInfo
+    stats: WorkerAdditionalInfo,
+    s3Service: IS3Service
   ): Promise<WorkerSummaryResponseDTO> {
     const dto = new WorkerSummaryResponseDTO();
 
@@ -53,7 +54,7 @@ export class WorkerSummaryResponseDTO {
       : "";
 
     const profileImage = user.profileImage?.includes("amazonaws.com")
-      ? await generateSignedUrl(user.profileImage)
+      ? await s3Service.generateSignedUrl(user.profileImage)
       : user.profileImage || DEFAULT_IMAGE_URL;
 
     const experience =

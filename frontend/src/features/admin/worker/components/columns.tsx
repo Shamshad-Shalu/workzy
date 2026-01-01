@@ -67,7 +67,7 @@ const workerColumns = (
     showInMobileHeader: false,
     mobileOrder: 4,
     mobileLabel: 'Account Type',
-    width: 120,
+    width: 100,
   },
   {
     id: 'workerStatus',
@@ -102,7 +102,7 @@ const workerColumns = (
   },
   {
     id: 'userStatus',
-    header: 'Block/Unblock',
+    header: 'W.Status',
     accessorKey: 'isBlocked',
     cell: ({ row }) => (
       <StatusBadge
@@ -155,7 +155,7 @@ const workerColumns = (
     ),
     showInMobileHeader: false,
     mobileOrder: 7,
-    width: 200,
+    width: 180,
     minWidth: 180,
   },
 ];

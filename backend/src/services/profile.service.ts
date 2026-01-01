@@ -2,7 +2,7 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { TYPES } from "@/di/types";
 import { inject, injectable } from "inversify";
-import { deleteFromS3, generateSignedUrl, uploadFileToS3 } from "./s3.service";
+import { generateSignedUrl, uploadFileToS3 } from "./s3.dservice";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
@@ -14,18 +14,20 @@ import redisClient from "@/config/redisClient";
 import validator from "validator";
 import logger from "@/config/logger";
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class ProfileService implements IProfileService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
-    @inject(TYPES.EmailService) private _emailService: IEmailService
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
   async updateProfileImage(userId: string, file: Express.Multer.File): Promise<string> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     if (user.profileImage?.includes(".amazonaws.com/")) {
-      await deleteFromS3(user.profileImage);
+      await this._s3Service.deleteFile(user.profileImage);
     }
     const newImage = await uploadFileToS3(file, "private/user/profiles");
     user.profileImage = newImage;
@@ -97,7 +99,7 @@ export class ProfileService implements IProfileService {
 
   async getProfile(userId: string): Promise<UserProfileResponseDTO> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
-    return await UserProfileResponseDTO.fromEntity(user);
+    return await UserProfileResponseDTO.fromEntity(user, this._s3Service);
   }
   async updateProfileBasic(
     userId: string,
@@ -107,6 +109,6 @@ export class ProfileService implements IProfileService {
     if (!updatedUser) {
       throw new CustomError(USER.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    return UserProfileResponseDTO.fromEntity(updatedUser);
+    return UserProfileResponseDTO.fromEntity(updatedUser, this._s3Service);
   }
 }

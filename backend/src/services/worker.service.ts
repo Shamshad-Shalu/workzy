@@ -12,17 +12,19 @@ import {
 import { DocumentType, IWorker, WorkerStatus } from "@/types/worker";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
-import { deleteFromS3, uploadFileToS3 } from "./s3.service";
+import { uploadFileToS3 } from "./s3.dservice";
 import CustomError from "@/utils/customError";
 import mongoose, { FilterQuery } from "mongoose";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class WorkerService implements IWorkerService {
   constructor(
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.UserRepository) private _userRepository: IUserRepository
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
     return this._workerRepository.findOne({ userId });
@@ -44,13 +46,13 @@ export class WorkerService implements IWorkerService {
       reviewsCount: 450,
       responseTime: "2 hours",
     };
-    return WorkerSummaryResponseDTO.format(worker, user, WorkerAdditionalInfo);
+    return WorkerSummaryResponseDTO.format(worker, user, WorkerAdditionalInfo, this._s3Service);
   }
 
   async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
 
-    return await WorkerProfileResponseDTO.fromEntity(worker);
+    return await WorkerProfileResponseDTO.fromEntity(worker, this._s3Service);
   }
 
   async updateWorkerProfile(
@@ -64,7 +66,7 @@ export class WorkerService implements IWorkerService {
 
     if (file) {
       if (worker?.coverImage) {
-        await deleteFromS3(worker.coverImage);
+        await this._s3Service.deleteFile(worker.coverImage);
       }
       updates.coverImage = await uploadFileToS3(file, "public/worker/coverImages");
     }
@@ -74,7 +76,7 @@ export class WorkerService implements IWorkerService {
       throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
 
-    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+    return WorkerProfileResponseDTO.fromEntity(updatedWorker, this._s3Service);
   }
 
   async createWorkerProfile(
@@ -95,7 +97,7 @@ export class WorkerService implements IWorkerService {
     const worker = await this._workerRepository.create({
       ...updates,
     });
-    return WorkerProfileResponseDTO.fromEntity(worker);
+    return WorkerProfileResponseDTO.fromEntity(worker, this._s3Service);
   }
 
   async getAllWorkers(
@@ -128,7 +130,7 @@ export class WorkerService implements IWorkerService {
     if (!workers) {
       throw new CustomError(SERVER.ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    const workerDtos = await WorkerResponseDTO.fromEntities(workers);
+    const workerDtos = await WorkerResponseDTO.fromEntities(workers, this._s3Service);
 
     return { workers: workerDtos, total };
   }
@@ -167,7 +169,7 @@ export class WorkerService implements IWorkerService {
     if (status === WORKER_STATUS.VERIFIED) {
       await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
     }
-    return await WorkerResponseDTO.fromEntity(updatedWorker);
+    return await WorkerResponseDTO.fromEntity(updatedWorker, this._s3Service);
   }
 
   async reSubmitWorkerDocument(
@@ -190,7 +192,7 @@ export class WorkerService implements IWorkerService {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
 
-    await deleteFromS3(document.url);
+    await this._s3Service.deleteFile(document.url);
 
     updates.documents = worker.documents.map((doc) =>
       doc._id?.toString() === id
@@ -211,6 +213,6 @@ export class WorkerService implements IWorkerService {
     if (!updatedWorker) {
       throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
     }
-    return await WorkerProfileResponseDTO.fromEntity(updatedWorker);
+    return await WorkerProfileResponseDTO.fromEntity(updatedWorker, this._s3Service);
   }
 }

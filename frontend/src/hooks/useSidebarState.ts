@@ -17,7 +17,7 @@ export function useSidebarState(mobile: boolean = false) {
     if (saved !== null) {
       setUserCollapsed(saved === 'true');
     }
-  });
+  }, []);
 
   const toggleCollapse = () => {
     const next = !collapsed;

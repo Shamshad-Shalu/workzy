@@ -19,6 +19,7 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { Profile } from "passport";
 import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
 import { AccessTokenPayload } from "@/core/types/global/jwt";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class AuthController implements IAuthController {
@@ -27,7 +28,8 @@ export class AuthController implements IAuthController {
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.TokenService) private _tokenService: ITokenService,
-    @inject(TYPES.WorkerService) private _workerService: IWorkerService
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
   // Register a new user and send OTP to email
@@ -145,8 +147,7 @@ export class AuthController implements IAuthController {
     }
 
     const accessToken = generateAccessToken(payload);
-
-    const plainUser = await LoginResponseDTO.fromEntity(fullUser);
+    const plainUser = await LoginResponseDTO.fromEntity(fullUser, this._s3Service);
 
     res.status(HTTPSTATUS.OK).json({ accessToken, user: plainUser });
   });

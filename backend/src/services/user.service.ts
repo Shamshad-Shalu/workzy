@@ -1,6 +1,7 @@
 import redisClient from "@/config/redisClient";
 import { REDIS_EXPIRY, USER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { TYPES } from "@/di/types";
 import { UsersResponseDTO } from "@/dtos/responses/admin/users.dto";
@@ -11,7 +12,10 @@ import { inject, injectable } from "inversify";
 
 @injectable()
 export class UserService implements IUserService {
-  constructor(@inject(TYPES.UserRepository) private _userRepository: IUserRepository) {}
+  constructor(
+    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
+  ) {}
 
   async findByEmail(email: string): Promise<IUser | null> {
     return this._userRepository.findByEmail(email);
@@ -31,7 +35,7 @@ export class UserService implements IUserService {
       this._userRepository.getAllUsers(skip, limit, search, status, role),
       this._userRepository.countDocuments(filter),
     ]);
-    const users = await UsersResponseDTO.fromEntities(usersRaw);
+    const users = await UsersResponseDTO.fromEntities(usersRaw, this._s3Service);
 
     return { users, total };
   }

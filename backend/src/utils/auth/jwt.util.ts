@@ -4,7 +4,6 @@ import {
   ACCESS_TOKEN_EXPIRY,
   REFRESH_TOKEN,
   REFRESH_TOKEN_EXPIRY,
-  Role,
 } from "@/constants";
 import { AccessTokenPayload, RefreshTokenPayload } from "@/core/types/global/jwt";
 

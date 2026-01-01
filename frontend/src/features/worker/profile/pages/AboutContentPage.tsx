@@ -36,9 +36,6 @@ export default function WorkeAboutContentPage() {
   const { getWorkerProfile, updateWorkerProfile } = useWorkerProfile();
   const dispatch = useAppDispatch();
 
-  if (!user) {
-    return null;
-  }
   useEffect(() => {
     async function loadProfile() {
       const [userInfo, workerInfo] = await Promise.all([getUserProfilePage(), getWorkerProfile()]);
@@ -52,6 +49,9 @@ export default function WorkeAboutContentPage() {
     loadProfile();
   }, []);
 
+  if (!user) {
+    return null;
+  }
   function handleOtpRequest(type: 'email' | 'phone', value: string) {
     setOtpData({ type, value });
     setOpenOtpModal(true);

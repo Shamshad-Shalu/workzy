@@ -12,12 +12,14 @@ import CustomError from "@/utils/customError";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class AuthService implements IAuthService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.WorkerService) private _workerService: IWorkerService
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
   async findUserByEmail(email: string): Promise<boolean> {
@@ -66,7 +68,7 @@ export class AuthService implements IAuthService {
       }
     }
 
-    return await LoginResponseDTO.fromEntity(userObj);
+    return await LoginResponseDTO.fromEntity(userObj, this._s3Service);
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
@@ -120,6 +122,6 @@ export class AuthService implements IAuthService {
         userObj.workerId = worker._id.toString();
       }
     }
-    return await LoginResponseDTO.fromEntity(userObj);
+    return await LoginResponseDTO.fromEntity(userObj, this._s3Service);
   }
 }
