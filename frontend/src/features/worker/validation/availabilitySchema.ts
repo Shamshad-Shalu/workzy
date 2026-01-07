@@ -11,6 +11,17 @@ export const slotSchema = z
     message: 'End time must be after start time',
   });
 
+const noOverlap = (slots: { startTime: string; endTime: string }[]) => {
+  const sorted = [...slots].sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].startTime < sorted[i - 1].endTime) {
+      return false;
+    }
+  }
+  return true;
+};
+
 export const availabilitySchema = z
   .object({
     monday: z.array(slotSchema),
@@ -21,6 +32,14 @@ export const availabilitySchema = z
     saturday: z.array(slotSchema),
     sunday: z.array(slotSchema),
   })
-  .refine(data => Object.values(data).some(daySlots => daySlots.length > 0), {
-    message: 'At least one availability slot is required',
+  .superRefine((data, ctx) => {
+    Object.entries(data).forEach(([day, slots]) => {
+      if (slots.length && !noOverlap(slots)) {
+        ctx.addIssue({
+          path: [day],
+          message: `Time slots on ${day} must not overlap`,
+          code: z.ZodIssueCode.custom,
+        });
+      }
+    });
   });

@@ -42,6 +42,8 @@ export function LocationSearchModal({
       return;
     }
 
+    let cancelled = false;
+
     const fetchLocations = async () => {
       setIsLoading(true);
       setError(null);
@@ -58,17 +60,27 @@ export function LocationSearchModal({
         }
 
         const data = await response.json();
-        setResults(data.features || []);
+        if (!cancelled) {
+          setResults(data.features || []);
+        }
       } catch (err) {
-        setError('Failed to search locations. Please try again.');
-        console.error(handleApiError(err));
-        setResults([]);
+        if (!cancelled) {
+          setError('Failed to search locations. Please try again.');
+          console.error(handleApiError(err));
+          setResults([]);
+        }
       } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setIsLoading(false);
+        }
       }
     };
 
     fetchLocations();
+
+    return () => {
+      cancelled = true;
+    };
   }, [searchQuery]);
 
   const handleUseCurrentLocation = async () => {

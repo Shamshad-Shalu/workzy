@@ -6,7 +6,6 @@ const WorkerProfileService = {
     workerId: string
   ): Promise<{ workerInfo: WorkerInfo; workerStats: WorkerStats }> => {
     const res = await api.get(`/worker/${workerId}/profile`);
-    console.log('Worker Profile Response:', res);
     return res.data;
   },
 
@@ -15,7 +14,10 @@ const WorkerProfileService = {
     return res.data;
   },
 
-  updateWorkerProfile: async (workerId: string, data: any): Promise<string> => {
+  updateWorkerProfile: async (
+    workerId: string,
+    data: any
+  ): Promise<{ message: string; workerData: WorkerProfile }> => {
     const res = await api.patch(`/worker/${workerId}/profile`, data);
     return res.data;
   },

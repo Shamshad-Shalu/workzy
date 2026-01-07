@@ -1,6 +1,5 @@
-// src/components/molecules/StatCard.tsx
 import React from 'react';
-import { cn } from '@/lib/utils'; // optional helper to join classes
+import { cn } from '@/lib/utils';
 
 type Tone = 'default' | 'info' | 'success' | 'warning' | 'danger' | 'muted' | 'dark';
 type Size = 'sm' | 'md' | 'lg';
@@ -10,20 +9,18 @@ export interface StatCardProps {
   value: React.ReactNode;
   label?: React.ReactNode;
 
-  // high-level visual API
-  variant?: 'card' | 'soft' | 'outline' | 'ghost'; // card = default boxed card
-  tone?: Tone; // semantic tone for color accents
+  variant?: 'card' | 'soft' | 'outline' | 'ghost';
+  tone?: Tone;
   size?: Size;
 
   // behavior
   onClick?: () => void;
   className?: string;
 
-  // optional explicit overrides (rarely used)
-  customBg?: string; // CSS color value eg 'linear-gradient(...)' or 'var(--color-card)'
-  customText?: string; // CSS color value
-  customBorder?: string; // CSS color value
-  iconColor?: string; // CSS color value
+  customBg?: string;
+  customText?: string;
+  customBorder?: string;
+  iconColor?: string;
   noShadow?: boolean;
 }
 
@@ -33,11 +30,6 @@ const sizeMap: Record<Size, string> = {
   lg: 'p-7 text-lg',
 };
 
-/**
- * Uses CSS variables from your theme:
- * --color-card, --color-card-foreground, --color-border
- * and sidebar tokens if needed.
- */
 export default function StatCard({
   icon,
   value,
@@ -86,12 +78,10 @@ export default function StatCard({
 
   const toneStyle = toneMap[tone] ?? toneMap.default;
 
-  // base styles use theme tokens
   const baseBg = customBg ?? 'var(--color-card, white)';
   const baseText = customText ?? 'var(--color-card-foreground, #111827)';
   const baseBorder = customBorder ?? 'var(--color-border, rgba(0,0,0,0.08))';
 
-  // variant specific classes (we keep them minimal so theme CSS wins)
   const variantClasses =
     variant === 'soft'
       ? 'bg-[color:var(--color-accent)/0.08] border-transparent'

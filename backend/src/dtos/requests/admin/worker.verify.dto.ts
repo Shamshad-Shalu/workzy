@@ -4,7 +4,7 @@ import { IsEnum, IsString, Matches, MinLength, ValidateIf } from "class-validato
 export class VerifyWorkerRequestDTO {
   @ValidateIf((o) => o.status === "verified")
   @IsString()
-  @Matches(/^(?=(?:.*[A-Za-z]){3,})[A-Za-z0-9\s#\-\/.,]{3,50}$/, {
+  @Matches(/^(?=(?:.*[A-Za-z]){3,})[A-Za-z0-9\s#\-/.,]{3,50}$/, {
     message: "Name must be 3–50 characters and valid",
   })
   docName?: string;

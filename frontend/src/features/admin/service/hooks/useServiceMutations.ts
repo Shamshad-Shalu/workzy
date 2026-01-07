@@ -18,6 +18,7 @@ export function useServiceMutations() {
       toast.error(handleApiError(err));
     },
   });
+
   const addServiceMutation = useMutation({
     mutationFn: (data: ServiceDTO) => AdminService.createService(data),
 

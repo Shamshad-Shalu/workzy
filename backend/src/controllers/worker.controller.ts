@@ -5,8 +5,9 @@ import { Request, Response } from "express";
 import { TYPES } from "@/di/types";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
-import { HTTPSTATUS, WORKER } from "@/constants";
+import { AUTH, HTTPSTATUS, WORKER } from "@/constants";
 import CustomError from "@/utils/customError";
+import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 
 @injectable()
 export class WorkerController implements IWorkerController {
@@ -25,8 +26,11 @@ export class WorkerController implements IWorkerController {
     res.status(200).json(workerSummary);
   });
 
-  getMe = asyncHandler(async (req: any, res: Response): Promise<void> => {
-    const userId = req.user._id;
+  getMe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?._id;
+    if (!userId) {
+      throw new CustomError(AUTH.INVALID_TOKEN);
+    }
     const worker = await this._workerService.getWorkerByUserId(userId);
     if (!worker) {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
@@ -37,30 +41,23 @@ export class WorkerController implements IWorkerController {
 
   updateWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = req.params.workerId;
-    const updateData = req.body as WorkerProfileRequestDTO;
-    const workerData = await this._workerService.updateWorkerProfile(
-      workerId,
-      updateData,
-      req.file
-    );
+    const data = req.body as WorkerProfileRequestDTO;
+    const workerData = await this._workerService.updateWorkerProfile(workerId, data);
     res.status(200).json({ message: WORKER.UPDATE_SUCCESS, workerData });
   });
 
   createWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
-    const file = req?.file;
-    if (!file) return;
-    const worker = await this._workerService.createWorkerProfile(userId, req.body, file);
+    const data = req.body as JoinUsDTO;
+
+    const worker = await this._workerService.createWorkerProfile(userId, data);
     res.status(200).json({ message: WORKER.CREATE_SUCCES, worker });
   });
 
   reSubmitWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
-    const file = req.file;
-    if (!file) {
-      throw new CustomError(WORKER.DOCUMENT_REQUIRED);
-    }
-    const workerData = await this._workerService.reSubmitWorkerDocument(workerId, req.body, file);
-    res.status(200).json({ message: WORKER.DOCUMENT_UPDATED, workerData });
+    const data = req.body as ResubmitDocument;
+    const workerData = await this._workerService.reSubmitWorkerDocument(workerId, data);
+    res.status(200).json({ message: WORKER.DOCUMENT_UPDATED, worker: workerData });
   });
 }

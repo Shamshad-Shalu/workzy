@@ -37,7 +37,7 @@ export default function WorkerProfileLayout({
     }`;
 
   return (
-    <div className="pb-12 bg-background -mt-6">
+    <div className="pb-12 bg-background">
       <WorkerProfileHeader workerInfo={workerInfo} workerAction={workerAction} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-7">

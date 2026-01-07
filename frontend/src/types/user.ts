@@ -24,6 +24,6 @@ export interface User {
     address?: Address;
     location?: Location;
   };
-
   isBlocked: boolean;
+  workerId?: string;
 }

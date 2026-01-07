@@ -1,4 +1,4 @@
-import { ImageUpload } from '@/components/atoms/ImageUpload';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';

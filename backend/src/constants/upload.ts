@@ -1,7 +1,44 @@
-export enum UploadFolders {
-  USER_PROFILES = "private/user/profiles",
-  WORKER_DOCS = "private/worker/documents",
-  WORKER_COVERS = "public/worker/coverImages",
-  SERVICE_IMAGES = "public/services/images",
-  SERVICE_ICONS = "public/services/icons",
-}
+export const FILE_TYPES = {
+  IMAGES: ["image/jpeg", "image/png", "image/webp", "image/avif", "image/jpg"],
+
+  DOCUMENTS: ["application/pdf", "application/msword", "image/jpeg", "image/png"],
+
+  VIDEOS: ["video/mp4", "video/webm", "video/quicktime"],
+
+  AUDIOS: ["audio/mpeg", "audio/wav", "audio/ogg"],
+} as const;
+
+export const PURPOSE_POLICY = {
+  PROFILE_IMAGE: {
+    folder: "private/user/profiles",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  SERVICE_ICON: {
+    folder: "public/services/icons",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  SERVICE_IMAGE: {
+    folder: "public/services/images",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  WORKER_DOCUMENT: {
+    folder: "private/worker/documents",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  WORKER_COVER_IMAGE: {
+    folder: "public/worker/coverImages",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+} as const;
+
+export type UploadPurpose = keyof typeof PURPOSE_POLICY;
+export const UploadPurposes = Object.keys(PURPOSE_POLICY);

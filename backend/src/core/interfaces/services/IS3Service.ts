@@ -2,7 +2,6 @@ import { RequestUploadUrlDTO } from "@/dtos/requests/upload.dto";
 
 export interface UploadUrlResponse {
   uploadUrl: string;
-  fileKey: string;
   publicUrl: string;
 }
 

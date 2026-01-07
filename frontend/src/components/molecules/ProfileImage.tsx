@@ -47,7 +47,7 @@ export default function ProfileImage({
         onError={() => setImgLoaded(true)}
         style={{ width: size, height: size, display: imgLoaded && !loading ? 'block' : 'none' }}
         className="rounded-full object-cover border-2 border-bg-accent/30"
-        alt="User Profile Avatar"
+        alt="Profile"
       />
       {loading && (
         <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">

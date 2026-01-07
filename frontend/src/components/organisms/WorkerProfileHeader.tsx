@@ -30,7 +30,7 @@ export default function WorkerProfileHeader({
   return (
     <div className="w-full ">
       {/* Top Banner*/}
-      <div className="relative -mx-4 lg:-mx-6 h-[260px] md:h-[320px] overflow-hidden">
+      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden rounded-t-2xl">
         <img src={coverImage} className="w-full h-full object-cover" alt="banner" />
         <div className="absolute inset-0 bg-black/10" />
       </div>

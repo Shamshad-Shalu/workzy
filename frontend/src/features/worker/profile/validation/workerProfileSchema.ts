@@ -6,12 +6,7 @@ export const workerProfileSchema = z.object({
   displayName: serviceNameRule,
   tagline: serviceNameRule,
   about: descriptionRuleRequired,
-  coverImage: z
-    .union([z.string(), z.instanceof(File), z.null()])
-    .optional()
-    .refine(val => val !== null, {
-      message: 'Image is required',
-    }),
+  coverImage: z.string().nullable().optional(),
   defaultRate: z.object({
     amount: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
     type: z.enum(['hourly', 'fixed']),

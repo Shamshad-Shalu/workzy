@@ -1,5 +1,5 @@
 import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/atoms/ImageUpload';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import { type JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
@@ -23,6 +23,8 @@ import {
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
 import type { RootState } from '@/store/store';
+import { cn } from '@/lib/utils';
+import { UploadPurposes } from '@/constants/upload';
 
 export default function JoinUsPage() {
   const { user } = useAppSelector((s: RootState) => s.auth);
@@ -34,10 +36,9 @@ export default function JoinUsPage() {
   const [workerStatus, setWorkerStatus] = useState<WorkerStatus | null>(null);
   const [workerId, setWorkerId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [resubmitted, setResubmitted] = useState<boolean>(false);
   const [existingDoc, setExistingDoc] = useState<IDocument | null>(null);
-  const [documentValue, setDocumentValue] = useState<string | File | null>(
-    existingDoc?.url ?? null
-  );
+  const [documentValue, setDocumentValue] = useState<string | null>(existingDoc?.url ?? null);
 
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
@@ -86,48 +87,35 @@ export default function JoinUsPage() {
       toast.info('Your application is already pending review.');
       return;
     }
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === 'document') {
-        if (value instanceof File) {
-          formData.append('document', value);
-        }
-        return;
-      } else {
-        formData.append(key, JSON.stringify(value));
-      }
-    });
-
     try {
-      const res = await WorkerProfileService.addWorkerProfile(userId, formData);
+      const res = await WorkerProfileService.addWorkerProfile(userId, data);
       toast.success(res?.message);
       navigate('/');
     } catch (error) {
       toast.error(handleApiError(error));
     }
   }
-
   async function reSubmitForm() {
-    const formData = new FormData();
-
-    if (documentValue instanceof File) {
-      formData.append('document', documentValue);
-    } else {
-      toast.error('Document image is required!.');
+    if (!existingDoc) {return;}
+    if (!documentValue) {
+      toast.error('Please Reupload document');
       return;
     }
-    if (existingDoc) {
-      formData.append('id', existingDoc._id);
-    }
-    formData.append('WorkerStatus', 'pending');
+
+    const data = {
+      id: existingDoc?._id,
+      WorkerStatus: 'pending',
+      url: documentValue,
+    };
+
     if (!workerId) {
       return;
     }
     setLoading(true);
     try {
-      const res = await WorkerProfileService.reSubmitWorkerInfo(workerId, formData);
-      setWorkerStatus('pending');
-      toast.success(res.message);
+      const { worker, message } = await WorkerProfileService.reSubmitWorkerInfo(workerId, data);
+      setWorkerStatus(worker.status);
+      toast.success(message);
     } catch (error) {
       toast.error(handleApiError(error));
     } finally {
@@ -136,8 +124,8 @@ export default function JoinUsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
-      <section className="relative bg-gradient-to-br from-[var(--golden-dark)] to-[var(--golden-dark)]/80 text-white overflow-hidden">
+    <main>
+      <section className="relative bg-gradient-to-br from-section-dark to-section-dark/80 text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-golden animate-pulse"></div>
           <div
@@ -150,14 +138,14 @@ export default function JoinUsPage() {
           ></div>
         </div>
 
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 max-w-7xl">
+        <div className="section-container py-20 relative z-10 ">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div className="flex flex-col space-y-6">
               <div className="inline-flex items-center px-4 py-2 rounded-full bg-golden/20 text-golden text-sm font-medium mb-2 self-start">
                 <PawPrint className="h-4 w-4 mr-2" />
                 <span>Trusted by 2,000+ Service Professionals</span>
               </div>
-              <h1 className="text-primary text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight leading-tight">
                 Grow Your Service Business with <span className="text-golden">Workzy</span>
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground leading-relaxed">
@@ -201,24 +189,32 @@ export default function JoinUsPage() {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-card border-y">
-        <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="p-6">
+      <section className="py-12 sm:py-16 bg-card border-y border-border overflow-hidden">
+        <div className="section-container">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 text-center">
+            <div className="flex flex-col items-center p-2">
               <AnimatedCounter value="2000" suffix="+" />
-              <p className="mt-2 text-lg font-medium text-muted-foreground">Service Providers</p>
+              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
+                Service Providers
+              </p>
             </div>
-            <div className="p-6">
+            <div className="flex flex-col items-center p-2">
               <AnimatedCounter value="50000" suffix="+" />
-              <p className="mt-2 text-lg font-medium text-muted-foreground">Customers</p>
+              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
+                Customers
+              </p>
             </div>
-            <div className="p-6">
+            <div className="flex flex-col items-center p-2">
               <AnimatedCounter value="98" suffix="%" />
-              <p className="mt-2 text-lg font-medium text-muted-foreground">Satisfaction Rate</p>
+              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
+                Satisfaction Rate
+              </p>
             </div>
-            <div className="p-6">
+            <div className="flex flex-col items-center p-2">
               <AnimatedCounter value="500000" prefix="$" suffix="+" />
-              <p className="mt-2 text-lg font-medium text-muted-foreground">Revenue Generated</p>
+              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
+                Revenue Generated
+              </p>
             </div>
           </div>
         </div>
@@ -251,7 +247,14 @@ export default function JoinUsPage() {
             )}
             {/* Status Alerts */}
             {workerStatus === 'needs_revision' && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 mb-8">
+              <div
+                className={cn(
+                  'rounded-xl p-6 mb-8',
+                  resubmitted
+                    ? 'bg-blue/10 border border-blue/20'
+                    : 'bg-destructive/10 border border-destructive/20'
+                )}
+              >
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-6 h-6 text-destructive mt-0.5 flex-shrink-0" />
                   <div className="flex-1">
@@ -279,10 +282,11 @@ export default function JoinUsPage() {
                     <div>
                       <ImageUpload
                         value={documentValue}
-                        isEditable={true}
+                        purpose={UploadPurposes.WORKER_DOCUMENT}
                         className="w-full"
-                        onChange={file => {
-                          setDocumentValue(file || '');
+                        onChange={url => {
+                          setDocumentValue(url);
+                          setResubmitted(true);
                         }}
                       />
                       <Button
@@ -291,6 +295,7 @@ export default function JoinUsPage() {
                         variant="blue"
                         onClick={reSubmitForm}
                         loading={loading}
+                        disabled={!resubmitted}
                       >
                         Submit
                       </Button>

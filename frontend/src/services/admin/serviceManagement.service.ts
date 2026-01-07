@@ -1,7 +1,6 @@
 import api from '@/lib/api/axios';
 import { ADMIN_ROUTES } from '@/constants';
 import type { ServiceDTO, ServiceResponse } from '@/types/admin/service';
-import { serviceToFormData } from '@/utils/admin/serviceFormData';
 
 const AdminService = {
   getServices: async (
@@ -23,14 +22,12 @@ const AdminService = {
   },
 
   createService: async (data: ServiceDTO) => {
-    const formData = serviceToFormData(data);
-    const response = await api.post('/admin/services/add', formData);
+    const response = await api.post('/admin/services/add', data);
     return response.data;
   },
 
   updateService: async (id: string, data: ServiceDTO) => {
-    const formData = serviceToFormData(data);
-    const response = await api.patch(`/admin/services/edit/${id}`, formData);
+    const response = await api.patch(`/admin/services/edit/${id}`, data);
     console.log('response:', response);
     return response.data;
   },

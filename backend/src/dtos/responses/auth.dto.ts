@@ -1,6 +1,5 @@
 import { DEFAULT_IMAGE_URL, Role } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { generateSignedUrl } from "@/services/s3.dservice";
 import { IUser } from "@/types/user";
 import { Expose } from "class-transformer";
 import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
@@ -63,8 +62,7 @@ export class LoginResponseDTO {
 
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (image?.includes(".amazonaws.com")) {
-      // dto.profileImage = await generateSignedUrl(image)
+    } else if (image?.includes("private/user/profiles")) {
       dto.profileImage = await s3Service.generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
       dto.profileImage = image;

@@ -41,6 +41,7 @@ const workerSchema: Schema = new Schema<IWorker>(
     },
     coverImage: {
       type: String,
+      default: null,
     },
     defaultRate: {
       amount: {

@@ -22,6 +22,14 @@ export default function AdminDashboard() {
         <div className="h-40 rounded-xl bg-accent/40" />
         <div className="h-40 rounded-xl bg-accent/40" />
         <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
+        <div className="h-40 rounded-xl bg-accent/40" />
       </div>
     </div>
   );

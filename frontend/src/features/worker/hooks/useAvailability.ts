@@ -1,45 +1,36 @@
-import { useState } from 'react';
-import type { AvailabilitySlots, TimeSlot } from '@/types/worker';
+import type { AvailabilitySlots } from '@/types/worker';
 
-export type Day =
-  | 'monday'
-  | 'tuesday'
-  | 'wednesday'
-  | 'thursday'
-  | 'friday'
-  | 'saturday'
-  | 'sunday';
-
-interface UseAvailabilityReturn {
-  data: AvailabilitySlots;
-  addSlot: (day: Day) => void;
-  updateSlot: (day: Day, index: number, field: keyof TimeSlot, value: string) => void;
-  removeSlot: (day: Day, index: number) => void;
-}
-
-export function useAvailability(initial: AvailabilitySlots): UseAvailabilityReturn {
-  const [data, setData] = useState<AvailabilitySlots>(initial);
-
-  const addSlot = (day: Day) => {
-    setData(prev => ({
-      ...prev,
-      [day]: [...prev[day], { startTime: '09:00', endTime: '17:00' }],
-    }));
+export function useAvailability() {
+  const addSlot = (availability: AvailabilitySlots, day: keyof AvailabilitySlots) => {
+    return {
+      ...availability,
+      [day]: [...availability[day], { startTime: '09:00', endTime: '17:00' }],
+    };
   };
 
-  const updateSlot = (day: Day, index: number, field: keyof TimeSlot, value: string) => {
-    setData(prev => ({
-      ...prev,
-      [day]: prev[day].map((slot, i) => (i === index ? { ...slot, [field]: value } : slot)),
-    }));
+  const updateSlot = (
+    availability: AvailabilitySlots,
+    day: keyof AvailabilitySlots,
+    index: number,
+    field: 'startTime' | 'endTime',
+    value: string
+  ) => {
+    return {
+      ...availability,
+      [day]: availability[day].map((slot, i) => (i === index ? { ...slot, [field]: value } : slot)),
+    };
   };
 
-  const removeSlot = (day: Day, index: number) => {
-    setData(prev => ({
-      ...prev,
-      [day]: prev[day].filter((_, i) => i !== index),
-    }));
+  const removeSlot = (
+    availability: AvailabilitySlots,
+    day: keyof AvailabilitySlots,
+    index: number
+  ) => {
+    return {
+      ...availability,
+      [day]: availability[day].filter((_, i) => i !== index),
+    };
   };
 
-  return { data, addSlot, updateSlot, removeSlot };
+  return { addSlot, updateSlot, removeSlot };
 }

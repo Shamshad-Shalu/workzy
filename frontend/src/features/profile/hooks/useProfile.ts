@@ -3,6 +3,9 @@ import { profileApi } from '../api/profile.api';
 import type { User } from '@/types/user';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
+import { uploadToS3 } from '@/services/upload.service';
+import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
+import { UploadPurposes } from '@/constants/upload';
 
 export function useProfile() {
   const [loading, setLoading] = useState(false);
@@ -84,8 +87,13 @@ export function useProfile() {
   async function uploadImage(file: File) {
     setImageLoading(true);
     try {
-      return await profileApi.uploadProfileImage(file);
-    } catch (err: any) {
+      const error = validateImage(file, 10);
+      if (error) {throw new Error(error);}
+
+      const compressedFile = await compressAndConvertToWebP(file);
+      const url = await uploadToS3({ file: compressedFile, purpose: UploadPurposes.PROFILE_IMAGE });
+      return await profileApi.uploadProfileImage(url);
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {

@@ -30,7 +30,7 @@ export class UserProfileResponseDTO {
 
     if (!image) {
       dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (image?.includes(".amazonaws.com")) {
+    } else if (image?.includes("private/user/profiles")) {
       dto.profileImage = await s3Service.generateSignedUrl(image);
     } else if (image?.startsWith("http")) {
       dto.profileImage = image;

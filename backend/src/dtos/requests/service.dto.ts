@@ -37,6 +37,12 @@ export class ServiceRequestDTO {
   @Min(0, { message: "Platform fee must be non-negative." })
   @Max(50, { message: "Platform fee cannot exceed 50%." })
   platformFee!: number;
+
+  @IsString()
+  imageUrl!: string;
+
+  @IsString()
+  iconUrl!: string;
 }
 
 export class ServiceUpdateRequestDTO {
@@ -72,4 +78,10 @@ export class ServiceUpdateRequestDTO {
   @Min(0, { message: "Platform fee must be non-negative." })
   @Max(50, { message: "Platform fee cannot exceed 50%." })
   platformFee?: number;
+
+  @IsString()
+  imageUrl!: string;
+
+  @IsString()
+  iconUrl!: string;
 }

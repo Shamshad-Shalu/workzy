@@ -52,7 +52,7 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-1000 w-full bg-card border-border shadow-sm ">
+    <header className="fixed left-0 right-0 top-0 z-50 bg-card border-border shadow-sm ">
       <div className="max-w-7xl mx-auto h-16 px-4 flex items-center justify-between">
         <Link to="/" className="text-xl font-bold text-foreground">
           Workzy

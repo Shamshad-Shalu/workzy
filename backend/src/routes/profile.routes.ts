@@ -4,8 +4,6 @@ import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
-import { upload } from "@/middlewares/upload/multer";
-import { validateFileSize } from "@/middlewares/upload/validateFileSize";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 import { Router } from "express";
 
@@ -21,11 +19,6 @@ router.post("/change-password", validateDto(ChangePasswordDTO), profileControlle
 router.post("/change-email", profileController.changeEmail);
 router.post("/resend-otp", profileController.resentOtp);
 router.post("/verify-otp", profileController.verifyOtp);
-router.post(
-  "/upload-profile",
-  upload.single("image"),
-  validateFileSize,
-  profileController.uploadImage
-);
+router.post("/upload-profile", profileController.uploadImage);
 
 export default router;

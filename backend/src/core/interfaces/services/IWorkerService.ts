@@ -1,9 +1,10 @@
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
+import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
-import { DocumentType, IWorker, WorkerStatus } from "@/types/worker";
+import { IWorker } from "@/types/worker";
 
 export interface IWorkerService {
   getWorkerByUserId(userId: string): Promise<IWorker | null>;
@@ -11,14 +12,9 @@ export interface IWorkerService {
   getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO>;
   updateWorkerProfile(
     workerId: string,
-    data: WorkerProfileRequestDTO,
-    file?: Express.Multer.File
+    data: WorkerProfileRequestDTO
   ): Promise<WorkerProfileResponseDTO>;
-  createWorkerProfile(
-    userId: string,
-    data: any,
-    file: Express.Multer.File
-  ): Promise<WorkerProfileResponseDTO>;
+  createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO>;
   getAllWorkers(
     page: number,
     limit: number,
@@ -29,7 +25,6 @@ export interface IWorkerService {
   verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerResponseDTO>;
   reSubmitWorkerDocument(
     workerId: string,
-    data: { id: string; WorkerStatus?: WorkerStatus; type?: DocumentType },
-    file: Express.Multer.File
+    data: ResubmitDocument
   ): Promise<WorkerProfileResponseDTO>;
 }

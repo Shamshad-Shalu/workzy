@@ -7,10 +7,11 @@ import { serviceSchema } from '../validation/serviceSchema';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
-import { ImageUpload } from '@/components/atoms/ImageUpload';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
 import type { ServiceDTO, ServiceRow } from '@/types/admin/service';
+import { UploadPurposes } from '@/constants/upload';
 
 type ServiceFormData = z.infer<typeof serviceSchema>;
 
@@ -45,8 +46,8 @@ export function ServiceModal({
     defaultValues: {
       name: '',
       description: '',
-      iconUrl: null,
-      imageUrl: null,
+      iconUrl: '',
+      imageUrl: '',
       parentId,
       level,
       platformFee: 0,
@@ -58,8 +59,8 @@ export function ServiceModal({
     reset({
       name: service?.name || '',
       description: service?.description || '',
-      iconUrl: service?.iconUrl ?? null,
-      imageUrl: service?.imageUrl ?? null,
+      iconUrl: service?.iconUrl || '',
+      imageUrl: service?.imageUrl || '',
       parentId,
       level,
       platformFee: service?.platformFee ?? 0,
@@ -71,8 +72,8 @@ export function ServiceModal({
     reset({
       name: '',
       description: '',
-      iconUrl: null,
-      imageUrl: null,
+      iconUrl: '',
+      imageUrl: '',
       parentId,
       level,
       platformFee: 0,
@@ -83,6 +84,7 @@ export function ServiceModal({
   const onSubmitForm = async (data: ServiceFormData) => {
     setIsLoading(true);
     try {
+      console.log('data:', data);
       await onSubmit(data as ServiceDTO);
       onClose();
       resetForm();
@@ -150,9 +152,10 @@ export function ServiceModal({
               render={({ field, fieldState }) => (
                 <ImageUpload
                   value={field.value}
-                  onChange={file => field.onChange(file)}
+                  onChange={url => field.onChange(url)}
                   error={fieldState.error?.message}
                   className="h-40"
+                  purpose={UploadPurposes.SERVICE_ICON}
                 />
               )}
             />
@@ -168,9 +171,10 @@ export function ServiceModal({
               render={({ field, fieldState }) => (
                 <ImageUpload
                   value={field.value}
-                  onChange={file => field.onChange(file)}
+                  onChange={url => field.onChange(url)}
                   error={fieldState.error?.message}
                   className="h-40 w-40"
+                  purpose={UploadPurposes.SERVICE_IMAGE}
                 />
               )}
             />

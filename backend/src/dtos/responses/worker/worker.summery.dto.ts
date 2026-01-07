@@ -53,7 +53,7 @@ export class WorkerSummaryResponseDTO {
       ? `${address.place}, ${address.city}, ${address.state} - ${address.pincode}`
       : "";
 
-    const profileImage = user.profileImage?.includes("amazonaws.com")
+    const profileImage = user.profileImage?.includes("private")
       ? await s3Service.generateSignedUrl(user.profileImage)
       : user.profileImage || DEFAULT_IMAGE_URL;
 

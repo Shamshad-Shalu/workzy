@@ -1,3 +1,4 @@
+import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
 import crypto from "crypto";
 
 export function generateUniqueFileName(prefix: string, extension: string): string {
@@ -51,5 +52,25 @@ export function getFileExtension(mimetype: string, originalName?: string): strin
 }
 
 export function getDefaultPrefix(folder: string): string {
-  return folder.split("/").pop()?.replace("s", "") || "file";
+  const last = folder.split("/").pop() || "file";
+  return last.endsWith("s") ? last.slice(0, -1) : last;
+}
+
+export function extractKeyFromUrl(fileUrl: string): string {
+  if (!fileUrl.startsWith("http")) return fileUrl;
+  const directMatch = fileUrl.match(/amazonaws\.com\/(.+?)(?:\?|$)/);
+  if (directMatch) return directMatch[1];
+
+  const signedMatch = fileUrl.match(/\/s3\/[^/]+\/[^/]+\/([^&?]+)/);
+  if (signedMatch) return decodeURIComponent(signedMatch[1]);
+
+  const legacyMatch = fileUrl.match(/\/X-Amz-Algorithm[^/]+\/([^&]+)/);
+  if (legacyMatch) return decodeURIComponent(legacyMatch[1]);
+
+  return fileUrl;
+}
+
+export function getPublicImageUrl(fileUrl: string): string {
+  const key = extractKeyFromUrl(fileUrl);
+  return `https://${AWS_S3_BUCKET}.s3.${AWS_REGION}.amazonaws.com/${key}`;
 }

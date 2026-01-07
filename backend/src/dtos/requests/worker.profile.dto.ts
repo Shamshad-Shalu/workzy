@@ -33,4 +33,7 @@ export class WorkerProfileRequestDTO {
   @ArrayMinSize(1, { message: "At least one cities is required." })
   @ArrayMaxSize(10, { message: "A maximum of 50 skills are allowed." })
   cities!: string[];
+
+  @IsString()
+  coverImage?: string | null;
 }

@@ -1,5 +1,5 @@
 import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/atoms/ImageUpload';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
@@ -20,6 +20,8 @@ import {
   LocationSearchModal,
   useLocationSearchModal,
 } from '@/components/molecules/LocationSearchModal';
+import { toast } from 'sonner';
+import { UploadPurposes } from '@/constants/upload';
 
 interface WorkerSectionProps {
   workerData: WorkerProfile;
@@ -27,14 +29,9 @@ interface WorkerSectionProps {
 }
 
 export default function WorkerSection({ workerData, onSubmit }: WorkerSectionProps) {
+  const { addSlot, updateSlot, removeSlot } = useAvailability();
   const [isEditing, setIsEditing] = useState(false);
   const { isOpen, openModal, closeModal } = useLocationSearchModal();
-  const {
-    data: availability,
-    addSlot,
-    updateSlot,
-    removeSlot,
-  } = useAvailability(workerData.availability);
 
   const {
     register,
@@ -47,12 +44,31 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
   } = useForm<WorkerProfileSchemaType>({
     resolver: zodResolver(workerProfileSchema),
     defaultValues: workerData as unknown as WorkerProfileSchemaType,
-    reValidateMode: 'onChange',
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
   });
 
   useEffect(() => {
-    setValue('availability', availability, { shouldValidate: false, shouldDirty: true });
-  }, [availability, setValue]);
+    reset(workerData as unknown as WorkerProfileSchemaType);
+  }, [reset, workerData]);
+
+  useEffect(() => {
+    function findErrorMessage(err: any): string | null {
+      if (typeof err.message === 'string') {
+        return err.message;
+      }
+      if (typeof err === 'object') {
+        for (const value of Object.values(err)) {
+          const msg = findErrorMessage(value);
+          if (msg) {return msg;}
+        }
+      }
+      return null;
+    }
+    if (!errors.availability) {return;}
+    const message = findErrorMessage(errors.availability);
+    toast.error(message);
+  }, [errors.availability]);
 
   const handleFormSubmit = async (data: WorkerProfileSchemaType) => {
     await onSubmit(data);
@@ -225,10 +241,11 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                   render={({ field, fieldState }) => (
                     <ImageUpload
                       value={field.value}
-                      onChange={file => field.onChange(file)}
+                      onChange={url => field.onChange(url)}
                       error={fieldState.error?.message}
                       className="w-full mt-2"
                       isEditable={isEditing}
+                      purpose={UploadPurposes.WORKER_COVER_IMAGE}
                     />
                   )}
                 />
@@ -281,22 +298,19 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
             <Controller
               name="availability"
               control={control}
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <AvailabilitySection
-                  error={errors.availability?.message}
-                  availability={field.value ?? availability}
+                  availability={field.value}
                   isEditing={isEditing}
+                  hasError={!!fieldState.error}
                   onAddSlot={day => {
-                    addSlot(day);
-                    setValue('availability', availability, { shouldValidate: false });
+                    field.onChange(addSlot(field.value, day));
                   }}
-                  onUpdateSlot={(d, i, t, v) => {
-                    updateSlot(d, i, t, v);
-                    setValue('availability', availability, { shouldValidate: false });
+                  onUpdateSlot={(day, index, fieldName, value) => {
+                    field.onChange(updateSlot(field.value, day, index, fieldName, value));
                   }}
                   onRemoveSlot={(day, index) => {
-                    removeSlot(day, index);
-                    setValue('availability', availability, { shouldValidate: false });
+                    field.onChange(removeSlot(field.value, day, index));
                   }}
                 />
               )}

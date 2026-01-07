@@ -1,5 +1,5 @@
 import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/atoms/ImageUpload';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
@@ -8,6 +8,7 @@ import { Briefcase, DollarSign } from 'lucide-react';
 import { Controller, useForm } from 'react-hook-form';
 import { JoinWorkerSchema, type JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { UploadPurposes } from '@/constants/upload';
 
 interface BecomeWorkerFormType {
   onSubmit: (data: any) => void;
@@ -99,10 +100,10 @@ export default function BecomeWorkerForm({ onSubmit, disabled = false }: BecomeW
                 render={({ field, fieldState }) => (
                   <ImageUpload
                     value={field.value}
-                    onChange={file => field.onChange(file)}
+                    onChange={url => field.onChange(url)}
+                    purpose={UploadPurposes.WORKER_DOCUMENT}
                     error={fieldState.error?.message}
                     className="w-full mt-2"
-                    isEditable
                   />
                 )}
               />

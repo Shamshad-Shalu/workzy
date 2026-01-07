@@ -2,7 +2,6 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { TYPES } from "@/di/types";
 import { inject, injectable } from "inversify";
-import { generateSignedUrl, uploadFileToS3 } from "./s3.dservice";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { compare, hash } from "bcryptjs";
 import CustomError from "@/utils/customError";
@@ -15,6 +14,7 @@ import validator from "validator";
 import logger from "@/config/logger";
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { extractKeyFromUrl } from "@/utils/upload";
 
 @injectable()
 export class ProfileService implements IProfileService {
@@ -24,16 +24,18 @@ export class ProfileService implements IProfileService {
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
-  async updateProfileImage(userId: string, file: Express.Multer.File): Promise<string> {
+  async updateProfileImage(userId: string, url: string): Promise<string> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
-    if (user.profileImage?.includes(".amazonaws.com/")) {
+
+    if (user.profileImage?.includes("private/user/profiles")) {
       await this._s3Service.deleteFile(user.profileImage);
     }
-    const newImage = await uploadFileToS3(file, "private/user/profiles");
-    user.profileImage = newImage;
-    await user.save();
-
-    return await generateSignedUrl(newImage);
+    const profileImage = extractKeyFromUrl(url);
+    const updatedUser = await this._userRepository.update(user.id, { profileImage });
+    if (!updatedUser?.profileImage) {
+      throw new CustomError(USER.UPDATE_ERROR);
+    }
+    return await this._s3Service.generateSignedUrl(updatedUser.profileImage);
   }
 
   async updatePassword(userId: string, passwordDto: ChangePasswordDTO): Promise<boolean> {

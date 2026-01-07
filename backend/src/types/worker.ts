@@ -1,4 +1,4 @@
-import { Document, ObjectId } from "mongoose";
+import { Document, Types } from "mongoose";
 import { IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
@@ -34,11 +34,11 @@ export interface IDocument {
 }
 
 export interface IWorker extends Document<string> {
-  userId: ObjectId | IUser;
+  userId: Types.ObjectId | IUser;
   displayName: string;
   tagline: string;
   about: string;
-  coverImage?: string;
+  coverImage: string | null;
   status: WorkerStatus;
   experience: number;
   defaultRate: IRate;

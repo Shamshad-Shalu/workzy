@@ -53,7 +53,11 @@ export function TagManager({
                 >
                   <span>{tag}</span>
                   {onRemove && (
-                    <button onClick={() => onRemove(tag)} className="hover:opacity-70">
+                    <button
+                      onClick={() => onRemove(tag)}
+                      className="hover:opacity-70"
+                      type="button"
+                    >
                       <X className="w-3 h-3" />
                     </button>
                   )}
@@ -61,7 +65,7 @@ export function TagManager({
               ))}
             </div>
 
-            {max && items.length >= max && (
+            {max && items.length > max && (
               <p className="text-xs text-destructive">
                 Maximum {max} {label.toLowerCase()} allowed
               </p>

@@ -11,7 +11,6 @@ import { buildServiceFilter } from "@/utils/admin/buildServiceFilter";
 import CustomError from "@/utils/customError";
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
-import { uploadFileToS3 } from "../s3.dservice";
 import { clearRedisListCache } from "@/utils/cache.util";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -23,10 +22,7 @@ export class ServiceManagementService implements IServiceManagementService {
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
-  async createService(
-    serviceData: ServiceRequestDTO,
-    files: { iconFile: Express.Multer.File; imgFile: Express.Multer.File }
-  ): Promise<ServiceResponseDTO> {
+  async createService(serviceData: ServiceRequestDTO): Promise<ServiceResponseDTO> {
     const isAlreadyExists = await this._serviceRepository.findOne({
       name: serviceData.name,
       parentId: serviceData.parentId || null,
@@ -35,24 +31,14 @@ export class ServiceManagementService implements IServiceManagementService {
     if (isAlreadyExists) {
       throw new CustomError(SERVICE.EXISTS, HTTPSTATUS.FORBIDDEN);
     }
-
-    const [imgUrl, iconUrl] = await Promise.all([
-      uploadFileToS3(files.imgFile, "public/services/images"),
-      uploadFileToS3(files.iconFile, "public/services/icons"),
-    ]);
-
-    const { name, platformFee, description, parentId } = serviceData;
+    const { parentId, ...data } = serviceData;
 
     const parentObjectId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
 
     const newService = await this._serviceRepository.create({
-      name,
-      platformFee,
-      description,
+      ...data,
       isAvailable: true,
       parentId: parentObjectId,
-      imageUrl: imgUrl,
-      iconUrl: iconUrl,
     });
 
     await clearRedisListCache("services:list");
@@ -91,9 +77,7 @@ export class ServiceManagementService implements IServiceManagementService {
 
   async updateService(
     serviceId: string,
-    updateData: ServiceUpdateRequestDTO,
-    iconFile?: Express.Multer.File,
-    imgFile?: Express.Multer.File
+    updateData: ServiceUpdateRequestDTO
   ): Promise<ServiceResponseDTO> {
     const service = await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND);
 
@@ -107,26 +91,17 @@ export class ServiceManagementService implements IServiceManagementService {
       throw new CustomError(SERVICE.EXISTS, HTTPSTATUS.FORBIDDEN);
     }
     const updates: Partial<IService> = { ...(updateData as Partial<IService>) };
+
     const filePromises: Promise<void>[] = [];
     updates.parentId = updateData.parentId
       ? new mongoose.Types.ObjectId(updateData.parentId)
       : null;
 
-    if (imgFile) {
-      filePromises.push(
-        uploadFileToS3(imgFile, "public/services/images").then((newImageUrl) => {
-          this._s3Service.deleteFile(service.imageUrl);
-          updates.imageUrl = newImageUrl;
-        })
-      );
+    if (service.imageUrl !== updateData.imageUrl) {
+      filePromises.push(this._s3Service.deleteFile(service.imageUrl));
     }
-    if (iconFile) {
-      filePromises.push(
-        uploadFileToS3(iconFile, "public/services/icons").then((newIconUrl) => {
-          this._s3Service.deleteFile(service.iconUrl);
-          updates.iconUrl = newIconUrl;
-        })
-      );
+    if (service.iconUrl !== updateData.iconUrl) {
+      filePromises.push(this._s3Service.deleteFile(service.iconUrl));
     }
     await Promise.all(filePromises);
 

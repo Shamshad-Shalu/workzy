@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
+import { AUTH, EMAIL, HTTPSTATUS, SERVER, USER } from "@/constants";
 import { TYPES } from "@/di/types";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
@@ -19,12 +19,12 @@ export class ProfileController implements IProfileController {
 
   uploadImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
-    if (!req.file) {
-      throw new CustomError("Image not found", HTTPSTATUS.BAD_REQUEST);
+    const { url } = req.body;
+    if (!userId || !url) {
+      throw new CustomError(SERVER.UNEXPECTED);
     }
-    const url = await this._profileService.updateProfileImage(userId, req.file);
-    res.json({ url });
+    const imageUrl = await this._profileService.updateProfileImage(userId, url);
+    res.status(HTTPSTATUS.OK).json({ url: imageUrl });
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {

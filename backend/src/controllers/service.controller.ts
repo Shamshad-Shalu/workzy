@@ -7,7 +7,6 @@ import { IServiceManagementService } from "@/core/interfaces/services/admin/ISer
 import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/service.dto";
 import { HTTPSTATUS } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
-import CustomError from "@/utils/customError";
 
 @injectable()
 export class AdminServiceController implements IAdminServiceController {
@@ -16,21 +15,8 @@ export class AdminServiceController implements IAdminServiceController {
   ) {}
 
   createService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const files = req.files as {
-      iconUrl?: Express.Multer.File[];
-      imageUrl?: Express.Multer.File[];
-    };
-    const iconFile = files.iconUrl?.[0];
-    const imgFile = files.imageUrl?.[0];
-
-    if (!iconFile || !imgFile) {
-      throw new CustomError(SERVICE.MISSING_FILES, HTTPSTATUS.BAD_REQUEST);
-    }
-
-    const newService = await this._serviceManagement.createService(req.body as ServiceRequestDTO, {
-      iconFile,
-      imgFile,
-    });
+    const data = req.body as ServiceRequestDTO;
+    const newService = await this._serviceManagement.createService(data);
     res.status(HTTPSTATUS.CREATED).json({ message: SERVICE.CREATED, newService });
   });
 
@@ -58,23 +44,9 @@ export class AdminServiceController implements IAdminServiceController {
 
   updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const serviceId = req.params.serviceId;
-    const files = req.files as {
-      iconUrl?: Express.Multer.File[];
-      imageUrl?: Express.Multer.File[];
-    };
-
-    const iconFile = files.iconUrl?.[0];
-    const imgFile = files.imageUrl?.[0];
-
     const updateData = req.body as ServiceUpdateRequestDTO;
 
-    const updatedService = await this._serviceManagement.updateService(
-      serviceId,
-      updateData,
-      iconFile,
-      imgFile
-    );
-
+    const updatedService = await this._serviceManagement.updateService(serviceId, updateData);
     res.status(HTTPSTATUS.OK).json({ message: SERVICE.UPDATED, updatedService });
   });
 

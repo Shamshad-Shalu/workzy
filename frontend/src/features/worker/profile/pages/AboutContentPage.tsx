@@ -17,6 +17,7 @@ import AccountChangeActions from '@/features/profile/components/AccountChangeAct
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
 import { handleApiError } from '@/utils/handleApiError';
 import { useOutletContext } from 'react-router-dom';
+import type { RootState } from '@/store/store';
 
 type OutletContext = {
   reloadWorkerData: () => Promise<void>;
@@ -30,7 +31,7 @@ export default function WorkeAboutContentPage() {
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
   const [workerInfo, setWorkerInfo] = useState<WorkerProfile | null>(null);
 
-  const { user } = useAppSelector((s: any) => s.auth);
+  const { user } = useAppSelector((s: RootState) => s.auth);
   const { reloadWorkerData } = useOutletContext<OutletContext>();
   const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
   const { getWorkerProfile, updateWorkerProfile } = useWorkerProfile();
@@ -58,22 +59,11 @@ export default function WorkeAboutContentPage() {
   }
 
   async function handleWorkerProfileSubmit(data: WorkerProfileSchemaType) {
-    const formData = new FormData();
-    Object.entries(data).forEach(([key, value]) => {
-      if (key === 'coverImage') {
-        if (value instanceof File) {
-          formData.append('coverImage', value);
-        }
-        return;
-      } else {
-        formData.append(key, JSON.stringify(value));
-      }
-    });
-
     try {
-      await updateWorkerProfile(formData);
+      const { message, workerData } = await updateWorkerProfile(data);
       reloadWorkerData();
-      toast.success('successfully updated worker profile');
+      toast.success(message);
+      setWorkerInfo(workerData);
     } catch (error) {
       toast.error(handleApiError(error));
     }

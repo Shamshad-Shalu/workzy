@@ -37,10 +37,8 @@ export const profileApi = {
     const res = await api.post(PROFILE_ROUTES.RESEND_OTP, { type, value });
     return res.data;
   },
-  uploadProfileImage: async (file: File) => {
-    const form = new FormData();
-    form.append('image', file);
-    const res = await api.post(PROFILE_ROUTES.UPLOAD_IMAGE, form);
+  uploadProfileImage: async (url: string) => {
+    const res = await api.post(PROFILE_ROUTES.UPLOAD_IMAGE, {url});
     return res.data as { url: string };
   },
 };

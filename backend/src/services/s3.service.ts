@@ -1,8 +1,14 @@
 import { s3 } from "@/config/s3";
-import { AWS_REGION, AWS_S3_BUCKET, AWS_S3_EXPIRY } from "@/constants";
+import { AWS_REGION, AWS_S3_BUCKET, AWS_S3_EXPIRY, PURPOSE_POLICY } from "@/constants";
 import { IS3Service, UploadUrlResponse } from "@/core/interfaces/services/IS3Service";
 import { RequestUploadUrlDTO } from "@/dtos/requests/upload.dto";
-import { generateUniqueFileName, getDefaultPrefix, getFileExtension } from "@/utils/upload";
+import CustomError from "@/utils/customError";
+import {
+  extractKeyFromUrl,
+  generateUniqueFileName,
+  getDefaultPrefix,
+  getFileExtension,
+} from "@/utils/upload";
 import {
   DeleteObjectCommand,
   GetObjectCommand,
@@ -29,12 +35,24 @@ export class S3Service implements IS3Service {
   private s3: S3Client = s3;
 
   async generateUploadPresignedUrl(data: RequestUploadUrlDTO): Promise<UploadUrlResponse> {
-    const { fileName, fileType, folder, prefix } = data;
+    const { fileName, fileType, purpose, fileSize } = data;
 
-    const prefixVal = prefix || getDefaultPrefix(folder);
+    const policy = PURPOSE_POLICY[purpose];
+    if (!policy) throw new CustomError("Invalid upload purpose");
+
+    if (!(policy.allowedTypes as readonly string[]).includes(fileType)) {
+      throw new CustomError("File type not allowed");
+    }
+
+    if (fileSize > policy.maxSizeMB * 1024 * 1024) {
+      throw new Error("File too large");
+    }
+
     const extension = getFileExtension(fileType, fileName);
-    const uniqueName = generateUniqueFileName(prefixVal, extension);
-    const fileKey = `${folder}/${uniqueName}`;
+
+    const prefix = getDefaultPrefix(policy.folder);
+    const uniqueName = generateUniqueFileName(prefix, extension);
+    const fileKey = `${policy.folder}/${uniqueName}`;
 
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
@@ -43,13 +61,15 @@ export class S3Service implements IS3Service {
     });
 
     const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });
-    const publicUrl = `https://${this.config.bucket}.s3.${this.config.region}.amazonaws.com/${fileKey}`;
+    const url = `https://${this.config.bucket}.s3.${this.config.region}.amazonaws.com/${fileKey}`;
 
-    return { uploadUrl, fileKey, publicUrl };
+    const publicUrl = policy.folder.startsWith("private") ? await this.generateSignedUrl(url) : url;
+
+    return { uploadUrl, publicUrl };
   }
 
   async deleteFile(fileUrl: string): Promise<void> {
-    const key = this.extractKeyFromUrl(fileUrl);
+    const key = extractKeyFromUrl(fileUrl);
     if (!key) return;
 
     await this.s3.send(
@@ -64,7 +84,7 @@ export class S3Service implements IS3Service {
     fileUrl: string,
     expiresIn: number = this.config.expiry
   ): Promise<string> {
-    const key = this.extractKeyFromUrl(fileUrl);
+    const key = extractKeyFromUrl(fileUrl);
     if (!key) return fileUrl;
 
     const command = new GetObjectCommand({
@@ -73,9 +93,5 @@ export class S3Service implements IS3Service {
     });
 
     return await getSignedUrl(this.s3, command, { expiresIn });
-  }
-
-  private extractKeyFromUrl(fileUrl: string): string | null {
-    return fileUrl.split(".amazonaws.com/")[1] || null;
   }
 }

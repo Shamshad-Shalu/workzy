@@ -14,8 +14,8 @@ export interface ServiceDTO {
   _id?: string;
   name: string;
   description?: string;
-  iconUrl: string | File | null;
-  imageUrl: string | File | null;
+  iconUrl: string | null;
+  imageUrl: string | null;
   parentId?: string | null;
   level?: number;
   platformFee: number;

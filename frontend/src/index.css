@@ -156,15 +156,23 @@
     border-color: var(--color-border);
     outline-color: rgb(var(--color-ring) / 0.5);
   }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
 }
 
+@layer components {
+  .section-container {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+}
+
 .no-scrollbar {
   scrollbar-width: none;
 }
+
 .sidebar-scroll::-webkit-scrollbar {
   width: 0;
 }

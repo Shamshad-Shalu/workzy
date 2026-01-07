@@ -37,7 +37,6 @@ export default function WorkerProfileRouteWrapper() {
   if (!workerInfo) {
     return <WorkerProfileLayoutSkeleton />;
   }
-
   async function handleImageUpload(file: File) {
     const res = await uploadImage(file);
     dispatch(updateUser({ profileImage: res.url }));

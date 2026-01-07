@@ -2,11 +2,7 @@ import { ServiceRequestDTO, ServiceUpdateRequestDTO } from "@/dtos/requests/serv
 import { ServiceResponseDTO } from "@/dtos/responses/admin/service.response.dto";
 
 export interface IServiceManagementService {
-  createService(
-    serviceData: ServiceRequestDTO,
-    files: { iconFile: Express.Multer.File; imgFile: Express.Multer.File }
-  ): Promise<ServiceResponseDTO>;
-
+  createService(serviceData: ServiceRequestDTO): Promise<ServiceResponseDTO>;
   toggleServiceStatus(serviceId: string): Promise<{ newStatus: boolean; message: string }>;
   getAllServices(
     page: number,
@@ -18,8 +14,6 @@ export interface IServiceManagementService {
 
   updateService(
     serviceId: string,
-    updateData: ServiceUpdateRequestDTO,
-    iconFile?: Express.Multer.File,
-    imgFile?: Express.Multer.File
+    updateData: ServiceUpdateRequestDTO
   ): Promise<ServiceResponseDTO>;
 }

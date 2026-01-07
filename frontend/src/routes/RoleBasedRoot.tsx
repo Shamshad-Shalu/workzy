@@ -11,7 +11,7 @@ export default function RoleBasedRoot() {
   const params = new URLSearchParams(location.search);
   const asUser = params.get('as') === 'user';
 
-  if (status !== 'succeeded') {
+  if (status === 'loading') {
     return null;
   }
 

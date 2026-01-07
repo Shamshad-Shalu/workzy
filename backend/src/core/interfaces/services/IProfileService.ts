@@ -2,7 +2,7 @@ import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dt
 import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
 
 export interface IProfileService {
-  updateProfileImage(userId: string, file: Express.Multer.File): Promise<string>;
+  updateProfileImage(userId: string, url: string): Promise<string>;
   updatePassword(userId: string, passwordDto: ChangePasswordDTO): Promise<boolean>;
   sentMail(userId: string, email: string): Promise<boolean>;
   resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean>;

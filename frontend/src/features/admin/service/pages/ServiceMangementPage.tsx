@@ -98,13 +98,6 @@ export default function ServiceManagementPage() {
 
   const handleServiceSubmit = async (serviceData: ServiceDTO) => {
     if (editingService) {
-      if (typeof serviceData.iconUrl === 'string') {
-        serviceData.iconUrl = null;
-      }
-      if (typeof serviceData.imageUrl === 'string') {
-        serviceData.imageUrl = null;
-      }
-
       await updateServiceMutation.mutateAsync({
         id: editingService._id,
         data: serviceData,
