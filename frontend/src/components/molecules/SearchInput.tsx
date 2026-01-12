@@ -33,7 +33,7 @@ export default function SearchInput({
     return () => {
       clearTimeout(handler);
     };
-  }, [inputValue, debounce]);
+  }, [inputValue, debounce, value, onChange]);
 
   return (
     <Input

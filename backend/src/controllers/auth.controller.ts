@@ -120,6 +120,7 @@ export class AuthController implements IAuthController {
 
     const isBlocked = await redisClient.get(`blocked_user:${userId}`);
     if (isBlocked) {
+      clearRefreshTokenCookie(res);
       res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
       return;
     }

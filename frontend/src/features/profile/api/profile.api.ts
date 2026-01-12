@@ -7,12 +7,12 @@ export const profileApi = {
     const res = await api.get(PROFILE_ROUTES.PROFILE);
     return res.data.user;
   },
-  updateBasicInfo: async (payload: Partial<User>): Promise<any> => {
+  updateBasicInfo: async (payload: Partial<User>): Promise<{ message: string; user: User }> => {
     const res = await api.patch(PROFILE_ROUTES.PROFILE, payload);
     return res.data;
   },
 
-  requestChangeEmail: async (email: string): Promise<any> => {
+  requestChangeEmail: async (email: string): Promise<{ message: string }> => {
     const res = await api.post(PROFILE_ROUTES.CHANGE_EMAIL, { email });
     return res.data;
   },
@@ -38,7 +38,7 @@ export const profileApi = {
     return res.data;
   },
   uploadProfileImage: async (url: string) => {
-    const res = await api.post(PROFILE_ROUTES.UPLOAD_IMAGE, {url});
+    const res = await api.post(PROFILE_ROUTES.UPLOAD_IMAGE, { url });
     return res.data as { url: string };
   },
 };

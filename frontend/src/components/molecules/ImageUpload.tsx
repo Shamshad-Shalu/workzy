@@ -1,21 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { Camera, X, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import type {  UploadPurpose } from '@/constants/upload';
+import type { UploadPurpose } from '@/constants/upload';
 import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
 import { uploadToS3 } from '@/services/upload.service';
+import Button from '../atoms/Button';
 
 interface ImageUploadProps {
-  value?: string | null;
-  onChange?: (url: string | null) => void;
+  value?: string;
+  onChange?: (url: string) => void;
   error?: string;
   className?: string;
   maxSizeMB?: number;
   isEditable?: boolean;
   autoCompress?: boolean;
   purpose?: UploadPurpose;
+  onUploadingChange?: (uploading: boolean) => void;
 }
 
 export function ImageUpload({
@@ -27,6 +28,7 @@ export function ImageUpload({
   isEditable = true,
   autoCompress = true,
   purpose,
+  onUploadingChange,
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(value ?? null);
   const [isUploading, setIsUploading] = useState(false);
@@ -39,17 +41,19 @@ export function ImageUpload({
   const handleSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
 
-    if (!file || !purpose ) {return}
+    if (!file || !purpose) {
+      return;
+    }
     const error = validateImage(file, maxSizeMB);
 
     if (error) {
       toast.error(error);
-      onChange?.(null);
       return;
     }
 
     try {
       setIsUploading(true);
+      onUploadingChange?.(true);
 
       let uploadFile = file;
       if (autoCompress) {
@@ -57,23 +61,27 @@ export function ImageUpload({
       }
       const url = await uploadToS3({
         file: uploadFile,
-        purpose
+        purpose,
       });
 
       setPreview(url);
       onChange?.(url);
     } catch (error) {
+      console.error(error);
       toast.error('Upload Filed');
-      onChange?.(null);
+      onChange?.('');
     } finally {
       setIsUploading(false);
+      onUploadingChange?.(false);
     }
   };
 
   const handleRemove = () => {
     setPreview(null);
-    onChange?.(null);
-    if (inputRef.current) {inputRef.current.value = '';}
+    onChange?.('');
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
   };
 
   return (
@@ -90,8 +98,8 @@ export function ImageUpload({
             src={preview}
             alt="preview"
             className={cn(
-              'h-full w-full object-cover transition-opacity'
-              // isUploading && "opacity-40"
+              'h-full w-full object-cover transition-opacity',
+              isUploading && 'opacity-40'
             )}
           />
         ) : (

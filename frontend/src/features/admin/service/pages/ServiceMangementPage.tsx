@@ -3,7 +3,7 @@ import Table from '@/components/data-table/Table';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import AdminService from '@/services/admin/serviceManagement.service';
-import type { ServiceDTO, ServiceResponse, ServiceRow } from '@/types/admin/service';
+import type { ServiceResponse, Service } from '@/types/admin/service';
 import { useQuery } from '@tanstack/react-query';
 import { Filter, Layers } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
@@ -15,16 +15,17 @@ import { ServiceModal } from '../components/ServiceModal';
 import { useServiceMutations } from '../hooks/useServiceMutations';
 import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
+import type { ServiceFormData } from '../validation/serviceSchema';
 
 type ServiceCrumb = { id: string; name: string };
 type CustomParams = { parentId: string | null };
 
 export default function ServiceManagementPage() {
-  const [selectedService, setSelectedService] = useState<ServiceRow | null>(null);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
-  const [parentVal, setParentVal] = useState<ServiceRow | null>(null);
-  const [editingService, setEditingService] = useState<ServiceRow | null>(null);
+  const [parentVal, setParentVal] = useState<Service | null>(null);
+  const [editingService, setEditingService] = useState<Service | null>(null);
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -66,7 +67,7 @@ export default function ServiceManagementPage() {
     });
   }
 
-  const openStatusModal = (service: ServiceRow) => {
+  const openStatusModal = (service: Service) => {
     setSelectedService(service);
     setStatusModalOpen(true);
   };
@@ -75,15 +76,15 @@ export default function ServiceManagementPage() {
     (v: string) => {
       updateParams({ search: v, page: 0, parentId });
     },
-    [parentId]
+    [parentId, updateParams]
   );
 
-  const onEdit = (service: ServiceRow) => {
+  const onEdit = (service: Service) => {
     setEditingService(service);
     setServiceModalOpen(true);
   };
 
-  const onViewChild = (service: ServiceRow) => {
+  const onViewChild = (service: Service) => {
     setParentVal(service);
     const newPath = [...path, { id: service._id, name: service.name }];
     navigate(`?parentId=${service._id}&page=1`, {
@@ -96,7 +97,7 @@ export default function ServiceManagementPage() {
     }
   }, [parentId]);
 
-  const handleServiceSubmit = async (serviceData: ServiceDTO) => {
+  const handleServiceSubmit = async (serviceData: ServiceFormData) => {
     if (editingService) {
       await updateServiceMutation.mutateAsync({
         id: editingService._id,

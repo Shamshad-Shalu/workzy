@@ -2,9 +2,15 @@ import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_TOKEN } from '@/constants';
+import type { Address } from '@/types/user';
+
+type MapboxContextItem = {
+  id: string;
+  text: string;
+};
 
 interface MapSelectorProps {
-  onLocationSelect: (coordinates: [number, number], address?: any) => void;
+  onLocationSelect: (coordinates: [number, number], address?: Address) => void;
   onClose: () => void;
 }
 
@@ -54,33 +60,45 @@ export default function MapSelector({ onLocationSelect, onClose }: MapSelectorPr
         map.on('click', async e => {
           const { lng, lat } = e.lngLat;
 
-          // Reverse geocode to get address
           try {
             const response = await fetch(
               `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${MAPBOX_TOKEN}&types=address,place,region,postcode`
             );
             const data = await response.json();
 
-            const addressComponents: any = {};
+            const addressComponents: Address = {};
             if (data.features && data.features.length > 0) {
               const feature = data.features[0];
-              const context = feature.context || [];
+              const context: MapboxContextItem[] = feature.context || [];
 
-              context.forEach((item: any) => {
-                if (item.id.includes('place')) {
-                  addressComponents.place = item.text;
-                }
-                if (item.id.includes('region')) {
-                  addressComponents.state = item.text;
-                }
+              context.forEach(item => {
                 if (item.id.includes('postcode')) {
                   addressComponents.pincode = item.text;
                 }
+
+                if (item.id.includes('region')) {
+                  addressComponents.state = item.text;
+                }
+
+                if (context.length === 6) {
+                  if (item.id.includes('locality')) {
+                    addressComponents.place = item.text;
+                  }
+                  if (item.id.includes('place')) {
+                    addressComponents.city = item.text;
+                  }
+                } else {
+                  if (item.id.includes('place')) {
+                    addressComponents.place = item.text;
+                  }
+                  if (item.id.includes('district')) {
+                    addressComponents.city = item.text;
+                  }
+                }
+
+                addressComponents.house =
+                  feature.place_name?.split(',')[0] || addressComponents.place;
               });
-              const city = feature.place_name?.split(',')[0] || addressComponents.place;
-              if (city) {
-                addressComponents.city = city;
-              }
             }
 
             onLocationSelect([lng, lat], addressComponents);

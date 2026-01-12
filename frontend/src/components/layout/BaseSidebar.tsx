@@ -24,6 +24,7 @@ interface BaseSidebarProps {
   toggleCollapse: () => void;
   initialRender: boolean;
   mobile?: boolean;
+  onNavigate?: () => void;
 
   menuItems: MenuItem[];
   supportItems?: MenuItem[];
@@ -36,6 +37,7 @@ export function BaseSidebar({
   initialRender,
   mobile = false,
   menuItems,
+  onNavigate,
   supportItems = [],
   user,
 }: BaseSidebarProps) {
@@ -61,7 +63,7 @@ export function BaseSidebar({
   return (
     <aside
       className={cn(
-        'h-screen flex flex-col bg-card border-r shadow-sm overflow-hidden no-scrollbar',
+        'h-full flex flex-col bg-card border-r shadow-sm overflow-hidden no-scrollbar',
         !initialRender && 'transition-[width] duration-300 ease-in-out',
         collapsed ? 'w-20' : 'w-72',
         mobile && 'w-72'
@@ -97,6 +99,7 @@ export function BaseSidebar({
             label={item.label}
             to={item.to}
             collapsed={collapsed}
+            onNavigate={onNavigate}
           />
         ))}
 

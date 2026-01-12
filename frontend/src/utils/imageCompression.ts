@@ -21,16 +21,17 @@ export async function compressAndConvertToWebP(
     return file;
   }
 }
-function renameToWebP (file :File ) :File {
-  if(file.name.endsWith(".webp")) {return file;}
+function renameToWebP(file: File): File {
+  if (file.name.endsWith('.webp')) {
+    return file;
+  }
 
-  const baseName = file.name.replace(/\.[^/.]+$/, "");
-  return new File([file] ,`${baseName}.webp`,{
-    type:"image/webp",
-    lastModified:Date.now()
+  const baseName = file.name.replace(/\.[^/.]+$/, '');
+  return new File([file], `${baseName}.webp`, {
+    type: 'image/webp',
+    lastModified: Date.now(),
   });
 }
-
 
 export function validateImage(file: File, maxSizeMB: number = 5): string | null {
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];

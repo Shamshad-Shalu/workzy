@@ -1,5 +1,5 @@
 import redisClient from "@/config/redisClient";
-import { HTTPSTATUS, REDIS_EXPIRY } from "@/constants";
+import { HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
@@ -70,7 +70,7 @@ export class ServiceManagementService implements IServiceManagementService {
 
     const serviceDto = ServiceResponseDTO.fromEntities(ServiceRaw as IService[]);
     const response = { services: serviceDto, total };
-    await redisClient.set(cacheKey, JSON.stringify(response), { EX: REDIS_EXPIRY });
+    await redisClient.set(cacheKey, JSON.stringify(response), { EX: REFRESH_TOKEN_TTL_SECONDS });
 
     return response;
   }

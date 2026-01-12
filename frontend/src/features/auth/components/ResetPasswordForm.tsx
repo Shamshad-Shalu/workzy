@@ -30,7 +30,7 @@ export default function ResetPasswordForm() {
       const res = await resetPasswordService(email!, token!, password);
       toast.success(res.message);
       navigate('/login');
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
     } finally {
       setLoading(false);

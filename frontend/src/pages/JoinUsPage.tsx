@@ -26,6 +26,12 @@ import type { RootState } from '@/store/store';
 import { cn } from '@/lib/utils';
 import { UploadPurposes } from '@/constants/upload';
 
+export interface ResumbitDocumentType {
+  id: string;
+  WorkerStatus: string;
+  url: string;
+}
+
 export default function JoinUsPage() {
   const { user } = useAppSelector((s: RootState) => s.auth);
   const navigate = useNavigate();
@@ -38,7 +44,7 @@ export default function JoinUsPage() {
   const [loading, setLoading] = useState<boolean>(false);
   const [resubmitted, setResubmitted] = useState<boolean>(false);
   const [existingDoc, setExistingDoc] = useState<IDocument | null>(null);
-  const [documentValue, setDocumentValue] = useState<string | null>(existingDoc?.url ?? null);
+  const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
 
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
@@ -96,7 +102,9 @@ export default function JoinUsPage() {
     }
   }
   async function reSubmitForm() {
-    if (!existingDoc) {return;}
+    if (!existingDoc) {
+      return;
+    }
     if (!documentValue) {
       toast.error('Please Reupload document');
       return;
@@ -193,25 +201,25 @@ export default function JoinUsPage() {
         <div className="section-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 text-center">
             <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value="2000" suffix="+" />
+              <AnimatedCounter value={2000} suffix="+" />
               <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
                 Service Providers
               </p>
             </div>
             <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value="50000" suffix="+" />
+              <AnimatedCounter value={50000} suffix="+" />
               <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
                 Customers
               </p>
             </div>
             <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value="98" suffix="%" />
+              <AnimatedCounter value={98} suffix="%" />
               <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
                 Satisfaction Rate
               </p>
             </div>
             <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value="500000" prefix="$" suffix="+" />
+              <AnimatedCounter value={500000} prefix="$" suffix="+" />
               <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
                 Revenue Generated
               </p>

@@ -2,6 +2,7 @@ import { Document, Types } from "mongoose";
 import { IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
+
 export type RateType = "hourly" | "fixed";
 export type DocumentType = "id_proof" | "license" | "certificate" | "other";
 export interface IRate {

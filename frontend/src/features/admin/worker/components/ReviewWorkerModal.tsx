@@ -15,7 +15,7 @@ import { useEffect } from 'react';
 interface ReviewWorkerModalType {
   open: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: ReviewWorkerSchemaType) => void;
   selectedWorker: WorkerRow | null;
 }
 

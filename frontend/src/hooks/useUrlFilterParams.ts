@@ -16,52 +16,12 @@ type StandardParams = {
   updateParams: (updates: Updates) => void;
 };
 
-const createUpdateParamsFunction =
-  (setSearchParams: ReturnType<typeof useSearchParams>[1]) => (updates: Updates) => {
-    setSearchParams(
-      prev => {
-        const newParams = new URLSearchParams(prev);
-
-        const filterKeys = Object.keys(updates).filter(
-          k => !['page', 'pageIndex', 'pageSize'].includes(k)
-        );
-
-        Object.entries(updates).forEach(([key, value]) => {
-          const paramKey = key === 'pageSize' ? 'limit' : key === 'pageIndex' ? 'page' : key;
-
-          if (value === null || value === undefined || value === '') {
-            newParams.delete(paramKey);
-            return;
-          }
-
-          if (paramKey === 'page') {
-            newParams.set('page', String(Number(value) + 1));
-          } else {
-            newParams.set(paramKey, String(value));
-          }
-        });
-
-        const isPageUpdatedManually = updates.page !== undefined || updates.pageIndex !== undefined;
-        const shouldResetPage = filterKeys.length > 0 || updates.pageSize !== undefined;
-
-        if (shouldResetPage && !isPageUpdatedManually) {
-          newParams.set('page', '0');
-        }
-
-        return newParams;
-      },
-      { replace: true }
-    );
-  };
-
 export const useUrlFilterParams = <
   TCustom extends Record<string, unknown> = Record<string, unknown>,
 >(
   customParams: CustomParamConfig[] = []
 ): StandardParams & TCustom => {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  const customParamsString = useMemo(() => JSON.stringify(customParams), [customParams]);
 
   const filterState = useMemo(() => {
     const standardParams = {
@@ -84,9 +44,49 @@ export const useUrlFilterParams = <
     }, {} as TCustom);
 
     return { ...standardParams, ...customState };
-  }, [searchParams, customParamsString]);
+  }, [searchParams, customParams]);
 
-  const updateParams = useCallback(createUpdateParamsFunction(setSearchParams), [setSearchParams]);
+  const updateParams = useCallback(
+    (updates: Updates) => {
+      setSearchParams(
+        prev => {
+          const newParams = new URLSearchParams(prev);
+
+          const filterKeys = Object.keys(updates).filter(
+            k => !['page', 'pageIndex', 'pageSize'].includes(k)
+          );
+
+          Object.entries(updates).forEach(([key, value]) => {
+            const paramKey = key === 'pageSize' ? 'limit' : key === 'pageIndex' ? 'page' : key;
+
+            if (value === null || value === undefined || value === '') {
+              newParams.delete(paramKey);
+              return;
+            }
+
+            if (paramKey === 'page') {
+              newParams.set('page', String(Number(value) + 1));
+            } else {
+              newParams.set(paramKey, String(value));
+            }
+          });
+
+          const isPageUpdatedManually =
+            updates.page !== undefined || updates.pageIndex !== undefined;
+
+          const shouldResetPage = filterKeys.length > 0 || updates.pageSize !== undefined;
+
+          if (shouldResetPage && !isPageUpdatedManually) {
+            newParams.set('page', '0');
+          }
+
+          return newParams;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
 
   return {
     ...filterState,

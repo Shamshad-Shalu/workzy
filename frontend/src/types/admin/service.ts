@@ -1,4 +1,4 @@
-export interface ServiceRow {
+export interface Service {
   _id: string;
   name: string;
   description?: string;
@@ -10,19 +10,7 @@ export interface ServiceRow {
   parentId?: null | string;
 }
 
-export interface ServiceDTO {
-  _id?: string;
-  name: string;
-  description?: string;
-  iconUrl: string | null;
-  imageUrl: string | null;
-  parentId?: string | null;
-  level?: number;
-  platformFee: number;
-  isAvailable?: boolean;
-}
-
 export interface ServiceResponse {
-  services: ServiceRow[];
+  services: Service[];
   total: number;
 }

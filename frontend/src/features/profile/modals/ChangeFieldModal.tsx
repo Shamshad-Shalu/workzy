@@ -3,7 +3,6 @@ import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { ZodType } from 'zod';
-import type { ZodTypeAny } from 'zod';
 
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
@@ -16,10 +15,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-type FieldForm = {
+type BaseField = {
   value: string;
 };
-interface Props {
+
+interface Props<TSchema extends ZodType<BaseField>> {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   title: string;
@@ -29,11 +29,11 @@ interface Props {
   leftIcon?: React.ReactNode;
   placeholder?: string;
   initialValue?: string;
-  schema: ZodType<FieldForm, any, any> | ZodTypeAny;
-  onSubmit: (value: string) => Promise<any>;
+  schema: TSchema;
+  onSubmit: (value: string) => Promise<void>;
 }
 
-export default function ChangeFieldModal({
+export default function ChangeFieldModal<TSchema extends ZodType<BaseField>>({
   open,
   onOpenChange,
   title,
@@ -45,20 +45,20 @@ export default function ChangeFieldModal({
   initialValue = '',
   schema,
   onSubmit,
-}: Props) {
+}: Props<TSchema>) {
   const {
     register,
     handleSubmit,
     watch,
     formState: { errors, isValid, isSubmitting },
-  } = useForm<FieldForm>({
+  } = useForm<BaseField>({
     resolver: zodResolver(schema as any),
     defaultValues: { value: initialValue ?? '' },
     mode: 'onChange',
   });
   const currentValue = watch('value');
 
-  async function onSubmitForm(data: FieldForm) {
+  async function onSubmitForm(data: BaseField) {
     await onSubmit(data.value);
     onOpenChange(false);
   }

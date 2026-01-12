@@ -1,22 +1,11 @@
-import React, { createContext, useContext, useState, useLayoutEffect } from 'react';
-
-type Theme = 'dark' | 'light' | 'system';
-
-interface ThemeContextType {
-  theme: Theme;
-  setTheme: (theme: Theme) => void;
-}
+import { useLayoutEffect, useState } from 'react';
+import { ThemeContext, type Theme } from './theme-context';
 
 interface ThemeProviderProps {
   children: React.ReactNode;
   defaultTheme?: Theme;
   storageKey?: string;
 }
-
-const ThemeContext = createContext<ThemeContextType>({
-  theme: 'system',
-  setTheme: () => {},
-});
 
 export function ThemeProvider({
   children,
@@ -53,5 +42,3 @@ export function ThemeProvider({
     </ThemeContext.Provider>
   );
 }
-
-export const useTheme = () => useContext(ThemeContext);

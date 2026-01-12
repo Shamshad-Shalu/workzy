@@ -5,6 +5,7 @@ dotenv.config();
 export const PORT = process.env.PORT;
 export const SERVER_URL = process.env.SERVER_URL;
 export const CLIENT_URL = process.env.CLIENT_URL;
+export const DUMMY_URL = process.env.DUMMY_URL;
 export const NODE_ENV = process.env.NODE_ENV;
 export const MONGO_URI = process.env.MONGO_URI;
 export const ACCESS_TOKEN = process.env.ACCESS_TOKEN;
@@ -18,7 +19,7 @@ export const NODEMAILER_PASSWORD = process.env.NODEMAILER_PASSWORD;
 export const DEFAULT_IMAGE_URL = `https://workzy-app-storage.s3.ap-south-1.amazonaws.com/public/common/user/userprofile.avif`;
 export const DEFAULT_WORKER_COVER_IMAGE = `https://workzy-app-storage.s3.ap-south-1.amazonaws.com/public/common/worker/profile_coverImage.jpg`;
 export const EMAIL_OTP_EXPIRY = Number(process.env.EMAIL_OTP_EXPIRY);
-export const REDIS_EXPIRY = Number(process.env.REDIS_EXPIRY);
+export const REFRESH_TOKEN_TTL_SECONDS = Number(process.env.REFRESH_TOKEN_TTL_SECONDS);
 
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;

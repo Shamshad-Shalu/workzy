@@ -12,7 +12,10 @@ export const validateRefreshToken = (req: Request, res: Response, next: NextFunc
       return;
     }
     const decoded = verifyRefreshToken(token);
-    req.user = decoded;
+    req.user = {
+      _id: decoded.user._id,
+      role: decoded.user.role,
+    };
     next();
   } catch (error) {
     res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.NO_REFRESH_TOKEN, error });

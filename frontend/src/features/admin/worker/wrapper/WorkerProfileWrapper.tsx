@@ -1,5 +1,5 @@
 import ProfileImage from '@/components/molecules/ProfileImage';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { WorkerInfo } from '@/types/worker';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 import { useWorkerProfile } from '@/features/worker/profile/hooks/useWorkerProfile';
@@ -14,7 +14,7 @@ export default function WorkerProfileRouteWrapper() {
   const [workerInfo, setWorkerInfo] = useState<WorkerInfo | null>(null);
   const [workerStats, setWorkerStats] = useState<StatItem[]>([]);
 
-  async function load() {
+  const load = useCallback(async () => {
     const { workerInfo, workerStats } = await getWorkerSummary();
     setWorkerInfo(workerInfo);
     setWorkerStats([
@@ -22,10 +22,8 @@ export default function WorkerProfileRouteWrapper() {
       { value: workerStats.averageRating.toString() || 'N/A', label: 'Average Rating' },
       { value: workerStats.completionRate.toString() || '0%', label: 'Completion Rate' },
     ]);
-  }
-  function reloadWorkerData() {
-    load();
-  }
+  }, [getWorkerSummary]);
+
   useEffect(() => {
     load();
   }, [load]);
@@ -40,7 +38,7 @@ export default function WorkerProfileRouteWrapper() {
         workerInfo={workerInfo}
         workerStats={workerStats}
         workerAction={<ProfileImage src={workerInfo?.profileImage} editable={false} />}
-        reloadWorkerData={reloadWorkerData}
+        reloadWorkerData={() => load()}
       />
       <ProfileImageModal
         open={openImage}

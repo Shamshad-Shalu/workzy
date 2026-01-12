@@ -254,13 +254,3 @@ export function LocationSearchModal({
     </AppModal>
   );
 }
-
-export function useLocationSearchModal() {
-  const [isOpen, setIsOpen] = useState(false);
-
-  return {
-    isOpen,
-    openModal: () => setIsOpen(true),
-    closeModal: () => setIsOpen(false),
-  };
-}

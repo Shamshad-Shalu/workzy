@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { profileApi } from '../api/profile.api';
 import type { User } from '@/types/user';
 import { toast } from 'sonner';
@@ -11,19 +11,19 @@ export function useProfile() {
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
 
-  async function getUserProfilePage() {
+  const getUserProfilePage = useCallback(async () => {
     setLoading(true);
     try {
-      const user = await profileApi.getProfilePage();
-      return user;
+      return await profileApi.getProfilePage();
     } catch (err) {
       toast.error(handleApiError(err));
+      throw err;
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function updateBasic(payload: Partial<User>) {
+  const updateBasic = useCallback(async (payload: Partial<User>) => {
     setLoading(true);
     try {
       if (payload.profile?.address) {
@@ -39,16 +39,15 @@ export function useProfile() {
           delete payload.profile!.address;
         }
       }
-      const user = await profileApi.updateBasicInfo(payload);
-      return user;
+      return await profileApi.updateBasicInfo(payload);
     } catch (err) {
       toast.error(handleApiError(err));
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function changeEmail(email: string) {
+  const changeEmail = useCallback(async (email: string) => {
     setLoading(true);
     try {
       return await profileApi.requestChangeEmail(email);
@@ -58,9 +57,9 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function changePhone(phone: string) {
+  const changePhone = useCallback(async (phone: string) => {
     setLoading(true);
     try {
       return await profileApi.requestChangePhone(phone);
@@ -70,9 +69,9 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function changePassword(currentPassword: string, newPassword: string) {
+  const changePassword = useCallback(async (currentPassword: string, newPassword: string) => {
     setLoading(true);
     try {
       return await profileApi.changePassword(currentPassword, newPassword);
@@ -82,13 +81,15 @@ export function useProfile() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function uploadImage(file: File) {
+  const uploadImage = useCallback(async (file: File) => {
     setImageLoading(true);
     try {
       const error = validateImage(file, 10);
-      if (error) {throw new Error(error);}
+      if (error) {
+        throw new Error(error);
+      }
 
       const compressedFile = await compressAndConvertToWebP(file);
       const url = await uploadToS3({ file: compressedFile, purpose: UploadPurposes.PROFILE_IMAGE });
@@ -99,30 +100,31 @@ export function useProfile() {
     } finally {
       setImageLoading(false);
     }
-  }
-  async function verifyOtp(type: 'email' | 'phone', value: string, otp: string) {
+  }, []);
+
+  const verifyOtp = useCallback(async (type: 'email' | 'phone', value: string, otp: string) => {
     setLoading(true);
     try {
       return await profileApi.verifyOtp(type, value, otp);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
-  async function resendOtp(type: 'email' | 'phone', value: string) {
+  const resendOtp = useCallback(async (type: 'email' | 'phone', value: string) => {
     setLoading(true);
     try {
       return await profileApi.resendOtp(type, value);
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
 
   return {
     loading,

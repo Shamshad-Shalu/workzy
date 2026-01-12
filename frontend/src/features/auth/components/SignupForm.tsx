@@ -29,7 +29,7 @@ export default function SignupForm() {
       const res = await registerService(data);
       toast.success(res.message);
       navigate('/verify-otp', { state: { email: data.email, password: data.password } });
-    } catch (error: any) {
+    } catch (error) {
       toast.error(handleApiError(error));
     }
   };

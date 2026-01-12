@@ -77,8 +77,10 @@ export default function WorkeAboutContentPage() {
             user={user}
             onSave={async payload => {
               const res = await updateBasic(payload);
-              dispatch(updateUser(res?.user));
-              toast.success(res.message);
+              toast.success(res?.message);
+              if (res?.user) {
+                dispatch(updateUser(res?.user));
+              }
             }}
           />
         </div>

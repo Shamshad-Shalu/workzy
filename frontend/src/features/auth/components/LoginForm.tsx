@@ -43,7 +43,7 @@ export default function LoginForm() {
       toast.success(AUTH_MESSAGES.LOGIN_SUCCESS);
 
       redirectBasedOnRole(user.role, navigate);
-    } catch (error: any) {
+    } catch (error) {
       toast.error(handleApiError(error));
     }
   };

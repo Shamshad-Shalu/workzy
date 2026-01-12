@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { User } from '@/types/user';
+import type { Address, User } from '@/types/user';
 import { type ProfileFormType, ProfileSchema } from '../validation/profileSchema';
 
 interface UseProfileFormProps {
@@ -55,7 +55,7 @@ export function useProfileForm({ user, onSave }: UseProfileFormProps) {
     reset(defaultValues);
   }, [user, reset]);
 
-  const handleLocationSelect = (coordinates: [number, number], address?: any) => {
+  const handleLocationSelect = (coordinates: [number, number], address?: Address) => {
     setValue(
       'profile.location',
       {
@@ -66,6 +66,9 @@ export function useProfileForm({ user, onSave }: UseProfileFormProps) {
     );
 
     if (address) {
+      if (address.house) {
+        setValue('profile.address.house', address.house);
+      }
       if (address.place) {
         setValue('profile.address.place', address.place);
       }

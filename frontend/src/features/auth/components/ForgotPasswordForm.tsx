@@ -26,7 +26,7 @@ export default function ForgotPasswordForm() {
       const res = await forgotPasswordService(email);
       toast.success(res.message);
       navigate('/login');
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
     } finally {
       setLoading(false);

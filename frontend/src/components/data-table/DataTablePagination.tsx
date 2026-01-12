@@ -11,19 +11,18 @@ interface Props<T> {
 
 export function DataTablePagination<T>({ table, onPageChange, onPageSizeChange }: Props<T>) {
   const [pageSizeLocal, setPageSizeLocal] = useState(table.getState().pagination.pageSize);
+  const { pageIndex, pageSize } = table.getState().pagination;
 
   useEffect(() => {
-    setPageSizeLocal(table.getState().pagination.pageSize);
-  }, [table.getState().pagination.pageSize]);
+    setPageSizeLocal(pageSize);
+  }, [pageSize]);
 
   const handlePageSizeChange = (v: number) => {
     table.setPageSize(v);
     onPageSizeChange?.(v);
   };
 
-  const { pageIndex, pageSize } = table.getState().pagination;
-
-  const totalFilteredRows = (table.options.meta as any)?.total ?? 0;
+  const totalFilteredRows = table.options.meta?.total ?? 0;
   const startIndex = totalFilteredRows === 0 ? 0 : pageIndex * pageSize + 1;
   const endIndex = Math.min((pageIndex + 1) * pageSize, totalFilteredRows);
 

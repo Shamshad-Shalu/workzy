@@ -1,31 +1,39 @@
 import { Outlet } from 'react-router-dom';
 import { WorkerSidebar } from './WorkerSidebar';
 import { Topbar } from '@/components/organisms/Topbar';
-import { Sheet, SheetTrigger, SheetContent } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
+import { Suspense, useState } from 'react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
-export function WorkerLayout() {
+export default function WorkerLayout() {
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
   return (
-    <div className="flex h-screen bg-muted/30 overflow-hidden">
-      <div className="hidden lg:block">
+    <div className="flex inset-0 fixed bg-muted/30">
+      <div className="hidden lg:block h-full">
         <WorkerSidebar />
       </div>
 
-      <Sheet>
-        <SheetTrigger id="drawer-trigger" className="hidden" />
-
+      <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
         <SheetContent side="left" className="p-0 w-72">
-          <WorkerSidebar mobile />
+          <VisuallyHidden>
+            <SheetTitle>Sidebar</SheetTitle>
+            <SheetDescription>Mobile navigation</SheetDescription>
+          </VisuallyHidden>
+          <WorkerSidebar mobile onNavigate={() => setMobileSidebarOpen(false)} />
         </SheetContent>
       </Sheet>
 
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 ">
         <Topbar
           onMenuClick={() => {
-            document.getElementById('drawer-trigger')?.click();
+            setMobileSidebarOpen(true);
           }}
         />
         <main className="flex-1 overflow-y-auto p-4 lg:p-6 no-scrollbar bg-background">
-          <Outlet />
+          <Suspense fallback={<div className="opacity-50" />}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </div>

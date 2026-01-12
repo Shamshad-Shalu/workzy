@@ -1,17 +1,15 @@
 import type { TableColumnDef } from '@/types/table.types';
-import { flexRender } from '@tanstack/react-table';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props<TData extends { _id: string }> {
   item: TData;
   columns: TableColumnDef<TData>[];
-  index?: number;
 }
+
 export default function DataTableMobileCard<TData extends { _id: string }>({
   item,
   columns,
-  index,
 }: Props<TData>) {
   const [open, setOpen] = useState(false);
   const baseColumns = columns.filter(
@@ -35,41 +33,19 @@ export default function DataTableMobileCard<TData extends { _id: string }>({
   const detailInfo = detailColumns.filter(col => col.id !== detailActions?.id);
 
   const renderColumnContent = (column: TableColumnDef<TData>) => {
-    if (column.cell) {
-      const context = {
-        row: {
-          original: item,
-          index: index || 0,
-          id: item._id,
-          getIsSelected: () => false,
-          getIsExpanded: () => false,
-          getCanExpand: () => false,
-          getVisibleCells: () => [],
-          getValue: (key: string) => item[key as keyof TData],
-        } as any,
-        column: {
-          id: column.id,
-          columnDef: column,
-        } as any,
-        table: {
-          getState: () => ({
-            pagination: { pageIndex: 0, pageSize: 10 },
-          }),
-        } as any,
-        cell: {} as any,
-        getValue: () => {
-          const col = column as any;
-          return col.accessorKey ? item[col.accessorKey as keyof TData] : undefined;
-        },
-      };
-      return flexRender(column.cell, context as any);
+    if (!column.cell) {
+      return '-';
     }
-    const col = column as any;
-    if (col.accessorKey) {
-      const value = item[col.accessorKey as keyof TData];
-      return value !== undefined && value !== null ? String(value) : '-';
-    }
-    return '-';
+    const value =
+      'accessorKey' in column && column.accessorKey
+        ? item[column.accessorKey as keyof TData]
+        : undefined;
+    const cellRenderer = column.cell as unknown as (ctx: unknown) => React.ReactNode;
+
+    return cellRenderer({
+      row: { original: item },
+      getValue: () => value,
+    });
   };
 
   return (

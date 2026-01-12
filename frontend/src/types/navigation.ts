@@ -5,3 +5,8 @@ export interface MenuItem {
   label: string;
   to: string;
 }
+
+export interface SidebarProps {
+  mobile?: boolean;
+  onNavigate?: () => void;
+}

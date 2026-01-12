@@ -8,7 +8,7 @@ import type { WorkerProfile } from '@/types/worker';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Pencil, Save, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, type ControllerRenderProps } from 'react-hook-form';
 import {
   workerProfileSchema,
   type WorkerProfileSchemaType,
@@ -16,10 +16,7 @@ import {
 import { useAvailability } from '../../hooks/useAvailability';
 import { AvailabilitySection } from '../../components/AvailabilitySection';
 import { TagManager } from '@/components/molecules/TagManager';
-import {
-  LocationSearchModal,
-  useLocationSearchModal,
-} from '@/components/molecules/LocationSearchModal';
+import { LocationSearchModal } from '@/components/molecules/LocationSearchModal';
 import { toast } from 'sonner';
 import { UploadPurposes } from '@/constants/upload';
 
@@ -31,7 +28,8 @@ interface WorkerSectionProps {
 export default function WorkerSection({ workerData, onSubmit }: WorkerSectionProps) {
   const { addSlot, updateSlot, removeSlot } = useAvailability();
   const [isEditing, setIsEditing] = useState(false);
-  const { isOpen, openModal, closeModal } = useLocationSearchModal();
+  const [isImageUploading, setIsImageUploading] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
 
   const {
     register,
@@ -52,22 +50,30 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
     reset(workerData as unknown as WorkerProfileSchemaType);
   }, [reset, workerData]);
 
-  useEffect(() => {
-    function findErrorMessage(err: any): string | null {
-      if (typeof err.message === 'string') {
-        return err.message;
-      }
-      if (typeof err === 'object') {
-        for (const value of Object.values(err)) {
-          const msg = findErrorMessage(value);
-          if (msg) {return msg;}
-        }
-      }
+  function findErrorMessage(err: unknown): string | null {
+    if (typeof err !== 'object' || err === null) {
       return null;
     }
-    if (!errors.availability) {return;}
+    if ('message' in err && typeof (err as { message?: unknown }).message === 'string') {
+      return (err as { message: string }).message;
+    }
+    for (const value of Object.values(err as Record<string, unknown>)) {
+      const msg = findErrorMessage(value);
+      if (msg) {
+        return msg;
+      }
+    }
+    return null;
+  }
+
+  useEffect(() => {
+    if (!errors.availability) {
+      return;
+    }
     const message = findErrorMessage(errors.availability);
-    toast.error(message);
+    if (message) {
+      toast.error(message);
+    }
   }, [errors.availability]);
 
   const handleFormSubmit = async (data: WorkerProfileSchemaType) => {
@@ -75,7 +81,10 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
     setIsEditing(false);
   };
 
-  const handleLocationSelect = (location: string, field: any) => {
+  const handleLocationSelect = (
+    location: string,
+    field: ControllerRenderProps<WorkerProfileSchemaType, 'cities'>
+  ) => {
     const currentCities = field.value || [];
     if (!currentCities.includes(location)) {
       field.onChange([...currentCities, location]);
@@ -105,6 +114,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                     variant="secondary"
                     iconRight={<X size={18} />}
                     type="button"
+                    disabled={isImageUploading}
                     onClick={() => {
                       setIsEditing(false);
                       reset(workerData as unknown as WorkerProfileSchemaType);
@@ -116,6 +126,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                     variant="green"
                     iconRight={<Save size={19} />}
                     type="submit"
+                    disabled={isImageUploading || isSubmitting}
                     loading={isSubmitting}
                   >
                     Save Changes
@@ -214,15 +225,15 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                       isEditing={isEditing}
                       max={8}
                       error={errors.cities?.message}
-                      onAdd={openModal}
+                      onAdd={() => setLocationModalOpen(true)}
                       onRemove={city => {
                         field.onChange(field.value.filter(s => s !== city));
                       }}
                       className="bg-section-blue border-section-blue-border"
                     />
                     <LocationSearchModal
-                      open={isOpen}
-                      onClose={closeModal}
+                      open={locationModalOpen}
+                      onClose={() => setLocationModalOpen(false)}
                       onSelectLocation={location => handleLocationSelect(location, field)}
                       title="Add City"
                       description="Search and select a city"
@@ -246,6 +257,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                       className="w-full mt-2"
                       isEditable={isEditing}
                       purpose={UploadPurposes.WORKER_COVER_IMAGE}
+                      onUploadingChange={setIsImageUploading}
                     />
                   )}
                 />

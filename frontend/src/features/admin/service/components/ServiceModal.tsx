@@ -1,26 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { AppModal } from '@/components/molecules/AppModal';
-import { serviceSchema } from '../validation/serviceSchema';
+import { serviceSchema, type ServiceFormData } from '../validation/serviceSchema';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
-import type { ServiceDTO, ServiceRow } from '@/types/admin/service';
+import type { Service } from '@/types/admin/service';
 import { UploadPurposes } from '@/constants/upload';
-
-type ServiceFormData = z.infer<typeof serviceSchema>;
 
 interface ServiceModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (service: ServiceDTO) => Promise<void>;
-  service?: ServiceDTO | null;
-  parentServices: ServiceRow | null;
+  onSubmit: (service: ServiceFormData) => Promise<void>;
+  service?: Service | null;
+  parentServices: Service | null;
 }
 
 export function ServiceModal({
@@ -84,8 +81,7 @@ export function ServiceModal({
   const onSubmitForm = async (data: ServiceFormData) => {
     setIsLoading(true);
     try {
-      console.log('data:', data);
-      await onSubmit(data as ServiceDTO);
+      await onSubmit(data);
       onClose();
       resetForm();
     } catch (error) {

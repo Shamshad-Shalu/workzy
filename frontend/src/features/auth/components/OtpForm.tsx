@@ -37,7 +37,7 @@ export default function OtpForm() {
       }
       toast.success(AUTH_MESSAGES.REGISTER_SUCCESS);
       navigate('/');
-    } catch (err: any) {
+    } catch (err) {
       toast.error(handleApiError(err));
     }
   };

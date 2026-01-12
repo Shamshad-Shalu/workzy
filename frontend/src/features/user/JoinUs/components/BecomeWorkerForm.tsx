@@ -11,7 +11,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { UploadPurposes } from '@/constants/upload';
 
 interface BecomeWorkerFormType {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: JoinWorkerSchemaType) => void;
   disabled?: boolean;
 }
 

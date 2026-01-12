@@ -3,8 +3,9 @@ import { adminMenuItems, adminSupportItems } from '@/features/admin/AdminNavigat
 import { useSidebarState } from '@/hooks/useSidebarState';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
+import type { SidebarProps } from '@/types/navigation';
 
-export function AdminSidebar({ mobile = false }) {
+export function AdminSidebar({ mobile = false, onNavigate }: SidebarProps) {
   const { collapsed, initialRender, toggleCollapse } = useSidebarState(mobile);
   const { user } = useAppSelector((s: RootState) => s.auth);
   if (!user) {
@@ -20,6 +21,7 @@ export function AdminSidebar({ mobile = false }) {
       menuItems={adminMenuItems}
       supportItems={adminSupportItems}
       user={user}
+      onNavigate={onNavigate}
     />
   );
 }

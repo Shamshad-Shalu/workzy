@@ -3,7 +3,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 
 interface AnimatedCounterProps {
-  value: string | number;
+  value: number;
   duration?: number;
   prefix?: string;
   suffix?: string;
@@ -106,41 +106,49 @@ export const AnimatedCounter: React.FC<AnimatedCounterProps> = ({
 
   useEffect(() => {
     let start = 0;
-    const end = Number.parseInt(value.toString());
-
+    const end = parseInt(value.toString(), 10);
     if (start === end) {
       return;
     }
 
+    const element = countRef.current;
+    let timer: ReturnType<typeof setInterval> | null = null;
+
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting) {
-          const timer = setInterval(() => {
-            start = start + Math.ceil(end / (duration / 50));
-            if (start > end) {
+          timer = setInterval(() => {
+            start += Math.ceil(end / (duration / 50));
+            if (start >= end) {
               setCount(end);
-              clearInterval(timer);
+              if (timer) {
+                clearInterval(timer);
+              }
             } else {
               setCount(start);
             }
           }, 50);
 
-          if (countRef.current) {
-            observer.unobserve(countRef.current);
+          if (element) {
+            observer.unobserve(element);
           }
         }
       },
       { threshold: 0.5 }
     );
 
-    if (countRef.current) {
-      observer.observe(countRef.current);
+    if (element) {
+      observer.observe(element);
     }
 
     return () => {
-      if (countRef.current) {
-        observer.unobserve(countRef.current);
+      if (timer) {
+        clearInterval(timer);
       }
+      if (element) {
+        observer.unobserve(element);
+      }
+      observer.disconnect();
     };
   }, [value, duration]);
 

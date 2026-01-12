@@ -1,6 +1,8 @@
 import WorkerProfileService from '@/services/worker/workerProfile.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
+import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
+import { useCallback } from 'react';
 
 export function useWorkerProfile() {
   const { user } = useAppSelector((s: RootState) => s.auth);
@@ -10,17 +12,20 @@ export function useWorkerProfile() {
   }
   const workerId = user.workerId;
 
-  async function getWorkerSummary() {
-    return await WorkerProfileService.getWorkerSummaryById(workerId);
-  }
+  const getWorkerSummary = useCallback(() => {
+    return WorkerProfileService.getWorkerSummaryById(workerId);
+  }, [workerId]);
 
-  async function getWorkerProfile() {
-    return await WorkerProfileService.getWorkerProfileById(workerId);
-  }
+  const getWorkerProfile = useCallback(() => {
+    return WorkerProfileService.getWorkerProfileById(workerId);
+  }, [workerId]);
 
-  async function updateWorkerProfile(data: any) {
-    return await WorkerProfileService.updateWorkerProfile(workerId, data);
-  }
+  const updateWorkerProfile = useCallback(
+    (data: WorkerProfileSchemaType) => {
+      return WorkerProfileService.updateWorkerProfile(workerId, data);
+    },
+    [workerId]
+  );
 
   return { getWorkerSummary, getWorkerProfile, updateWorkerProfile };
 }

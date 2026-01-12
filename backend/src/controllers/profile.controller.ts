@@ -21,7 +21,7 @@ export class ProfileController implements IProfileController {
     const userId = req.user?._id;
     const { url } = req.body;
     if (!userId || !url) {
-      throw new CustomError(SERVER.UNEXPECTED);
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const imageUrl = await this._profileService.updateProfileImage(userId, url);
     res.status(HTTPSTATUS.OK).json({ url: imageUrl });
@@ -29,7 +29,9 @@ export class ProfileController implements IProfileController {
 
   changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
 
     await this._profileService.updatePassword(userId, req.body as ChangePasswordDTO);
     res.status(HTTPSTATUS.OK).json({ message: AUTH.PASSWORD_UPDATED });
@@ -37,7 +39,10 @@ export class ProfileController implements IProfileController {
 
   changeEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
+    if (!userId) {
+      res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.UNAUTHORIZED });
+      return;
+    }
     const { email } = req.body;
 
     if (!validator.isEmail(email)) {
@@ -49,7 +54,9 @@ export class ProfileController implements IProfileController {
 
   resentOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
     const { type, value } = req.body;
     await this._profileService.resendOtp(userId, type, value);
 
@@ -58,7 +65,9 @@ export class ProfileController implements IProfileController {
 
   verifyOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
     const { type, value, otp } = req.body;
 
     await this._otpService.verifyAndRetrieveUser(value, otp);
@@ -69,19 +78,20 @@ export class ProfileController implements IProfileController {
 
   getProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
     const user = await this._profileService.getProfile(userId);
     res.status(HTTPSTATUS.OK).json({ user });
   });
 
   updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?._id;
-    if (!userId) return;
-    const data = req.body;
-    const updateUser = await this._profileService.updateProfileBasic(
-      userId,
-      data as ProfileRequestDTO
-    );
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const data = req.body as ProfileRequestDTO;
+    const updateUser = await this._profileService.updateProfileBasic(userId, data);
     res.status(HTTPSTATUS.OK).json({ message: USER.PROFILE_SUCCESS, user: updateUser });
   });
 }

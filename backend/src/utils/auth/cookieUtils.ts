@@ -1,4 +1,4 @@
-import { NODE_ENV, Role } from "@/constants";
+import { NODE_ENV, REFRESH_TOKEN_TTL_SECONDS, Role } from "@/constants";
 import { Response } from "express";
 import { generateRefreshToken } from "./jwt.util";
 
@@ -12,6 +12,7 @@ export const setRefreshTokenCookie = (res: Response, payload: { _id: string; rol
     secure: isProd,
     sameSite: isProd ? "none" : "lax",
     path: "/",
+    maxAge: REFRESH_TOKEN_TTL_SECONDS * 1000,
   });
 };
 

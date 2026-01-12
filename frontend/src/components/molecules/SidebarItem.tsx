@@ -7,17 +7,18 @@ interface SidebarItemProps {
   icon: ReactNode;
   label: string;
   to: string;
-  match?: string;
   collapsed?: boolean;
+  onNavigate?: () => void;
 }
 
-export function SidebarItem({ icon, label, to, match, collapsed }: SidebarItemProps) {
+export function SidebarItem({ icon, label, to, collapsed, onNavigate }: SidebarItemProps) {
   const location = useLocation();
 
-  const isActive = location.pathname === to || (match && location.pathname.startsWith(match));
+  const isActive = location.pathname === to || location.pathname.startsWith(to);
 
   const Item = (
     <NavLink
+      onClick={onNavigate}
       to={to}
       className={cn(
         'flex items-center gap-4 px-4 py-3 rounded-xl text-base font-medium transition-all cursor-pointer',

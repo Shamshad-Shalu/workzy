@@ -29,6 +29,10 @@ interface TableProps<TData> {
   onSortChange?: (next: SortingState) => void;
 }
 
+interface TableMeta {
+  total: number;
+}
+
 export default function Table<TData extends { _id: string }>({
   columns,
   data,
@@ -70,7 +74,7 @@ export default function Table<TData extends { _id: string }>({
       sorting,
       pagination: { pageIndex, pageSize },
     },
-    onSortingChange: (updater: any) => {
+    onSortingChange: updater => {
       const next = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(next);
       onSortChange?.(next);
@@ -83,7 +87,7 @@ export default function Table<TData extends { _id: string }>({
     getSortedRowModel: getSortedRowModel(),
     meta: {
       total,
-    },
+    } satisfies TableMeta,
   });
 
   const getColumnWidth = (column: TableColumnDef<TData>) => {
@@ -112,9 +116,7 @@ export default function Table<TData extends { _id: string }>({
             No results found
           </div>
         ) : (
-          data.map((item, i) => (
-            <DataTableMobileCard key={item._id} item={item} columns={columns} index={i} />
-          ))
+          data.map(item => <DataTableMobileCard key={item._id} item={item} columns={columns} />)
         )}
 
         <div className="bg-card rounded-lg px-4 mt-6">

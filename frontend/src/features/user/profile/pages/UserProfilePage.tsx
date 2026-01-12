@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import ProfileInfoCard from '../../../profile/components/ProfileInfoCard';
+import type { RootState } from '@/store/store';
+import z from 'zod';
+import { Mail, Phone } from 'lucide-react';
+import { toast } from 'sonner';
 import PageHeader from '@/components/molecules/PageHeader';
 import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
 import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
-import { Mail, Phone } from 'lucide-react';
-import z from 'zod';
 import { emailRule, phoneRule } from '@/lib/validation/rules';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 import { useProfile } from '@/features/profile/hooks/useProfile';
-import { toast } from 'sonner';
+import { Separator } from '@/components/ui/separator';
 import OtpModal from '@/features/profile/modals/OtpModal';
 import { updateUser } from '@/store/slices/authSlice';
 import ProfileImage from '@/components/molecules/ProfileImage';
-import { Separator } from '@/components/ui/separator';
 import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
-import type { RootState } from '@/store/store';
+import ProfileInfoCard from '@/features/profile/components/ProfileInfoCard';
 
 export default function ProfilePage() {
   const { user } = useAppSelector((s: RootState) => s.auth);
@@ -50,7 +50,7 @@ export default function ProfilePage() {
       }
     }
     loadProfile();
-  }, []);
+  }, [dispatch, getUserProfilePage]);
 
   if (!user) {
     return null;
@@ -89,9 +89,11 @@ export default function ProfilePage() {
         <ProfileInfoCard
           user={user}
           onSave={async payload => {
-            const res = await updateBasic(payload);
-            dispatch(updateUser(res?.user));
-            toast.success(res.message);
+            const data = await updateBasic(payload);
+            toast.success(data?.message);
+            if (data?.user) {
+              dispatch(updateUser(data?.user));
+            }
           }}
         />
 
@@ -108,8 +110,8 @@ export default function ProfilePage() {
           placeholder="Enter new email"
           initialValue={user.email}
           onSubmit={async email => {
-            const res = await changeEmail(email);
-            toast.success(res.message);
+            const { message } = await changeEmail(email);
+            toast.success(message);
             handleOtpRequest('email', email);
           }}
         />

@@ -10,4 +10,4 @@ export interface TableColumnMeta {
   maxWidth?: number;
 }
 
-export type TableColumnDef<T> = ColumnDef<T, any> & TableColumnMeta;
+export type TableColumnDef<T> = ColumnDef<T, unknown> & TableColumnMeta;

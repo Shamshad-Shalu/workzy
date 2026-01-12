@@ -7,7 +7,7 @@ export const ReviewWorkerSchema = z
     docName: z
       .string()
       .optional()
-      .refine(val => !val || /^(?=(?:.*[A-Za-z]){3,})[A-Za-z0-9\s#\-\/.,]{3,50}$/.test(val), {
+      .refine(val => !val || /^(?=(?:.*[A-Za-z]){3,})[A-Za-z0-9\s#\-/.,]{3,50}$/.test(val), {
         message: 'Name must be 3–50 characters and valid',
       }),
     docId: z.string(),

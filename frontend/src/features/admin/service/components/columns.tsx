@@ -3,13 +3,13 @@ import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import type { TableColumnDef } from '@/types/table.types';
 import { Eye, Pencil } from 'lucide-react';
-import type { ServiceRow } from '@/types/admin/service';
+import type { Service } from '@/types/admin/service';
 
 const serviceColumns = (
-  onToggleStatus: (service: ServiceRow) => void,
-  onEdit: (service: ServiceRow) => void,
-  onViewChild: (service: ServiceRow) => void
-): TableColumnDef<ServiceRow>[] => [
+  onToggleStatus: (service: Service) => void,
+  onEdit: (service: Service) => void,
+  onViewChild: (service: Service) => void
+): TableColumnDef<Service>[] => [
   {
     id: 'index',
     header: '#',

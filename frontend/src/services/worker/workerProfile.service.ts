@@ -1,4 +1,7 @@
+import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
+import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
+import type { ResumbitDocumentType } from '@/pages/JoinUsPage';
 import type { Worker, WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
 
 const WorkerProfileService = {
@@ -16,7 +19,7 @@ const WorkerProfileService = {
 
   updateWorkerProfile: async (
     workerId: string,
-    data: any
+    data: WorkerProfileSchemaType
   ): Promise<{ message: string; workerData: WorkerProfile }> => {
     const res = await api.patch(`/worker/${workerId}/profile`, data);
     return res.data;
@@ -24,7 +27,7 @@ const WorkerProfileService = {
 
   addWorkerProfile: async (
     userId: string,
-    data: any
+    data: JoinWorkerSchemaType
   ): Promise<{ worker: Worker; message: string }> => {
     const res = await api.post(`/worker/joinUs/${userId}`, data);
     return res.data;
@@ -37,7 +40,7 @@ const WorkerProfileService = {
 
   reSubmitWorkerInfo: async (
     workerId: string,
-    data: any
+    data: ResumbitDocumentType
   ): Promise<{ worker: Worker; message: string }> => {
     const res = await api.patch(`/worker/${workerId}/reApply`, data);
     return res.data;

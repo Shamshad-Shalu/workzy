@@ -1,7 +1,7 @@
 import { Bell, Sun, Moon, Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useTheme } from '@/context/theme-provider';
 import workzyLogo from '@/assets/icons/logo-icon.jpg';
+import { useTheme } from '@/context/use-theme';
+import Button from '../atoms/Button';
 
 interface TopbarProps {
   onMenuClick?: () => void;

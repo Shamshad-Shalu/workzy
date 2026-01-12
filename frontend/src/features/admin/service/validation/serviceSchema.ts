@@ -15,4 +15,4 @@ export const serviceSchema = z.object({
   isAvailable: z.boolean(),
 });
 
-export type serviceSchema = z.infer<typeof serviceSchema>;
+export type ServiceFormData = z.infer<typeof serviceSchema>;

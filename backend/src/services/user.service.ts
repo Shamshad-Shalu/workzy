@@ -1,5 +1,5 @@
 import redisClient from "@/config/redisClient";
-import { REDIS_EXPIRY, USER } from "@/constants";
+import { REFRESH_TOKEN_TTL_SECONDS, USER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUserService } from "@/core/interfaces/services/IUserService";
@@ -47,7 +47,7 @@ export class UserService implements IUserService {
     await this._userRepository.update(userId, { isBlocked: newStatus });
 
     if (newStatus) {
-      await redisClient.set(`blocked_user:${userId}`, 1, { EX: REDIS_EXPIRY });
+      await redisClient.set(`blocked_user:${userId}`, 1, { EX: REFRESH_TOKEN_TTL_SECONDS });
     } else {
       await redisClient.del(`blocked_user:${userId}`);
     }

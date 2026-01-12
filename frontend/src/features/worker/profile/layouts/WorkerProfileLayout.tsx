@@ -1,5 +1,6 @@
 import StatCard from '@/components/molecules/StatCard';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
+import { cn } from '@/lib/utils';
 import type { WorkerInfo } from '@/types/worker';
 import { Check } from 'lucide-react';
 import { NavLink, Outlet } from 'react-router-dom';
@@ -17,7 +18,7 @@ interface WorkerProfileLayoutProps {
 }
 
 const TABS = [
-  { name: 'About', path: 'about' },
+  { name: 'About', path: '' },
   { name: 'Services', path: 'services' },
   { name: 'Documents', path: 'documents' },
   { name: 'Subscription', path: 'subscription' },
@@ -30,11 +31,12 @@ export default function WorkerProfileLayout({
   reloadWorkerData,
 }: WorkerProfileLayoutProps) {
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
-    `p-4 text-muted-foreground transition duration-150 border-b-2 ${
+    cn(
+      `p-4 text-muted-foreground transition duration-150 border-b-2 `,
       isActive
         ? 'text-primary font-semibold border-primary'
         : 'border-transparent hover:bg-muted/50'
-    }`;
+    );
 
   return (
     <div className="pb-12 bg-background">
@@ -52,7 +54,7 @@ export default function WorkerProfileLayout({
         </div>
         <div className="bg-card rounded-2xl shadow-sm mb-6 flex px-6 flex justify-between border-b border-border">
           {TABS.map(tab => (
-            <NavLink key={tab.path} to={tab.path} className={getNavLinkClass} end={tab.path === ''}>
+            <NavLink key={tab.name} to={tab.path} className={getNavLinkClass} end={tab.path === ''}>
               {tab.name}
             </NavLink>
           ))}
