@@ -6,7 +6,7 @@ export interface ServiceFilter {
   parentId?: mongoose.Types.ObjectId | null;
 }
 
-export function buildServiceFilter(
+export function buildCategoryFilter(
   search?: string,
   status?: string,
   parentId?: string | null
@@ -20,7 +20,8 @@ export function buildServiceFilter(
   if (status === "active") filter.isAvailable = true;
   if (status === "blocked") filter.isAvailable = false;
 
-  filter.parentId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
-
+  if (parentId || parentId === null) {
+    filter.parentId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
+  }
   return filter;
 }

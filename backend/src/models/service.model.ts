@@ -1,23 +1,55 @@
-import { IService } from "@/types/service";
+import { RateType } from "@/types/worker";
+import { IService, ServiceJobType } from "@/types/service";
 import mongoose, { Schema } from "mongoose";
 
 const ServiceSchema: Schema<IService> = new Schema(
   {
-    name: { type: String, required: true, unique: true, trim: true },
-    description: { type: String },
-    iconUrl: { type: String, default: null },
-    imageUrl: { type: String, default: null },
-    parentId: { type: Schema.Types.ObjectId, ref: "Services", default: null },
-    level: {
-      type: Number,
-      enum: [1, 2, 3],
-      default: 1,
+    workerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Worker",
+      required: true,
     },
-    platformFee: { type: Number, default: 0 },
-    isAvailable: { type: Boolean, default: true },
+    serviceId: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+    rate: {
+      amount: {
+        type: Number,
+        required: true,
+        min: 0,
+      },
+      type: {
+        type: String,
+        enum: ["hourly", "fixed"] as RateType[],
+        required: true,
+      },
+    },
+    description: {
+      type: String,
+    },
+    estimatedDuration: {
+      type: String,
+    },
+    serviceType: {
+      type: String,
+      enum: ["Small Task", "Major Project", "Consultation"] as ServiceJobType[],
+      default: "Small Task",
+    },
+    experience: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
 
-const Services = mongoose.model<IService>("Services", ServiceSchema);
-export default Services;
+ServiceSchema.index({ workerId: 1, serviceId: 1 }, { unique: true });
+
+export default mongoose.model<IService>("Service", ServiceSchema);

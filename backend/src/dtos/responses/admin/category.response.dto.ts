@@ -1,7 +1,7 @@
 import { IsBoolean, IsMongoId, IsOptional, IsNumber, IsString } from "class-validator";
-import { IService } from "@/types/service";
+import { ICategory } from "@/types/category";
 
-export class ServiceResponseDTO {
+export class CategoryResponseDTO {
   @IsMongoId()
   _id!: string;
 
@@ -33,8 +33,8 @@ export class ServiceResponseDTO {
   @IsString()
   createdAt!: Date;
 
-  static fromEntity(entity: IService): ServiceResponseDTO {
-    const dto = new ServiceResponseDTO();
+  static fromEntity(entity: ICategory): CategoryResponseDTO {
+    const dto = new CategoryResponseDTO();
 
     dto._id = entity._id;
     dto.name = entity.name;
@@ -50,7 +50,7 @@ export class ServiceResponseDTO {
     return dto;
   }
 
-  static fromEntities(entities: IService[]): ServiceResponseDTO[] {
+  static fromEntities(entities: ICategory[]): CategoryResponseDTO[] {
     return entities.map((entity) => this.fromEntity(entity));
   }
 }

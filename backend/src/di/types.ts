@@ -18,9 +18,14 @@ const TYPES = {
 
   AdminController: Symbol.for("AdminController"),
 
-  adminServiceController: Symbol.for("adminServiceController"),
-  ServiceManagementService: Symbol.for("ServiceManagementService"),
-  ServiceRepository: Symbol.for("ServiceRepository"),
+  //category
+  CategoryController: Symbol.for("CategoryController"),
+  CategoryService: Symbol.for("CategoryService"),
+  CategoryRepository: Symbol.for("CategoryRepository"),
+
+  // admin
+  AdminCategoryController: Symbol.for("AdminCategoryController"),
+  CategoryManagementService: Symbol.for("CategoryManagementService"),
 
   // Miscellaneous / Utilities
   OTPService: Symbol.for("IOTPService"),

@@ -24,18 +24,22 @@ import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ProfileService } from "@/services/profile.service";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { AdminController } from "@/controllers/admin/admin.controller";
-import { IAdminServiceController } from "@/core/interfaces/controllers/admin/IAdminServiceController";
-import { AdminServiceController } from "@/controllers/service.controller";
-import { IServiceManagementService } from "@/core/interfaces/services/admin/IServiceManagementService";
-import { ServiceManagementService } from "@/services/admin/serviceManagement.service";
-import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
-import { ServiceRepository } from "@/repositories/service.repository";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
 import { WorkerController } from "@/controllers/worker.controller";
 import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
 import { UploadController } from "@/controllers/upload.controller";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { S3Service } from "@/services/s3.service";
+import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
+import { CategoryRepository } from "@/repositories/category.repository";
+import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
+import { CategoryController } from "@/controllers/category.controller";
+import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
+import { CategoryService } from "@/services/category.service";
+import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
+import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
+import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
+import { CategoryManagementService } from "@/services/admin/category-management.service";
 
 const container = new Container();
 
@@ -58,11 +62,14 @@ container.bind<IProfileService>(TYPES.ProfileService).to(ProfileService);
 
 container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
 
-container.bind<IAdminServiceController>(TYPES.adminServiceController).to(AdminServiceController);
+// categories
+container.bind<ICategoryRepository>(TYPES.CategoryRepository).to(CategoryRepository);
+container.bind<ICategoryController>(TYPES.CategoryController).to(CategoryController);
+container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryService);
+container.bind<IAdminCategoryController>(TYPES.AdminCategoryController).to(AdminCategoryController);
 container
-  .bind<IServiceManagementService>(TYPES.ServiceManagementService)
-  .to(ServiceManagementService);
-container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
+  .bind<ICategoryManagementService>(TYPES.CategoryManagementService)
+  .to(CategoryManagementService);
 
 container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
 container.bind<IUploadController>(TYPES.UploadController).to(UploadController);

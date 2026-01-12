@@ -16,6 +16,7 @@ import { useServiceMutations } from '../hooks/useServiceMutations';
 import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
 import type { ServiceFormData } from '../validation/serviceSchema';
+import { useAppSelector } from '@/store/hooks';
 
 type ServiceCrumb = { id: string; name: string };
 type CustomParams = { parentId: string | null };
@@ -26,7 +27,8 @@ export default function ServiceManagementPage() {
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
   const [parentVal, setParentVal] = useState<Service | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
-
+  const {user ,accessToken } = useAppSelector(s => s.auth)
+  console.log({user , accessToken })
   const location = useLocation();
   const navigate = useNavigate();
   const path = (location.state?.path as ServiceCrumb[]) || [];

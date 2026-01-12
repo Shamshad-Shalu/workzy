@@ -1,0 +1,13 @@
+import mongoose, { Document } from "mongoose";
+
+export interface ICategory extends Document<string> {
+  name: string;
+  description?: string;
+  iconUrl: string;
+  imageUrl: string;
+  level: number;
+  parentId?: mongoose.Types.ObjectId | null;
+  platformFee: number;
+  isAvailable: boolean;
+  createdAt: Date;
+}

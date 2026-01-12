@@ -1,13 +1,15 @@
-import mongoose, { Document } from "mongoose";
+import { Document, ObjectId } from "mongoose";
+import { IRate } from "./worker";
+
+export type ServiceJobType = "Small Task" | "Major Project" | "Consultation";
 
 export interface IService extends Document<string> {
-  name: string;
+  workerId: ObjectId;
+  serviceId: ObjectId;
+  rate: IRate;
   description?: string;
-  iconUrl: string;
-  imageUrl: string;
-  level: number;
-  parentId?: mongoose.Types.ObjectId | null;
-  platformFee: number;
-  isAvailable: boolean;
-  createdAt: Date;
+  estimatedDuration?: string;
+  serviceType?: ServiceJobType;
+  experience: number;
+  isActive: boolean;
 }

@@ -25,12 +25,14 @@ export const PROFILE_ROUTES = {
 } as const;
 
 const ADMIN_ROUTE = '/admin';
+
 export const ADMIN_ROUTES = {
   GETUSER: `${ADMIN_ROUTE}/users`,
   TOGGLESTATUS: `${ADMIN_ROUTE}/users/toggle`,
 
-  GETSERVICE: `${ADMIN_ROUTE}/services`,
-  TOGGLESERVICESTATUS: `${ADMIN_ROUTE}/services/toggle-status`,
+  TOGGLESERVICESTATUS: `${ADMIN_ROUTE}/categories/toggle-status`,
+  ADDCATEGORY:`${ADMIN_ROUTE}/categories/add`,
+  EDITCATEGORY:`${ADMIN_ROUTE}/categories/edit`,
 
   GETWORKER: `${ADMIN_ROUTE}/workers/all`,
   VERIFYWORKER: `${ADMIN_ROUTE}/workers/verify`,

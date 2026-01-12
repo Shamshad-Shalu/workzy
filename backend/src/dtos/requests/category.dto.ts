@@ -1,4 +1,4 @@
-import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
+import { CATEGORY, DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
 import { Type } from "class-transformer";
 import {
   IsBoolean,
@@ -13,10 +13,10 @@ import {
   ValidateIf,
 } from "class-validator";
 
-export class ServiceRequestDTO {
+export class CategoryRequestDTO {
   @IsString()
-  @IsNotEmpty({ message: "Service name is requiered." })
-  @Matches(SERVICE_NAME_REGEX, { message: "Invalid service name format." })
+  @IsNotEmpty({ message: "Category name is requiered." })
+  @Matches(SERVICE_NAME_REGEX, { message: CATEGORY.INVALID })
   name!: string;
 
   @IsOptional()
@@ -45,14 +45,14 @@ export class ServiceRequestDTO {
   iconUrl!: string;
 }
 
-export class ServiceUpdateRequestDTO {
-  @IsMongoId({ message: "Invalid service ID format." })
+export class CategoryUpdateRequestDTO {
+  @IsMongoId({ message: "Invalid Category ID format." })
   @IsOptional()
   _id?: string;
 
   @IsOptional()
   @IsString()
-  @Matches(SERVICE_NAME_REGEX, { message: "Invalid service name format." })
+  @Matches(SERVICE_NAME_REGEX, { message: CATEGORY.INVALID })
   name?: string;
 
   @IsOptional()

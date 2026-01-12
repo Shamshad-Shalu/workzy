@@ -3,7 +3,7 @@ import { inject, injectable } from "inversify";
 import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
 import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, SERVER, USER } from "@/constants";
+import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
 import { TYPES } from "@/di/types";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";

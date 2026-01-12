@@ -79,7 +79,10 @@ export class ProfileService implements IProfileService {
         throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
       }
       await this._emailService.sendEmail(value, newOtp);
-    } else {
+    } else if (type === "phone") {
+      if (!validator.isMobilePhone(value)) {
+        throw new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
+      }
     }
     return true;
   }
