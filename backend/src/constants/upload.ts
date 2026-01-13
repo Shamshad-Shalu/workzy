@@ -15,14 +15,14 @@ export const PURPOSE_POLICY = {
     allowedTypes: FILE_TYPES.IMAGES,
   },
 
-  SERVICE_ICON: {
-    folder: "public/services/icons",
+  CATEGORY_ICON: {
+    folder: "public/categories/icons",
     maxSizeMB: 10,
     allowedTypes: FILE_TYPES.IMAGES,
   },
 
-  SERVICE_IMAGE: {
-    folder: "public/services/images",
+  CATEGORY_IMAGE: {
+    folder: "public/categories/images",
     maxSizeMB: 10,
     allowedTypes: FILE_TYPES.IMAGES,
   },

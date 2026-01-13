@@ -2,35 +2,26 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AppModal } from '@/components/molecules/AppModal';
-import { serviceSchema, type ServiceFormData } from '../validation/serviceSchema';
+import { categorySchema, type CategoryFormData } from '../validation/categorySchema';
 import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
 import { Textarea } from '@/components/atoms/Textarea';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
-import type { Service } from '@/types/admin/service';
+import type { Category } from '@/types/admin/category';
 import { UploadPurposes } from '@/constants/upload';
 
-interface ServiceModalProps {
+interface CategoryModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (service: ServiceFormData) => Promise<void>;
-  service?: Service | null;
-  parentServices: Service | null;
+  onSubmit: (category: CategoryFormData) => Promise<void>;
+  category?: Category | null;
+  parentId?: string | null;
 }
 
-export function ServiceModal({
-  open,
-  onClose,
-  onSubmit,
-  service,
-  parentServices,
-}: ServiceModalProps) {
+export function CategoryModal({ open, onClose, onSubmit, category, parentId }: CategoryModalProps) {
   const [isLoading, setIsLoading] = useState(false);
-
-  const level = !parentServices?.level ? 1 : parentServices.level + 1;
-  const parentId = !parentServices?._id ? null : parentServices._id;
 
   const {
     register,
@@ -38,15 +29,14 @@ export function ServiceModal({
     control,
     formState: { errors },
     reset,
-  } = useForm<ServiceFormData>({
-    resolver: zodResolver(serviceSchema),
+  } = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
     defaultValues: {
       name: '',
       description: '',
       iconUrl: '',
       imageUrl: '',
       parentId,
-      level,
       platformFee: 0,
       isAvailable: true,
     },
@@ -54,16 +44,15 @@ export function ServiceModal({
 
   useEffect(() => {
     reset({
-      name: service?.name || '',
-      description: service?.description || '',
-      iconUrl: service?.iconUrl || '',
-      imageUrl: service?.imageUrl || '',
+      name: category?.name || '',
+      description: category?.description || '',
+      iconUrl: category?.iconUrl || '',
+      imageUrl: category?.imageUrl || '',
       parentId,
-      level,
-      platformFee: service?.platformFee ?? 0,
-      isAvailable: service?.isAvailable ?? true,
+      platformFee: category?.platformFee ?? 0,
+      isAvailable: category?.isAvailable ?? true,
     });
-  }, [parentId, level, service, reset]);
+  }, [category, reset, parentId]);
 
   const resetForm = () => {
     reset({
@@ -72,13 +61,12 @@ export function ServiceModal({
       iconUrl: '',
       imageUrl: '',
       parentId,
-      level,
       platformFee: 0,
       isAvailable: true,
     });
   };
 
-  const onSubmitForm = async (data: ServiceFormData) => {
+  const onSubmitForm = async (data: CategoryFormData) => {
     setIsLoading(true);
     try {
       await onSubmit(data);
@@ -95,9 +83,9 @@ export function ServiceModal({
     <AppModal
       open={open}
       onClose={onClose}
-      title={service ? 'Edit Service' : 'Add New Service'}
+      title={category ? 'Edit Category' : 'Add New Category'}
       onConfirm={handleSubmit(onSubmitForm)}
-      confirmText={service ? 'Update' : 'Create'}
+      confirmText={category ? 'Update' : 'Create'}
       cancelText="Cancel"
       isConfirmLoading={isLoading}
       canCloseOnOutsideClick={!isLoading}
@@ -105,7 +93,7 @@ export function ServiceModal({
     >
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 w-full">
         <div>
-          <Label>Service Name</Label>
+          <Label>Category Name</Label>
           <Input
             placeholder="Enter your full name"
             className="px-3"
@@ -138,11 +126,11 @@ export function ServiceModal({
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div className="w-40">
-            <Label>Service Icon</Label>
+            <Label>Category Icon</Label>
             <Controller
               name="iconUrl"
               rules={{
-                validate: v => (v ? true : 'Service icon is required'),
+                validate: v => (v ? true : 'Category icon is required'),
               }}
               control={control}
               render={({ field, fieldState }) => (
@@ -151,17 +139,17 @@ export function ServiceModal({
                   onChange={url => field.onChange(url)}
                   error={fieldState.error?.message}
                   className="h-40"
-                  purpose={UploadPurposes.SERVICE_ICON}
+                  purpose={UploadPurposes.CATEGORY_ICON}
                 />
               )}
             />
           </div>
           <div className="w-40">
-            <Label>Service Image</Label>
+            <Label>Category Image</Label>
             <Controller
               name="imageUrl"
               rules={{
-                validate: v => (v ? true : 'Service Image is required'),
+                validate: v => (v ? true : 'Category Image is required'),
               }}
               control={control}
               render={({ field, fieldState }) => (
@@ -170,7 +158,7 @@ export function ServiceModal({
                   onChange={url => field.onChange(url)}
                   error={fieldState.error?.message}
                   className="h-40 w-40"
-                  purpose={UploadPurposes.SERVICE_IMAGE}
+                  purpose={UploadPurposes.CATEGORY_IMAGE}
                 />
               )}
             />

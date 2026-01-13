@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import OtpInput from '@/components/atoms/OtpInput';
 import Button from '@/components/atoms/Button';
-import { resendOtpService } from '@/services/authService';
+import { resendOtpService } from '@/services/auth.service';
 import { toast } from 'sonner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthOtp } from '../hooks/useOtpVerification';

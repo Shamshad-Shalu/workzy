@@ -3,7 +3,7 @@ import Input from '@/components/atoms/Input';
 import Button from '@/components/atoms/Button';
 import Label from '@/components/atoms/Label';
 import { ArrowRight, Mail } from 'lucide-react';
-import { forgotPasswordService } from '@/services/authService';
+import { forgotPasswordService } from '@/services/auth.service';
 import { toast } from 'sonner';
 import { handleApiError } from '@/utils/handleApiError';
 import { useNavigate } from 'react-router-dom';

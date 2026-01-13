@@ -1,6 +1,7 @@
 import { Camera } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 import { Skeleton } from '../ui/skeleton';
+import userprofile from '@/assets/images/userprofile.avif';
 
 interface Props {
   src: string | undefined;
@@ -9,6 +10,7 @@ interface Props {
   onChange?: (file: File) => Promise<void>;
   onClickImage?: () => void;
   loading?: boolean;
+  fallbackImage?: string;
 }
 export default function ProfileImage({
   src,
@@ -17,6 +19,7 @@ export default function ProfileImage({
   onChange,
   onClickImage,
   loading = false,
+  fallbackImage,
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
@@ -44,7 +47,9 @@ export default function ProfileImage({
         src={src}
         onClick={onClickImage}
         onLoad={() => setImgLoaded(true)}
-        onError={() => setImgLoaded(true)}
+        onError={e => {
+          e.currentTarget.src = fallbackImage ?? userprofile;
+        }}
         style={{ width: size, height: size, display: imgLoaded && !loading ? 'block' : 'none' }}
         className="rounded-full object-cover border-2 border-bg-accent/30"
         alt="Profile"

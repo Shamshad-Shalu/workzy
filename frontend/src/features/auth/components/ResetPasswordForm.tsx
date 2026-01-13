@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import PasswordInput from '@/components/atoms/PasswordInput';
 import Button from '@/components/atoms/Button';
 import Label from '@/components/atoms/Label';
-import { resetPasswordService } from '@/services/authService';
+import { resetPasswordService } from '@/services/auth.service';
 import { toast } from 'sonner';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { handleApiError } from '@/utils/handleApiError';

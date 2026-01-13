@@ -1,4 +1,4 @@
-import { CATEGORY, HTTPSTATUS } from "@/constants";
+import { CATEGORY, HTTPSTATUS, SERVER } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { TYPES } from "@/di/types";
@@ -10,7 +10,6 @@ import mongoose from "mongoose";
 import { clearRedisListCache } from "@/utils/cache.util";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { ICategory } from "@/types/category";
 
 @injectable()
 export class CategoryManagementService implements ICategoryManagementService {
@@ -29,6 +28,17 @@ export class CategoryManagementService implements ICategoryManagementService {
       throw new CustomError(CATEGORY.EXISTS, HTTPSTATUS.FORBIDDEN);
     }
     const { parentId, ...data } = categoryData;
+    let level = 1;
+    if (parentId && mongoose.Types.ObjectId.isValid(parentId)) {
+      const parentCategory = await this._categoryRepository.findById(parentId);
+      if (!parentCategory) {
+        throw new CustomError(SERVER.ERROR);
+      }
+      if (parentCategory.level >= 3) {
+        throw new CustomError(CATEGORY.INVALID_LEVEL, HTTPSTATUS.BAD_REQUEST);
+      }
+      level = parentCategory.level + 1;
+    }
 
     const parentObjectId =
       parentId && mongoose.Types.ObjectId.isValid(parentId)
@@ -37,7 +47,7 @@ export class CategoryManagementService implements ICategoryManagementService {
 
     const newCategory = await this._categoryRepository.create({
       ...data,
-      isAvailable: true,
+      level,
       parentId: parentObjectId,
     });
 
@@ -59,19 +69,14 @@ export class CategoryManagementService implements ICategoryManagementService {
     const isAlreadyExists = await this._categoryRepository.findOne({
       name: updateData.name,
       parentId: updateData.parentId || null,
-      _id: { $ne: categoryId },
+      _id: { $ne: category.id },
     });
 
     if (isAlreadyExists) {
       throw new CustomError(CATEGORY.EXISTS, HTTPSTATUS.FORBIDDEN);
     }
-    const updates: Partial<ICategory> = { ...(updateData as Partial<ICategory>) };
-
-    const filePromises: Promise<void>[] = [];
-    updates.parentId = updateData.parentId
-      ? new mongoose.Types.ObjectId(updateData.parentId)
-      : null;
-
+    const { parentId, ...data } = updateData;
+    const filePromises: Promise<boolean>[] = [];
     if (category.imageUrl !== updateData.imageUrl) {
       filePromises.push(this._s3Service.deleteFile(category.imageUrl));
     }
@@ -80,11 +85,11 @@ export class CategoryManagementService implements ICategoryManagementService {
     }
     await Promise.all(filePromises);
 
-    const updatedCategory = await this._categoryRepository.update(categoryId, updates);
+    const updatedCategory = await this._categoryRepository.update(categoryId, { ...data });
     if (!updatedCategory) {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await clearRedisListCache("services:list");
+    await clearRedisListCache("categories:list");
 
     return CategoryResponseDTO.fromEntity(updatedCategory);
   }

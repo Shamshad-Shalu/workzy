@@ -1,4 +1,4 @@
-export interface Service {
+export interface Category {
   _id: string;
   name: string;
   description?: string;
@@ -10,7 +10,7 @@ export interface Service {
   parentId?: null | string;
 }
 
-export interface ServiceResponse {
-  services: Service[];
+export interface CategoryResponse {
+  categories: Category[];
   total: number;
 }

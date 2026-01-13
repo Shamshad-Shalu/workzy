@@ -3,13 +3,14 @@ import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import type { TableColumnDef } from '@/types/table.types';
 import { Eye, Pencil } from 'lucide-react';
-import type { Service } from '@/types/admin/service';
+import type { Category } from '@/types/admin/category';
+import categoryImage from '@/assets/images/categoryImage.jpeg';
 
-const serviceColumns = (
-  onToggleStatus: (service: Service) => void,
-  onEdit: (service: Service) => void,
-  onViewChild: (service: Service) => void
-): TableColumnDef<Service>[] => [
+const categoryColumns = (
+  onToggleStatus: (category: Category) => void,
+  onEdit: (category: Category) => void,
+  onViewChild: (category: Category) => void
+): TableColumnDef<Category>[] => [
   {
     id: 'index',
     header: '#',
@@ -23,8 +24,8 @@ const serviceColumns = (
     maxWidth: 30,
   },
   {
-    id: 'service',
-    header: 'Service',
+    id: 'category',
+    header: 'Category',
     accessorKey: 'name',
     cell: ({ row }) => <div className="font-medium line-clamp-2">{row.original.name}</div>,
     showInMobileHeader: true,
@@ -37,7 +38,9 @@ const serviceColumns = (
     id: 'icon',
     header: 'Icon',
     accessorKey: 'iconUrl',
-    cell: ({ row }) => <ProfileImage src={row.original.iconUrl} size={40} />,
+    cell: ({ row }) => (
+      <ProfileImage src={row.original.iconUrl} size={40} fallbackImage={categoryImage} />
+    ),
     hideOnSmall: true,
     showInMobileHeader: false,
     mobileOrder: 5,
@@ -48,7 +51,9 @@ const serviceColumns = (
     id: 'image',
     header: 'Image',
     accessorKey: 'imageUrl',
-    cell: ({ row }) => <ProfileImage src={row.original.imageUrl} size={40} />,
+    cell: ({ row }) => (
+      <ProfileImage src={row.original.imageUrl} size={40} fallbackImage={categoryImage} />
+    ),
     hideOnSmall: true,
     showInMobileHeader: false,
     mobileOrder: 4,
@@ -124,4 +129,4 @@ const serviceColumns = (
   },
 ];
 
-export default serviceColumns;
+export default categoryColumns;

@@ -1,5 +1,5 @@
 import { setCredentials } from '@/store/slices/authSlice';
-import { verifyOtpService } from '@/services/authService';
+import { verifyOtpService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store/hooks';
 
 export function useAuthOtp() {

@@ -8,5 +8,5 @@ export interface UploadUrlResponse {
 export interface IS3Service {
   generateUploadPresignedUrl(data: RequestUploadUrlDTO): Promise<UploadUrlResponse>;
   generateSignedUrl(fileUrl: string, expiresIn?: number): Promise<string>;
-  deleteFile(fileUrl: string): Promise<void>;
+  deleteFile(fileUrl: string): Promise<boolean>;
 }

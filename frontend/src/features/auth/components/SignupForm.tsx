@@ -2,7 +2,7 @@ import { useForm } from 'react-hook-form';
 import { signupSchema, type SignupSchemaType } from '../validation/signupSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Link, useNavigate } from 'react-router-dom';
-import { registerService } from '@/services/authService';
+import { registerService } from '@/services/auth.service';
 import { handleApiError } from '@/utils/handleApiError';
 import { toast } from 'sonner';
 import Label from '@/components/atoms/Label';

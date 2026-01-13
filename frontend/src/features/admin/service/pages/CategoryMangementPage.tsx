@@ -2,55 +2,53 @@ import Select from '@/components/atoms/Select';
 import Table from '@/components/data-table/Table';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
-import AdminService from '@/services/admin/serviceManagement.service';
-import type { ServiceResponse, Service } from '@/types/admin/service';
+import type { Category, CategoryResponse } from '@/types/admin/category';
 import { useQuery } from '@tanstack/react-query';
-import { Filter, Layers } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import serviceColumns from '../components/columns';
-import { AppModal } from '@/components/molecules/AppModal';
-import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import Button from '@/components/atoms/Button';
-import { ServiceModal } from '../components/ServiceModal';
-import { useServiceMutations } from '../hooks/useServiceMutations';
-import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
 import { useLocation, useNavigate } from 'react-router-dom';
-import type { ServiceFormData } from '../validation/serviceSchema';
-import { useAppSelector } from '@/store/hooks';
+import { Filter, Layers } from 'lucide-react';
+import { AppModal } from '@/components/molecules/AppModal';
+import { useCallback, useState } from 'react';
+import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+import categoryColumns from '../components/CategoryColumns';
+import type { CategoryFormData } from '../validation/categorySchema';
+import Button from '@/components/atoms/Button';
+import AdminCategoryService from '@/services/admin/categoryManagement.service';
+import { CategoryModal } from '../components/categoryModal';
+import { useCategoryMutations } from '../hooks/useCategoryMutations';
+import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
 
-type ServiceCrumb = { id: string; name: string };
+type CategoryCrumb = { id: string; name: string };
 type CustomParams = { parentId: string | null };
 
-export default function ServiceManagementPage() {
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+export default function CategoryManagementPage() {
+  const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
-  const [serviceModalOpen, setServiceModalOpen] = useState(false);
-  const [parentVal, setParentVal] = useState<Service | null>(null);
-  const [editingService, setEditingService] = useState<Service | null>(null);
-  const {user ,accessToken } = useAppSelector(s => s.auth)
-  console.log({user , accessToken })
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
   const location = useLocation();
   const navigate = useNavigate();
-  const path = (location.state?.path as ServiceCrumb[]) || [];
+  const path = (location.state?.path as CategoryCrumb[]) || [];
 
   const { pageIndex, pageSize, search, status, parentId, updateParams } =
     useUrlFilterParams<CustomParams>([{ key: 'parentId' }]);
 
-  const { addServiceMutation, updateServiceMutation, toggleStatusMutation } = useServiceMutations();
+  const { addCategoryMutation, updateCategoryMutation, toggleStatusMutation } =
+    useCategoryMutations();
 
-  const { data, isLoading } = useQuery<ServiceResponse, Error>({
-    queryKey: ['admin-services', pageIndex, pageSize, search, status, parentId],
-    queryFn: () => AdminService.getServices(pageIndex + 1, pageSize, search, status, parentId),
+  const { data, isLoading } = useQuery<CategoryResponse, Error>({
+    queryKey: ['admin-categories', pageIndex, pageSize, search, status, parentId],
+    queryFn: () =>
+      AdminCategoryService.getCategories(pageIndex + 1, pageSize, search, status, parentId),
     placeholderData: prev => prev,
   });
 
   const breadcrumbItems = [
     {
-      label: 'Services',
-      href: '/admin/services',
+      label: 'Categories',
+      href: '/admin/categories',
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        navigate('/admin/services', { state: { path: [] } });
+        navigate('/admin/categories', { state: { path: [] } });
       },
     },
   ];
@@ -69,8 +67,8 @@ export default function ServiceManagementPage() {
     });
   }
 
-  const openStatusModal = (service: Service) => {
-    setSelectedService(service);
+  const openStatusModal = (category: Category) => {
+    setSelectedCategory(category);
     setStatusModalOpen(true);
   };
 
@@ -81,51 +79,45 @@ export default function ServiceManagementPage() {
     [parentId, updateParams]
   );
 
-  const onEdit = (service: Service) => {
-    setEditingService(service);
-    setServiceModalOpen(true);
+  const onEdit = (category: Category) => {
+    setEditingCategory(category);
+    setCategoryModalOpen(true);
   };
 
-  const onViewChild = (service: Service) => {
-    setParentVal(service);
-    const newPath = [...path, { id: service._id, name: service.name }];
-    navigate(`?parentId=${service._id}&page=1`, {
+  const onViewChild = (category: Category) => {
+    const newPath = [...path, { id: category._id, name: category.name }];
+    navigate(`?parentId=${category._id}&page=1`, {
       state: { path: newPath },
     });
   };
-  useEffect(() => {
-    if (!parentId) {
-      setParentVal(null);
-    }
-  }, [parentId]);
 
-  const handleServiceSubmit = async (serviceData: ServiceFormData) => {
-    if (editingService) {
-      await updateServiceMutation.mutateAsync({
-        id: editingService._id,
-        data: serviceData,
+  const handleCategorySubmit = async (categoryData: CategoryFormData) => {
+    if (editingCategory) {
+      await updateCategoryMutation.mutateAsync({
+        id: editingCategory._id,
+        data: categoryData,
       });
     } else {
-      await addServiceMutation.mutateAsync(serviceData);
+      await addCategoryMutation.mutateAsync(categoryData);
     }
   };
 
-  const handleCloseServiceModal = () => {
-    setServiceModalOpen(false);
-    setEditingService(null);
+  const handleCloseCategoryModal = () => {
+    setCategoryModalOpen(false);
+    setEditingCategory(null);
   };
 
   return (
     <div>
       <div className="flex items-center justify-between">
-        <PageHeader title="Service Management" />
+        <PageHeader title="Category Management" />
         <Button
           variant="blue"
           size="lg"
-          onClick={() => setServiceModalOpen(true)}
+          onClick={() => setCategoryModalOpen(true)}
           iconLeft={<Layers />}
         >
-          Add Service
+          Add Category
         </Button>
       </div>
       <div className="mb-4">
@@ -155,8 +147,8 @@ export default function ServiceManagementPage() {
         </div>
       </div>
       <Table
-        columns={serviceColumns(openStatusModal, onEdit, onViewChild)}
-        data={data?.services ?? []}
+        columns={categoryColumns(openStatusModal, onEdit, onViewChild)}
+        data={data?.categories ?? []}
         total={data?.total}
         pageIndex={pageIndex}
         pageSize={pageSize}
@@ -173,29 +165,29 @@ export default function ServiceManagementPage() {
         open={statusModalOpen}
         onClose={() => setStatusModalOpen(false)}
         isTitleHidden={true}
-        confirmText={selectedService?.isAvailable ? 'Block' : 'Unblock'}
+        confirmText={selectedCategory?.isAvailable ? 'Block' : 'Unblock'}
         onConfirm={() => {
-          if (!selectedService?._id) {
+          if (!selectedCategory?._id) {
             return;
           }
-          toggleStatusMutation.mutate(selectedService?._id, {
+          toggleStatusMutation.mutate(selectedCategory?._id, {
             onSuccess: () => setStatusModalOpen(false),
           });
         }}
         className="sm:mx-1"
       >
         <span className="block mb-2">
-          Are you sure you want to {selectedService?.isAvailable ? 'Block' : 'Unblok'}{' '}
-          <b>{selectedService?.name}</b>
+          Are you sure you want to {selectedCategory?.isAvailable ? 'Block' : 'Unblok'}{' '}
+          <b>{selectedCategory?.name}</b>
         </span>
       </AppModal>
 
-      <ServiceModal
-        open={serviceModalOpen}
-        onClose={handleCloseServiceModal}
-        onSubmit={handleServiceSubmit}
-        parentServices={parentVal}
-        service={editingService}
+      <CategoryModal
+        open={categoryModalOpen}
+        onClose={handleCloseCategoryModal}
+        onSubmit={handleCategorySubmit}
+        category={editingCategory}
+        parentId={parentId}
       />
     </div>
   );

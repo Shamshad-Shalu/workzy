@@ -68,9 +68,9 @@ export class S3Service implements IS3Service {
     return { uploadUrl, publicUrl };
   }
 
-  async deleteFile(fileUrl: string): Promise<void> {
+  async deleteFile(fileUrl: string): Promise<boolean> {
     const key = extractKeyFromUrl(fileUrl);
-    if (!key) return;
+    if (!key) return false;
 
     await this.s3.send(
       new DeleteObjectCommand({
@@ -78,6 +78,7 @@ export class S3Service implements IS3Service {
         Key: key,
       })
     );
+    return true;
   }
 
   async generateSignedUrl(

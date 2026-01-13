@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import userprofile from '@/assets/images/userprofile.avif';
 
 interface Props {
   open: boolean;
@@ -14,9 +15,7 @@ interface Props {
 }
 
 export default function ProfileImageModal({ open, onOpenChange, image }: Props) {
-  const profileImage =
-    image ||
-    'https://res.cloudinary.com/dhvlhpg55/image/upload/v1740028408/nexus/images/oamn3bzchpmixago65yf.jpg';
+  const profileImage = image || userprofile;
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogHeader>

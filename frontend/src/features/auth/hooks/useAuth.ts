@@ -1,5 +1,5 @@
 import { setCredentials } from '@/store/slices/authSlice';
-import { loginService } from '@/services/authService';
+import { loginService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store/hooks';
 
 export function useAuth() {

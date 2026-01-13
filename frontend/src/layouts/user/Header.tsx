@@ -15,7 +15,7 @@ import {
 import ModeToggle from '../../components/ui/ModeToggle';
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
-import { logoutService } from '@/services/authService';
+import { logoutService } from '@/services/auth.service';
 import type { RootState } from '@/store/store';
 
 const NAV_LINKS = [

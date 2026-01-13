@@ -6,6 +6,7 @@ import {
   BreadcrumbSeparator,
   BreadcrumbPage,
 } from '@/components/ui/breadcrumb';
+import React from 'react';
 
 export interface CrumbItem {
   label: string;
@@ -25,18 +26,20 @@ export default function AppBreadcrumb({ items }: AppBreadcrumbProps) {
           const isLast = index === items.length - 1;
 
           return (
-            <BreadcrumbItem key={index}>
-              {isLast ? (
-                <BreadcrumbPage>{item.label}</BreadcrumbPage>
-              ) : (
-                <>
-                  <BreadcrumbLink href={item.href || '#'} onClick={item.onClick}>
-                    {item.label}
-                  </BreadcrumbLink>
-                  <BreadcrumbSeparator />
-                </>
-              )}
-            </BreadcrumbItem>
+            <React.Fragment key={index}>
+              <BreadcrumbItem>
+                {isLast ? (
+                  <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                ) : (
+                  <>
+                    <BreadcrumbLink href={item.href || '#'} onClick={item.onClick}>
+                      {item.label}
+                    </BreadcrumbLink>
+                  </>
+                )}
+              </BreadcrumbItem>
+              {!isLast && <BreadcrumbSeparator />}
+            </React.Fragment>
           );
         })}
       </BreadcrumbList>

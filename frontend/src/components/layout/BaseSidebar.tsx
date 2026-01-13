@@ -16,7 +16,7 @@ import type { MenuItem } from '@/types/navigation';
 import { clearUser } from '@/store/slices/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useAppDispatch } from '@/store/hooks';
-import { logoutService } from '@/services/authService';
+import { logoutService } from '@/services/auth.service';
 import { setAxiosToken } from '@/lib/api/axios';
 
 interface BaseSidebarProps {

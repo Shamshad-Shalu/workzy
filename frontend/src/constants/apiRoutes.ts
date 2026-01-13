@@ -31,8 +31,8 @@ export const ADMIN_ROUTES = {
   TOGGLESTATUS: `${ADMIN_ROUTE}/users/toggle`,
 
   TOGGLESERVICESTATUS: `${ADMIN_ROUTE}/categories/toggle-status`,
-  ADDCATEGORY:`${ADMIN_ROUTE}/categories/add`,
-  EDITCATEGORY:`${ADMIN_ROUTE}/categories/edit`,
+  ADDCATEGORY: `${ADMIN_ROUTE}/categories/add`,
+  EDITCATEGORY: `${ADMIN_ROUTE}/categories/edit`,
 
   GETWORKER: `${ADMIN_ROUTE}/workers/all`,
   VERIFYWORKER: `${ADMIN_ROUTE}/workers/verify`,

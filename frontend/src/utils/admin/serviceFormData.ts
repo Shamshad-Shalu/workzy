@@ -1,4 +1,4 @@
-import type { ServiceDTO } from '@/types/admin/service';
+import type { ServiceDTO } from '@/types/admin/category';
 
 export function serviceToFormData(dto: ServiceDTO): FormData {
   const fd = new FormData();

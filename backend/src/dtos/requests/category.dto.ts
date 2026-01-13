@@ -2,7 +2,6 @@ import { CATEGORY, DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
 import { Type } from "class-transformer";
 import {
   IsBoolean,
-  IsMongoId,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -30,10 +29,6 @@ export class CategoryRequestDTO {
 
   @Type(() => Number)
   @IsNumber()
-  level!: number;
-
-  @Type(() => Number)
-  @IsNumber()
   @Min(0, { message: "Platform fee must be non-negative." })
   @Max(50, { message: "Platform fee cannot exceed 50%." })
   platformFee!: number;
@@ -46,24 +41,15 @@ export class CategoryRequestDTO {
 }
 
 export class CategoryUpdateRequestDTO {
-  @IsMongoId({ message: "Invalid Category ID format." })
-  @IsOptional()
-  _id?: string;
-
-  @IsOptional()
   @IsString()
   @Matches(SERVICE_NAME_REGEX, { message: CATEGORY.INVALID })
-  name?: string;
+  name!: string;
 
   @IsOptional()
   @IsString()
   @ValidateIf((o) => o.description !== undefined && o.description !== "")
   @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
   description?: string;
-
-  @Type(() => Number)
-  @IsNumber()
-  level!: number;
 
   @IsOptional()
   parentId?: string | null;
