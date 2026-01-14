@@ -76,3 +76,9 @@ export interface WorkerStats {
   averageRating: number;
   completionRate: number;
 }
+
+export interface ResubmitDocumentPayload {
+  id: string;
+  WorkerStatus?: string;
+  url: string;
+}

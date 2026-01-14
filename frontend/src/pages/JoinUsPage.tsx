@@ -1,20 +1,19 @@
-import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/molecules/ImageUpload';
-import { useProfile } from '@/features/profile/hooks/useProfile';
-import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
-import { type JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
-import WorkerProfileService from '@/services/worker/workerProfile.service';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateUser } from '@/store/slices/authSlice';
-import { handleApiError } from '@/utils/handleApiError';
-import userImg from '../assets/auth/signup.jpg';
-import teamImg from '../assets/auth/signup.jpg';
-import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone, Star } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS } from '@/constants/landingItems';
-import { type IDocument, type WorkerStatus } from '@/types/worker';
+import {
+  AlertCircle,
+  ArrowRight,
+  PawPrint,
+  Settings,
+  Smartphone,
+  Star,
+} from 'lucide-react';
+import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
+
+import Button from '@/components/atoms/Button';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
+import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import {
   AnimatedCounter,
   FAQItem,
@@ -22,79 +21,60 @@ import {
   MetricCard,
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
-import type { RootState } from '@/store/store';
-import { cn } from '@/lib/utils';
+
+import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS } from '@/constants/landingItems';
 import { UploadPurposes } from '@/constants/upload';
 
-export interface ResumbitDocumentType {
-  id: string;
-  WorkerStatus: string;
-  url: string;
-}
+import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
+import type { IDocument, WorkerStatus } from '@/types/worker';
+
+import userImg from '../assets/auth/signup.jpg';
+import teamImg from '../assets/auth/signup.jpg';
+import { handleApiError } from '@/utils/handleApiError';
+import { cn } from '@/lib/utils';
+import { useAppDispatch } from '@/store/hooks';
+import { updateUser } from '@/store/slices/authSlice';
 
 export default function JoinUsPage() {
-  const { user } = useAppSelector((s: RootState) => s.auth);
   const navigate = useNavigate();
-  const { getUserProfilePage } = useProfile();
-  const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch()
+  const { worker , user  ,isLoading ,joinWorker ,resubmitWorker } = useWorkerJoin();
 
-  const [showApplicationForm, setShowApplicationForm] = useState(false);
-  const [workerStatus, setWorkerStatus] = useState<WorkerStatus | null>(null);
-  const [workerId, setWorkerId] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [resubmitted, setResubmitted] = useState<boolean>(false);
   const [existingDoc, setExistingDoc] = useState<IDocument | null>(null);
   const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
-
+  
+  const workerStatus : WorkerStatus | null = worker?.status ?? null;
+  const workerId = worker?._id ?? null ;
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
+  const isPending = workerStatus === 'pending';
+  const needsRevision = workerStatus === 'needs_revision';
+  const isVerified = workerStatus === 'verified';
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [userInfo, workerInfo] = await Promise.all([
-          getUserProfilePage(),
-          WorkerProfileService.getMe(),
-        ]);
-
-        if (userInfo) {
-          dispatch(updateUser(userInfo));
-        }
-
-        if (workerInfo) {
-          setWorkerId(workerInfo._id);
-          setWorkerStatus(workerInfo.status);
-          if (workerInfo.status === 'needs_revision') {
-            const doc = workerInfo.documents?.[0];
-            if (doc) {
-              setExistingDoc(doc);
-              setDocumentValue(doc.url);
-            }
-          }
-        }
-      } catch (error) {
-        console.error(error);
+    if(needsRevision) {
+      const doc = worker?.documents?.[0];
+      if(doc) {
+        setExistingDoc(doc);
+        setDocumentValue(doc.url);
       }
     }
+    if(user) {dispatch(updateUser(user))}
+  }, [ worker  ]);
 
-    loadData();
-  }, []);
+  if (!user || isLoading ) {return null;}
 
-  if (!user) {
-    return null;
-  }
-  const userId = user._id;
-  if (!userId) {
-    return null;
-  }
 
   async function onSubmit(data: JoinWorkerSchemaType) {
-    if (workerStatus === 'pending') {
+    if(!user?._id) {return;}
+    if (isPending) {
       toast.info('Your application is already pending review.');
       return;
     }
     try {
-      const res = await WorkerProfileService.addWorkerProfile(userId, data);
+      const res = await joinWorker.mutateAsync({userId :user._id , data });
       toast.success(res?.message);
       navigate('/');
     } catch (error) {
@@ -102,27 +82,13 @@ export default function JoinUsPage() {
     }
   }
   async function reSubmitForm() {
-    if (!existingDoc) {
-      return;
-    }
-    if (!documentValue) {
-      toast.error('Please Reupload document');
-      return;
-    }
-
-    const data = {
-      id: existingDoc?._id,
-      WorkerStatus: 'pending',
-      url: documentValue,
-    };
-
-    if (!workerId) {
+    if (!existingDoc || !documentValue || !workerId) {
+      toast.error('Please upload the document');
       return;
     }
     setLoading(true);
     try {
-      const { worker, message } = await WorkerProfileService.reSubmitWorkerInfo(workerId, data);
-      setWorkerStatus(worker.status);
+      const { message } = await resubmitWorker.mutateAsync({workerId, data : {id: existingDoc._id , WorkerStatus :"pending" ,url :documentValue }})
       toast.success(message);
     } catch (error) {
       toast.error(handleApiError(error));
@@ -161,17 +127,18 @@ export default function JoinUsPage() {
                 business with our all-in-one platform.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <Button
-                  size="lg"
-                  onClick={() => {
-                    setShowApplicationForm(true);
-                    document.getElementById('apply-now')?.scrollIntoView({ behavior: 'smooth' });
-                  }}
-                  className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:translate-y-[-2px]"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                { !isVerified && (
+                    <Button
+                      size="lg"
+                      onClick={() => {
+                        document.getElementById('apply-now')?.scrollIntoView({ behavior: 'smooth' });
+                      }}
+                      className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:translate-y-[-2px]"
+                    >
+                      Get Started
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                )}
               </div>
             </div>
 
@@ -229,7 +196,6 @@ export default function JoinUsPage() {
       </section>
 
       {/* Application Form Section */}
-      {showApplicationForm && workerStatus !== 'verified' && (
         <section id="apply-now" className="py-20 px-4 bg-muted/30">
           <div className="container mx-auto max-w-6xl">
             {workerStatus === 'rejected' && (
@@ -243,18 +209,8 @@ export default function JoinUsPage() {
               </div>
             )}
 
-            {workerStatus !== 'rejected' && workerStatus !== 'pending' && (
-              <div className="text-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                  Start Your Application
-                </h2>
-                <p className="text-muted-foreground">
-                  Join our platform and grow your business today
-                </p>
-              </div>
-            )}
             {/* Status Alerts */}
-            {workerStatus === 'needs_revision' && (
+            { needsRevision && existingDoc && (
               <div
                 className={cn(
                   'rounded-xl p-6 mb-8',
@@ -262,32 +218,13 @@ export default function JoinUsPage() {
                     ? 'bg-blue/10 border border-blue/20'
                     : 'bg-destructive/10 border border-destructive/20'
                 )}
-              >
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-6 h-6 text-destructive mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-destructive mb-2 text-lg">
-                      Action Required: Revise Application
-                    </h4>
-                    <p className="text-sm text-destructive/80 mb-3">
-                      Your previous application requires changes. Please address the note below and
-                      re-upload your document.
+              >  
+                 <h4 className="font-semibold text-lg mb-2">Action Required</h4>
+                  {existingDoc.rejectReason && (
+                    <p className="text-sm mb-4 text-destructive">
+                      Admin note: {existingDoc.rejectReason}
                     </p>
-                    {existingDoc?.rejectReason && (
-                      <div className="mt-3 p-4 bg-card rounded-lg border border-destructive/10">
-                        <span className="font-semibold text-xs uppercase tracking-wider text-destructive/70 block mb-2">
-                          Admin Note:
-                        </span>
-                        <p className="text-sm text-destructive font-medium">
-                          {existingDoc.rejectReason}
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {existingDoc && (
-                  <div className="mt-4 pl-9 grid grid-cols-2 ">
-                    <div>
+                  )}
                       <ImageUpload
                         value={documentValue}
                         purpose={UploadPurposes.WORKER_DOCUMENT}
@@ -305,15 +242,12 @@ export default function JoinUsPage() {
                         loading={loading}
                         disabled={!resubmitted}
                       >
-                        Submit
+                        Resubmit Document
                       </Button>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
-            {workerStatus === 'pending' && (
+            {isPending && (
               <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-6 text-center mb-8">
                 <h4 className="font-semibold text-primary text-lg mb-2">
                   Application Under Review
@@ -326,7 +260,7 @@ export default function JoinUsPage() {
             )}
 
             {/* Profile Completion Warning */}
-            {(!hasLocation || !hasPhoneNumber) && workerStatus !== 'pending' && (
+            {(!hasLocation || !hasPhoneNumber) && isPending && (
               <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 mb-8">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
@@ -351,14 +285,12 @@ export default function JoinUsPage() {
                 </div>
               </div>
             )}
-
             {/* Application Form */}
-            {!['pending', 'needs_revision', 'rejected'].includes(workerStatus ?? '') && (
+            {!['pending', 'needs_revision', 'rejected' ,"verified"].includes(workerStatus ?? '') && (
               <BecomeWorkerForm onSubmit={onSubmit} disabled={!hasLocation || !hasPhoneNumber} />
             )}
           </div>
-        </section>
-      )}
+      </section>
 
       {/* Why Join Us Section */}
       <section className="py-20 px-4 bg-background">
@@ -476,8 +408,8 @@ export default function JoinUsPage() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
                 size="lg"
+                disabled ={workerStatus === "verified"}
                 onClick={() => {
-                  setShowApplicationForm(true);
                   document.getElementById('apply-now')?.scrollIntoView({ behavior: 'smooth' });
                 }}
                 className="bg-golden hover:bg-golden/90 text-section-dark px-10 py-6 text-lg rounded-full"

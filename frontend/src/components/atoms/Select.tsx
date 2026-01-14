@@ -21,9 +21,10 @@ interface Props {
   error?: string;
   options: Option[];
   leftIcon?: React.ReactNode;
+  disabled?: boolean; 
 }
 
-export default function Select({ value, onChange, placeholder, error, options, leftIcon }: Props) {
+export default function Select({ value, onChange, placeholder, error, options, leftIcon , disabled = false }: Props) {
   return (
     <div>
       <div className="relative">
@@ -39,14 +40,15 @@ export default function Select({ value, onChange, placeholder, error, options, l
               'w-full py-5 px-3 rounded-lg bg-background border border-input text-foreground',
               'transition-all outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0',
               leftIcon && 'pl-10',
-              error && 'border-destructive bg-destructive/10'
+              error && 'border-destructive bg-destructive/10',
+              disabled && 'opacity-60 cursor-not-allowed bg-muted'
             )}
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent hidden = {disabled}>
             {options.map(opt => (
-              <SelectItem key={opt.value} value={opt.value}>
+              <SelectItem key={opt.value} value={opt.value} >
                 {opt.label}
               </SelectItem>
             ))}

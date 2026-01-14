@@ -1,5 +1,4 @@
 import AdminCategoryService from '@/services/admin/categoryManagement.service';
-import { handleApiError } from '@/utils/handleApiError';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import type { CategoryFormData } from '../validation/categorySchema';
@@ -14,9 +13,6 @@ export function useCategoryMutations() {
       toast.success(res.message);
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
     },
-    onError: err => {
-      toast.error(handleApiError(err));
-    },
   });
 
   const addCategoryMutation = useMutation({
@@ -25,11 +21,7 @@ export function useCategoryMutations() {
     onSuccess: res => {
       toast.success(res.message);
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-    },
-
-    onError: err => {
-      toast.error(handleApiError(err));
-    },
+    }
   });
 
   const toggleStatusMutation = useMutation<{ message: string }, Error, string>({
@@ -37,9 +29,6 @@ export function useCategoryMutations() {
     onSuccess: data => {
       toast.success(data.message);
       queryClient.invalidateQueries({ queryKey: ['admin-categories'] });
-    },
-    onError: error => {
-      toast.error(handleApiError(error));
     },
   });
 

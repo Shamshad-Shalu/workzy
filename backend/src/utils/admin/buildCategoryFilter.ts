@@ -20,8 +20,10 @@ export function buildCategoryFilter(
   if (status === "active") filter.isAvailable = true;
   if (status === "blocked") filter.isAvailable = false;
 
-  if (parentId || parentId === null) {
-    filter.parentId = parentId ? new mongoose.Types.ObjectId(parentId) : null;
+  if (parentId === null) {
+    filter.parentId = null;
+  } else if (parentId) {
+    filter.parentId = new mongoose.Types.ObjectId(parentId);
   }
   return filter;
 }

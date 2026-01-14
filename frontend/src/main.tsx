@@ -2,13 +2,13 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { Provider } from 'react-redux';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import store from './store/store.ts';
 import AuthInitializer from './components/providers/AuthInitializer.tsx';
 import { ThemeProvider } from './context/theme-provider.tsx';
 import { Toaster } from './components/ui/sonner.tsx';
+import { queryClient } from './lib/react-query/queryClient.ts';
 
-const queryClient = new QueryClient({});
 
 createRoot(document.getElementById('root')!).render(
   <ThemeProvider>

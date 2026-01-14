@@ -7,15 +7,17 @@ import { useQuery } from '@tanstack/react-query';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, Layers } from 'lucide-react';
 import { AppModal } from '@/components/molecules/AppModal';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import categoryColumns from '../components/CategoryColumns';
 import type { CategoryFormData } from '../validation/categorySchema';
 import Button from '@/components/atoms/Button';
 import AdminCategoryService from '@/services/admin/categoryManagement.service';
-import { CategoryModal } from '../components/categoryModal';
 import { useCategoryMutations } from '../hooks/useCategoryMutations';
 import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
+import { CategoryModal } from '../components/CategoryModal';
+import { toast } from 'sonner';
+import { handleApiError } from '@/utils/handleApiError';
 
 type CategoryCrumb = { id: string; name: string };
 type CustomParams = { parentId: string | null };
@@ -35,12 +37,16 @@ export default function CategoryManagementPage() {
   const { addCategoryMutation, updateCategoryMutation, toggleStatusMutation } =
     useCategoryMutations();
 
-  const { data, isLoading } = useQuery<CategoryResponse, Error>({
+  const { data, isLoading ,isError ,error } = useQuery<CategoryResponse, Error>({
     queryKey: ['admin-categories', pageIndex, pageSize, search, status, parentId],
     queryFn: () =>
       AdminCategoryService.getCategories(pageIndex + 1, pageSize, search, status, parentId),
     placeholderData: prev => prev,
   });
+
+  useEffect(() => {
+    if(isError) {toast.error(handleApiError(error))}
+  },[isError , error ])
 
   const breadcrumbItems = [
     {
@@ -113,6 +119,7 @@ export default function CategoryManagementPage() {
         <PageHeader title="Category Management" />
         <Button
           variant="blue"
+          disabled={isError}
           size="lg"
           onClick={() => setCategoryModalOpen(true)}
           iconLeft={<Layers />}
@@ -127,6 +134,7 @@ export default function CategoryManagementPage() {
         <div className="grid sm:grid-cols-12 gap-4">
           <div className="sm:col-span-7">
             <SearchInput
+              disabled={isError}
               placeholder="Search by name or email..."
               value={search}
               onChange={handleSearchChange}
@@ -137,6 +145,7 @@ export default function CategoryManagementPage() {
               value={status}
               onChange={v => updateParams({ status: v, page: 0 })}
               leftIcon={<Filter />}
+              disabled ={isError}
               options={[
                 { label: 'All Status', value: 'all' },
                 { label: 'Active', value: 'active' },

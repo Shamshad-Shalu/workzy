@@ -100,6 +100,7 @@ export default function BecomeWorkerForm({ onSubmit, disabled = false }: BecomeW
                 render={({ field, fieldState }) => (
                   <ImageUpload
                     value={field.value}
+                    isEditable = { !disabled }
                     onChange={url => field.onChange(url)}
                     purpose={UploadPurposes.WORKER_DOCUMENT}
                     error={fieldState.error?.message}

@@ -1,12 +1,14 @@
 import redisClient from "@/config/redisClient";
-import { REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
 import { ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
+import CustomError from "@/utils/customError";
 import { inject, injectable } from "inversify";
+import mongoose from "mongoose";
 
 @injectable()
 export class CategoryService implements ICategoryService {
@@ -24,6 +26,10 @@ export class CategoryService implements ICategoryService {
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
+    }
+
+    if (parentId && !mongoose.Types.ObjectId.isValid(parentId)) {
+      throw new CustomError("Invalid ParentId", HTTPSTATUS.BAD_REQUEST);
     }
 
     const skip = (page - 1) * limit;

@@ -18,7 +18,6 @@ export async function uploadToS3({ file, purpose }: UploadProps): Promise<string
     fileSize: file.size,
     purpose,
   });
-
   const res = await fetch(data.uploadUrl, {
     method: 'PUT',
     body: file,

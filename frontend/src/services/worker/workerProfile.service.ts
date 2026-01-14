@@ -1,8 +1,7 @@
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
 import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
-import type { ResumbitDocumentType } from '@/pages/JoinUsPage';
-import type { Worker, WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
+import type { ResubmitDocumentPayload, Worker, WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
 
 const WorkerProfileService = {
   getWorkerSummaryById: async (
@@ -40,7 +39,7 @@ const WorkerProfileService = {
 
   reSubmitWorkerInfo: async (
     workerId: string,
-    data: ResumbitDocumentType
+    data: ResubmitDocumentPayload
   ): Promise<{ worker: Worker; message: string }> => {
     const res = await api.patch(`/worker/${workerId}/reApply`, data);
     return res.data;
