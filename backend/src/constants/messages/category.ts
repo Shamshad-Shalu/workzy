@@ -7,5 +7,7 @@ export const CATEGORY = {
   BLOCKED: "Category blocked successfully.",
   UNBLOCKED: "Category unblocked successfully.",
   INVALID: "Invalid Category name format.",
-  INVALID_LEVEL: "Maximum category depth is 3",
+  INVALID_LEVEL: "Invalid category level.",
+
+  NAME_REQUIRED: "Category name is required.",
 };

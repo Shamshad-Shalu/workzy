@@ -1,7 +1,13 @@
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
 import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
-import type { ResubmitDocumentPayload, Worker, WorkerInfo, WorkerProfile, WorkerStats } from '@/types/worker';
+import type {
+  ResubmitDocumentPayload,
+  Worker,
+  WorkerInfo,
+  WorkerProfile,
+  WorkerStats,
+} from '@/types/worker';
 
 const WorkerProfileService = {
   getWorkerSummaryById: async (

@@ -1,5 +1,5 @@
 import redisClient from "@/config/redisClient";
-import { HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
@@ -7,6 +7,7 @@ import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dt
 import { ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 
@@ -45,5 +46,14 @@ export class CategoryService implements ICategoryService {
     await redisClient.set(cacheKey, JSON.stringify(response), { EX: REFRESH_TOKEN_TTL_SECONDS });
 
     return response;
+  }
+
+  async getCategoryById(categoryId: string): Promise<CategoryResponseDTO> {
+    const category = await getEntityOrThrow(
+      this._categoryRepository,
+      categoryId,
+      CATEGORY.NOT_FOUND
+    );
+    return CategoryResponseDTO.fromEntity(category);
   }
 }

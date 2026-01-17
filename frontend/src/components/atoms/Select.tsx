@@ -9,22 +9,32 @@ import { cn } from '@/lib/utils';
 import { AlertCircle } from 'lucide-react';
 import React from 'react';
 
-interface Option {
+interface Option<T extends string> {
   label: string;
-  value: string;
+  value: T;
 }
 
-interface Props {
-  value?: string;
-  onChange?: (v: string) => void;
+interface Props<T extends string> {
+  value?: T;
+  onChange?: (v: T) => void;
   placeholder?: string;
   error?: string;
-  options: Option[];
+  options: Option<T>[];
   leftIcon?: React.ReactNode;
-  disabled?: boolean; 
+  disabled?: boolean;
+  customClass?: string;
 }
 
-export default function Select({ value, onChange, placeholder, error, options, leftIcon , disabled = false }: Props) {
+export default function Select<T extends string>({
+  value,
+  onChange,
+  placeholder,
+  error,
+  options,
+  leftIcon,
+  disabled = false,
+  customClass,
+}: Props<T>) {
   return (
     <div>
       <div className="relative">
@@ -41,14 +51,15 @@ export default function Select({ value, onChange, placeholder, error, options, l
               'transition-all outline-none focus:ring-2 focus:ring-ring focus:ring-offset-0',
               leftIcon && 'pl-10',
               error && 'border-destructive bg-destructive/10',
-              disabled && 'opacity-60 cursor-not-allowed bg-muted'
+              disabled && 'opacity-60 cursor-not-allowed bg-muted',
+              customClass
             )}
           >
             <SelectValue placeholder={placeholder} />
           </SelectTrigger>
-          <SelectContent hidden = {disabled}>
+          <SelectContent hidden={disabled}>
             {options.map(opt => (
-              <SelectItem key={opt.value} value={opt.value} >
+              <SelectItem key={opt.value} value={opt.value}>
                 {opt.label}
               </SelectItem>
             ))}

@@ -1,52 +1,55 @@
-import Select from '@/components/atoms/Select';
-import Table from '@/components/data-table/Table';
-import PageHeader from '@/components/molecules/PageHeader';
-import SearchInput from '@/components/molecules/SearchInput';
-import type { Category, CategoryResponse } from '@/types/admin/category';
-import { useQuery } from '@tanstack/react-query';
+import { useCallback, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, Layers } from 'lucide-react';
-import { AppModal } from '@/components/molecules/AppModal';
-import { useCallback, useEffect, useState } from 'react';
-import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import categoryColumns from '../components/CategoryColumns';
-import type { CategoryFormData } from '../validation/categorySchema';
-import Button from '@/components/atoms/Button';
-import AdminCategoryService from '@/services/admin/categoryManagement.service';
-import { useCategoryMutations } from '../hooks/useCategoryMutations';
-import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
-import { CategoryModal } from '../components/CategoryModal';
 import { toast } from 'sonner';
+
+import Button from '@/components/atoms/Button';
+import Select from '@/components/atoms/Select';
+
+import SearchInput from '@/components/molecules/SearchInput';
+import PageHeader from '@/components/molecules/PageHeader';
+import AppBreadcrumb from '@/components/molecules/AppBreadcrumb';
+import { AppModal } from '@/components/molecules/AppModal';
+import Table from '@/components/data-table/Table';
+import categoryColumns from '../components/CategoryColumns';
+import { CategoryModal } from '../components/CategoryModal';
+import { useCategoryMutations } from '../hooks/useCategoryMutations';
 import { handleApiError } from '@/utils/handleApiError';
+import type { Category } from '@/types/admin/category';
+import type { CategoryFormData } from '../validation/categorySchema';
+import { useCategoryUrlParams } from '../hooks/useCategoryUrlParams';
 
 type CategoryCrumb = { id: string; name: string };
-type CustomParams = { parentId: string | null };
 
 export default function CategoryManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const [statusModalOpen, setStatusModalOpen] = useState(false);
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { pageIndex, pageSize, parentId, search, status, updateParams } = useCategoryUrlParams();
+  const {
+    addCategoryMutation,
+    updateCategoryMutation,
+    toggleStatusMutation,
+    data,
+    isLoading,
+    isError,
+    error,
+    parentCategory,
+  } = useCategoryMutations({ pageIndex, pageSize, search, status, parentId });
+
+  const currentLevel = parentCategory ? parentCategory.level + 1 : 1;
   const path = (location.state?.path as CategoryCrumb[]) || [];
 
-  const { pageIndex, pageSize, search, status, parentId, updateParams } =
-    useUrlFilterParams<CustomParams>([{ key: 'parentId' }]);
-
-  const { addCategoryMutation, updateCategoryMutation, toggleStatusMutation } =
-    useCategoryMutations();
-
-  const { data, isLoading ,isError ,error } = useQuery<CategoryResponse, Error>({
-    queryKey: ['admin-categories', pageIndex, pageSize, search, status, parentId],
-    queryFn: () =>
-      AdminCategoryService.getCategories(pageIndex + 1, pageSize, search, status, parentId),
-    placeholderData: prev => prev,
-  });
-
   useEffect(() => {
-    if(isError) {toast.error(handleApiError(error))}
-  },[isError , error ])
+    if (isError) {
+      toast.error(handleApiError(error));
+    }
+  }, [isError, error]);
 
   const breadcrumbItems = [
     {
@@ -145,7 +148,7 @@ export default function CategoryManagementPage() {
               value={status}
               onChange={v => updateParams({ status: v, page: 0 })}
               leftIcon={<Filter />}
-              disabled ={isError}
+              disabled={isError}
               options={[
                 { label: 'All Status', value: 'all' },
                 { label: 'Active', value: 'active' },
@@ -156,7 +159,7 @@ export default function CategoryManagementPage() {
         </div>
       </div>
       <Table
-        columns={categoryColumns(openStatusModal, onEdit, onViewChild)}
+        columns={categoryColumns(currentLevel, openStatusModal, onEdit, onViewChild)}
         data={data?.categories ?? []}
         total={data?.total}
         pageIndex={pageIndex}
@@ -186,7 +189,7 @@ export default function CategoryManagementPage() {
         className="sm:mx-1"
       >
         <span className="block mb-2">
-          Are you sure you want to {selectedCategory?.isAvailable ? 'Block' : 'Unblok'}{' '}
+          Are you sure you want to {selectedCategory?.isAvailable ? 'Block' : 'Unblock'}{' '}
           <b>{selectedCategory?.name}</b>
         </span>
       </AppModal>
@@ -196,7 +199,7 @@ export default function CategoryManagementPage() {
         onClose={handleCloseCategoryModal}
         onSubmit={handleCategorySubmit}
         category={editingCategory}
-        parentId={parentId}
+        parentCategory={parentCategory}
       />
     </div>
   );

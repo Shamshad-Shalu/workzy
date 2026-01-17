@@ -1,14 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import {
-  AlertCircle,
-  ArrowRight,
-  PawPrint,
-  Settings,
-  Smartphone,
-  Star,
-} from 'lucide-react';
+import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone, Star } from 'lucide-react';
 import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
 
 import Button from '@/components/atoms/Button';
@@ -37,16 +30,18 @@ import { updateUser } from '@/store/slices/authSlice';
 
 export default function JoinUsPage() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch()
-  const { worker , user  ,isLoading ,joinWorker ,resubmitWorker } = useWorkerJoin();
+  const dispatch = useAppDispatch();
+  const applyNowRef = useRef<HTMLElement | null>(null);
+  const { worker, user, isLoading, joinWorker, resubmitWorker } = useWorkerJoin();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [resubmitted, setResubmitted] = useState<boolean>(false);
   const [existingDoc, setExistingDoc] = useState<IDocument | null>(null);
+  const [formOpen, setFormOpen] = useState<boolean>(false);
   const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
-  
-  const workerStatus : WorkerStatus | null = worker?.status ?? null;
-  const workerId = worker?._id ?? null ;
+
+  const workerStatus: WorkerStatus | null = worker?.status ?? null;
+  const workerId = worker?._id ?? null;
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
   const isPending = workerStatus === 'pending';
@@ -54,27 +49,37 @@ export default function JoinUsPage() {
   const isVerified = workerStatus === 'verified';
 
   useEffect(() => {
-    if(needsRevision) {
-      const doc = worker?.documents?.[0];
-      if(doc) {
-        setExistingDoc(doc);
-        setDocumentValue(doc.url);
-      }
+    if (user) {
+      dispatch(updateUser(user));
     }
-    if(user) {dispatch(updateUser(user))}
-  }, [ worker  ]);
+  }, [user, dispatch]);
 
-  if (!user || isLoading ) {return null;}
+  useEffect(() => {
+    if (!needsRevision) {
+      return;
+    }
 
+    const doc = worker?.documents?.[0];
+    if (doc) {
+      setExistingDoc(doc);
+      setDocumentValue(doc.url);
+    }
+  }, [needsRevision, worker]);
+
+  if (!user || isLoading) {
+    return null;
+  }
 
   async function onSubmit(data: JoinWorkerSchemaType) {
-    if(!user?._id) {return;}
+    if (!user?._id) {
+      return;
+    }
     if (isPending) {
       toast.info('Your application is already pending review.');
       return;
     }
     try {
-      const res = await joinWorker.mutateAsync({userId :user._id , data });
+      const res = await joinWorker.mutateAsync({ userId: user._id, data });
       toast.success(res?.message);
       navigate('/');
     } catch (error) {
@@ -88,7 +93,10 @@ export default function JoinUsPage() {
     }
     setLoading(true);
     try {
-      const { message } = await resubmitWorker.mutateAsync({workerId, data : {id: existingDoc._id , WorkerStatus :"pending" ,url :documentValue }})
+      const { message } = await resubmitWorker.mutateAsync({
+        workerId,
+        data: { id: existingDoc._id, WorkerStatus: 'pending', url: documentValue },
+      });
       toast.success(message);
     } catch (error) {
       toast.error(handleApiError(error));
@@ -96,6 +104,14 @@ export default function JoinUsPage() {
       setLoading(false);
     }
   }
+
+  const openFormAndScroll = () => {
+    setFormOpen(true);
+
+    requestAnimationFrame(() => {
+      applyNowRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
+  };
 
   return (
     <main>
@@ -127,17 +143,15 @@ export default function JoinUsPage() {
                 business with our all-in-one platform.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                { !isVerified && (
-                    <Button
-                      size="lg"
-                      onClick={() => {
-                        document.getElementById('apply-now')?.scrollIntoView({ behavior: 'smooth' });
-                      }}
-                      className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:translate-y-[-2px]"
-                    >
-                      Get Started
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
+                {!isVerified && (
+                  <Button
+                    size="lg"
+                    onClick={openFormAndScroll}
+                    className="bg-golden hover:bg-golden/90 text-section-dark px-8 py-6 text-lg rounded-full shadow-lg transform transition-transform duration-300 hover:translate-y-[-2px]"
+                  >
+                    Get Started
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
                 )}
               </div>
             </div>
@@ -195,102 +209,108 @@ export default function JoinUsPage() {
         </div>
       </section>
 
-      {/* Application Form Section */}
-        <section id="apply-now" className="py-20 px-4 bg-muted/30">
-          <div className="container mx-auto max-w-6xl">
-            {workerStatus === 'rejected' && (
-              <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center mb-8">
-                <h4 className="font-semibold text-primary text-lg mb-2">
-                  Application Rejected By Admin
-                </h4>
-                <div className="text-primary/80">
-                  Please contact <a className="text-underline">www.workzy.service.com</a>
+      {formOpen && (
+        <>
+          {/* Application Form Section */}
+          <section id="apply-now" ref={applyNowRef} className="py-20 px-4 bg-muted/30">
+            <div className="container mx-auto max-w-6xl">
+              {workerStatus === 'rejected' && (
+                <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center mb-8">
+                  <h4 className="font-semibold text-primary text-lg mb-2">
+                    Application Rejected By Admin
+                  </h4>
+                  <div className="text-primary/80">
+                    Please contact <a className="text-underline">www.workzy.service.com</a>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {/* Status Alerts */}
-            { needsRevision && existingDoc && (
-              <div
-                className={cn(
-                  'rounded-xl p-6 mb-8',
-                  resubmitted
-                    ? 'bg-blue/10 border border-blue/20'
-                    : 'bg-destructive/10 border border-destructive/20'
-                )}
-              >  
-                 <h4 className="font-semibold text-lg mb-2">Action Required</h4>
+              {/* Status Alerts */}
+              {needsRevision && existingDoc && (
+                <div
+                  className={cn(
+                    'rounded-xl p-6 mb-8',
+                    resubmitted
+                      ? 'bg-blue/10 border border-blue/20'
+                      : 'bg-destructive/10 border border-destructive/20'
+                  )}
+                >
+                  <h4 className="font-semibold text-lg mb-2">Action Required</h4>
                   {existingDoc.rejectReason && (
                     <p className="text-sm mb-4 text-destructive">
                       Admin note: {existingDoc.rejectReason}
                     </p>
                   )}
-                      <ImageUpload
-                        value={documentValue}
-                        purpose={UploadPurposes.WORKER_DOCUMENT}
-                        className="w-full"
-                        onChange={url => {
-                          setDocumentValue(url);
-                          setResubmitted(true);
-                        }}
-                      />
-                      <Button
-                        fullWidth
-                        size="lg"
-                        variant="blue"
-                        onClick={reSubmitForm}
-                        loading={loading}
-                        disabled={!resubmitted}
+                  <ImageUpload
+                    value={documentValue}
+                    purpose={UploadPurposes.WORKER_DOCUMENT}
+                    className="w-full"
+                    onChange={url => {
+                      setDocumentValue(url);
+                      setResubmitted(true);
+                    }}
+                  />
+                  <Button
+                    fullWidth
+                    size="lg"
+                    variant="blue"
+                    onClick={reSubmitForm}
+                    loading={loading}
+                    disabled={!resubmitted}
+                  >
+                    Resubmit Document
+                  </Button>
+                </div>
+              )}
+
+              {isPending && (
+                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-6 text-center mb-8">
+                  <h4 className="font-semibold text-primary text-lg mb-2">
+                    Application Under Review
+                  </h4>
+                  <p className="text-primary/80">
+                    Your application is currently being reviewed by our team. You will be notified
+                    once the status changes.
+                  </p>
+                </div>
+              )}
+
+              {/* Profile Completion Warning */}
+              {(!hasLocation || !hasPhoneNumber) && (isPending || workerStatus === null) && (
+                <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 mb-8">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1">
+                      <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
+                        Complete Your Profile First
+                      </h4>
+                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                        {!hasLocation && 'Please add your address and set your GPS location'}
+                        {!hasLocation && !hasPhoneNumber && ' and '}
+                        {!hasPhoneNumber && 'add your phone number'}
+                        {' in your profile settings before becoming a service provider.'}
+                      </p>
+                      <button
+                        type="button"
+                        className="mt-3 text-sm font-medium text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300 underline cursor-pointer"
+                        onClick={() => navigate('/profile')}
                       >
-                        Resubmit Document
-                      </Button>
-              </div>
-            )}
-
-            {isPending && (
-              <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-6 text-center mb-8">
-                <h4 className="font-semibold text-primary text-lg mb-2">
-                  Application Under Review
-                </h4>
-                <p className="text-primary/80">
-                  Your application is currently being reviewed by our team. You will be notified
-                  once the status changes.
-                </p>
-              </div>
-            )}
-
-            {/* Profile Completion Warning */}
-            {(!hasLocation || !hasPhoneNumber) && isPending && (
-              <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 mb-8">
-                <div className="flex items-start gap-3">
-                  <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
-                      Complete Your Profile First
-                    </h4>
-                    <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                      {!hasLocation && 'Please add your address and set your GPS location'}
-                      {!hasLocation && !hasPhoneNumber && ' and '}
-                      {!hasPhoneNumber && 'add your phone number'}
-                      {' in your profile settings before becoming a service provider.'}
-                    </p>
-                    <button
-                      type="button"
-                      className="mt-3 text-sm font-medium text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300 underline cursor-pointer"
-                      onClick={() => navigate('/profile')}
-                    >
-                      Go to Profile Settings →
-                    </button>
+                        Go to Profile Settings →
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
-            {/* Application Form */}
-            {!['pending', 'needs_revision', 'rejected' ,"verified"].includes(workerStatus ?? '') && (
-              <BecomeWorkerForm onSubmit={onSubmit} disabled={!hasLocation || !hasPhoneNumber} />
-            )}
-          </div>
-      </section>
+              )}
+              {/* Application Form */}
+              {!['pending', 'needs_revision', 'rejected', 'verified'].includes(
+                workerStatus ?? ''
+              ) && (
+                <BecomeWorkerForm onSubmit={onSubmit} disabled={!hasLocation || !hasPhoneNumber} />
+              )}
+            </div>
+          </section>
+        </>
+      )}
 
       {/* Why Join Us Section */}
       <section className="py-20 px-4 bg-background">
@@ -408,10 +428,8 @@ export default function JoinUsPage() {
             <div className="flex flex-col sm:flex-row justify-center gap-4">
               <Button
                 size="lg"
-                disabled ={workerStatus === "verified"}
-                onClick={() => {
-                  document.getElementById('apply-now')?.scrollIntoView({ behavior: 'smooth' });
-                }}
+                disabled={workerStatus === 'verified'}
+                onClick={openFormAndScroll}
                 className="bg-golden hover:bg-golden/90 text-section-dark px-10 py-6 text-lg rounded-full"
               >
                 Become a Service Provider

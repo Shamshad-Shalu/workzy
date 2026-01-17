@@ -15,6 +15,7 @@ export class AdminCategoryController implements IAdminCategoryController {
 
   createCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = req.body as CategoryRequestDTO;
+
     const category = await this._categoryManagement.createCategory(data);
     res.status(HTTPSTATUS.CREATED).json({ message: CATEGORY.CREATED, category });
   });

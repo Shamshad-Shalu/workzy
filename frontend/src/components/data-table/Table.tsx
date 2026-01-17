@@ -74,6 +74,8 @@ export default function Table<TData extends { _id: string }>({
       sorting,
       pagination: { pageIndex, pageSize },
     },
+    enableColumnResizing: true,
+    columnResizeMode: 'onChange',
     onSortingChange: updater => {
       const next = typeof updater === 'function' ? updater(sorting) : updater;
       setSorting(next);
@@ -91,7 +93,7 @@ export default function Table<TData extends { _id: string }>({
   });
 
   const getColumnWidth = (column: TableColumnDef<TData>) => {
-    const styles: React.CSSProperties = {};
+    const styles: React.CSSProperties = { boxSizing: 'border-box' };
 
     if (column.width) {
       styles.width = `${column.width}px`;

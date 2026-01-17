@@ -28,7 +28,11 @@ export default [
       "@typescript-eslint/no-explicit-any": "warn", // Warns about using `any` type
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { argsIgnorePattern: "^_" }, // Ignores unused variables starting with `_`
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_", // Ignores unused variables starting with `_`
+          ignoreRestSiblings: true,
+        },
       ],
       "@typescript-eslint/ban-ts-comment": "warn", // Warns about using `@ts-ignore` comments
       "@typescript-eslint/no-empty-function": "warn", // Warns about empty functions

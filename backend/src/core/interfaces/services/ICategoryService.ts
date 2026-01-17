@@ -8,4 +8,5 @@ export interface ICategoryService {
     status: string,
     parentId: string | null
   ): Promise<{ categories: CategoryResponseDTO[]; total: number }>;
+  getCategoryById(categoryId: string): Promise<CategoryResponseDTO>;
 }

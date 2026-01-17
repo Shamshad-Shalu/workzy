@@ -31,6 +31,15 @@ export class CategoryController implements ICategoryController {
     });
   });
 
+  getCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const categoryId = req.params.categoryId;
+
+    const category = await this._categoryService.getCategoryById(categoryId);
+    res.status(HTTPSTATUS.OK).json({
+      category,
+    });
+  });
+
   //   getCategorySuggestions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
 
   //   })

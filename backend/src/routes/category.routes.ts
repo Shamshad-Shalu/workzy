@@ -8,5 +8,6 @@ const router = Router();
 const categoryController = container.get<ICategoryController>(TYPES.CategoryController);
 
 router.get("/", categoryController.getCategories);
+router.get("/:categoryId", categoryController.getCategory);
 
 export default router;

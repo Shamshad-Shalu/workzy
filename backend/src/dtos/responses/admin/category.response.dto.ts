@@ -1,42 +1,33 @@
-import { IsBoolean, IsMongoId, IsOptional, IsNumber, IsString } from "class-validator";
+import { IsMongoId } from "class-validator";
 import { ICategory } from "@/types/category";
+import { PricingMode, ServiceType } from "@/constants";
 
 export class CategoryResponseDTO {
   @IsMongoId()
   _id!: string;
-
-  @IsString()
   name!: string;
-
-  @IsString()
   description!: string;
-
-  @IsString()
   iconUrl!: string;
-
-  @IsString()
   imageUrl!: string;
-
-  @IsOptional()
-  @IsMongoId()
   parentId?: string | null;
-
-  @IsNumber()
   platformFee!: number;
-
-  @IsNumber()
   level!: number;
-
-  @IsBoolean()
   isAvailable!: boolean;
-
-  @IsString()
+  baseRate!: number;
+  rateDeviationPercent?: number;
+  estimatedDuration?: number;
+  bufferTime?: number;
+  travelRatePerKM?: number;
+  serviceType?: ServiceType;
+  pricingMode?: PricingMode;
+  allowBulkOffers?: boolean;
+  allowSuddenBooking?: boolean;
   createdAt!: Date;
 
   static fromEntity(entity: ICategory): CategoryResponseDTO {
     const dto = new CategoryResponseDTO();
 
-    dto._id = entity._id;
+    dto._id = entity._id.toString();
     dto.name = entity.name;
     dto.description = entity.description || "";
     dto.level = entity.level;
@@ -46,6 +37,15 @@ export class CategoryResponseDTO {
     dto.platformFee = entity.platformFee;
     dto.isAvailable = entity.isAvailable;
     dto.createdAt = entity.createdAt;
+    dto.baseRate = entity.baseRate;
+    dto.rateDeviationPercent = entity.rateDeviationPercent;
+    dto.estimatedDuration = entity.estimatedDuration;
+    dto.bufferTime = entity.bufferTime;
+    dto.travelRatePerKM = entity.travelRatePerKM;
+    dto.serviceType = entity.serviceType;
+    dto.pricingMode = entity.pricingMode;
+    dto.allowBulkOffers = entity.allowBulkOffers;
+    dto.allowSuddenBooking = entity.allowSuddenBooking;
 
     return dto;
   }

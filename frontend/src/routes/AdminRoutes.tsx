@@ -11,7 +11,7 @@ const WorkerManagementPage = lazy(
 );
 const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDetailsPage'));
 const CategoryManagementPage = lazy(
-  () => import('@/features/admin/service/pages/CategoryMangementPage')
+  () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
 
 export default function AdminRoutes() {

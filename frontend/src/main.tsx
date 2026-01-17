@@ -9,7 +9,6 @@ import { ThemeProvider } from './context/theme-provider.tsx';
 import { Toaster } from './components/ui/sonner.tsx';
 import { queryClient } from './lib/react-query/queryClient.ts';
 
-
 createRoot(document.getElementById('root')!).render(
   <ThemeProvider>
     <Provider store={store}>
