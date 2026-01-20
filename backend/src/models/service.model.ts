@@ -1,7 +1,7 @@
-import { IProviderService } from "@/types/providerService";
+import { IService } from "@/types/service";
 import mongoose, { Schema } from "mongoose";
 
-const ProviderServiceSchema: Schema<IProviderService> = new Schema(
+const ServiceSchema: Schema<IService> = new Schema(
   {
     workerId: {
       type: Schema.Types.ObjectId,
@@ -32,6 +32,6 @@ const ProviderServiceSchema: Schema<IProviderService> = new Schema(
   { timestamps: true }
 );
 
-ProviderServiceSchema.index({ workerId: 1, categoryId: 1 }, { unique: true });
+ServiceSchema.index({ workerId: 1, categoryId: 1 }, { unique: true });
 
-export default mongoose.model<IProviderService>("ProviderService", ProviderServiceSchema);
+export default mongoose.model<IService>("Service", ServiceSchema);

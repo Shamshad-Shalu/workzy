@@ -51,6 +51,4 @@ export interface IWorker extends Document<string> {
   rejectReason?: string;
 }
 
-
 // completedJobs
-

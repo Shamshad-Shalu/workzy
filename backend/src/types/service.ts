@@ -5,7 +5,7 @@ export interface BulkDiscountType {
   percent: number;
 }
 
-export interface IProviderService extends Document<string> {
+export interface IService extends Document<string> {
   workerId: Types.ObjectId;
   categoryId: Types.ObjectId;
   rate: number;

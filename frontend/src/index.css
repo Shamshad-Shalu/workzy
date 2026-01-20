@@ -92,6 +92,7 @@
 
   /* Section Background Colors - Light Theme */
   --section-blue: oklch(96.552% 0.01363 277.023);
+  /* --section-blue: oklch(96.552% 0.01363 277.023); */
   --section-blue-border: oklch(72.447% 0.06955 282.646);
   --section-red: oklch(0.9 0.06 343);
   --section-red-border: oklch(0.85 0.08 15);

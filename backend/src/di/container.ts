@@ -40,6 +40,10 @@ import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IA
 import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { CategoryManagementService } from "@/services/admin/category-management.service";
+import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
+import { ServiceController } from "@/controllers/service.controller";
+import { ServiceManagement } from "@/services/service-management.service";
+import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 
 const container = new Container();
 
@@ -73,5 +77,8 @@ container
 
 container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
 container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
+
+container.bind<IServiceController>(TYPES.ServiceController).to(ServiceController);
+container.bind<IServiceManagement>(TYPES.ServiceManagement).to(ServiceManagement);
 
 export { container };

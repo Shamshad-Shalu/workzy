@@ -35,6 +35,10 @@ const TYPES = {
   // Upload
   UploadController: Symbol.for("UploadController"),
   S3Service: Symbol.for("S3Service"),
+
+  // services
+  ServiceController: Symbol.for("ServiceController"),
+  ServiceManagement: Symbol.for("ServiceManagement"),
 };
 
 export { TYPES };
