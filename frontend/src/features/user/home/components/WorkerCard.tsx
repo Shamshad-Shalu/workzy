@@ -1,13 +1,12 @@
-import { CheckCircle, Clock, MapPin } from 'lucide-react';
+import { CheckCircle, MapPin } from 'lucide-react';
 export interface Worker {
   id: string;
-  name: string;
-  imageUrl: string;
-  profession: string;
+  displayName: string;
+  tagline: string;
+  profileImage: string;
   experience: number;
   completedJobs: number;
   distance: string;
-  responseTime: string;
   verified: boolean;
 }
 
@@ -34,8 +33,8 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
         <div className="flex items-start gap-4 mb-4">
           <div className="relative">
             <img
-              src={worker.imageUrl}
-              alt={worker.name}
+              src={worker.profileImage}
+              alt={worker.displayName}
               className="w-16 h-16 rounded-full object-cover"
             />
 
@@ -48,9 +47,9 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
 
           <div className="flex-1">
             <h3 className="font-bold text-foreground text-lg group-hover:text-indigo-600 transition-colors">
-              {worker.name}
+              {worker.displayName}
             </h3>
-            <p className="text-sm text-indigo-600 font-medium">{worker.profession}</p>
+            <p className="text-sm text-indigo-600 font-medium">{worker.tagline}</p>
 
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
               <span>{worker.experience}y exp</span>
@@ -65,10 +64,10 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
             <span className="text-muted-foreground">{worker.distance} away</span>
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
+          {/* <div className="flex items-center gap-2 text-sm">
             <Clock className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">{worker.responseTime}</span>
-          </div>
+          </div> */}
         </div>
         <button
           className="

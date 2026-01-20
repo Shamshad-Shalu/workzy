@@ -50,3 +50,7 @@ export interface IWorker extends Document<string> {
   createdAt: Date;
   rejectReason?: string;
 }
+
+
+// completedJobs
+

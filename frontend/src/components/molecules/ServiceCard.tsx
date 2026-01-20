@@ -7,7 +7,6 @@ export interface Service {
   imageUrl: string;
   bookings: string;
   subServices: string[];
-  startingPrice: string;
 }
 
 interface ServiceCardProps {
