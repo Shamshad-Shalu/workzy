@@ -1,0 +1,37 @@
+import { IProviderService } from "@/types/providerService";
+import mongoose, { Schema } from "mongoose";
+
+const ProviderServiceSchema: Schema<IProviderService> = new Schema(
+  {
+    workerId: {
+      type: Schema.Types.ObjectId,
+      ref: "Worker",
+      required: true,
+    },
+    categoryId: {
+      type: Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+    rate: { type: Number, required: true },
+    description: { type: String },
+    estimatedDuration: { type: Number },
+    bufferTime: { type: Number },
+    maxTravelRadius: { type: Number, default: 20 },
+    bulkDiscount: [
+      {
+        count: { type: Number, required: true },
+        percent: { type: Number, required: true },
+      },
+    ],
+    allowSuddenBooking: { type: Boolean, default: false },
+    isActive: { type: Boolean, default: true },
+    experience: { type: Number, default: 0 },
+    maxTravelCost: { type: Number, default: null },
+  },
+  { timestamps: true }
+);
+
+ProviderServiceSchema.index({ workerId: 1, categoryId: 1 }, { unique: true });
+
+export default mongoose.model<IProviderService>("ProviderService", ProviderServiceSchema);

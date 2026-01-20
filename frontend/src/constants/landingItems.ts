@@ -98,3 +98,33 @@ export const FEATURE_CARDS: FeatureCardProps[] = [
       'Built-in messaging system allows for seamless communication with customers before, during, and after service.',
   },
 ];
+
+interface StatCardProps {
+  name: string;
+  value: number;
+  suffix: string;
+  prefix?: string;
+}
+export const STATS_CARDS: StatCardProps[] = [
+  {
+    name: 'Service Providers',
+    suffix: '+',
+    value: 2000,
+  },
+  {
+    name: 'Customers',
+    suffix: '+',
+    value: 50000,
+  },
+  {
+    name: 'Satisfaction Rate',
+    suffix: '%',
+    value: 98,
+  },
+  {
+    name: 'Revenue Generated',
+    value: 500000,
+    prefix: '$',
+    suffix: '+',
+  },
+];

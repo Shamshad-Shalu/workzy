@@ -34,6 +34,7 @@ export default function UserRoutes() {
 
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
+          {/* <Route path="/services" element={< />} /> */}
           <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/join-us" element={<JoinUsPage />} />

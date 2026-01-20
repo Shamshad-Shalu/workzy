@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone, Star } from 'lucide-react';
+import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone } from 'lucide-react';
 import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
 
 import Button from '@/components/atoms/Button';
@@ -15,7 +15,7 @@ import {
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
 
-import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS } from '@/constants/landingItems';
+import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
 import { UploadPurposes } from '@/constants/upload';
 
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
@@ -27,6 +27,7 @@ import { handleApiError } from '@/utils/handleApiError';
 import { cn } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
+import CTASection from '@/features/user/home/components/CTASection';
 
 export default function JoinUsPage() {
   const navigate = useNavigate();
@@ -181,30 +182,14 @@ export default function JoinUsPage() {
       <section className="py-12 sm:py-16 bg-card border-y border-border overflow-hidden">
         <div className="section-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 text-center">
-            <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value={2000} suffix="+" />
-              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
-                Service Providers
-              </p>
-            </div>
-            <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value={50000} suffix="+" />
-              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
-                Customers
-              </p>
-            </div>
-            <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value={98} suffix="%" />
-              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
-                Satisfaction Rate
-              </p>
-            </div>
-            <div className="flex flex-col items-center p-2">
-              <AnimatedCounter value={500000} prefix="$" suffix="+" />
-              <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
-                Revenue Generated
-              </p>
-            </div>
+            {STATS_CARDS.map(stat => (
+              <div className="flex flex-col items-center p-2">
+                <AnimatedCounter value={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
+                <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
+                  {stat.name}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -412,46 +397,7 @@ export default function JoinUsPage() {
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-20 px-4 bg-section-dark text-white">
-        <div className="container mx-auto max-w-5xl">
-          <div className="relative text-center">
-            <span className="inline-block px-4 py-1.5 bg-golden/20 text-golden rounded-full text-sm font-medium mb-4">
-              GET STARTED TODAY
-            </span>
-            <h2 className="text-3xl md:text-5xl font-bold mb-6">
-              Ready to Transform Your Service Business?
-            </h2>
-            <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto">
-              Join our community of professional service providers and start expanding your client
-              base today.
-            </p>
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <Button
-                size="lg"
-                disabled={workerStatus === 'verified'}
-                onClick={openFormAndScroll}
-                className="bg-golden hover:bg-golden/90 text-section-dark px-10 py-6 text-lg rounded-full"
-              >
-                Become a Service Provider
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </div>
-            <div className="mt-12 flex flex-col md:flex-row items-center justify-center gap-8">
-              <div className="flex items-center gap-2">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-yellow-400" />
-                  ))}
-                </div>
-                <p className="text-gray-300">4.9/5 provider satisfaction</p>
-              </div>
-            </div>
-            <p className="mt-8 text-sm text-gray-400">
-              No contracts. No setup fees. Start growing your business today.
-            </p>
-          </div>
-        </div>
-      </section>
+      <CTASection isVerified={workerStatus === 'verified'} onBecomeProvider={openFormAndScroll} />
     </main>
   );
 }
