@@ -13,9 +13,9 @@ export interface IService extends Document<string> {
   estimatedDuration?: number;
   bufferTime?: number;
   maxTravelRadius: number;
-  bulkDiscount?: BulkDiscountType[];
+  bulkDiscounts?: BulkDiscountType[];
   allowSuddenBooking?: boolean;
-  isActive: boolean;
+  isAvailable: boolean;
   experience: number;
   maxTravelCost?: number | null;
   createdAt: Date;

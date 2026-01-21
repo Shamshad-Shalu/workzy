@@ -39,6 +39,7 @@ const TYPES = {
   // services
   ServiceController: Symbol.for("ServiceController"),
   ServiceManagement: Symbol.for("ServiceManagement"),
+  ServiceRepository: Symbol.for("ServiceRepository"),
 };
 
 export { TYPES };

@@ -14,3 +14,10 @@ export const PRICING_MODE = {
 } as const;
 
 export type PricingMode = (typeof PRICING_MODE)[keyof typeof PRICING_MODE];
+
+export const BULK_DISCOUNT = {
+  MIN_COUNT: 2,
+  MAX_COUNT: 10,
+  MIN_PERCENT: 1,
+  MAX_PERCENT: 50,
+};

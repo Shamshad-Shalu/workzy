@@ -44,6 +44,8 @@ import { IServiceController } from "@/core/interfaces/controllers/IServiceContro
 import { ServiceController } from "@/controllers/service.controller";
 import { ServiceManagement } from "@/services/service-management.service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
+import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
+import { ServiceRepository } from "@/repositories/service.repository";
 
 const container = new Container();
 
@@ -80,5 +82,6 @@ container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
 
 container.bind<IServiceController>(TYPES.ServiceController).to(ServiceController);
 container.bind<IServiceManagement>(TYPES.ServiceManagement).to(ServiceManagement);
+container.bind<IServiceRepository>(TYPES.ServiceRepository).to(ServiceRepository);
 
 export { container };

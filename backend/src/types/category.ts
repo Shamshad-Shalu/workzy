@@ -12,7 +12,7 @@ export interface ICategory extends Document<string> {
   isAvailable: boolean;
 
   baseRate: number;
-  rateDeviationPercent?: number;
+  rateDeviationPercent: number;
   estimatedDuration: number;
   bufferTime?: number;
   travelRatePerKM?: number;
