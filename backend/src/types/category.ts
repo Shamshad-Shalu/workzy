@@ -22,3 +22,8 @@ export interface ICategory extends Document<string> {
   allowSuddenBooking?: boolean;
   createdAt: Date;
 }
+
+export interface CategoryOption {
+  id: string;
+  name: string;
+}

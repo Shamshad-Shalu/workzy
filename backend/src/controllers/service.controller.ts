@@ -75,4 +75,10 @@ export class ServiceController implements IServiceController {
       total,
     });
   });
+
+  getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId } = req.params;
+    const categories = await this._serviceMangement.getWorkerServiceFilters(workerId);
+    res.status(HTTPSTATUS.OK).json({ categories });
+  });
 }

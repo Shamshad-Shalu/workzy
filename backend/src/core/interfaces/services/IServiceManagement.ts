@@ -1,5 +1,6 @@
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
 import { ServiceResponseDTO } from "@/dtos/responses/service.dto";
+import { CategoryOption } from "@/types/category";
 import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
 
 export interface IServiceManagement {
@@ -22,4 +23,6 @@ export interface IServiceManagement {
     status: string,
     categoryId: string | null
   ): Promise<WorkerServicesAggregationResult>;
+
+  getWorkerServiceFilters(workerId: string): Promise<CategoryOption[]>;
 }

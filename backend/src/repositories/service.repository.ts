@@ -6,6 +6,7 @@ import Service from "../models/service.model";
 import { CategorySearchMatch, ServiceMatchStage } from "@/types/mongo-filters.types";
 import { PipelineStage, Types } from "mongoose";
 import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
+import { CategoryOption } from "@/types/category";
 
 @injectable()
 export class ServiceRepository extends BaseRepository<IService> implements IServiceRepository {
@@ -74,7 +75,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
                 serviceName: "$category.name",
                 serviceType: "$category.serviceType",
                 pricingMode: "$category.pricingMode",
-
+                imageUrl: "$category.imageUrl",
                 rate: 1,
                 description: 1,
                 experience: 1,
@@ -108,5 +109,49 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
       services: result?.services ?? [],
       total: result.total ?? 0,
     };
+  }
+
+  async getWorkerServiceParentCategories(workerId: string): Promise<CategoryOption[]> {
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          workerId: new Types.ObjectId(workerId),
+          isAvailable: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: "$category" },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category.parentId",
+          foreignField: "_id",
+          as: "parentCategory",
+        },
+      },
+      { $unwind: "$parentCategory" },
+      {
+        $group: {
+          _id: "$parentCategory._id",
+          name: { $first: "$parentCategory.name" },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: { $toString: "$_id" },
+          name: 1,
+        },
+      },
+      { $sort: { name: 1 } },
+    ];
+    return this.model.aggregate(pipeline).exec();
   }
 }

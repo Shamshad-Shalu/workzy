@@ -2,6 +2,9 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import { ROLE } from '@/constants';
+import WorkerServicesPageDummy from '@/features/worker/services/pages/dummyWorkerServicesPages';
+import WorkerServicesPage from '@/features/worker/services/pages/WorkerServicesPage';
+import DummyWorkerServicesPage from '@/features/worker/services/pages/dummy';
 
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/Dashboard'));
@@ -11,7 +14,7 @@ const WorkerProfileRouteWrapper = lazy(
 const WorkerAboutContentPage = lazy(
   () => import('@/features/worker/profile/pages/AboutContentPage')
 );
-const WorkerServicesContentPage = lazy(
+const ServicesContentPage = lazy(
   () => import('@/features/worker/profile/pages/ServicesContentPage')
 );
 const WorkerDocumentsContentPage = lazy(
@@ -27,11 +30,14 @@ export default function WorkerRoutes() {
       <Route element={<ProtectedRoute requiredRoles={[ROLE.WORKER]} />}>
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
+          <Route path="services" element={<WorkerServicesPage />} />
+          <Route path="jobs" element={<WorkerServicesPageDummy />} />
+          <Route path="dummy-services" element={<DummyWorkerServicesPage />} />
 
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="about" element={<WorkerAboutContentPage />} />
-            <Route path="services" element={<WorkerServicesContentPage />} />
+            <Route path="services" element={<ServicesContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
             <Route path="subscription" element={<WorkerSubcriptionContentPage />} />
           </Route>

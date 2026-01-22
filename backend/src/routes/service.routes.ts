@@ -11,6 +11,7 @@ const router = Router();
 const serviceController = container.get<IServiceController>(TYPES.ServiceController);
 
 router.get("/:workerId", serviceController.getWorkerServices);
+router.get("/:workerId/service-filters", serviceController.getWorkerServiceCategories);
 
 router.use(authenticate([ROLE.WORKER]));
 router.post("/", validateDto(ServiceRequestDTO), serviceController.createService);

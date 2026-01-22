@@ -3,7 +3,7 @@ import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'blue' | 'green' | 'red';
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon' | 'responsiveLg';
   fullWidth?: boolean;
   loading?: boolean;
   iconLeft?: ReactNode;
@@ -40,6 +40,7 @@ export default function Button({
     md: 'text-sm px-4 py-2.5 h-10',
     lg: 'text-base px-5 py-3 h-12',
     icon: 'h-9 w-9 p-0 flex items-center justify-center',
+    responsiveLg: 'text-sm px-3 py-2 h-9 sm:text-base sm:px-5 sm:py-3 sm:h-12',
   };
 
   return (

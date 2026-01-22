@@ -3,11 +3,12 @@ import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS, WORKER } from "@/const
 import { SERVICE } from "@/constants/messages/service";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
+import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { TYPES } from "@/di/types";
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
 import { ServiceResponseDTO } from "@/dtos/responses/service.dto";
-import { ICategory } from "@/types/category";
+import { CategoryOption, ICategory } from "@/types/category";
 import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
 import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
@@ -18,7 +19,8 @@ import { Types } from "mongoose";
 export class ServiceManagement implements IServiceManagement {
   constructor(
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
-    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository
+    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
+    @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository
   ) {}
 
   async createService(workerId: string, data: ServiceRequestDTO): Promise<ServiceResponseDTO> {
@@ -121,5 +123,10 @@ export class ServiceManagement implements IServiceManagement {
     await redisClient.set(cacheKey, JSON.stringify(result), { EX: REFRESH_TOKEN_TTL_SECONDS });
 
     return result;
+  }
+
+  async getWorkerServiceFilters(workerId: string): Promise<CategoryOption[]> {
+    await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    return this._serviceRepository.getWorkerServiceParentCategories(workerId);
   }
 }

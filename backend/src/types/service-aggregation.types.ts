@@ -6,6 +6,7 @@ export interface AggregatedService {
   serviceName: string; // the category name
   serviceType: ServiceType; //category type
   pricingMode: PricingMode; // category pricing mode ,
+  imageUrl: string; // category image ,
 
   _id: Types.ObjectId;
   workerId: Types.ObjectId;
