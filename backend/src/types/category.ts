@@ -27,3 +27,10 @@ export interface CategoryOption {
   id: string;
   name: string;
 }
+
+export interface CategoryAncestor {
+  _id: string;
+  name: string;
+  level: 1 | 2 | 3;
+  parentId: string | null;
+}

@@ -6,11 +6,11 @@ export interface BulkDiscountType {
 }
 
 export interface Service {
-  _id: string;
-  serviceName: string; // the category name
+  id: string;
+  serviceName: string; // category name
   serviceType: ServiceType; //category type
   pricingMode: PricingMode; // category pricing mode ,
-  imageUrl: string; //
+  imageUrl: string;
   workerId: string;
   categoryId: string;
   rate: number;

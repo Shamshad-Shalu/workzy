@@ -7,7 +7,12 @@ import {
 import { toast } from 'sonner';
 import type { CategoryFormData } from '../validation/categorySchema';
 import CategoryService from '@/services/category.service';
-import type { Category, CategoryFilters, CategoryResponse } from '@/types/admin/category';
+import type {
+  Category,
+  CategoryAncestor,
+  CategoryFilters,
+  CategoryResponse,
+} from '@/types/admin/category';
 import AdminCategoryService from '@/services/admin/categoryManagement.service';
 
 export function useCategoryMutations(filters: CategoryFilters) {
@@ -29,10 +34,19 @@ export function useCategoryMutations(filters: CategoryFilters) {
         queryFn: () => CategoryService.getCategory(parentId as string),
         enabled: !!parentId,
       },
+      {
+        queryKey: ['category-ancestors', parentId],
+        queryFn: () => CategoryService.getCategoryAncestors(parentId as string),
+        enabled: !!parentId,
+      },
     ],
-  }) as [UseQueryResult<CategoryResponse, Error>, UseQueryResult<Category | null, Error>];
+  }) as [
+    UseQueryResult<CategoryResponse, Error>,
+    UseQueryResult<Category | null, Error>,
+    UseQueryResult<CategoryAncestor[] | null, Error>,
+  ];
 
-  const [categoriesQuery, parentCategoryQuery] = results;
+  const [categoriesQuery, parentCategoryQuery, categoryAncestors] = results;
 
   const updateCategoryMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: CategoryFormData }) =>
@@ -68,6 +82,7 @@ export function useCategoryMutations(filters: CategoryFilters) {
     updateCategoryMutation,
     addCategoryMutation,
     toggleStatusMutation,
+    categoryAncestors: categoryAncestors.data ?? [],
     parentCategory: parentCategoryQuery.data,
   };
 }

@@ -9,7 +9,7 @@ const categoryColumns = (
   currentLevel: number,
   onToggleStatus: (category: Category) => void,
   onEdit: (category: Category) => void,
-  onViewChild: (category: Category) => void
+  onViewChild: (categoryId: string) => void
 ): TableColumnDef<Category>[] => {
   const baseColumns: TableColumnDef<Category>[] = [
     {
@@ -123,7 +123,7 @@ const categoryColumns = (
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           {row.original.level !== 3 && (
-            <Button size="sm" variant="blue" onClick={() => onViewChild(row.original)}>
+            <Button size="sm" variant="blue" onClick={() => onViewChild(row.original._id)}>
               <Eye size={17} />
             </Button>
           )}

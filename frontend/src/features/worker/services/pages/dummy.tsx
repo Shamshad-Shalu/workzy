@@ -192,8 +192,12 @@ export default function DummyWorkerServicesPage() {
       return matchesSearch && matchesStatus && matchesCategory;
     })
     .sort((a, b) => {
-      if (sortBy === 'rate-high') {return b.rate - a.rate;}
-      if (sortBy === 'rate-low') {return a.rate - b.rate;}
+      if (sortBy === 'rate-high') {
+        return b.rate - a.rate;
+      }
+      if (sortBy === 'rate-low') {
+        return a.rate - b.rate;
+      }
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
 

@@ -1,5 +1,5 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
-import { ICategory } from "@/types/category";
+import { CategoryAncestor, ICategory } from "@/types/category";
 
 export interface ICategoryRepository extends BaseRepository<ICategory> {
   getAllCategories(
@@ -9,4 +9,5 @@ export interface ICategoryRepository extends BaseRepository<ICategory> {
     status: string,
     parentId: string | null
   ): Promise<ICategory[]>;
+  findAncestors(categoryId: string): Promise<CategoryAncestor[]>;
 }

@@ -4,7 +4,7 @@ import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRep
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
-import { ICategory } from "@/types/category";
+import { CategoryAncestor, ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -55,5 +55,9 @@ export class CategoryService implements ICategoryService {
       CATEGORY.NOT_FOUND
     );
     return CategoryResponseDTO.fromEntity(category);
+  }
+
+  async getCategoryAncestors(categoryId: string): Promise<CategoryAncestor[]> {
+    return await this._categoryRepository.findAncestors(categoryId);
   }
 }

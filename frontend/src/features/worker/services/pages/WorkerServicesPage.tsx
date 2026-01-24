@@ -8,8 +8,10 @@ import { useServiceMutations } from '../hooks/useServiceMutations';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type { CategoryOption } from '@/types/category';
 import { useNavigate } from 'react-router-dom';
+import WorkerServiceCard from '../components/WorkerServiceCard';
+import { DataList } from '@/components/data-table/DataList';
+import type { Service } from '@/types/service';
 
 type SelectOption = {
   label: string;
@@ -17,7 +19,7 @@ type SelectOption = {
 };
 
 export default function WorkerServicesPageDummy() {
-  const [serviceModalOpen, serServiceModalOpen] = useState(false);
+  const [serviceModalOpen, setServiceModalOpen] = useState(false);
 
   const filters = useUrlFilterParams<{ categoryId: string | null }>([{ key: 'categoryId' }]);
 
@@ -47,16 +49,7 @@ export default function WorkerServicesPageDummy() {
     value: category.id,
   }));
 
-  const handleCategoryNavigate = (categoryId: string) => {
-    const category = categoriesList?.find(c => c.id === categoryId);
-    if (!category) {return;}
-
-    const newPath = [{ id: category.id, name: category.name }];
-
-    navigate(`?category=${category.name}&page=1`, {
-      state: { path: newPath },
-    });
-  };
+  console.log({ data });
 
   return (
     <main>
@@ -69,7 +62,7 @@ export default function WorkerServicesPageDummy() {
           variant="blue"
           disabled={isError}
           size="responsiveLg"
-          onClick={() => serServiceModalOpen(true)}
+          onClick={() => setServiceModalOpen(true)}
           iconLeft={<Plus />}
         >
           Add Service
@@ -81,7 +74,7 @@ export default function WorkerServicesPageDummy() {
             <SearchInput
               disabled={isError}
               placeholder="Search by name or description..."
-              value={''}
+              value={search}
               onChange={handleSearchChange}
             />
           </div>
@@ -101,8 +94,8 @@ export default function WorkerServicesPageDummy() {
           </div>
           <div className="sm:col-span-3">
             <Select
-              value={status}
-              onChange={handleCategoryNavigate}
+              value={categoryId ?? 'all'}
+              onChange={v => updateParams({ categoryId: v === 'all' ? null : v, page: 0 })}
               leftIcon={<Filter />}
               disabled={isError}
               options={[{ label: 'All Status', value: 'all' }, ...categoriesOptions]}
@@ -110,6 +103,22 @@ export default function WorkerServicesPageDummy() {
           </div>
         </div>
       </div>
+      <section className="@container pt-12">
+        <DataList<Service>
+          mode="card"
+          data={data?.services ?? []}
+          total={data?.total ?? 0}
+          pageIndex={pageIndex}
+          pageSize={pageSize}
+          pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
+          onPageChange={p => updateParams({ page: p })}
+          onPageSizeChange={s => updateParams({ pageSize: s, page: 0 })}
+          isLoading={isLoading}
+          emptyText="No services found"
+          gridClassName="grid gap-5 grid-cols-1 @[480px]:grid-cols-2 @[800px]:grid-cols-3 @[1220px]:grid-cols-4"
+          renderCard={service => <WorkerServiceCard service={service} key={service.id} />}
+        />
+      </section>
     </main>
   );
 }

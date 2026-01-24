@@ -40,6 +40,12 @@ export class CategoryController implements ICategoryController {
     });
   });
 
+  getCategoryAncestors = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const ancestors = await this._categoryService.getCategoryAncestors(id);
+    res.status(200).json({ ancestors });
+  });
+
   //   getCategorySuggestions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
 
   //   })

@@ -136,8 +136,12 @@ export default function WorkerServicesPage() {
 
     return matchesSearch && matchesStatus && matchesCategory;
   }).sort((a, b) => {
-    if (sortBy === 'rate-high') {return b.rate - a.rate;}
-    if (sortBy === 'rate-low') {return a.rate - b.rate;}
+    if (sortBy === 'rate-high') {
+      return b.rate - a.rate;
+    }
+    if (sortBy === 'rate-low') {
+      return a.rate - b.rate;
+    }
     return 0; // newest
   });
 

@@ -1,5 +1,5 @@
 import api from '@/lib/api/axios';
-import type { Category, CategoryResponse } from '@/types/admin/category';
+import type { Category, CategoryAncestor, CategoryResponse } from '@/types/admin/category';
 
 const CategoryService = {
   getCategories: async (
@@ -18,6 +18,10 @@ const CategoryService = {
   getCategory: async (categoryId: string): Promise<Category> => {
     const res = await api.get(`/categories/${categoryId}`);
     return res.data?.category;
+  },
+  getCategoryAncestors: async (categoryId: string): Promise<CategoryAncestor[]> => {
+    const res = await api.get(`/categories/${categoryId}/ancestors`);
+    return res.data.ancestors;
   },
 };
 

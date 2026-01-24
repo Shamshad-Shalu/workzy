@@ -13,17 +13,20 @@ export function StatusBadge({
   status = 'neutral',
   label,
   onClick,
+  className = '',
 }: {
   status?: 'success' | 'error' | 'warning' | 'info' | 'neutral';
   label: string;
   onClick?: () => void;
+  className?: string;
 }) {
   return (
     <Badge
       onClick={onClick}
       className={cn(
-        'flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium',
-        statusStyles[status]
+        'flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium text-foreground',
+        statusStyles[status],
+        className
       )}
     >
       {label}

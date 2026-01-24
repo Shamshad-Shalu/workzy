@@ -249,8 +249,12 @@ export default function WorkerServicesPage() {
       return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
-      if (sortBy === 'rate-high') {return b.rate - a.rate;}
-      if (sortBy === 'rate-low') {return a.rate - b.rate;}
+      if (sortBy === 'rate-high') {
+        return b.rate - a.rate;
+      }
+      if (sortBy === 'rate-low') {
+        return a.rate - b.rate;
+      }
       return 0;
     });
 
@@ -348,7 +352,7 @@ export default function WorkerServicesPage() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
               {paginatedServices.map(service => (
                 <ServiceCard key={service._id} service={service} />
               ))}

@@ -1,4 +1,4 @@
-import type { TableColumnDef } from '@/types/table.types';
+import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
 import {
   useReactTable,
   type SortingState,
@@ -33,7 +33,7 @@ interface TableMeta {
   total: number;
 }
 
-export default function Table<TData extends { _id: string }>({
+export default function Table<TData extends RowWithAnyId>({
   columns,
   data,
   pageIndex,
@@ -118,7 +118,13 @@ export default function Table<TData extends { _id: string }>({
             No results found
           </div>
         ) : (
-          data.map(item => <DataTableMobileCard key={item._id} item={item} columns={columns} />)
+          data.map(item => (
+            <DataTableMobileCard
+              key={'id' in item ? item.id : item._id}
+              item={item}
+              columns={columns}
+            />
+          ))
         )}
 
         <div className="bg-card rounded-lg px-4 mt-6">

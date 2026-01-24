@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
 import { Filter, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -17,9 +16,7 @@ import { useCategoryMutations } from '../hooks/useCategoryMutations';
 import { handleApiError } from '@/utils/handleApiError';
 import type { Category } from '@/types/admin/category';
 import type { CategoryFormData } from '../validation/categorySchema';
-import { useCategoryUrlParams } from '../hooks/useCategoryUrlParams';
-
-type CategoryCrumb = { id: string; name: string };
+import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 
 export default function CategoryManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
@@ -27,14 +24,15 @@ export default function CategoryManagementPage() {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { pageIndex, pageSize, parentId, search, status, updateParams } = useUrlFilterParams<{
+    parentId: string | null;
+  }>([{ key: 'parentId' }]);
 
-  const { pageIndex, pageSize, parentId, search, status, updateParams } = useCategoryUrlParams();
   const {
     addCategoryMutation,
     updateCategoryMutation,
     toggleStatusMutation,
+    categoryAncestors,
     data,
     isLoading,
     isError,
@@ -43,7 +41,6 @@ export default function CategoryManagementPage() {
   } = useCategoryMutations({ pageIndex, pageSize, search, status, parentId });
 
   const currentLevel = parentCategory ? parentCategory.level + 1 : 1;
-  const path = (location.state?.path as CategoryCrumb[]) || [];
 
   useEffect(() => {
     if (isError) {
@@ -57,20 +54,22 @@ export default function CategoryManagementPage() {
       href: '/admin/categories',
       onClick: (e: React.MouseEvent) => {
         e.preventDefault();
-        navigate('/admin/categories', { state: { path: [] } });
+        updateParams({ parentId: null, page: 0 });
       },
     },
   ];
 
-  if (path && Array.isArray(path)) {
-    path.forEach((crumb, index) => {
+  if (categoryAncestors?.length) {
+    categoryAncestors.forEach(ancestor => {
       breadcrumbItems.push({
-        label: crumb.name,
+        label: ancestor.name,
         href: '#',
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
-          const newPath = path.slice(0, index + 1);
-          navigate(`?parentId=${crumb.id}&page=1`, { state: { path: newPath } });
+          updateParams({
+            parentId: ancestor._id,
+            page: 0,
+          });
         },
       });
     });
@@ -93,11 +92,8 @@ export default function CategoryManagementPage() {
     setCategoryModalOpen(true);
   };
 
-  const onViewChild = (category: Category) => {
-    const newPath = [...path, { id: category._id, name: category.name }];
-    navigate(`?parentId=${category._id}&page=1`, {
-      state: { path: newPath },
-    });
+  const onViewChild = (categoryId: string) => {
+    updateParams({ parentId: categoryId, page: 0 });
   };
 
   const handleCategorySubmit = async (categoryData: CategoryFormData) => {

@@ -1,15 +1,15 @@
 import { useState, useEffect } from 'react';
-import { type Table } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import Button from '../atoms/Button';
+import type { PaginationAdapter } from '@/types/table.types';
 
-interface Props<T> {
-  table: Table<T>;
+interface Props {
+  table: PaginationAdapter;
   onPageChange?: (pageIndex: number) => void;
   onPageSizeChange?: (pageSize: number) => void;
 }
 
-export function DataTablePagination<T>({ table, onPageChange, onPageSizeChange }: Props<T>) {
+export function DataTablePagination({ table, onPageChange, onPageSizeChange }: Props) {
   const [pageSizeLocal, setPageSizeLocal] = useState(table.getState().pagination.pageSize);
   const { pageIndex, pageSize } = table.getState().pagination;
 

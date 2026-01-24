@@ -1,13 +1,13 @@
-import type { TableColumnDef } from '@/types/table.types';
+import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-interface Props<TData extends { _id: string }> {
+interface Props<TData extends RowWithAnyId> {
   item: TData;
   columns: TableColumnDef<TData>[];
 }
 
-export default function DataTableMobileCard<TData extends { _id: string }>({
+export default function DataTableMobileCard<TData extends RowWithAnyId>({
   item,
   columns,
 }: Props<TData>) {
