@@ -46,6 +46,14 @@ export class CategoryController implements ICategoryController {
     res.status(200).json({ ancestors });
   });
 
+  getCategoryLevels = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const level = Number(req.query.level);
+    const parentId = (req.query.parentId as string) || null;
+
+    const categories = await this._categoryService.getCategoriesByLevel(level, parentId);
+    res.status(200).json({ categories });
+  });
+
   //   getCategorySuggestions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
 
   //   })

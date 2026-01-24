@@ -8,7 +8,6 @@ import { useServiceMutations } from '../hooks/useServiceMutations';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import { useNavigate } from 'react-router-dom';
 import WorkerServiceCard from '../components/WorkerServiceCard';
 import { DataList } from '@/components/data-table/DataList';
 import type { Service } from '@/types/service';
@@ -29,7 +28,6 @@ export default function WorkerServicesPageDummy() {
   const { user } = useAppSelector((s: RootState) => s.auth);
 
   const workerId = user?.workerId;
-  const navigate = useNavigate();
   const { data, categoriesList, error, isError, isLoading } = useServiceMutations(
     workerId!,
     filters

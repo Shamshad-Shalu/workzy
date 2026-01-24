@@ -29,3 +29,9 @@ export const BUFFER_OPTIONS = ['0', '1', '2'].map(m => ({
   label: `${m} min`,
   value: m,
 }));
+export const BULK_DISCOUNT = {
+  MIN_COUNT: 2,
+  MAX_COUNT: 10,
+  MIN_PERCENT: 1,
+  MAX_PERCENT: 50,
+};

@@ -34,3 +34,10 @@ export interface CategoryAncestor {
   level: 1 | 2 | 3;
   parentId: string | null;
 }
+
+export type CategoryLite = Pick<CategoryAncestor, "_id" | "name" | "level">;
+export interface CategoryLiteDTO {
+  id: string;
+  name: string;
+  level: 1 | 2 | 3;
+}

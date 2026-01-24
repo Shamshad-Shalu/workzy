@@ -10,4 +10,5 @@ export const CATEGORY = {
   INVALID_LEVEL: "Invalid category level.",
 
   NAME_REQUIRED: "Category name is required.",
+  MISS_MATCH: "Category inputs miss matches..",
 };

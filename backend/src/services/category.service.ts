@@ -4,7 +4,7 @@ import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRep
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
-import { CategoryAncestor, ICategory } from "@/types/category";
+import { CategoryAncestor, CategoryLiteDTO, ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -59,5 +59,23 @@ export class CategoryService implements ICategoryService {
 
   async getCategoryAncestors(categoryId: string): Promise<CategoryAncestor[]> {
     return await this._categoryRepository.findAncestors(categoryId);
+  }
+
+  async getCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLiteDTO[]> {
+    if (![1, 2, 3].includes(level)) {
+      throw new CustomError(CATEGORY.INVALID_LEVEL, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    if ((level === 1 && parentId !== null) || (level > 1 && !parentId)) {
+      throw new CustomError(CATEGORY.MISS_MATCH);
+    }
+    if (parentId) {
+      const parent = await getEntityOrThrow(this._categoryRepository, parentId);
+      if (parent.level !== level - 1) {
+        throw new CustomError(CATEGORY.INVALID_LEVEL);
+      }
+    }
+    const categories = await this._categoryRepository.findCategoriesByLevel(level, parentId);
+    return categories.map((cat) => ({ id: cat._id, level: cat.level, name: cat.name }));
   }
 }

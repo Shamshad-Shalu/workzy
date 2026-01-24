@@ -1,10 +1,10 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import Category from "@/models/category.model";
-import { CategoryAncestor, ICategory } from "@/types/category";
+import { CategoryAncestor, CategoryLite, ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import { injectable } from "inversify";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 import { PipelineStage } from "mongoose";
 
 @injectable()
@@ -60,5 +60,23 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     ];
 
     return this.model.aggregate<CategoryAncestor>(pipeline).exec();
+  }
+
+  findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLite[]> {
+    const filter: FilterQuery<ICategory> = {
+      level,
+      isAvailable: true,
+    };
+
+    if (parentId !== null) {
+      filter.parentId = new Types.ObjectId(parentId);
+    } else {
+      filter.parentId = null;
+    }
+    return this.model
+      .find(filter)
+      .select("_id name level")
+      .sort({ createdAt: 1 })
+      .lean<CategoryLite[]>();
   }
 }
