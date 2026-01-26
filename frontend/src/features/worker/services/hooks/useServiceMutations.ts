@@ -1,10 +1,17 @@
 import ServiceMangement from '@/services/service.service';
 import type { CategoryOption } from '@/types/category';
 import type { ServiceFilters, ServiceResponse } from '@/types/service';
-import { useQueries, type UseQueryResult } from '@tanstack/react-query';
+import {
+  useMutation,
+  useQueries,
+  useQueryClient,
+  type UseQueryResult,
+} from '@tanstack/react-query';
+import type { ServiceFormType } from '../validation/ServiceFormData';
+import { toast } from 'sonner';
 
 export function useServiceMutations(workerId: string, filters: ServiceFilters) {
-  //   const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const { pageIndex, pageSize, search, status, categoryId } = filters;
 
@@ -41,11 +48,39 @@ export function useServiceMutations(workerId: string, filters: ServiceFilters) {
 
   const [servicesQuery, categoriesQuery] = results;
 
+  const updateServiceMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ServiceFormType }) =>
+      ServiceMangement.updateService(id, data),
+    onSuccess: res => {
+      toast.success(res.message);
+      queryClient.invalidateQueries({ queryKey: ['worker-services'] });
+    },
+  });
+
+  const addServiceMutation = useMutation({
+    mutationFn: (data: ServiceFormType) => ServiceMangement.addService(data),
+    onSuccess: res => {
+      toast.success(res.message);
+      queryClient.invalidateQueries({ queryKey: ['worker-services'] });
+    },
+  });
+
+  const toggleStatusMutation = useMutation<{ message: string }, Error, string>({
+    mutationFn: id => ServiceMangement.toggleStatus(id),
+    onSuccess: data => {
+      toast.success(data.message);
+      queryClient.invalidateQueries({ queryKey: ['worker-services'] });
+    },
+  });
+
   return {
     data: servicesQuery.data,
     isLoading: servicesQuery.isLoading,
     isError: servicesQuery.isError,
     error: servicesQuery.error,
     categoriesList: categoriesQuery.data?.categories ?? [],
+    updateServiceMutation,
+    addServiceMutation,
+    toggleStatusMutation,
   };
 }

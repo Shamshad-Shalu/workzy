@@ -19,7 +19,6 @@ interface WorkerProfileLayoutProps {
 
 const TABS = [
   { name: 'About', path: '' },
-  { name: 'Services', path: 'services' },
   { name: 'Documents', path: 'documents' },
   { name: 'Subscription', path: 'subscription' },
 ];

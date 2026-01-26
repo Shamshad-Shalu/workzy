@@ -8,7 +8,7 @@ export interface AggregatedService {
   pricingMode: PricingMode; // category pricing mode ,
   imageUrl: string; // category image ,
 
-  _id: Types.ObjectId;
+  id: Types.ObjectId;
   workerId: Types.ObjectId;
   categoryId: Types.ObjectId;
   rate: number;

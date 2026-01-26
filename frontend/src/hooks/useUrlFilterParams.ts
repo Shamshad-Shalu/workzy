@@ -26,7 +26,7 @@ export const useUrlFilterParams = <
   const filterState = useMemo(() => {
     const standardParams = {
       pageIndex: Math.max(parseInt(searchParams.get('page') ?? '1', 10) - 1, 0),
-      pageSize: parseInt(searchParams.get('limit') ?? '5', 10),
+      pageSize: parseInt(searchParams.get('limit') ?? '10', 10),
       search: searchParams.get('search') ?? '',
       status: searchParams.get('status') ?? 'all',
     };

@@ -18,12 +18,16 @@ const ServiceSchema: Schema<IService> = new Schema(
     estimatedDuration: { type: Number },
     bufferTime: { type: Number },
     maxTravelRadius: { type: Number, default: 20 },
-    bulkDiscounts: [
-      {
-        count: { type: Number, required: true },
-        percent: { type: Number, required: true },
-      },
-    ],
+    bulkDiscounts: {
+      type: [
+        {
+          _id: false,
+          count: { type: Number, required: true },
+          percent: { type: Number, required: true },
+        },
+      ],
+      default: undefined,
+    },
     allowSuddenBooking: { type: Boolean, default: false },
     isAvailable: { type: Boolean, default: true },
     experience: { type: Number, default: 0 },

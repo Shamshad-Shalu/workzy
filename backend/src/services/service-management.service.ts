@@ -1,6 +1,5 @@
 import redisClient from "@/config/redisClient";
-import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS, WORKER } from "@/constants";
-import { SERVICE } from "@/constants/messages/service";
+import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS, SERVICE, WORKER } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -84,7 +83,7 @@ export class ServiceManagement implements IServiceManagement {
     const newStatus = !service.isAvailable;
 
     await this._serviceRepository.update(service.id, { isAvailable: newStatus });
-    const message = newStatus ? CATEGORY.UNBLOCKED : CATEGORY.BLOCKED;
+    const message = newStatus ? SERVICE.UNBLOCKED : SERVICE.BLOCKED;
     await clearRedisListCache(`worker:${workerId}:services`);
     return { newStatus, message };
   }

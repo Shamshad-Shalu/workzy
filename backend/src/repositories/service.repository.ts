@@ -69,7 +69,8 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
             { $limit: limit },
             {
               $project: {
-                _id: 1,
+                _id: 0,
+                id: { $toString: "$_id" },
                 workerId: 1,
                 categoryId: 1,
                 serviceName: "$category.name",

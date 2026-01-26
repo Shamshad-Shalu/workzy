@@ -41,3 +41,9 @@ export interface CategoryAncestor {
   level: 1 | 2 | 3;
   parentId: string | null;
 }
+
+export interface CategoryLite {
+  id: string;
+  name: string;
+  level: 1 | 2 | 3;
+}

@@ -17,8 +17,9 @@ export default function SlotTimeInput({
   error,
   isBuffer = false,
 }: SlotTimeInputProps) {
-  const hours = Math.floor(valueInMinutes / 60);
-  const minutes = valueInMinutes % 60;
+  const safeMinutes = Number.isFinite(valueInMinutes) ? valueInMinutes : 0;
+  const hours = Math.floor(safeMinutes / 60);
+  const minutes = safeMinutes % 60;
 
   const hourOptions = isBuffer ? BUFFER_OPTIONS : HOUR_OPTIONS;
 

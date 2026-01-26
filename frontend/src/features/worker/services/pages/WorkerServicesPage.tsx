@@ -11,14 +11,17 @@ import type { RootState } from '@/store/store';
 import WorkerServiceCard from '../components/WorkerServiceCard';
 import { DataList } from '@/components/data-table/DataList';
 import type { Service } from '@/types/service';
+import { WorkerServiceModal } from '../components/WorkerServiceModal';
+import type { ServiceFormType } from '../validation/ServiceFormData';
+import { AppModal } from '@/components/molecules/AppModal';
 
-type SelectOption = {
-  label: string;
-  value: string;
-};
+type SelectOption = { label: string; value: string };
 
-export default function WorkerServicesPageDummy() {
+export default function WorkerServicesPage() {
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
+  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [statusModalOpen, setStatusModalOpen] = useState<boolean>(false);
 
   const filters = useUrlFilterParams<{ categoryId: string | null }>([{ key: 'categoryId' }]);
 
@@ -28,12 +31,15 @@ export default function WorkerServicesPageDummy() {
   const { user } = useAppSelector((s: RootState) => s.auth);
 
   const workerId = user?.workerId;
-  const { data, categoriesList, error, isError, isLoading } = useServiceMutations(
-    workerId!,
-    filters
-  );
-
-  console.log({ data, categoriesList, error, isError, isLoading });
+  const {
+    data,
+    categoriesList,
+    isError,
+    isLoading,
+    updateServiceMutation,
+    addServiceMutation,
+    toggleStatusMutation,
+  } = useServiceMutations(workerId!, filters);
 
   const handleSearchChange = useCallback(
     (v: string) => {
@@ -47,7 +53,24 @@ export default function WorkerServicesPageDummy() {
     value: category.id,
   }));
 
-  console.log({ data });
+  const handleSumbit = async (serviceData: ServiceFormType) => {
+    if (editingService) {
+      await updateServiceMutation.mutateAsync({ id: editingService.id, data: serviceData });
+    } else {
+      await addServiceMutation.mutateAsync(serviceData);
+    }
+    setEditingService(null);
+  };
+
+  const openStatusModal = (service: Service) => {
+    setSelectedService(service);
+    setStatusModalOpen(true);
+  };
+
+  const openEditModal = (service: Service) => {
+    setEditingService(service);
+    setServiceModalOpen(true);
+  };
 
   return (
     <main>
@@ -60,7 +83,9 @@ export default function WorkerServicesPageDummy() {
           variant="blue"
           disabled={isError}
           size="responsiveLg"
-          onClick={() => setServiceModalOpen(true)}
+          onClick={() => {
+            setServiceModalOpen(true);
+          }}
           iconLeft={<Plus />}
         >
           Add Service
@@ -114,9 +139,51 @@ export default function WorkerServicesPageDummy() {
           isLoading={isLoading}
           emptyText="No services found"
           gridClassName="grid gap-5 grid-cols-1 @[480px]:grid-cols-2 @[800px]:grid-cols-3 @[1220px]:grid-cols-4"
-          renderCard={service => <WorkerServiceCard service={service} key={service.id} />}
+          renderCard={service => (
+            <WorkerServiceCard
+              service={service}
+              key={service.id}
+              onEdit={openEditModal}
+              onToggleStatus={openStatusModal}
+            />
+          )}
         />
       </section>
+      <AppModal
+        open={statusModalOpen}
+        onClose={() => {
+          setStatusModalOpen(false);
+          setSelectedService(null);
+        }}
+        isTitleHidden={true}
+        confirmText={selectedService?.isAvailable ? 'Block' : 'Unblock'}
+        onConfirm={() => {
+          if (!selectedService) {return;}
+          const serviceId = selectedService.id;
+          toggleStatusMutation.mutate(serviceId, {
+            onSuccess: () => {
+              setStatusModalOpen(false); 
+              setSelectedService(null);
+            },
+          });
+        }}
+        className="sm:mx-1"
+      >
+        <span className="block mb-2">
+          Are you sure you want to {selectedService?.isAvailable ? 'Block' : 'Unblock'}{' '}
+          <b>{selectedService?.serviceName}</b>
+        </span>
+      </AppModal>
+      <WorkerServiceModal
+        key={editingService?.id ?? 'add'}
+        open={serviceModalOpen}
+        onClose={() => {
+          setServiceModalOpen(false);
+          setEditingService(null);
+        }}
+        service={editingService}
+        onSubmit={handleSumbit}
+      />
     </main>
   );
 }

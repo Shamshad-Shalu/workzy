@@ -1,6 +1,7 @@
+import type { ServiceFormType } from '@/features/worker/services/validation/ServiceFormData';
 import api from '@/lib/api/axios';
 import type { CategoryOption } from '@/types/category';
-import type { ServiceResponse } from '@/types/service';
+import type { Service, ServiceResponse } from '@/types/service';
 
 interface Filters {
   page?: number;
@@ -8,6 +9,10 @@ interface Filters {
   search?: string;
   status?: string;
   categoryId?: string | null;
+}
+interface SResponse {
+  message: string;
+  service: Service;
 }
 
 const ServiceMangement = {
@@ -18,7 +23,6 @@ const ServiceMangement = {
     const res = await api.get(`/services/${workerId}`, {
       params: { page, limit, search, status, categoryId: categoryId === 'all' ? null : categoryId },
     });
-    console.log('services:', res.data);
     return res.data;
   },
   getWorkerServiceCategories: async (workerId: string): Promise<CategoryOption[]> => {
@@ -27,7 +31,16 @@ const ServiceMangement = {
   },
 
   toggleStatus: async (serviceId: string): Promise<{ message: string }> => {
-    const res = await api.patch(`services${serviceId}/status`);
+    const res = await api.patch(`services/${serviceId}/status`);
+    return res.data;
+  },
+
+  updateService: async (serviceId: string, data: ServiceFormType): Promise<SResponse> => {
+    const res = await api.patch(`services/${serviceId}`, data);
+    return res.data;
+  },
+  addService: async (data: ServiceFormType): Promise<SResponse> => {
+    const res = await api.post('services', data);
     return res.data;
   },
 };

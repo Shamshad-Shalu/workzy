@@ -20,7 +20,6 @@ export default function WorkerServiceCard({
 }: ServiceCardTypes) {
   return (
     <section className="group card bg-card rounded-xl border border-border overflow-hidden hover:shadow-lg transition-all duration-300">
-      {/* Image */}
       <div className="relative h-48 overflow-hidden bg-muted">
         <img
           src={service.imageUrl}
@@ -47,10 +46,15 @@ export default function WorkerServiceCard({
             <StatusBadge label="Instant" className="bg-orange-500/90 text-white " />
           )}
           {service.bulkDiscounts && service?.bulkDiscounts?.length > 0 && (
-            <StatusBadge
-              label={`Bulk ${service.bulkDiscounts[0].percent}%`}
-              className="bg-blue-500/90"
-            />
+            <>
+              {service.bulkDiscounts.map((discount, i) => (
+                <StatusBadge
+                  key={i}
+                  label={`${discount.percent} % on ${discount.count}`}
+                  className="bg-blue-500 text-white"
+                />
+              ))}
+            </>
           )}
         </div>
       </div>

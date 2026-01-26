@@ -1,11 +1,53 @@
-// import type { Category } from "@/types/admin/category";
-// import type { ServiceFormType } from "../validation/ServiceFormData";
+import { FormProvider } from 'react-hook-form';
+import type { Service } from '@/types/service';
+import type { ServiceFormType } from '../validation/ServiceFormData';
+import { useServiceForm } from '../hooks/useServiceForm';
+import { useCategoryLevels } from '../hooks/useCategoryLevels';
+import { AppModal } from '@/components/molecules/AppModal';
+import { CategorySection } from './CategorySection';
+import ServiceFormSection from './ServiceFormSection';
 
-// interface WorkerServiceModalProps {
-//   open: boolean;
-//   onClose: () => void;
-//   onSubmit: (service: ServiceFormType) => Promise<void>;
-//   category?: Category | null;
-// }
+interface WorkerServiceModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (service: ServiceFormType) => Promise<void>;
+  service?: Service | null;
+}
 
-export function WorkerServiceModal() {}
+export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerServiceModalProps) {
+  const { category, ...rest } = useCategoryLevels(service?.categoryId);
+  const form = useServiceForm(service, category);
+
+  const handleSubmit = async (data: ServiceFormType) => {
+    const { _baseRate, _deviation, _setTravelCost, _baseBuffer, _baseDuration, ...submitData } =
+      data;
+    await onSubmit(submitData);
+    onClose();
+    form.reset();
+  };
+
+  return (
+    <AppModal
+      open={open}
+      onClose={onClose}
+      title={service ? 'Edit Service' : 'Add Service'}
+      onConfirm={form.handleSubmit(handleSubmit)}
+      className="sm:max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar"
+    >
+      <div className="space-y-4 w-full">
+        <FormProvider {...form}>
+          <form className="space-y-4">
+            <CategorySection categoryInfo={{ category, ...rest }} service={service} />
+            {category ? (
+              <ServiceFormSection form={form} category={category} />
+            ) : (
+              <div className="p-6 text-sm text-muted-foreground text-center">
+                Select a category to configure service details
+              </div>
+            )}
+          </form>
+        </FormProvider>
+      </div>
+    </AppModal>
+  );
+}

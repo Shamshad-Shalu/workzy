@@ -3,6 +3,7 @@ import { ICategory } from "@/types/category";
 import { BulkDiscountType, IService } from "@/types/service";
 
 export class ServiceResponseDTO {
+  id!: string;
   rate!: number;
   description?: string;
   estimatedDuration?: number;
@@ -22,6 +23,7 @@ export class ServiceResponseDTO {
   static fromEntity(entity: IService, category: ICategory): ServiceResponseDTO {
     const dto = new ServiceResponseDTO();
 
+    dto.id = entity.id;
     dto.serviceName = category.name;
     dto.serviceType = category.serviceType as ServiceType;
     dto.pricingMode = category.pricingMode as PricingMode;
