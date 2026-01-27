@@ -23,7 +23,9 @@ const bulkDiscountSchema = z.object({
 });
 
 const progressiveBulkDiscountSchema = z.array(bulkDiscountSchema).superRefine((discounts, ctx) => {
-  if (!discounts || discounts.length === 0) {return;}
+  if (!discounts || discounts.length === 0) {
+    return;
+  }
 
   const sorted = [...discounts].sort((a, b) => a.count - b.count);
   const seen = new Set<number>();

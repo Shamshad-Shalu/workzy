@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { InputProps } from '../atoms/Input';
 import Input from '../atoms/Input';
 import { Search } from 'lucide-react';
@@ -16,32 +16,41 @@ export default function SearchInput({
   ...props
 }: SearchInputProps) {
   const [inputValue, setInputValue] = useState(value);
+  const [isTyping, setIsTyping] = useState(false);
+
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setInputValue(value);
-  }, [value]);
+    if (!isTyping) {
+      setInputValue(value);
+    }
+  }, [value, isTyping]);
 
   useEffect(() => {
-    if (inputValue === '') {
-      onChange('');
-      return;
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
 
-    const handler = setTimeout(() => {
-      onChange(inputValue.trim());
+    timerRef.current = setTimeout(() => {
+      const trimmed = inputValue.trim();
+      if (trimmed !== value.trim()) {
+        onChange(trimmed);
+      }
+      setIsTyping(false);
     }, debounce);
 
     return () => {
-      clearTimeout(handler);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
     };
-  }, [inputValue, debounce, onChange]);
+  }, [inputValue, debounce, value]);
 
-  return (
-    <Input
-      {...props}
-      value={inputValue}
-      onChange={e => setInputValue(e.target.value)}
-      leftIcon={<Search />}
-    />
-  );
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    setIsTyping(true);
+  };
+
+  return <Input {...props} value={inputValue} onChange={handleChange} leftIcon={<Search />} />;
 }

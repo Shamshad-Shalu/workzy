@@ -158,11 +158,13 @@ export default function WorkerServicesPage() {
         isTitleHidden={true}
         confirmText={selectedService?.isAvailable ? 'Block' : 'Unblock'}
         onConfirm={() => {
-          if (!selectedService) {return;}
+          if (!selectedService) {
+            return;
+          }
           const serviceId = selectedService.id;
           toggleStatusMutation.mutate(serviceId, {
             onSuccess: () => {
-              setStatusModalOpen(false); 
+              setStatusModalOpen(false);
               setSelectedService(null);
             },
           });
