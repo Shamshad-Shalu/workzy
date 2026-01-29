@@ -234,7 +234,7 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                     <LocationSearchModal
                       open={locationModalOpen}
                       onClose={() => setLocationModalOpen(false)}
-                      onSelectLocation={location => handleLocationSelect(location, field)}
+                      onSelectLocation={location => handleLocationSelect(location.name, field)}
                       title="Add City"
                       description="Search and select a city"
                     />

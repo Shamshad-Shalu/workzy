@@ -54,7 +54,12 @@ const API_DATA = {
           description: 'Electrical, plumbing, appliance repair & more',
           imageUrl: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400&q=80',
           bookings: '18K+',
-          subServices: ['Pipe Repair', 'Tap Installation', 'Drainage Cleaning', 'Water Heater'],
+          subServices: [
+            'Fix Water Leakage',
+            'Tap Installation',
+            'Drainage Cleaning',
+            'Fix Water Leakage dfsdsfgdf',
+          ],
         },
         {
           id: 's2',
@@ -105,7 +110,6 @@ const API_DATA = {
           description: 'Comprehensive home cleaning service',
           imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
           bookings: '25K+',
-          startingPrice: '₹1,999',
           subServices: ['Kitchen Deep Clean', 'Bathroom', 'Living Room', 'Bedroom'],
         },
         {
@@ -114,7 +118,6 @@ const API_DATA = {
           description: 'Professional bathroom sanitization',
           imageUrl: 'https://images.unsplash.com/photo-1628177142898-93e36e4e3a50?w=400&q=80',
           bookings: '14K+',
-          startingPrice: '₹599',
           subServices: ['Toilet Cleaning', 'Tile Scrubbing', 'Drain Clean', 'Sanitization'],
         },
         {
@@ -123,7 +126,6 @@ const API_DATA = {
           description: 'Steam cleaning for sofas & upholstery',
           imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80',
           bookings: '10K+',
-          startingPrice: '₹799',
           subServices: ['Fabric Sofa', 'Leather Sofa', 'Chair Cleaning', 'Cushion Clean'],
         },
         {
@@ -132,7 +134,6 @@ const API_DATA = {
           description: 'Complete kitchen deep cleaning',
           imageUrl: 'https://images.unsplash.com/photo-1556911220-bff31c812dba?w=400&q=80',
           bookings: '16K+',
-          startingPrice: '₹899',
           subServices: ['Chimney Clean', 'Cabinet Clean', 'Sink Clean', 'Floor Clean'],
         },
       ],

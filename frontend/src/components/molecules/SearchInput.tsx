@@ -3,16 +3,21 @@ import type { InputProps } from '../atoms/Input';
 import Input from '../atoms/Input';
 import { Search } from 'lucide-react';
 
-interface SearchInputProps extends Omit<InputProps, 'onChange'> {
-  value: string;
-  onChange: (value: string) => void;
+interface SearchInputProps extends Omit<InputProps, 'onChange' | 'onFocus' | 'value' | 'leftIcon'> {
+  value?: string;
+  onChange?: (value: string) => void;
+  onFocus?: () => void;
   debounce?: number;
+  variant?: 'default' | 'inline';
 }
 
 export default function SearchInput({
-  value,
+  value = '',
   onChange,
+  onFocus,
   debounce = 500,
+  className = '',
+  variant = 'default',
   ...props
 }: SearchInputProps) {
   const [inputValue, setInputValue] = useState(value);
@@ -27,6 +32,7 @@ export default function SearchInput({
   }, [value, isTyping]);
 
   useEffect(() => {
+    if (!onChange) {return;}
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }
@@ -44,13 +50,39 @@ export default function SearchInput({
         clearTimeout(timerRef.current);
       }
     };
-  }, [inputValue, debounce, value]);
+  }, [inputValue, debounce, value, onChange]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
     setIsTyping(true);
   };
+  const handleFocus = (_e?: React.FocusEvent<HTMLInputElement>) => {
+    if (onFocus) {
+      onFocus();
+    }
+  };
 
-  return <Input {...props} value={inputValue} onChange={handleChange} leftIcon={<Search />} />;
+  if (variant === 'inline') {
+    return (
+      <input
+        {...props}
+        type="text"
+        value={inputValue}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        className={className}
+      />
+    );
+  }
+  return (
+    <Input
+      {...props}
+      value={inputValue}
+      onChange={handleChange}
+      leftIcon={<Search />}
+      onFocus={handleFocus}
+      className={className}
+    />
+  );
 }

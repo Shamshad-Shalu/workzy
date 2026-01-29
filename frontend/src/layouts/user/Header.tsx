@@ -1,9 +1,24 @@
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
-import { Bell, User as UserIcon, Users } from 'lucide-react';
-
-import { Avatar, AvatarFallback, AvatarImage } from '../../components/ui/avatar';
+import {
+  Bell,
+  User,
+  Users,
+  Search,
+  MapPin,
+  Menu,
+  X,
+  Home,
+  Briefcase,
+  Info,
+  UserPlus,
+  LogOut,
+  ChevronRight,
+  ChevronDown,
+} from 'lucide-react';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,24 +27,63 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import ModeToggle from '../../components/ui/ModeToggle';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import ModeToggle from '@/components/ui/ModeToggle';
+import {
+  LocationSearchModal,
+  type SelectedLocation,
+} from '@/components/molecules/LocationSearchModal';
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import { logoutService } from '@/services/auth.service';
 import type { RootState } from '@/store/store';
+import { setLocation } from '@/store/slices/locationSlice';
+import { ServiceSelectionModal } from '@/components/molecules/ServiceSearchModal';
+import SearchInput from '@/components/molecules/SearchInput';
 
 const NAV_LINKS = [
-  { path: '/', label: 'Home' },
-  { path: '/services', label: 'Services' },
-  { path: '/about', label: 'About Us' },
-  { path: '/join-us', label: 'Join Us' },
+  { path: '/', label: 'Home', icon: Home },
+  { path: '/services', label: 'Services', icon: Briefcase },
+  { path: '/about', label: 'About Us', icon: Info },
+  { path: '/join-us', label: 'Join Us', icon: UserPlus },
 ];
 
+const SEARCH_ROUTES = ['/', '/services'];
+
+interface CategorySuggestion {
+  id: string;
+  name: string;
+  iconUrl: string;
+  level: number;
+}
 export default function Header() {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
+  const { city } = useAppSelector((s: RootState) => s.location);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [locationModalOpen, setLocationModalOpen] = useState(false);
+  const [serviceModalOpen, setServiceModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const searchInputRef = useRef<HTMLDivElement>(null);
+
+  const shouldShowSearch = SEARCH_ROUTES.some(
+    path => location.pathname === path || location.pathname.startsWith(`${path}/`)
+  );
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth > 1024) {
+        setMobileMenuOpen(false);
+      }
+    };
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -40,92 +94,308 @@ export default function Header() {
       dispatch(clearUser());
       setAxiosToken(null);
       navigate('/login');
+      setMobileMenuOpen(false);
     }
   };
 
   const handleSwitchMode = () => {
     navigate('/worker/dashboard');
+    setMobileMenuOpen(false);
   };
 
   const isActiveRoute = (path: string) => {
     return location.pathname === path;
   };
 
+  const handleLocationSelect = (location: SelectedLocation) => {
+    dispatch(
+      setLocation({
+        city: location.name,
+        latitude: location.latitude,
+        longitude: location.longitude,
+      })
+    );
+  };
+
+  const handleServiceSelect = (service: CategorySuggestion) => {
+    navigate(
+      `/services?service=${encodeURIComponent(service.name)}&location=${encodeURIComponent(city)}`
+    );
+    setServiceModalOpen(false);
+    setMobileMenuOpen(false);
+  };
+
+  const handleOpenServiceModal = () => {
+    setServiceModalOpen(true);
+  };
+
   return (
-    <header className="fixed left-0 right-0 top-0 z-50 bg-card border-border shadow-sm ">
-      <div className="max-w-7xl mx-auto h-16 px-4 flex items-center justify-between">
-        <Link to="/" className="text-xl font-bold text-foreground">
-          Workzy
-        </Link>
-        {isAuthenticated && (
-          <nav className="hidden md:flex items-center gap-6">
-            {NAV_LINKS.map(link => (
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`text-sm font-medium transition-colors hover:text-primary ${
-                  isActiveRoute(link.path) ? 'text-primary' : 'text-muted-foreground'
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-        )}
-        <div className="flex items-center gap-4">
-          <button className="relative p-2 hover:bg-accent dark:hover:bg-accent/50 rounded-full">
-            <Bell className="h-5 w-5 text-foreground" />
-            <span className="absolute top-1 right-1 h-2 w-2 bg-destructive rounded-full"></span>
-          </button>
-          <ModeToggle />
-          {isAuthenticated ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger>
-                <Avatar className="cursor-pointer ">
-                  <AvatarImage src={user?.profileImage} referrerPolicy="no-referrer" />
-                  <AvatarFallback>
-                    <UserIcon className="h-5 w-5" />
-                  </AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>
-                  <p className="font-medium">{user?.name}</p>
-                  <p className="text-xs text-muted-foreground">{user?.email}</p>
-                </DropdownMenuLabel>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={() => navigate('/profile')}>
-                  <UserIcon className="h-4 w-4 mr-2" />
-                  My Profile
-                </DropdownMenuItem>
-
-                {user?.role === ROLE.WORKER && (
-                  <DropdownMenuItem onClick={handleSwitchMode}>
-                    <Users className="h-4 w-4 mr-2" />
-                    Switch to Worker Mode
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={handleLogout} className="text-red-500">
-                  Logout
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          ) : (
-            <button
-              onClick={() => navigate('/login')}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90"
+    <>
+      <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 gap-4">
+            {/* Logo */}
+            <Link
+              to="/"
+              className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent flex-shrink-0"
             >
-              Login
-            </button>
-          )}
+              Workzy
+            </Link>
+            <nav className="hidden lg:flex items-center gap-1">
+              {NAV_LINKS.map(link => (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                    isActiveRoute(link.path)
+                      ? 'text-primary bg-primary/10'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-accent'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
+            {shouldShowSearch && (
+              <div className="hidden lg:flex items-center flex-1 max-w-md mx-4">
+                <button
+                  type="button"
+                  onClick={() => setLocationModalOpen(true)}
+                  className="flex items-center gap-2 px-3 py-2 bg-accent hover:bg-accent/80 border border-r-0 border-border rounded-l-lg transition-colors group"
+                >
+                  <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-sm font-medium text-foreground truncate max-w-[120px]">
+                    {city}
+                  </span>
+                </button>
+                <div ref={searchInputRef} className="flex-1 relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none z-10" />
+                  <SearchInput
+                    value={searchQuery}
+                    variant="inline"
+                    onChange={setSearchQuery}
+                    onFocus={handleOpenServiceModal}
+                    placeholder="Search for services"
+                    className="w-full pl-9 pr-3 py-2 bg-accent border border-border rounded-r-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
+                  />
+                </div>
+              </div>
+            )}
+            <div className="flex items-center gap-2">
+              {isAuthenticated && (
+                <button
+                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
+                  aria-label="Notifications"
+                >
+                  <Bell className="h-5 w-5 text-foreground" />
+                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-destructive rounded-full"></span>
+                </button>
+              )}
+              <ModeToggle />
+              {isAuthenticated ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors">
+                      <Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-primary/20 transition-all">
+                        <AvatarImage src={user?.profileImage} referrerPolicy="no-referrer" />
+                        <AvatarFallback>
+                          <User className="h-4 w-4" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    </button>
+                  </DropdownMenuTrigger>
+
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>
+                      <p className="font-medium">{user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{user?.email}</p>
+                    </DropdownMenuLabel>
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <User className="h-4 w-4 mr-2" />
+                      My Profile
+                    </DropdownMenuItem>
+
+                    {user?.role === ROLE.WORKER && (
+                      <DropdownMenuItem onClick={handleSwitchMode}>
+                        <Users className="h-4 w-4 mr-2" />
+                        Switch to Worker Mode
+                      </DropdownMenuItem>
+                    )}
+
+                    <DropdownMenuSeparator />
+
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <button
+                  onClick={() => navigate('/login')}
+                  className="hidden lg:block px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium text-sm"
+                >
+                  Login
+                </button>
+              )}
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <button className="lg:hidden p-2 hover:bg-accent rounded-lg transition-colors">
+                    <Menu className="h-5 w-5" />
+                  </button>
+                </SheetTrigger>
+
+                <SheetContent side="right" className="w-80 p-0">
+                  <div className="flex flex-col h-full">
+                    <div className="flex items-center justify-between p-4 border-b border-border">
+                      <span className="text-lg font-semibold">Menu</span>
+                      <button
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="p-2 hover:bg-accent rounded-lg transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+                    {isAuthenticated && user && (
+                      <div className="p-4 border-b border-border">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={user.profileImage} referrerPolicy="no-referrer" />
+                            <AvatarFallback>
+                              <User className="h-6 w-6" />
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground truncate">{user.name}</p>
+                            <p className="text-sm text-muted-foreground truncate">{user.email}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {shouldShowSearch && (
+                      <div className="p-4 border-b border-border space-y-3">
+                        <button
+                          onClick={() => {
+                            setLocationModalOpen(true);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
+                        >
+                          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                          <span className="text-sm font-medium text-foreground truncate flex-1 text-left">
+                            {city}
+                          </span>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setServiceModalOpen(true);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="flex items-center gap-3 w-full px-3 py-2.5 bg-accent hover:bg-accent/80 rounded-lg transition-colors"
+                        >
+                          <Search className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+                          <span className="text-sm text-muted-foreground">
+                            Search for services...
+                          </span>
+                        </button>
+                      </div>
+                    )}
+                    <nav className="flex-1 overflow-y-auto p-4 space-y-1">
+                      {NAV_LINKS.map(link => {
+                        const Icon = link.icon;
+                        return (
+                          <Link
+                            key={link.path}
+                            to={link.path}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
+                              isActiveRoute(link.path)
+                                ? 'bg-primary/10 text-primary'
+                                : 'text-foreground hover:bg-accent'
+                            }`}
+                          >
+                            <Icon className="h-5 w-5 flex-shrink-0" />
+                            <span className="font-medium">{link.label}</span>
+                          </Link>
+                        );
+                      })}
+
+                      {isAuthenticated && (
+                        <>
+                          <div className="my-2 border-t border-border" />
+                          <Link
+                            to="/profile"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
+                          >
+                            <User className="h-5 w-5 flex-shrink-0" />
+                            <span className="font-medium">My Profile</span>
+                          </Link>
+                          {user?.role === ROLE.WORKER && (
+                            <button
+                              onClick={handleSwitchMode}
+                              className="w-full flex items-center gap-3 px-3 py-3 rounded-lg text-foreground hover:bg-accent transition-colors"
+                            >
+                              <Users className="h-5 w-5 flex-shrink-0" />
+                              <span className="font-medium">Switch to Worker Mode</span>
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </nav>
+                    <div className="p-4 border-t border-border">
+                      {isAuthenticated ? (
+                        <button
+                          onClick={handleLogout}
+                          className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-destructive/10 text-destructive hover:bg-destructive/20 rounded-lg font-medium transition-colors"
+                        >
+                          <LogOut className="h-4 w-4" />
+                          Logout
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            navigate('/login');
+                            setMobileMenuOpen(false);
+                          }}
+                          className="w-full px-4 py-3 bg-primary text-primary-foreground rounded-lg font-medium hover:bg-primary/90 transition-colors"
+                        >
+                          Login
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <LocationSearchModal
+        open={locationModalOpen}
+        onClose={() => setLocationModalOpen(false)}
+        onSelectLocation={handleLocationSelect}
+        title="Select Your Location"
+        description="Choose your location to find services near you"
+      />
+
+      <ServiceSelectionModal
+        open={serviceModalOpen}
+        onClose={() => setServiceModalOpen(false)}
+        onSelectService={handleServiceSelect}
+        triggerRef={searchInputRef}
+        externalSearchQuery={searchQuery}
+      />
+    </>
   );
 }

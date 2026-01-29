@@ -33,7 +33,7 @@ export default function JoinUsPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const applyNowRef = useRef<HTMLElement | null>(null);
-  const { worker, user, isLoading, joinWorker, resubmitWorker } = useWorkerJoin();
+  const { worker, user, joinWorker, resubmitWorker } = useWorkerJoin();
 
   const [loading, setLoading] = useState<boolean>(false);
   const [resubmitted, setResubmitted] = useState<boolean>(false);
@@ -66,10 +66,6 @@ export default function JoinUsPage() {
       setDocumentValue(doc.url);
     }
   }, [needsRevision, worker]);
-
-  if (!user || isLoading) {
-    return null;
-  }
 
   async function onSubmit(data: JoinWorkerSchemaType) {
     if (!user?._id) {
@@ -107,6 +103,7 @@ export default function JoinUsPage() {
   }
 
   const openFormAndScroll = () => {
+    if (!user) {navigate('/login');}
     setFormOpen(true);
 
     requestAnimationFrame(() => {
@@ -116,7 +113,7 @@ export default function JoinUsPage() {
 
   return (
     <main>
-      <section className="relative bg-gradient-to-br from-section-dark to-section-dark/80 text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[oklch(89.1% 0.01315 266.734)] to-[oklch(89.1% 0.01315 266.734)] dark:bg-[oklch(21.48%_0.03444_254.607)] text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-golden animate-pulse"></div>
           <div

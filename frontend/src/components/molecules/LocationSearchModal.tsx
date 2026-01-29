@@ -15,10 +15,16 @@ interface LocationResult {
   context?: Array<{ id: string; text: string }>;
 }
 
+export interface SelectedLocation {
+  name: string;
+  latitude: number;
+  longitude: number;
+}
+
 interface LocationSearchModalProps {
   open: boolean;
   onClose: () => void;
-  onSelectLocation: (location: string) => void;
+  onSelectLocation: (location: SelectedLocation) => void;
   title?: string;
   description?: string;
 }
@@ -41,9 +47,7 @@ export function LocationSearchModal({
       setResults([]);
       return;
     }
-
     let cancelled = false;
-
     const fetchLocations = async () => {
       setIsLoading(true);
       setError(null);
@@ -96,7 +100,6 @@ export function LocationSearchModal({
     navigator.geolocation.getCurrentPosition(
       async position => {
         const { latitude, longitude } = position.coords;
-
         try {
           const response = await fetch(
             `https://api.mapbox.com/geocoding/v5/mapbox.places/${longitude},${latitude}.json?access_token=${MAPBOX_TOKEN}&types=place,locality,district,region&country=IN&bbox=${INDIA_BBOX}`
@@ -125,7 +128,12 @@ export function LocationSearchModal({
   };
 
   const handleSelectLocation = (location: LocationResult) => {
-    onSelectLocation(location.text);
+    const [longitude, latitude] = location.center;
+    onSelectLocation({
+      name: location.text,
+      latitude,
+      longitude,
+    });
     handleClose();
   };
 
