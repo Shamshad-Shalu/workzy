@@ -38,8 +38,8 @@ import { setAxiosToken } from '@/lib/api/axios';
 import { logoutService } from '@/services/auth.service';
 import type { RootState } from '@/store/store';
 import { setLocation } from '@/store/slices/locationSlice';
-import { ServiceSelectionModal } from '@/components/molecules/ServiceSearchModal';
 import SearchInput from '@/components/molecules/SearchInput';
+import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
 
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
@@ -389,12 +389,11 @@ export default function Header() {
         description="Choose your location to find services near you"
       />
 
-      <ServiceSelectionModal
+      <ServiceSearchContainer
         open={serviceModalOpen}
         onClose={() => setServiceModalOpen(false)}
-        onSelectService={handleServiceSelect}
-        triggerRef={searchInputRef}
         externalSearchQuery={searchQuery}
+        onSelectService={handleServiceSelect}
       />
     </>
   );

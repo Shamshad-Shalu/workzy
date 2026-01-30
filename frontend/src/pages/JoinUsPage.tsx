@@ -103,7 +103,9 @@ export default function JoinUsPage() {
   }
 
   const openFormAndScroll = () => {
-    if (!user) {navigate('/login');}
+    if (!user) {
+      navigate('/login');
+    }
     setFormOpen(true);
 
     requestAnimationFrame(() => {

@@ -32,7 +32,9 @@ export default function SearchInput({
   }, [value, isTyping]);
 
   useEffect(() => {
-    if (!onChange) {return;}
+    if (!onChange) {
+      return;
+    }
     if (timerRef.current) {
       clearTimeout(timerRef.current);
     }

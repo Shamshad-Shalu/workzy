@@ -5,6 +5,7 @@ import type {
   CategoryLite,
   CategoryResponse,
 } from '@/types/admin/category';
+import type { CategorySuggestion } from '@/types/category';
 
 const CategoryService = {
   getCategories: async (
@@ -33,6 +34,19 @@ const CategoryService = {
       params: { level, parentId },
     });
     return res.data.categories;
+  },
+
+  getCategoriesSuggestions: async (search: string): Promise<CategorySuggestion[]> => {
+    const res = await api.get('/categories/suggestions', {
+      params: { search, limit: 20 },
+    });
+    console.log('categories::', res.data);
+    return res.data.results;
+  },
+  getTrendingCategories: async (): Promise<CategorySuggestion[]> => {
+    const res = await api.get('/categories/trending');
+    console.log('trending::', res.data);
+    return res.data.results;
   },
 };
 

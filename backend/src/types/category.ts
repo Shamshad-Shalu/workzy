@@ -41,3 +41,14 @@ export interface CategoryLiteDTO {
   name: string;
   level: 1 | 2 | 3;
 }
+
+// category service listing
+export type CategorySuggestionEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
+export interface CategorySuggestion {
+  id: string;
+  name: string;
+  iconUrl: string;
+  level: number;
+}
+
+export type CategoryTrendingEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;

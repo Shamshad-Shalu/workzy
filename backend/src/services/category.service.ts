@@ -4,6 +4,10 @@ import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRep
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
+import {
+  CategorySuggestionResponseDTO,
+  CategoryTrendingResponseDTO,
+} from "@/dtos/responses/category.dto";
 import { CategoryAncestor, CategoryLiteDTO, ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
@@ -77,5 +81,40 @@ export class CategoryService implements ICategoryService {
     }
     const categories = await this._categoryRepository.findCategoriesByLevel(level, parentId);
     return categories.map((cat) => ({ id: cat._id, level: cat.level, name: cat.name }));
+  }
+
+  async getCategorySuggestions(
+    search: string,
+    limit: number
+  ): Promise<CategorySuggestionResponseDTO[]> {
+    if (!search.trim()) return [];
+    const categories = await this._categoryRepository.findSuggestions(search, limit);
+    return CategorySuggestionResponseDTO.fromEntities(categories);
+  }
+
+  async getTrendingCategories(limit: number): Promise<CategoryTrendingResponseDTO[]> {
+    const cacheKey = `categories:trending:${limit}`;
+
+    const cachedData = await redisClient.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+    // const categories = await this._categoryRepository.findTrending(limit);
+    // dummy data
+    const dummyNames = [
+      "696a8451292e6a0a607ba18d",
+      "69773bbaf6cf9efa2c8c4f8b",
+      "696a84b8292e6a0a607ba19e",
+      "69773b23f6cf9efa2c8c4f69",
+      "696a8799292e6a0a607ba1ac",
+    ];
+    const categoriesRaw = await Promise.all(
+      dummyNames.map((id) => this._categoryRepository.findOne({ _id: id }))
+    );
+    const categoriesFiltered = categoriesRaw.filter((c): c is NonNullable<typeof c> => Boolean(c));
+    const response = CategoryTrendingResponseDTO.fromEntities(categoriesFiltered);
+
+    await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 * 10 }); // 10 minutes
+    return response;
   }
 }

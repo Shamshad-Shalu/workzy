@@ -1,10 +1,15 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import Category from "@/models/category.model";
-import { CategoryAncestor, CategoryLite, ICategory } from "@/types/category";
+import {
+  CategoryAncestor,
+  CategoryLite,
+  CategorySuggestionEntity,
+  ICategory,
+} from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import { injectable } from "inversify";
-import { FilterQuery, Types } from "mongoose";
+import mongoose, { FilterQuery, Types } from "mongoose";
 import { PipelineStage } from "mongoose";
 
 @injectable()
@@ -78,5 +83,54 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       .select("_id name level")
       .sort({ createdAt: 1 })
       .lean<CategoryLite[]>();
+  }
+
+  async findSuggestions(search: string, limit: number): Promise<CategorySuggestionEntity[]> {
+    const filter: FilterQuery<ICategory> = {
+      name: { $regex: search, $options: "i" },
+      isAvailable: true,
+      level: { $ne: 1 },
+    };
+
+    type SuggestionDoc = CategorySuggestionEntity & {
+      parentId?: mongoose.Types.ObjectId | null;
+    };
+
+    const matches = await this.model
+      .find(filter)
+      .select("_id name iconUrl level parentId")
+      .limit(limit)
+      .lean<SuggestionDoc[]>();
+
+    if (matches.length === 0) return [];
+
+    const level2Ids = matches.filter((cat) => cat.level === 2).map((cat) => cat._id);
+
+    let children: SuggestionDoc[] = [];
+
+    if (level2Ids.length > 0) {
+      children = await this.model
+        .find({
+          parentId: { $in: level2Ids },
+          isAvailable: true,
+          level: 3,
+        })
+        .select("_id name iconUrl level parentId")
+        .lean<SuggestionDoc[]>();
+    }
+
+    const combined = [...matches, ...children];
+
+    const uniqueMap = new Map<string, CategorySuggestionEntity>();
+
+    for (const item of combined) {
+      uniqueMap.set(item._id.toString(), {
+        _id: item._id,
+        name: item.name,
+        iconUrl: item.iconUrl,
+        level: item.level,
+      });
+    }
+    return Array.from(uniqueMap.values());
   }
 }

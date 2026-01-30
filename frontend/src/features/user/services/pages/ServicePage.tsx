@@ -710,18 +710,32 @@ export default function ServicesPage() {
 
   // Filter workers
   const filteredWorkers = DUMMY_WORKERS.filter(worker => {
-    if (availableNow && !worker.available) {return false;}
-    if (worker.rating < minRating) {return false;}
-    if (worker.experience < minExperience) {return false;}
-    if (worker.price < priceRange[0] || worker.price > priceRange[1]) {return false;}
-    if (worker.distance > radius) {return false;}
+    if (availableNow && !worker.available) {
+      return false;
+    }
+    if (worker.rating < minRating) {
+      return false;
+    }
+    if (worker.experience < minExperience) {
+      return false;
+    }
+    if (worker.price < priceRange[0] || worker.price > priceRange[1]) {
+      return false;
+    }
+    if (worker.distance > radius) {
+      return false;
+    }
     return true;
   });
 
   // Sort: sponsored first, then by rating
   const sortedWorkers = [...filteredWorkers].sort((a, b) => {
-    if (a.isSponsored && !b.isSponsored) {return -1;}
-    if (!a.isSponsored && b.isSponsored) {return 1;}
+    if (a.isSponsored && !b.isSponsored) {
+      return -1;
+    }
+    if (!a.isSponsored && b.isSponsored) {
+      return 1;
+    }
     return b.rating - a.rating;
   });
 
@@ -781,7 +795,9 @@ export default function ServicesPage() {
             lg:w-80 flex-shrink-0
           `}
             onClick={e => {
-              if (e.target === e.currentTarget) {setShowFilters(false);}
+              if (e.target === e.currentTarget) {
+                setShowFilters(false);
+              }
             }}
           >
             <div

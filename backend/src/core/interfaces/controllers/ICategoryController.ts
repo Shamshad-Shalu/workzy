@@ -5,5 +5,6 @@ export interface ICategoryController {
   getCategory: RequestHandler;
   getCategoryAncestors: RequestHandler;
   getCategoryLevels: RequestHandler;
-  //   getCategorySuggestions: RequestHandler;
+  getCategorySuggestions: RequestHandler;
+  getTrendingCategories: RequestHandler;
 }
