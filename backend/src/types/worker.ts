@@ -5,10 +5,6 @@ export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision
 
 export type RateType = "hourly" | "fixed";
 export type DocumentType = "id_proof" | "license" | "certificate" | "other";
-export interface IRate {
-  amount: number;
-  type: RateType;
-}
 
 export interface ITimeSlot {
   startTime: string;
@@ -42,7 +38,7 @@ export interface IWorker extends Document<string> {
   coverImage: string | null;
   status: WorkerStatus;
   experience: number;
-  defaultRate: IRate;
+  defaultRate: number;
   documents: IDocument[];
   skills: string[];
   cities: string[];
@@ -51,4 +47,5 @@ export interface IWorker extends Document<string> {
   rejectReason?: string;
 }
 
+export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
 // completedJobs

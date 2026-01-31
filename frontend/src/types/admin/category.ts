@@ -1,7 +1,7 @@
 import type { PricingMode, ServiceType } from '@/constants';
 
 export interface Category {
-  _id: string;
+  id: string;
   name: string;
   description?: string;
   level: number;
@@ -36,14 +36,14 @@ export type CategoryFilters = {
 };
 
 export interface CategoryAncestor {
-  _id: string;
+  id: string;
   name: string;
-  level: 1 | 2 | 3;
+  level: number;
   parentId: string | null;
 }
 
 export interface CategoryLite {
   id: string;
   name: string;
-  level: 1 | 2 | 3;
+  level: number;
 }

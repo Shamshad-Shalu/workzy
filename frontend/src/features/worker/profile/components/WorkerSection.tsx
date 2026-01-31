@@ -2,7 +2,6 @@ import Button from '@/components/atoms/Button';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
-import Select from '@/components/atoms/Select';
 import { Textarea } from '@/components/atoms/Textarea';
 import type { WorkerProfile } from '@/types/worker';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,8 +34,6 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
     register,
     control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
     reset,
   } = useForm<WorkerProfileSchemaType>({
@@ -194,27 +191,6 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                 )}
               </div>
               <Controller
-                name="skills"
-                control={control}
-                render={({ field }) => (
-                  <TagManager
-                    label="Specialties"
-                    items={field.value ?? []}
-                    error={errors.skills?.message}
-                    isEditing={isEditing}
-                    onAdd={() => {
-                      const newSkill = 'Plumbing';
-                      field.onChange([...(field.value ?? []), newSkill]);
-                    }}
-                    onRemove={skill => {
-                      field.onChange(field.value.filter(s => s !== skill));
-                    }}
-                    className="bg-section-blue border-section-blue-border"
-                  />
-                )}
-              />
-
-              <Controller
                 name="cities"
                 control={control}
                 render={({ field }) => (
@@ -271,30 +247,15 @@ export default function WorkerSection({ workerData, onSubmit }: WorkerSectionPro
                       className="p-3"
                       type="number"
                       placeholder="Enter amount"
-                      error={errors.defaultRate?.amount?.message}
-                      {...register('defaultRate.amount', { valueAsNumber: true })}
-                    />
-                    <Label>Service Type</Label>
-                    <Select
-                      placeholder="Select Type"
-                      value={watch('defaultRate.type')}
-                      onChange={v => setValue('defaultRate.type', v as 'hourly' | 'fixed')}
-                      error={errors.defaultRate?.type?.message}
-                      options={[
-                        { label: 'Per Hour', value: 'hourly' },
-                        { label: 'Fixed Rate', value: 'fixed' },
-                      ]}
+                      error={errors.defaultRate?.message}
+                      {...register('defaultRate', { valueAsNumber: true })}
                     />
                   </div>
                 ) : (
                   <div className="border-l-3 pl-4 rounded-lg  p-4 bg-section-blue border-section-blue-border">
                     <Label>Service Rate</Label>
-
                     <div className="text-center">
-                      <div className="text-3xl font-bold">₹{workerData.defaultRate.amount}</div>
-                      <div className="text-xs mt-1 text-muted-baground">
-                        per {workerData.defaultRate.type === 'fixed' ? 'day' : 'hour'}
-                      </div>
+                      <div className="text-3xl font-bold">₹{workerData.defaultRate}</div>
                     </div>
                   </div>
                 )}

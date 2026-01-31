@@ -5,10 +5,12 @@ import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
 import {
+  CategoryAncestorResponseDTO,
+  CategoryLiteDTO,
   CategorySuggestionResponseDTO,
   CategoryTrendingResponseDTO,
 } from "@/dtos/responses/category.dto";
-import { CategoryAncestor, CategoryLiteDTO, ICategory } from "@/types/category";
+import { ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -61,8 +63,9 @@ export class CategoryService implements ICategoryService {
     return CategoryResponseDTO.fromEntity(category);
   }
 
-  async getCategoryAncestors(categoryId: string): Promise<CategoryAncestor[]> {
-    return await this._categoryRepository.findAncestors(categoryId);
+  async getCategoryAncestors(categoryId: string): Promise<CategoryAncestorResponseDTO[]> {
+    const ancestors = await this._categoryRepository.findAncestors(categoryId);
+    return CategoryAncestorResponseDTO.fromEntities(ancestors);
   }
 
   async getCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLiteDTO[]> {
@@ -80,7 +83,7 @@ export class CategoryService implements ICategoryService {
       }
     }
     const categories = await this._categoryRepository.findCategoriesByLevel(level, parentId);
-    return categories.map((cat) => ({ id: cat._id, level: cat.level, name: cat.name }));
+    return CategoryLiteDTO.fromEntities(categories);
   }
 
   async getCategorySuggestions(

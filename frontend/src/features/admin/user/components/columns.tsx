@@ -106,7 +106,7 @@ const userColumns = (
           size="sm"
           variant="outline"
           iconLeft={<Eye className="w-4 h-4" />}
-          onClick={() => onView(row.original._id)}
+          onClick={() => onView(row.original.id)}
         >
           View
         </Button>

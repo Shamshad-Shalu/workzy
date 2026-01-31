@@ -6,10 +6,7 @@ export const JoinWorkerSchema = z.object({
   tagline: serviceNameRule,
   about: descriptionRuleRequired,
   document: z.string().min(1, 'Please provide an ID proof image'),
-  defaultRate: z.object({
-    amount: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
-    type: z.enum(['hourly', 'fixed']),
-  }),
+  defaultRate: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
 });
 
 export type JoinWorkerSchemaType = z.infer<typeof JoinWorkerSchema>;

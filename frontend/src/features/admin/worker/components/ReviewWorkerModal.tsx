@@ -37,7 +37,7 @@ export default function ReviewWorkerModal({
     mode: 'onChange',
     defaultValues: {
       status: 'pending',
-      docId: selectedWorker?.documents[0]._id,
+      docId: selectedWorker?.documents[0].id,
     },
   });
 
@@ -51,8 +51,8 @@ export default function ReviewWorkerModal({
   };
 
   useEffect(() => {
-    if (selectedWorker?.documents?.[0]?._id) {
-      setValue('docId', selectedWorker.documents[0]._id, {
+    if (selectedWorker?.documents?.[0]?.id) {
+      setValue('docId', selectedWorker.documents[0].id, {
         shouldValidate: true,
         shouldDirty: true,
       });

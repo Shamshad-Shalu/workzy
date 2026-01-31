@@ -104,10 +104,7 @@ export default function WorkerProfileHeader({
                 </span>
               </div>
               <div className="text-left md:text-right">
-                <p className="text-3xl font-bold text-foreground">₹{rate.amount}</p>
-                <p className="text-muted-foreground text-sm">
-                  per {rate.type === 'fixed' ? 'day / project' : 'hour'}
-                </p>
+                <p className="text-3xl font-bold text-foreground">₹{rate}</p>
                 <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
                   {availability}
                 </span>

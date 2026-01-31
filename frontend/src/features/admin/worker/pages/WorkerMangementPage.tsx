@@ -58,10 +58,10 @@ export default function WorkerManagementPage() {
   };
 
   const handleSubmitReview = async (data: ReviewWorkerSchemaType) => {
-    if (!selectedWorker?._id) {
+    if (!selectedWorker?.id) {
       return;
     }
-    verifyWorkerMutation.mutate({ id: selectedWorker._id, data });
+    verifyWorkerMutation.mutate({ id: selectedWorker.id, data });
   };
 
   return (
@@ -125,7 +125,7 @@ export default function WorkerManagementPage() {
         isTitleHidden={true}
         confirmText={selectedWorker?.isBlocked ? 'Unblock' : 'Block'}
         onConfirm={() => {
-          if (!selectedWorker?._id) {
+          if (!selectedWorker?.id) {
             return;
           }
           toggleStatusMutation.mutate(selectedWorker?.userId);

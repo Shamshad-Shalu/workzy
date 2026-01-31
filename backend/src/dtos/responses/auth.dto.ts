@@ -7,7 +7,7 @@ import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
 export class RegisterResponseDTO {
   @Expose()
   @IsString()
-  _id!: string;
+  id!: string;
 
   @Expose()
   @IsString()
@@ -24,7 +24,7 @@ export class RegisterResponseDTO {
 
 export class LoginResponseDTO {
   @IsString()
-  _id!: string;
+  id!: string;
 
   @IsString()
   name!: string;
@@ -51,7 +51,7 @@ export class LoginResponseDTO {
   ): Promise<LoginResponseDTO> {
     const dto = new LoginResponseDTO();
 
-    dto._id = entity._id;
+    dto.id = entity._id;
     dto.name = entity.name;
     dto.email = entity.email;
     dto.role = entity.role;

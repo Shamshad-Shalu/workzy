@@ -123,7 +123,7 @@ const categoryColumns = (
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           {row.original.level !== 3 && (
-            <Button size="sm" variant="blue" onClick={() => onViewChild(row.original._id)}>
+            <Button size="sm" variant="blue" onClick={() => onViewChild(row.original.id)}>
               <Eye size={17} />
             </Button>
           )}

@@ -1,5 +1,5 @@
 export interface WorkerRow {
-  _id: string;
+  id: string;
   userId: string;
   name: string;
   email: string;
@@ -16,16 +16,13 @@ export interface WorkerRow {
   experience?: number;
 
   documents: {
-    _id: string;
+    id: string;
     type: string;
     url: string;
     name?: string;
     status: string;
   }[];
-  defaultRate?: {
-    amount: number;
-    type: 'hourly' | 'fixed';
-  };
+  defaultRate?: number;
 }
 
 export interface WorkerResponse {

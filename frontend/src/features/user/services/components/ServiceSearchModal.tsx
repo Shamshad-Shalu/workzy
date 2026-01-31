@@ -38,7 +38,9 @@ export default function ServiceSearchModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isMobile || !open) {return;}
+    if (isMobile || !open) {
+      return;
+    }
 
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
@@ -51,17 +53,23 @@ export default function ServiceSearchModal({
   }, [open, isMobile, onClose]);
 
   useEffect(() => {
-    if (!open) {return;}
+    if (!open) {
+      return;
+    }
 
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {onClose();}
+      if (event.key === 'Escape') {
+        onClose();
+      }
     };
 
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [open, onClose]);
 
-  if (!open) {return null;}
+  if (!open) {
+    return null;
+  }
 
   const hasResults = categoryServices.length > 0;
 

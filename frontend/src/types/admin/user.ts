@@ -1,5 +1,5 @@
 export interface UserRow {
-  _id: string;
+  id: string;
   name: string;
   email: string;
   phone?: string;

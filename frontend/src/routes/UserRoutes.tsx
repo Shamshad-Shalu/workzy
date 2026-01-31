@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
 import ServicesPage from '@/features/user/services/pages/ServicePage';
+import ServicesPageDummy from '@/features/user/services/pages/ServicePageDummy';
 
 // guest pages
 const Login = lazy(() => import('@/features/auth/pages/Login'));
@@ -36,6 +37,7 @@ export default function UserRoutes() {
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/services" element={<ServicesPage />} />
+          <Route path="/about" element={<ServicesPageDummy />} />
           <Route path="/join-us" element={<JoinUsPage />} />
           <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
             <Route path="/profile" element={<UserProfilePage />} />

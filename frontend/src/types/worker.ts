@@ -1,10 +1,4 @@
 export type WorkerStatus = 'pending' | 'verified' | 'rejected' | 'needs_revision';
-export type RateType = 'hourly' | 'fixed';
-
-export interface Rate {
-  amount: number;
-  type: RateType;
-}
 
 export interface TimeSlot {
   startTime: string;
@@ -22,7 +16,7 @@ export interface AvailabilitySlots {
 }
 
 export interface IDocument {
-  _id: string;
+  id: string;
   type: 'id_proof' | 'license' | 'certificate' | 'other';
   url: string;
   status: 'pending' | 'verified' | 'rejected';
@@ -30,14 +24,14 @@ export interface IDocument {
 }
 
 export interface Worker {
-  _id: string;
+  id: string;
   userId: string;
   displayName: string;
   tagline?: string;
   about?: string;
   coverImage?: string;
   status: WorkerStatus;
-  defaultRate?: Rate;
+  defaultRate?: number;
   documents: IDocument[];
   skills: string[];
   cities: string[];
@@ -50,14 +44,14 @@ export interface WorkerProfile {
   tagline?: string;
   about: string;
   coverImage: string;
-  defaultRate: Rate;
+  defaultRate: number;
   skills: string[];
   cities: string[];
   availability: AvailabilitySlots;
 }
 
 export interface WorkerInfo {
-  _id: string;
+  id: string;
   displayName: string;
   tagline: string;
   location: string;
@@ -65,7 +59,7 @@ export interface WorkerInfo {
   responseTime?: string;
   rating: number;
   reviewsCount?: number;
-  rate: Rate;
+  rate: number;
   availability: string;
   profileImage: string;
   coverImage?: string;

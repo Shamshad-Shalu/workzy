@@ -1,4 +1,10 @@
-import { CategorySuggestionEntity, CategoryTrendingEntity } from "@/types/category";
+import {
+  CategoryAncestorEntity,
+  CategoryLevelsEntity,
+  CategorySuggestionEntity,
+  CategoryTrendingEntity,
+  ICategory,
+} from "@/types/category";
 import { Expose } from "class-transformer";
 
 type BaseCategoryEntity = {
@@ -56,5 +62,47 @@ export class CategoryTrendingResponseDTO extends BaseCategoryDTO {
 
   static fromEntities(entities: CategoryTrendingEntity[]) {
     return this.mapEntities(entities);
+  }
+}
+
+export class CategoryLiteDTO {
+  @Expose() id!: string;
+  @Expose() name!: string;
+  @Expose() level!: number;
+
+  static fromEntity(entity: CategoryLevelsEntity): CategoryLiteDTO {
+    const dto = new CategoryLiteDTO();
+
+    dto.id = entity._id.toString();
+    dto.level = entity.level;
+    dto.name = entity.name;
+
+    return dto;
+  }
+
+  static fromEntities(entities: CategoryLevelsEntity[]): CategoryLiteDTO[] {
+    return entities.map((entity) => CategoryLiteDTO.fromEntity(entity));
+  }
+}
+
+export class CategoryAncestorResponseDTO {
+  @Expose() id!: string;
+  @Expose() name!: string;
+  @Expose() level!: number;
+  @Expose() parentId!: string | null;
+
+  static fromEntity(entity: CategoryAncestorEntity): CategoryAncestorResponseDTO {
+    const dto = new CategoryAncestorResponseDTO();
+
+    dto.id = entity._id.toString();
+    dto.level = entity.level;
+    dto.name = entity.name;
+    dto.parentId = entity?.parentId?.toString() || null;
+
+    return dto;
+  }
+
+  static fromEntities(entities: CategoryAncestorEntity[]): CategoryAncestorResponseDTO[] {
+    return entities.map((entity) => CategoryAncestorResponseDTO.fromEntity(entity));
   }
 }

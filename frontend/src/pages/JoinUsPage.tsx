@@ -42,7 +42,7 @@ export default function JoinUsPage() {
   const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
 
   const workerStatus: WorkerStatus | null = worker?.status ?? null;
-  const workerId = worker?._id ?? null;
+  const workerId = worker?.id ?? null;
   const hasLocation = !!user?.profile?.location?.coordinates;
   const hasPhoneNumber = !!user?.phone;
   const isPending = workerStatus === 'pending';
@@ -68,7 +68,7 @@ export default function JoinUsPage() {
   }, [needsRevision, worker]);
 
   async function onSubmit(data: JoinWorkerSchemaType) {
-    if (!user?._id) {
+    if (!user?.id) {
       return;
     }
     if (isPending) {
@@ -76,7 +76,7 @@ export default function JoinUsPage() {
       return;
     }
     try {
-      const res = await joinWorker.mutateAsync({ userId: user._id, data });
+      const res = await joinWorker.mutateAsync({ userId: user.id, data });
       toast.success(res?.message);
       navigate('/');
     } catch (error) {
@@ -92,7 +92,7 @@ export default function JoinUsPage() {
     try {
       const { message } = await resubmitWorker.mutateAsync({
         workerId,
-        data: { id: existingDoc._id, WorkerStatus: 'pending', url: documentValue },
+        data: { id: existingDoc.id, WorkerStatus: 'pending', url: documentValue },
       });
       toast.success(message);
     } catch (error) {

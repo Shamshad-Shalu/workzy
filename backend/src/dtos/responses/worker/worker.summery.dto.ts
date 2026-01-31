@@ -1,6 +1,6 @@
 import { Expose } from "class-transformer";
 import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
-import { IRate, IWorker } from "@/types/worker";
+import { IWorker } from "@/types/worker";
 import { IUser } from "@/types/user";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
@@ -8,7 +8,7 @@ export interface WorkerAdditionalInfo {
   jobsCompleted: number;
   averageRating: number;
   completionRate: number;
-  finalRate?: IRate;
+  finalRate?: number;
   rating: number;
   reviewsCount: number;
   responseTime: string;
@@ -17,13 +17,13 @@ export interface WorkerAdditionalInfo {
 
 export class WorkerSummaryResponseDTO {
   @Expose() workerInfo!: {
-    _id: string;
+    id: string;
     displayName: string;
     tagline: string;
     about: string;
     profileImage: string;
     coverImage: string;
-    rate: IRate;
+    rate: number;
     skills: string[];
     cities: string[];
     availability: string;
@@ -61,7 +61,7 @@ export class WorkerSummaryResponseDTO {
       (worker.experience ?? 0) + (new Date().getFullYear() - worker.createdAt.getFullYear());
 
     dto.workerInfo = {
-      _id: worker._id,
+      id: worker._id.toString(),
       displayName: worker.displayName,
       tagline: worker.tagline || "",
       about: worker.about || "",

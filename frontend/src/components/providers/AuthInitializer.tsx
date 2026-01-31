@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { refreshAccessToken } from '@/store/slices/authSlice';
 import type { RootState } from '@/store/store';
+import { bootstrapUserProfile } from '@/store/thunks/userThunks';
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
@@ -12,6 +13,12 @@ export default function AuthInitializer({ children }: { children: React.ReactNod
       dispatch(refreshAccessToken());
     }
   }, [dispatch, status]);
+
+  useEffect(() => {
+    if (status === 'succeeded') {
+      dispatch(bootstrapUserProfile());
+    }
+  }, [status, dispatch]);
 
   if (status === 'idle' || status === 'loading') {
     return (

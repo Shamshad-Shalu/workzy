@@ -4,7 +4,7 @@ import { DEFAULT_IMAGE_URL } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 export class UserProfileResponseDTO {
-  @Expose() _id!: string;
+  @Expose() id!: string;
   @Expose() name!: string;
   @Expose() email!: string;
   @Expose() phone?: string;
@@ -17,7 +17,7 @@ export class UserProfileResponseDTO {
   static async fromEntity(user: IUser, s3Service: IS3Service): Promise<UserProfileResponseDTO> {
     const dto = new UserProfileResponseDTO();
 
-    dto._id = user._id.toString();
+    dto.id = user._id.toString();
     dto.name = user.name;
     dto.email = user.email;
     dto.phone = user.phone;

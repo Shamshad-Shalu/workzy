@@ -47,11 +47,6 @@ const workerSchema: Schema = new Schema<IWorker>(
       amount: {
         type: Number,
       },
-      type: {
-        type: String,
-        enum: ["hourly", "fixed"],
-        default: "fixed",
-      },
     },
     experience: {
       type: Number,

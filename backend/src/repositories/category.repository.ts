@@ -2,8 +2,8 @@ import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import Category from "@/models/category.model";
 import {
-  CategoryAncestor,
-  CategoryLite,
+  CategoryAncestorEntity,
+  CategoryLevelsEntity,
   CategorySuggestionEntity,
   ICategory,
 } from "@/types/category";
@@ -29,7 +29,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     return this.model.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
 
-  async findAncestors(categoryId: string): Promise<CategoryAncestor[]> {
+  async findAncestors(categoryId: string): Promise<CategoryAncestorEntity[]> {
     const pipeline: PipelineStage[] = [
       {
         $match: { _id: new Types.ObjectId(categoryId) },
@@ -64,10 +64,10 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       },
     ];
 
-    return this.model.aggregate<CategoryAncestor>(pipeline).exec();
+    return this.model.aggregate<CategoryAncestorEntity>(pipeline).exec();
   }
 
-  findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLite[]> {
+  findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLevelsEntity[]> {
     const filter: FilterQuery<ICategory> = {
       level,
       isAvailable: true,
@@ -82,7 +82,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       .find(filter)
       .select("_id name level")
       .sort({ createdAt: 1 })
-      .lean<CategoryLite[]>();
+      .lean<CategoryLevelsEntity[]>();
   }
 
   async findSuggestions(search: string, limit: number): Promise<CategorySuggestionEntity[]> {

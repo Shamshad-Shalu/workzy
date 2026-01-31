@@ -67,7 +67,7 @@ export default function CategoryManagementPage() {
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
           updateParams({
-            parentId: ancestor._id,
+            parentId: ancestor.id,
             page: 0,
           });
         },
@@ -99,7 +99,7 @@ export default function CategoryManagementPage() {
   const handleCategorySubmit = async (categoryData: CategoryFormData) => {
     if (editingCategory) {
       await updateCategoryMutation.mutateAsync({
-        id: editingCategory._id,
+        id: editingCategory.id,
         data: categoryData,
       });
     } else {
@@ -175,10 +175,10 @@ export default function CategoryManagementPage() {
         isTitleHidden={true}
         confirmText={selectedCategory?.isAvailable ? 'Block' : 'Unblock'}
         onConfirm={() => {
-          if (!selectedCategory?._id) {
+          if (!selectedCategory?.id) {
             return;
           }
-          toggleStatusMutation.mutate(selectedCategory?._id, {
+          toggleStatusMutation.mutate(selectedCategory?.id, {
             onSuccess: () => setStatusModalOpen(false),
           });
         }}

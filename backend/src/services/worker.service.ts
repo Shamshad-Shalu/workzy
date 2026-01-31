@@ -53,7 +53,7 @@ export class WorkerService implements IWorkerService {
       completionRate: 90,
       rating: 4.2,
       reviewsCount: 450,
-      responseTime: "2 hours",
+      responseTime: "2 hours", // no need ( complex right ? or easy  ??)
     };
     return WorkerSummaryResponseDTO.format(worker, user, WorkerAdditionalInfo, this._s3Service);
   }

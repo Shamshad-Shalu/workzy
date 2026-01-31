@@ -28,27 +28,7 @@ export interface CategoryOption {
   name: string;
 }
 
-export interface CategoryAncestor {
-  _id: string;
-  name: string;
-  level: 1 | 2 | 3;
-  parentId: string | null;
-}
-
-export type CategoryLite = Pick<CategoryAncestor, "_id" | "name" | "level">;
-export interface CategoryLiteDTO {
-  id: string;
-  name: string;
-  level: 1 | 2 | 3;
-}
-
-// category service listing
+export type CategoryAncestorEntity = Pick<ICategory, "_id" | "name" | "level" | "parentId">;
+export type CategoryLevelsEntity = Pick<ICategory, "_id" | "name" | "level">;
 export type CategorySuggestionEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
-export interface CategorySuggestion {
-  id: string;
-  name: string;
-  iconUrl: string;
-  level: number;
-}
-
 export type CategoryTrendingEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;

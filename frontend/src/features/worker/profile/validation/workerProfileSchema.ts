@@ -7,11 +7,7 @@ export const workerProfileSchema = z.object({
   tagline: serviceNameRule,
   about: descriptionRuleRequired,
   coverImage: z.string().optional(),
-  defaultRate: z.object({
-    amount: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
-    type: z.enum(['hourly', 'fixed']),
-  }),
-  skills: z.array(z.string()).min(2, 'At least two skill required'),
+  defaultRate: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
   cities: z.array(z.string()).min(1, 'At least one skill required'),
   availability: availabilitySchema,
 });

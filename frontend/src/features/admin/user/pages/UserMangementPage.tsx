@@ -97,10 +97,10 @@ export default function UserManagementPage() {
         isTitleHidden={true}
         confirmText={selectedUser?.isBlocked ? 'Unblock' : 'Block'}
         onConfirm={() => {
-          if (!selectedUser?._id) {
+          if (!selectedUser?.id) {
             return;
           }
-          toggleStatusMutation.mutate(selectedUser?._id);
+          toggleStatusMutation.mutate(selectedUser?.id);
         }}
         className="sm:mx-1"
       >

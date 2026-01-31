@@ -57,14 +57,14 @@ export class CategoryController implements ICategoryController {
   getCategorySuggestions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const search = (req.query.search as string) || "";
     const limit = parseInt(req.query.limit as string) || 20;
-    
-    const results = await this._categoryService.getCategorySuggestions(search,limit)
-     res.status(200).json({ results });
-  })
+
+    const results = await this._categoryService.getCategorySuggestions(search, limit);
+    res.status(200).json({ results });
+  });
 
   getTrendingCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 10;
     const results = await this._categoryService.getTrendingCategories(limit);
     res.status(200).json({ results });
-  })
+  });
 }

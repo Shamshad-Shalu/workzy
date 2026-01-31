@@ -1,5 +1,5 @@
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
-import { IAvailabilitySlots, IRate } from "@/types/worker";
+import { IAvailabilitySlots } from "@/types/worker";
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -23,7 +23,7 @@ export class WorkerProfileRequestDTO {
   @ValidateIf((o) => o.about !== undefined && o.about !== "")
   @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
   about?: string;
-  defaultRate!: IRate;
+  defaultRate!: number;
   availability?: IAvailabilitySlots;
 
   @ArrayMinSize(2, { message: "At least 2 skill is required." })

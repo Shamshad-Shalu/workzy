@@ -1,16 +1,16 @@
-import { IDocument, IRate, IWorker } from "@/types/worker";
+import { DocumentDto, IDocument, IWorker } from "@/types/worker";
 import { IUser } from "@/types/user";
 import { DEFAULT_IMAGE_URL } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 export class WorkerResponseDTO {
-  _id!: string;
+  id!: string;
   status!: string;
-  documents?: IDocument[];
+  documents?: DocumentDto[];
   displayName!: string;
   tagline!: string;
   about!: string;
-  defaultRate?: IRate;
+  defaultRate?: number;
   experience!: number;
   createdAt!: Date;
 
@@ -28,7 +28,7 @@ export class WorkerResponseDTO {
 
     const user = entity.userId as IUser;
 
-    dto._id = entity._id.toString();
+    dto.id = entity._id.toString();
     dto.status = entity.status;
     dto.displayName = entity.displayName;
     dto.tagline = entity.tagline;
@@ -36,10 +36,16 @@ export class WorkerResponseDTO {
     dto.defaultRate = entity.defaultRate;
     if (entity.documents && entity.documents.length > 0) {
       dto.documents = await Promise.all(
-        entity.documents.map(async (doc: IDocument) => ({
-          ...doc,
-          url: await s3Service.generateSignedUrl(doc.url),
-        }))
+        (entity.documents || []).map(
+          async (doc: IDocument): Promise<DocumentDto> => ({
+            id: doc._id,
+            name: doc.name,
+            type: doc.type,
+            status: doc.status,
+            rejectReason: doc.rejectReason,
+            url: await s3Service.generateSignedUrl(doc.url),
+          })
+        )
       );
     } else {
       dto.documents = [];

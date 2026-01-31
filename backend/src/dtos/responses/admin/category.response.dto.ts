@@ -4,7 +4,7 @@ import { PricingMode, ServiceType } from "@/constants";
 
 export class CategoryResponseDTO {
   @IsMongoId()
-  _id!: string;
+  id!: string;
   name!: string;
   description!: string;
   iconUrl!: string;
@@ -27,7 +27,7 @@ export class CategoryResponseDTO {
   static fromEntity(entity: ICategory): CategoryResponseDTO {
     const dto = new CategoryResponseDTO();
 
-    dto._id = entity._id.toString();
+    dto.id = entity._id.toString();
     dto.name = entity.name;
     dto.description = entity.description || "";
     dto.level = entity.level;

@@ -1,25 +1,6 @@
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
 import { DocumentType, WorkerStatus } from "@/types/worker";
-import { Type } from "class-transformer";
-import {
-  IsString,
-  Matches,
-  IsUrl,
-  IsNumber,
-  Min,
-  IsEnum,
-  ValidateNested,
-  IsOptional,
-} from "class-validator";
-
-class RateDTO {
-  @IsNumber({}, { message: "Amount is required" })
-  @Min(1, { message: "Rate must be a valid amount" })
-  amount!: number;
-
-  @IsEnum(["hourly", "fixed"], { message: "Type must be hourly or fixed" })
-  type!: "hourly" | "fixed";
-}
+import { IsString, Matches, IsUrl, IsNumber, Min, IsOptional } from "class-validator";
 
 export class JoinUsDTO {
   @IsString()
@@ -38,9 +19,9 @@ export class JoinUsDTO {
   @IsUrl()
   document!: string;
 
-  @ValidateNested()
-  @Type(() => RateDTO)
-  defaultRate!: RateDTO;
+  @IsNumber({}, { message: "Amount is required" })
+  @Min(1, { message: "Rate must be a valid amount" })
+  defaultRate!: number;
 }
 
 export class ResubmitDocument {

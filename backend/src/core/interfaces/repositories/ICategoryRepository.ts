@@ -1,7 +1,7 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import {
-  CategoryAncestor,
-  CategoryLite,
+  CategoryAncestorEntity,
+  CategoryLevelsEntity,
   CategorySuggestionEntity,
   ICategory,
 } from "@/types/category";
@@ -14,7 +14,7 @@ export interface ICategoryRepository extends BaseRepository<ICategory> {
     status: string,
     parentId: string | null
   ): Promise<ICategory[]>;
-  findAncestors(categoryId: string): Promise<CategoryAncestor[]>;
-  findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLite[]>;
+  findAncestors(categoryId: string): Promise<CategoryAncestorEntity[]>;
+  findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLevelsEntity[]>;
   findSuggestions(search: string, limit: number): Promise<CategorySuggestionEntity[]>;
 }

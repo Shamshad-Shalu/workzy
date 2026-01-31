@@ -5,7 +5,7 @@ import { IsBoolean, IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class UsersResponseDTO {
   @IsString()
-  _id!: string;
+  id!: string;
 
   @IsString()
   name!: string;
@@ -33,7 +33,7 @@ export class UsersResponseDTO {
   static async fromEntity(entity: IUser, s3Service: IS3Service): Promise<UsersResponseDTO> {
     const dto = new UsersResponseDTO();
 
-    dto._id = entity._id;
+    dto.id = entity._id;
     dto.name = entity.name;
     dto.email = entity.email;
     dto.isPremium = entity.isPremium;

@@ -27,7 +27,6 @@ interface HeroCarouselProps {
   onCategoryClick?: (category: string) => void;
 }
 
-
 function CoreCarousel({
   children,
   options,
@@ -60,7 +59,7 @@ function CoreCarousel({
 }
 
 export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps) {
-  const [api, setApi] = useState<EmblaCarouselType | null >(null);
+  const [api, setApi] = useState<EmblaCarouselType | null>(null);
   const [current, setCurrent] = useState(0);
 
   return (
