@@ -12,7 +12,6 @@ import type { ServiceFilters, ServiceResponse } from '@/types/service';
 
 import type { ServiceFormType } from '../validation/ServiceFormData';
 
-
 export function useServiceMutations(workerId: string, filters: ServiceFilters) {
   const queryClient = useQueryClient();
 

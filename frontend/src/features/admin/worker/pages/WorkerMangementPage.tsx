@@ -12,7 +12,6 @@ import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import AdminWorkerService from '@/services/admin/workerManagement.service';
 import type { WorkerResponse, WorkerRow } from '@/types/admin/worker';
 
-
 import { useToggleStatus } from '../../hooks/useUserToggleStatus';
 import workerColumns from '../components/columns';
 import ReviewWorkerModal from '../components/ReviewWorkerModal';
@@ -24,6 +23,7 @@ type CustomParams = { workerStatus: string };
 
 export default function WorkerManagementPage() {
   const [selectedWorker, setSelectedWorker] = useState<WorkerRow | null>(null);
+  const [verifySelectedWorker, setverifySelectedWorker] = useState<WorkerRow | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [verifyModalOpen, setVerifyModalOpen] = useState(false);
 
@@ -57,7 +57,7 @@ export default function WorkerManagementPage() {
     console.log('open worker view,', id);
   };
   const openVerifyView = (worker: WorkerRow) => {
-    setSelectedWorker(worker);
+    setverifySelectedWorker(worker);
     setVerifyModalOpen(true);
   };
 
@@ -145,7 +145,7 @@ export default function WorkerManagementPage() {
         open={verifyModalOpen}
         onClose={() => setVerifyModalOpen(false)}
         onSubmit={handleSubmitReview}
-        selectedWorker={selectedWorker}
+        selectedWorker={verifySelectedWorker}
       />
     </div>
   );

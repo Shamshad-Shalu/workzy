@@ -10,8 +10,6 @@ import PageHeader from '@/components/molecules/PageHeader';
 import { forgotPasswordService } from '@/services/auth.service';
 import { handleApiError } from '@/utils/handleApiError';
 
-
-
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);

@@ -7,7 +7,6 @@ import { handleApiError } from '@/utils/handleApiError';
 
 import type { ReviewWorkerSchemaType } from '../validation/reviewWorkerShema';
 
-
 export interface VerifyWorkerResponse {
   message: string;
   worker: WorkerRow;

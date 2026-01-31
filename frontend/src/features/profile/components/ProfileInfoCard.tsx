@@ -13,7 +13,6 @@ import { useProfileForm } from '../hooks/useProfileForm';
 
 import MapSelector from './MapSelector';
 
-
 interface Props {
   user: User;
   onSave: (payload: Partial<User>) => Promise<void>;

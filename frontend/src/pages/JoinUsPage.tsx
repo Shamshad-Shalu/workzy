@@ -27,7 +27,6 @@ import { handleApiError } from '@/utils/handleApiError';
 import userImg from '../assets/auth/signup.jpg';
 import teamImg from '../assets/auth/signup.jpg';
 
-
 export default function JoinUsPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();

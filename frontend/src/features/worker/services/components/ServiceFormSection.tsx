@@ -11,7 +11,6 @@ import { useServiceForm } from '../hooks/useServiceForm';
 
 import BulkDiscountSection from './BulkDiscountSection';
 
-
 type ServiceFormHook = ReturnType<typeof useServiceForm>;
 
 export default function ServiceFormSection({

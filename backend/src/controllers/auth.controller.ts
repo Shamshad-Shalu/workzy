@@ -59,7 +59,7 @@ export class AuthController implements IAuthController {
 
     const user = await this._authService.register(userData);
 
-    setRefreshTokenCookie(res, { _id: user._id, role: user.role as Role });
+    setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     const accessToken = generateAccessToken({ ...user });
 
@@ -81,16 +81,16 @@ export class AuthController implements IAuthController {
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const user = await this._authService.login(req.body as LoginRequestDTO);
 
-    const isBlocked = await this._authService.isUserBlocked(user._id);
+    const isBlocked = await this._authService.isUserBlocked(user.id);
     if (isBlocked) {
       res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
       return;
     }
 
-    setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
+    setRefreshTokenCookie(res, { id: user.id.toString(), role: user.role as Role });
 
     const accessToken = generateAccessToken({
-      _id: user._id.toString(),
+      id: user.id.toString(),
       role: user.role as Role,
       workerId: user.workerId,
     });
@@ -116,7 +116,7 @@ export class AuthController implements IAuthController {
       throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.FORBIDDEN);
     }
 
-    const userId = decodedToken.user._id;
+    const userId = decodedToken.user.id;
     const role = decodedToken.user.role;
 
     const isBlocked = await redisClient.get(`blocked_user:${userId}`);
@@ -134,7 +134,7 @@ export class AuthController implements IAuthController {
     let fullUser = user.toObject ? user.toObject() : user;
 
     const payload: AccessTokenPayload = {
-      _id: user._id.toString(),
+      id: user._id.toString(),
       role: user.role,
     };
 
@@ -207,12 +207,12 @@ export class AuthController implements IAuthController {
       name: googleProfile.displayName,
       profile: jsonData?.picture || "",
     });
-    const isBlocked = await this._authService.isUserBlocked(user._id.toString());
+    const isBlocked = await this._authService.isUserBlocked(user.id);
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }
 
-    setRefreshTokenCookie(res, { _id: user._id.toString(), role: user.role as Role });
+    setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     res.redirect(`${CLIENT_URL}/auth/google/callback`);
   });

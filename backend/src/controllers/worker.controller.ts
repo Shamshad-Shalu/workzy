@@ -28,7 +28,7 @@ export class WorkerController implements IWorkerController {
   });
 
   getMe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.INVALID_TOKEN);
     }

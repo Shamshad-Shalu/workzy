@@ -5,7 +5,6 @@ import type { PaginationAdapter } from '@/types/table.types';
 
 import Button from '../atoms/Button';
 
-
 interface Props {
   table: PaginationAdapter;
   onPageChange?: (pageIndex: number) => void;

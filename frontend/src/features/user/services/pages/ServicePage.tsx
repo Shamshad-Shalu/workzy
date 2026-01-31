@@ -7,11 +7,6 @@ import {
   X,
   MapPin,
   Wrench,
-  Droplet,
-  Zap,
-  Wind,
-  Hammer,
-  Settings,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -22,22 +17,12 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 
 import { useAppSelector } from '@/store/hooks';
 
-// Service Icon Mapping
-const SERVICE_ICONS = {
-  'fix-water-leak': Droplet,
-  'install-tap': Wrench,
-  'toilet-repair': Settings,
-  'drain-cleaning': Wind,
-  'pipe-installation': Hammer,
-  'water-heater': Zap,
-} as const;
-
 // Types
 interface Service {
   id: string;
   name: string;
   category: string;
-  icon?: keyof typeof SERVICE_ICONS;
+  icon: string;
 }
 
 interface Worker {
@@ -56,8 +41,17 @@ interface Worker {
 
 // Dummy Data - Replace with API calls
 const DUMMY_SERVICES: Service[] = [
-  { id: 'fix-water-leak', name: 'Fix Water Leak', category: 'plumber', icon: 'fix-water-leak' },
+  {
+    id: 'fix-water-leak',
+    name: 'Fix Water Leak',
+    category: 'plumber',
+    icon: 'https://images.unsplash.com/photo-1607472586893-edb57bdc0e39?w=400',
+  },
   { id: 'install-tap', name: 'Install Tap/Faucet', category: 'plumber', icon: 'install-tap' },
+  { id: 'toilet-repair', name: 'Toilet Repair', category: 'plumber', icon: 'toilet-repair' },
+  { id: 'drain-cleaning', name: 'Drain Cleaning', category: 'plumber', icon: 'drain-cleaning' },
+  { id: 'toilet-repair', name: 'Toilet Repair', category: 'plumber', icon: 'toilet-repair' },
+  { id: 'drain-cleaning', name: 'Drain Cleaning', category: 'plumber', icon: 'drain-cleaning' },
   { id: 'toilet-repair', name: 'Toilet Repair', category: 'plumber', icon: 'toilet-repair' },
   { id: 'drain-cleaning', name: 'Drain Cleaning', category: 'plumber', icon: 'drain-cleaning' },
   {
@@ -120,6 +114,54 @@ const DUMMY_WORKERS: Worker[] = [
     completedJobs: 890,
   },
   {
+    id: 3,
+    name: 'Suresh Patel',
+    rating: 4.7,
+    reviews: 156,
+    experience: 5,
+    price: 279,
+    distance: 1.8,
+    available: false,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Suresh',
+    completedJobs: 750,
+  },
+  {
+    id: 4,
+    name: 'Vijay Singh',
+    rating: 4.6,
+    reviews: 134,
+    experience: 7,
+    price: 319,
+    distance: 4.2,
+    available: true,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vijay',
+    completedJobs: 890,
+  },
+  {
+    id: 3,
+    name: 'Suresh Patel',
+    rating: 4.7,
+    reviews: 156,
+    experience: 5,
+    price: 279,
+    distance: 1.8,
+    available: false,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Suresh',
+    completedJobs: 750,
+  },
+  {
+    id: 4,
+    name: 'Vijay Singh',
+    rating: 4.6,
+    reviews: 134,
+    experience: 7,
+    price: 319,
+    distance: 4.2,
+    available: true,
+    image: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Vijay',
+    completedJobs: 890,
+  },
+  {
     id: 5,
     name: 'Mohan Reddy',
     rating: 4.8,
@@ -150,7 +192,6 @@ export default function ServicesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  // Get location from Redux
   const { city, latitude, longitude, radius: globalRadius } = useAppSelector(s => s.location);
 
   // Get URL params
@@ -286,13 +327,13 @@ export default function ServicesPage() {
 
             <div className="space-y-6">
               {/* Location */}
-              <div>
+              {/* <div>
                 <label className="text-sm font-medium mb-2 block">Location</label>
                 <div className="flex items-center gap-2 px-3 py-2.5 bg-accent/50 border border-border rounded-lg">
                   <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                   <span className="text-sm truncate flex-1">{city}</span>
                 </div>
-              </div>
+              </div> */}
 
               {/* Radius */}
               <div>
@@ -306,7 +347,7 @@ export default function ServicesPage() {
                   max="50"
                   value={radius}
                   onChange={e => setRadius(Number(e.target.value))}
-                  className="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer accent-primary"
+                  className="w-full  accent-primary h-2 bg-accent rounded-lg cursor-pointer"
                 />
                 <div className="flex justify-between text-xs text-muted-foreground mt-1">
                   <span>1 km</span>
@@ -330,7 +371,7 @@ export default function ServicesPage() {
                     step="50"
                     value={priceRange[0]}
                     onChange={e => setPriceRange([Number(e.target.value), priceRange[1]])}
-                    className="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer accent-primary"
+                    className="w-full  accent-primary h-2 bg-accent rounded-lg cursor-pointer"
                   />
                   <input
                     type="range"
@@ -339,7 +380,7 @@ export default function ServicesPage() {
                     step="50"
                     value={priceRange[1]}
                     onChange={e => setPriceRange([priceRange[0], Number(e.target.value)])}
-                    className="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer accent-primary"
+                    className="w-full  accent-primary h-2 bg-accent rounded-lg cursor-pointer"
                   />
                 </div>
               </div>
@@ -363,28 +404,6 @@ export default function ServicesPage() {
                   ))}
                 </div>
               </div>
-
-              {/* Experience */}
-              <div>
-                <label className="text-sm font-medium mb-2 flex items-center justify-between">
-                  <span>Experience</span>
-                  <span className="text-primary">{minExperience}+ yrs</span>
-                </label>
-                <input
-                  type="range"
-                  min="0"
-                  max="10"
-                  value={minExperience}
-                  onChange={e => setMinExperience(Number(e.target.value))}
-                  className="w-full h-2 bg-accent rounded-lg appearance-none cursor-pointer accent-primary"
-                />
-                <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                  <span>Any</span>
-                  <span>10+ years</span>
-                </div>
-              </div>
-
-              {/* Available Now */}
               <label className="flex items-center gap-3 p-3 bg-accent/30 hover:bg-accent/50 border border-border rounded-lg cursor-pointer transition-colors">
                 <input
                   type="checkbox"
@@ -400,7 +419,6 @@ export default function ServicesPage() {
                 </div>
               </label>
 
-              {/* Reset Filters */}
               <button
                 onClick={resetFilters}
                 className="w-full px-4 py-2.5 bg-accent hover:bg-accent/80 rounded-lg text-sm font-medium transition-colors"
@@ -411,9 +429,7 @@ export default function ServicesPage() {
           </div>
         </aside>
 
-        {/* Main Content */}
         <main className="flex-1 min-w-0">
-          {/* Service Selection Grid */}
           {!selectedService && (
             <div className="mb-8">
               <div className="flex items-center justify-between mb-4">
@@ -438,7 +454,7 @@ export default function ServicesPage() {
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 sm:gap-4">
                 {displayServices.map(service => {
-                  const Icon = service.icon ? SERVICE_ICONS[service.icon] : Wrench;
+                  const Icon = service.icon ?? Wrench;
                   const isActive = selectedService === service.id;
 
                   return (
@@ -457,13 +473,7 @@ export default function ServicesPage() {
                             isActive ? 'bg-primary/10' : 'bg-accent group-hover:bg-primary/10'
                           }`}
                         >
-                          <Icon
-                            className={`w-6 h-6 sm:w-7 sm:h-7 transition-colors ${
-                              isActive
-                                ? 'text-primary'
-                                : 'text-muted-foreground group-hover:text-primary'
-                            }`}
-                          />
+                          <img src={Icon} className="w-8 h-8 sm:w-7 sm:h-7 transition-colors" />
                         </div>
                         <h3
                           className={`text-xs sm:text-sm font-medium leading-tight transition-colors ${

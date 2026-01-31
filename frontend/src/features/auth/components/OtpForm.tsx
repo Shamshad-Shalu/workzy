@@ -14,8 +14,6 @@ import { useAuth } from '../hooks/useAuth';
 import { useOtpTimer } from '../hooks/useOtpTimer';
 import { useAuthOtp } from '../hooks/useOtpVerification';
 
-
-
 export default function OtpForm() {
   const [otpValue, setOtpValue] = useState<string>('');
   const { timer, resetTimer } = useOtpTimer(30);

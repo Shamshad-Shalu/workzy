@@ -13,8 +13,6 @@ import {
 
 import { useProfile } from '../hooks/useProfile';
 
-
-
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;

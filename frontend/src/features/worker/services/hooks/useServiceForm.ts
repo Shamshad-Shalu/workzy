@@ -2,7 +2,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-
 import type { Category } from '@/types/admin/category';
 import type { Service } from '@/types/service';
 

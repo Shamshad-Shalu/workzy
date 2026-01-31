@@ -20,11 +20,7 @@ import { handleApiError } from '@/utils/handleApiError';
 import WorkerSection from '../components/WorkerSection';
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
 
-
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
-
-
-
 
 type OutletContext = {
   reloadWorkerData: () => Promise<void>;

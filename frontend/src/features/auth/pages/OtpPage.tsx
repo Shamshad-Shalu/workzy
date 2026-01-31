@@ -5,7 +5,6 @@ import OtpForm from '../components/OtpForm';
 
 import type React from 'react';
 
-
 const OtpPage: React.FC = () => {
   return (
     <AuthLayout image={otpImage} logo="/logo.png">

@@ -14,8 +14,6 @@ import type { WorkerStatus } from '@/types/worker';
 
 import { ReviewWorkerSchema, type ReviewWorkerSchemaType } from '../validation/reviewWorkerShema';
 
-
-
 interface ReviewWorkerModalType {
   open: boolean;
   onClose: () => void;

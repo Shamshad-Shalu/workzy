@@ -11,7 +11,6 @@ import { useTheme } from '@/context/use-theme';
 
 import type React from 'react';
 
-
 const Toaster = ({ ...props }: ToasterProps) => {
   const { theme = 'system' } = useTheme();
 

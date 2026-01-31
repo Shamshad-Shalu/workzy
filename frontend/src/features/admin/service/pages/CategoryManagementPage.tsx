@@ -17,9 +17,7 @@ import categoryColumns from '../components/CategoryColumns';
 import { CategoryModal } from '../components/CategoryModal';
 import { useCategoryMutations } from '../hooks/useCategoryMutations';
 
-
 import type { CategoryFormData } from '../validation/categorySchema';
-
 
 export default function CategoryManagementPage() {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);

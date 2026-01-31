@@ -14,8 +14,6 @@ import type { UserResponse, UserRow } from '@/types/admin/user';
 import { useToggleStatus } from '../../hooks/useUserToggleStatus';
 import userColumns from '../components/columns';
 
-
-
 export default function UserManagementPage() {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);

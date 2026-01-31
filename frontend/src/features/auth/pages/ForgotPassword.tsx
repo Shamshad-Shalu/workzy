@@ -5,7 +5,6 @@ import ForgotForm from '../components/ForgotPasswordForm';
 
 import type React from 'react';
 
-
 const ForgotPassword: React.FC = () => {
   return (
     <AuthLayout image={loginImage} logo="/logo.png">

@@ -7,7 +7,6 @@ import Button from '../atoms/Button';
 
 import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 
-
 interface SlideData {
   imageUrl: string;
   title: string;

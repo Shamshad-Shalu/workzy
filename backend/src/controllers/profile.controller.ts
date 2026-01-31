@@ -19,7 +19,7 @@ export class ProfileController implements IProfileController {
   ) {}
 
   uploadImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     const { url } = req.body;
     if (!userId || !url) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
@@ -29,7 +29,7 @@ export class ProfileController implements IProfileController {
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
@@ -39,7 +39,7 @@ export class ProfileController implements IProfileController {
   });
 
   changeEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.UNAUTHORIZED });
       return;
@@ -54,7 +54,7 @@ export class ProfileController implements IProfileController {
   });
 
   resentOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
@@ -65,7 +65,7 @@ export class ProfileController implements IProfileController {
   });
 
   verifyOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
@@ -78,7 +78,7 @@ export class ProfileController implements IProfileController {
   });
 
   getProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
@@ -87,7 +87,7 @@ export class ProfileController implements IProfileController {
   });
 
   updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?._id;
+    const userId = req.user?.id;
     if (!userId) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }

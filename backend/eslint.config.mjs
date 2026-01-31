@@ -20,28 +20,19 @@ export default [
     rules: {
       "prettier/prettier": "error",
       "import/order": [
-      "error",
-      {
-        groups: [
-          "builtin",
-          "external",
-          "internal",
-          "parent",
-          "sibling",
-          "index",
-          "type",
-        ],
-        pathGroups: [
-          {
-            pattern: "@/**",
-            group: "internal",
-          },
-        ],
-        "newlines-between": "always",
-        alphabetize: { order: "asc", caseInsensitive: true,
+        "error",
+        {
+          groups: ["builtin", "external", "internal", "parent", "sibling", "index", "type"],
+          pathGroups: [
+            {
+              pattern: "@/**",
+              group: "internal",
+            },
+          ],
+          "newlines-between": "always",
+          alphabetize: { order: "asc", caseInsensitive: true },
         },
-      },
-    ],
+      ],
       eqeqeq: "error",
       curly: "error",
       "no-console": "off",
@@ -61,7 +52,6 @@ export default [
       "object-curly-spacing": "off",
       "array-bracket-spacing": "off",
       "arrow-parens": "off",
-
     },
   },
   eslintConfigPrettier,

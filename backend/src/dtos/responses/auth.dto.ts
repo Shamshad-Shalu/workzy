@@ -52,7 +52,7 @@ export class LoginResponseDTO {
   ): Promise<LoginResponseDTO> {
     const dto = new LoginResponseDTO();
 
-    dto.id = entity._id;
+    dto.id = entity._id.toString();
     dto.name = entity.name;
     dto.email = entity.email;
     dto.role = entity.role;

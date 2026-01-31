@@ -18,7 +18,6 @@ import { useServiceMutations } from '../hooks/useServiceMutations';
 
 import type { ServiceFormType } from '../validation/ServiceFormData';
 
-
 type SelectOption = { label: string; value: string };
 
 export default function WorkerServicesPage() {

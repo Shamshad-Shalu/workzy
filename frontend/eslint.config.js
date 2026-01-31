@@ -36,18 +36,10 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/explicit-function-return-type': 'off',
 
-       'import/order':[
+      'import/order': [
         'error',
         {
-          groups: [
-            'builtin',
-            'external',
-            'internal',
-            'parent',
-            'sibling',
-            'index',
-            'type',
-          ],
+          groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index', 'type'],
           pathGroups: [
             {
               pattern: '@/**',
@@ -61,7 +53,7 @@ export default tseslint.config(
             caseInsensitive: true,
           },
         },
-       ],
+      ],
       indent: 'off',
       quotes: 'off',
       semi: 'off',

@@ -3,7 +3,6 @@ import { AlertCircle } from 'lucide-react';
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';

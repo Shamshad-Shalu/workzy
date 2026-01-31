@@ -13,7 +13,7 @@ export const validateRefreshToken = (req: Request, res: Response, next: NextFunc
     }
     const decoded = verifyRefreshToken(token);
     req.user = {
-      _id: decoded.user._id,
+      id: decoded.user.id,
       role: decoded.user.role,
     };
     next();

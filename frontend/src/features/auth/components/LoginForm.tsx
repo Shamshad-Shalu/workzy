@@ -16,8 +16,6 @@ import { AUTH_MESSAGES, GOOGLE_CALLBACK, SERVER_URL } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
 import { redirectBasedOnRole } from '@/utils/redirectBasedOnRole';
 
-
-
 import { useAuth } from '../hooks/useAuth';
 import { loginSchema, type LoginSchemaType } from '../validation/loginSchema';
 

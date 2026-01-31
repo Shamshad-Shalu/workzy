@@ -6,7 +6,7 @@ import { generateRefreshToken } from "./jwt.util";
 
 const isProd = NODE_ENV === "production";
 
-export const setRefreshTokenCookie = (res: Response, payload: { _id: string; role: Role }) => {
+export const setRefreshTokenCookie = (res: Response, payload: { id: string; role: Role }) => {
   const refreshToken = generateRefreshToken(payload);
 
   res.cookie("refreshToken", refreshToken, {

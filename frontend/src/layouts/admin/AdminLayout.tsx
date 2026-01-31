@@ -7,7 +7,6 @@ import { Sheet, SheetContent, SheetTitle, SheetDescription } from '@/components/
 
 import { AdminSidebar } from './AdminSidebar';
 
-
 export default function AdminLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 

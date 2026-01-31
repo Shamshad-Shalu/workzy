@@ -21,7 +21,6 @@ import {
 } from '../ui/dropdown-menu';
 import { Separator } from '../ui/separator';
 
-
 interface BaseSidebarProps {
   collapsed: boolean;
   toggleCollapse: () => void;
