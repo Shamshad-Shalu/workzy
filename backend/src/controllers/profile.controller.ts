@@ -1,14 +1,15 @@
-import { IProfileController } from "@/core/interfaces/controllers/IProfileController";
-import { inject, injectable } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
-import { TYPES } from "@/di/types";
-import { IProfileService } from "@/core/interfaces/services/IProfileService";
-import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
 import validator from "validator";
+
+import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
+import { IProfileController } from "@/core/interfaces/controllers/IProfileController";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IProfileService } from "@/core/interfaces/services/IProfileService";
+import { TYPES } from "@/di/types";
+import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class ProfileController implements IProfileController {

@@ -1,6 +1,8 @@
 import z from 'zod';
-import { availabilitySchema } from '../../validation/availabilitySchema';
+
 import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
+
+import { availabilitySchema } from '../../validation/availabilitySchema';
 
 export const workerProfileSchema = z.object({
   displayName: serviceNameRule,

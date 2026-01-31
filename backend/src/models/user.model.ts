@@ -1,6 +1,7 @@
 import mongoose, { Schema } from "mongoose";
-import { IAdress, ILocation, IUser } from "@/types/user";
+
 import { ROLE } from "@/constants";
+import { IAdress, ILocation, IUser } from "@/types/user";
 
 const LocationSchema = new Schema<ILocation>(
   {

@@ -1,8 +1,10 @@
+import { useCallback } from 'react';
+
 import WorkerProfileService from '@/services/worker/workerProfile.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
+
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
-import { useCallback } from 'react';
 
 export function useWorkerProfile() {
   const { user } = useAppSelector((s: RootState) => s.auth);

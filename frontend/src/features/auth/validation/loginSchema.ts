@@ -1,5 +1,6 @@
-import { emailRule } from '@/lib/validation/rules';
 import { z } from 'zod';
+
+import { emailRule } from '@/lib/validation/rules';
 
 export const loginSchema = z.object({
   email: emailRule,

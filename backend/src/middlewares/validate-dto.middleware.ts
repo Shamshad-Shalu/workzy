@@ -1,8 +1,9 @@
-import { AUTH, HTTPSTATUS } from "@/constants";
-import CustomError from "@/utils/customError";
 import { plainToInstance } from "class-transformer";
 import { validate, ValidationError, ValidatorOptions } from "class-validator";
 import { NextFunction, Request, Response } from "express";
+
+import { AUTH, HTTPSTATUS } from "@/constants";
+import CustomError from "@/utils/customError";
 
 export const validateDto = <T extends object>(
   dtoClass: new () => T,

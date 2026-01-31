@@ -1,6 +1,7 @@
 import { IsMongoId } from "class-validator";
-import { ICategory } from "@/types/category";
+
 import { PricingMode, ServiceType } from "@/constants";
+import { ICategory } from "@/types/category";
 
 export class CategoryResponseDTO {
   @IsMongoId()

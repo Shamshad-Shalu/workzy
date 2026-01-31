@@ -1,11 +1,12 @@
+import { Router } from "express";
+import passport from "passport";
+
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { validateRefreshToken } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
-import { Router } from "express";
-import passport from "passport";
 
 const router = Router();
 

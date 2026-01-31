@@ -1,7 +1,10 @@
-import type React from 'react';
-import AuthLayout from '@/layouts/auth/AuthLayout';
-import ResetPasswordForm from '../components/ResetPasswordForm';
 import resetImg from '@/assets/auth/login.jpg';
+import AuthLayout from '@/layouts/auth/AuthLayout';
+
+import ResetPasswordForm from '../components/ResetPasswordForm';
+
+import type React from 'react';
+
 
 const ResetPassword: React.FC = () => {
   return (

@@ -1,8 +1,17 @@
-import { ROLE } from '@/constants';
 import { ChevronDown, ChevronLeft, ChevronRight, LogOut, Repeat } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
+import { ROLE } from '@/constants';
+import { setAxiosToken } from '@/lib/api/axios';
+import { cn } from '@/lib/utils';
+import { logoutService } from '@/services/auth.service';
+import { useAppDispatch } from '@/store/hooks';
+import { clearUser } from '@/store/slices/authSlice';
+import type { MenuItem } from '@/types/navigation';
+import type { User } from '@/types/user';
+
 import workzyLogo from '../../assets/icons/logo-icon.jpg';
 import workzyIcon from '../../assets/icons/logo-icon.jpg';
-import { cn } from '@/lib/utils';
 import { SidebarItem } from '../molecules/SidebarItem';
 import {
   DropdownMenu,
@@ -11,13 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '../ui/dropdown-menu';
 import { Separator } from '../ui/separator';
-import type { User } from '@/types/user';
-import type { MenuItem } from '@/types/navigation';
-import { clearUser } from '@/store/slices/authSlice';
-import { useNavigate } from 'react-router-dom';
-import { useAppDispatch } from '@/store/hooks';
-import { logoutService } from '@/services/auth.service';
-import { setAxiosToken } from '@/lib/api/axios';
+
 
 interface BaseSidebarProps {
   collapsed: boolean;

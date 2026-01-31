@@ -1,6 +1,7 @@
+import { IsString, Matches, IsUrl, IsNumber, Min, IsOptional } from "class-validator";
+
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
 import { DocumentType, WorkerStatus } from "@/types/worker";
-import { IsString, Matches, IsUrl, IsNumber, Min, IsOptional } from "class-validator";
 
 export class JoinUsDTO {
   @IsString()

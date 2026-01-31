@@ -8,6 +8,7 @@ import {
   CreditCard,
   Settings,
 } from 'lucide-react';
+
 import type { MenuItem } from '@/types/navigation';
 
 export const adminMenuItems: MenuItem[] = [

@@ -1,4 +1,5 @@
 import { ROLE } from '@/constants';
+
 import type { NavigateFunction } from 'react-router-dom';
 
 export function redirectBasedOnRole(role: string, navigate: NavigateFunction) {

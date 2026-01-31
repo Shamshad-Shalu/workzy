@@ -1,11 +1,11 @@
+import { Expose } from "class-transformer";
+
 import {
   CategoryAncestorEntity,
   CategoryLevelsEntity,
   CategorySuggestionEntity,
   CategoryTrendingEntity,
-  ICategory,
 } from "@/types/category";
-import { Expose } from "class-transformer";
 
 type BaseCategoryEntity = {
   _id: { toString(): string };

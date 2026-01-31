@@ -1,3 +1,5 @@
+import { MapPin } from 'lucide-react';
+
 import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { ServiceCard } from '@/components/molecules/ServiceCard';
 import { HeroCarousel } from '@/components/organisms/HeroCarousel';
@@ -8,7 +10,6 @@ import TestimonialsSection from '@/features/user/home/components/TestimonialsSec
 import TopServiceSection from '@/features/user/home/components/TopServiceSection';
 import TrustSection from '@/features/user/home/components/TrustSection';
 import { WorkerCard } from '@/features/user/home/components/WorkerCard';
-import { MapPin } from 'lucide-react';
 
 const API_DATA = {
   hero: {

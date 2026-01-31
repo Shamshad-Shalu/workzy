@@ -1,6 +1,5 @@
 import { Check, MapPin, Pencil, Phone, Save, User2, X } from 'lucide-react';
-import type { User } from '@/types/user';
-import { useProfileForm } from '../hooks/useProfileForm';
+import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
@@ -8,8 +7,12 @@ import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
 import { Separator } from '@/components/ui/separator';
 import { INDIAN_STATES } from '@/constants/indianStates';
+import type { User } from '@/types/user';
+
+import { useProfileForm } from '../hooks/useProfileForm';
+
 import MapSelector from './MapSelector';
-import { toast } from 'sonner';
+
 
 interface Props {
   user: User;

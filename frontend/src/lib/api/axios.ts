@@ -1,4 +1,5 @@
 import axios, { AxiosError, type AxiosResponse, type AxiosRequestConfig } from 'axios';
+
 import { HOST } from '@/constants';
 import type { User } from '@/types/user';
 

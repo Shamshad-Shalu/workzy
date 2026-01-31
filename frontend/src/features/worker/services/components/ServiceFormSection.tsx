@@ -1,12 +1,16 @@
 import { Briefcase, IndianRupee, Info } from 'lucide-react';
+import { useEffect } from 'react';
+
+import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
-import Input from '@/components/atoms/Input';
 import SlotTimeInput from '@/components/molecules/SlotTimeInput';
-import BulkDiscountSection from './BulkDiscountSection';
 import type { Category } from '@/types/admin/category';
+
 import { useServiceForm } from '../hooks/useServiceForm';
-import { useEffect } from 'react';
+
+import BulkDiscountSection from './BulkDiscountSection';
+
 
 type ServiceFormHook = ReturnType<typeof useServiceForm>;
 

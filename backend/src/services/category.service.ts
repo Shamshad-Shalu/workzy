@@ -1,3 +1,6 @@
+import { inject, injectable } from "inversify";
+import mongoose from "mongoose";
+
 import redisClient from "@/config/redisClient";
 import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -14,8 +17,6 @@ import { ICategory } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
-import { inject, injectable } from "inversify";
-import mongoose from "mongoose";
 
 @injectable()
 export class CategoryService implements ICategoryService {

@@ -1,18 +1,19 @@
+import { compare, hash } from "bcryptjs";
+import { plainToInstance } from "class-transformer";
+import { inject, injectable } from "inversify";
+
+import redisClient from "@/config/redisClient";
+import { AUTH, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
+import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { LoginResponseDTO, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
-import { inject, injectable } from "inversify";
-import { compare, hash } from "bcryptjs";
-import redisClient from "@/config/redisClient";
-import { plainToInstance } from "class-transformer";
-import { AUTH, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
 import { IUser } from "@/types/user";
 import CustomError from "@/utils/customError";
-import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class AuthService implements IAuthService {

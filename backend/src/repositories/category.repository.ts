@@ -1,3 +1,7 @@
+import { injectable } from "inversify";
+import mongoose, { FilterQuery, Types } from "mongoose";
+import { PipelineStage } from "mongoose";
+
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import Category from "@/models/category.model";
@@ -8,9 +12,6 @@ import {
   ICategory,
 } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
-import { injectable } from "inversify";
-import mongoose, { FilterQuery, Types } from "mongoose";
-import { PipelineStage } from "mongoose";
 
 @injectable()
 export class CategoryRepository extends BaseRepository<ICategory> implements ICategoryRepository {

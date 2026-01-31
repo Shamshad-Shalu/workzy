@@ -1,12 +1,12 @@
 import "reflect-metadata";
-import express from "express";
-import cors from "cors";
 import cookieParser from "cookie-parser";
-import { CLIENT_URL, DUMMY_URL } from "./constants";
+import cors from "cors";
+import express from "express";
 
 import passport from "./config/passport";
-import apiRouter from "./routes";
+import { CLIENT_URL, DUMMY_URL } from "./constants";
 import errorMiddleware from "./middlewares/errorMiddleware";
+import apiRouter from "./routes";
 
 const app = express();
 

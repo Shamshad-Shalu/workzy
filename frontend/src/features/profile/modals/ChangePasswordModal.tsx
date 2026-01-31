@@ -1,15 +1,19 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
+
 import Button from '@/components/atoms/Button';
 import Label from '@/components/atoms/Label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { useProfile } from '../hooks/useProfile';
 import PasswordInput from '@/components/atoms/PasswordInput';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   changePasswordSchema,
   type ChangePasswordSchema,
 } from '@/features/profile/validation/passwordShema';
-import { toast } from 'sonner';
+
+import { useProfile } from '../hooks/useProfile';
+
+
 
 interface Props {
   open: boolean;

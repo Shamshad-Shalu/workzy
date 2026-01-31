@@ -1,3 +1,5 @@
+import { inject, injectable } from "inversify";
+
 import redisClient from "@/config/redisClient";
 import { REFRESH_TOKEN_TTL_SECONDS, USER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -8,7 +10,6 @@ import { UsersResponseDTO } from "@/dtos/responses/admin/users.dto";
 import { IUser } from "@/types/user";
 import { buildUserFilter } from "@/utils/admin/buildUserFilter";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
-import { inject, injectable } from "inversify";
 
 @injectable()
 export class UserService implements IUserService {

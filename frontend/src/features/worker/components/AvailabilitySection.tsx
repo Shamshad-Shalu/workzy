@@ -1,6 +1,7 @@
+import { CheckCircle, Clock, Plus, X } from 'lucide-react';
+
 import Button from '@/components/atoms/Button';
 import type { AvailabilitySlots, TimeSlot } from '@/types/worker';
-import { CheckCircle, Clock, Plus, X } from 'lucide-react';
 
 interface AvailabilitySectionProps {
   availability: AvailabilitySlots;

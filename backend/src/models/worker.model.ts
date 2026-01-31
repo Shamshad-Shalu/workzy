@@ -1,5 +1,6 @@
-import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 import mongoose, { Schema } from "mongoose";
+
+import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 
 const AvailabilitySchema = new Schema<IAvailabilitySlots>(
   {

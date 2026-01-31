@@ -1,6 +1,8 @@
 import { Types } from "mongoose";
-import { BulkDiscountType } from "./service";
+
 import { PricingMode, ServiceType } from "@/constants";
+
+import { BulkDiscountType } from "./service";
 
 export interface AggregatedService {
   serviceName: string; // the category name

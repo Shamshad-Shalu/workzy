@@ -1,4 +1,3 @@
-import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
 import {
   useReactTable,
   type SortingState,
@@ -7,8 +6,11 @@ import {
   getSortedRowModel,
 } from '@tanstack/react-table';
 import React, { useEffect, useState } from 'react';
-import { DataTablePagination } from './DataTablePagination';
+
+import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
+
 import DataTableMobileCard from './DataTableMobileCard';
+import { DataTablePagination } from './DataTablePagination';
 import { DataTableSkeletonRow } from './TableSkeletonRow';
 
 interface TableProps<TData> {

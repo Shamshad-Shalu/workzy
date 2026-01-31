@@ -1,8 +1,10 @@
+import { Navigate, Outlet } from 'react-router-dom';
+
 import type { Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
+
 import type React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
 
 type ProtectedRouteProps = {
   requiredRoles?: Role[];

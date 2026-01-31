@@ -1,12 +1,13 @@
-import { Route, Routes } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
-import { ROLE } from '@/constants';
+import { Route, Routes } from 'react-router-dom';
+
 import { Skeleton } from '@/components/ui/skeleton';
+import { ROLE } from '@/constants';
+import ServicesPage from '@/features/user/services/pages/ServicePage';
+import ServicesPageDummy from '@/features/user/services/pages/ServicePageDummy';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
-import ServicesPage from '@/features/user/services/pages/ServicePage';
-import ServicesPageDummy from '@/features/user/services/pages/ServicePageDummy';
 
 // guest pages
 const Login = lazy(() => import('@/features/auth/pages/Login'));

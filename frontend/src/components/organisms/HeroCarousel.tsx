@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
-import useEmblaCarousel from 'embla-carousel-react';
-import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 import Autoplay from 'embla-carousel-autoplay';
+import useEmblaCarousel from 'embla-carousel-react';
+import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+
 import Button from '../atoms/Button';
+
+import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
+
 
 interface SlideData {
   imageUrl: string;

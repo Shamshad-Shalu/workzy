@@ -1,11 +1,15 @@
 import { FormProvider } from 'react-hook-form';
-import type { Service } from '@/types/service';
-import type { ServiceFormType } from '../validation/ServiceFormData';
-import { useServiceForm } from '../hooks/useServiceForm';
-import { useCategoryLevels } from '../hooks/useCategoryLevels';
+
 import { AppModal } from '@/components/molecules/AppModal';
+import type { Service } from '@/types/service';
+
+import { useCategoryLevels } from '../hooks/useCategoryLevels';
+import { useServiceForm } from '../hooks/useServiceForm';
+
 import { CategorySection } from './CategorySection';
 import ServiceFormSection from './ServiceFormSection';
+
+import type { ServiceFormType } from '../validation/ServiceFormData';
 
 interface WorkerServiceModalProps {
   open: boolean;

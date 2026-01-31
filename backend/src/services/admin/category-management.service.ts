@@ -1,15 +1,16 @@
+import { inject, injectable } from "inversify";
+import mongoose from "mongoose";
+
 import { CATEGORY, HTTPSTATUS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CategoryRequestDTO, CategoryUpdateRequestDTO } from "@/dtos/requests/category.dto";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
-import CustomError from "@/utils/customError";
-import { inject, injectable } from "inversify";
-import mongoose from "mongoose";
 import { clearRedisListCache } from "@/utils/cache.util";
+import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class CategoryManagementService implements ICategoryManagementService {

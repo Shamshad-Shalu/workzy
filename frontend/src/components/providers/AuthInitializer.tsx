@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { refreshAccessToken } from '@/store/slices/authSlice';
 import type { RootState } from '@/store/store';

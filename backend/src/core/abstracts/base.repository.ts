@@ -7,6 +7,7 @@ import {
   Types,
   UpdateWriteOpResult,
 } from "mongoose";
+
 import { IBaseRepository } from "../interfaces/repositories/IBaseRepository";
 
 export abstract class BaseRepository<T extends Document> implements IBaseRepository<T> {

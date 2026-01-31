@@ -1,7 +1,8 @@
+import { Router } from "express";
+
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { Router } from "express";
 
 const router = Router();
 

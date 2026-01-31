@@ -1,4 +1,5 @@
 import { CheckCircle, Clock, Plus, X } from 'lucide-react';
+
 import Button from '@/components/atoms/Button';
 
 export type Slot = { startTime: string; endTime: string };

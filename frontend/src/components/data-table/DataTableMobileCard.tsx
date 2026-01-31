@@ -1,6 +1,7 @@
-import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
+
+import type { RowWithAnyId, TableColumnDef } from '@/types/table.types';
 
 interface Props<TData extends RowWithAnyId> {
   item: TData;

@@ -1,5 +1,3 @@
-import { CATEGORY, DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
-import { PRICING_MODE, PricingMode, SERVICE_TYPE, ServiceType } from "@/constants";
 import { Type } from "class-transformer";
 import {
   IsBoolean,
@@ -14,6 +12,9 @@ import {
   Min,
   ValidateIf,
 } from "class-validator";
+
+import { CATEGORY, DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
+import { PRICING_MODE, PricingMode, SERVICE_TYPE, ServiceType } from "@/constants";
 
 export class CategoryRequestDTO {
   @IsString()

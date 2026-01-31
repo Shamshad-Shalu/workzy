@@ -1,7 +1,9 @@
-import type { CategorySuggestion } from '@/types/category';
 import { Search, TrendingUp, X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
+
 import SearchInput from '@/components/molecules/SearchInput';
+import type { CategorySuggestion } from '@/types/category';
+
 import ServiceSkeleton from './ServiceSkeleton';
 import TrendingSkeleton from './TrendingSkeleton';
 

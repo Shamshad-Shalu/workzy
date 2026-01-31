@@ -1,3 +1,6 @@
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+
+import userprofile from '@/assets/images/userprofile.avif';
 import {
   Dialog,
   DialogContent,
@@ -5,8 +8,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import userprofile from '@/assets/images/userprofile.avif';
 
 interface Props {
   open: boolean;

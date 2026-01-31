@@ -1,5 +1,6 @@
-import { nameRule } from '@/lib/validation/rules';
 import { z } from 'zod';
+
+import { nameRule } from '@/lib/validation/rules';
 
 export const LocationSchema = z.object({
   type: z.literal('Point'),

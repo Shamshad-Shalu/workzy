@@ -1,4 +1,5 @@
 import { HTTPSTATUS } from "@/constants";
+
 import CustomError from "./customError";
 
 export async function getEntityOrThrow<T>(

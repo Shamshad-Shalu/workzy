@@ -1,10 +1,11 @@
+import { injectable } from "inversify";
+import { Types } from "mongoose";
+
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import User from "@/models/user.model";
 import { IUser } from "@/types/user";
 import { buildUserFilter } from "@/utils/admin/buildUserFilter";
-import { injectable } from "inversify";
-import { Types } from "mongoose";
 
 @injectable()
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository {

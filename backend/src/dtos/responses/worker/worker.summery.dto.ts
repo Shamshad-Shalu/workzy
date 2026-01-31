@@ -1,8 +1,9 @@
 import { Expose } from "class-transformer";
+
 import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
-import { IWorker } from "@/types/worker";
-import { IUser } from "@/types/user";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUser } from "@/types/user";
+import { IWorker } from "@/types/worker";
 
 export interface WorkerAdditionalInfo {
   jobsCompleted: number;

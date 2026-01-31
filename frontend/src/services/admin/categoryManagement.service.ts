@@ -1,6 +1,6 @@
-import api from '@/lib/api/axios';
 import { ADMIN_ROUTES } from '@/constants';
 import type { CategoryFormData } from '@/features/admin/service/validation/categorySchema';
+import api from '@/lib/api/axios';
 
 const AdminCategoryService = {
   toggleStatus: async (categoryId: string): Promise<{ message: string }> => {

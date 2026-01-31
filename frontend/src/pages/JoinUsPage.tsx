@@ -1,11 +1,13 @@
+import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone } from 'lucide-react';
-import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
 
 import Button from '@/components/atoms/Button';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
+import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
+import { UploadPurposes } from '@/constants/upload';
+import CTASection from '@/features/user/home/components/CTASection';
 import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import {
   AnimatedCounter,
@@ -14,20 +16,17 @@ import {
   MetricCard,
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
-
-import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
-import { UploadPurposes } from '@/constants/upload';
-
+import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
-import type { IDocument, WorkerStatus } from '@/types/worker';
-
-import userImg from '../assets/auth/signup.jpg';
-import teamImg from '../assets/auth/signup.jpg';
-import { handleApiError } from '@/utils/handleApiError';
 import { cn } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import CTASection from '@/features/user/home/components/CTASection';
+import type { IDocument, WorkerStatus } from '@/types/worker';
+import { handleApiError } from '@/utils/handleApiError';
+
+import userImg from '../assets/auth/signup.jpg';
+import teamImg from '../assets/auth/signup.jpg';
+
 
 export default function JoinUsPage() {
   const navigate = useNavigate();

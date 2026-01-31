@@ -1,7 +1,10 @@
-import type React from 'react';
-import AuthLayout from '@/layouts/auth/AuthLayout';
-import OtpForm from '../components/OtpForm';
 import otpImage from '@/assets/auth/otp.jpeg';
+import AuthLayout from '@/layouts/auth/AuthLayout';
+
+import OtpForm from '../components/OtpForm';
+
+import type React from 'react';
+
 
 const OtpPage: React.FC = () => {
   return (

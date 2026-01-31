@@ -1,11 +1,12 @@
-import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
-import { injectable, inject } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { TYPES } from "@/di/types";
+import asyncHandler from "express-async-handler";
+import { injectable, inject } from "inversify";
+
+import { ROLE, WORKER } from "@/constants";
+import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
-import { ROLE, WORKER } from "@/constants";
+import { TYPES } from "@/di/types";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 
 @injectable()

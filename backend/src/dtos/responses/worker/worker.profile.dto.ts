@@ -1,7 +1,8 @@
 import { Expose } from "class-transformer";
+
 import { DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
-import { DocumentDto, IAvailabilitySlots, IWorker, WorkerStatus } from "@/types/worker";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { DocumentDto, IAvailabilitySlots, IWorker, WorkerStatus } from "@/types/worker";
 
 export class WorkerProfileResponseDTO {
   @Expose() id!: string;

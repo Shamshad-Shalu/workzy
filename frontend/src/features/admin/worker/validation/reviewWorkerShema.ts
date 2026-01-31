@@ -1,6 +1,7 @@
 import z from 'zod';
-import { DESCRIPTION_REGEX } from '@/lib/validation/rules';
+
 import { WORKER_STATUSES } from '@/constants';
+import { DESCRIPTION_REGEX } from '@/lib/validation/rules';
 
 export const ReviewWorkerSchema = z
   .object({

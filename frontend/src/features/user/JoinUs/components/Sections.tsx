@@ -1,6 +1,7 @@
-import type { FAQItemProps, FeatureCardProps } from '@/constants/landingItems';
 import { ArrowRight, ChevronDown } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+
+import type { FAQItemProps, FeatureCardProps } from '@/constants/landingItems';
 
 interface AnimatedCounterProps {
   value: number;

@@ -1,9 +1,10 @@
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { toast } from 'sonner';
+
+import { AUTH_MESSAGES } from '@/constants';
 import { useAppDispatch } from '@/store/hooks';
 import { refreshAccessToken } from '@/store/slices/authSlice';
-import { toast } from 'sonner';
-import { AUTH_MESSAGES } from '@/constants';
 
 export default function GoogleCallback() {
   const [searchParams] = useSearchParams();

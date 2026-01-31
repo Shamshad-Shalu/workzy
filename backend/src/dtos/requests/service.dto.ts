@@ -1,4 +1,3 @@
-import { BULK_DISCOUNT, DESCRIPTION_REGEX } from "@/constants";
 import {
   IsBoolean,
   IsInt,
@@ -15,6 +14,8 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from "class-validator";
+
+import { BULK_DISCOUNT, DESCRIPTION_REGEX } from "@/constants";
 
 export class BulkDiscountDTO {
   @IsInt()

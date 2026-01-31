@@ -1,4 +1,3 @@
-import type { MenuItem } from '@/types/navigation';
 import {
   Bell,
   Briefcase,
@@ -11,6 +10,8 @@ import {
   User2,
   Wallet,
 } from 'lucide-react';
+
+import type { MenuItem } from '@/types/navigation';
 
 export const workerMenuItems: MenuItem[] = [
   { icon: <LayoutDashboard />, label: 'Dashboard', to: '/worker/dashboard' },

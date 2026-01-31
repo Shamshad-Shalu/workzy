@@ -1,11 +1,12 @@
 import { Router } from "express";
-import authRoute from "./auth.routes";
-import profileRoute from "./profile.routes";
+
 import adminRoutes from "./admin.routes";
-import workerRoutes from "./worker.routes";
-import uploadRoutes from "./upload.routes";
+import authRoute from "./auth.routes";
 import categoryRoutes from "./category.routes";
+import profileRoute from "./profile.routes";
 import serviceRoutes from "./service.routes";
+import uploadRoutes from "./upload.routes";
+import workerRoutes from "./worker.routes";
 
 const router = Router();
 

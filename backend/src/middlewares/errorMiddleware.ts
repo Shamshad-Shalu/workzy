@@ -1,7 +1,8 @@
+import { NextFunction, Request, Response } from "express";
+
 import logger from "@/config/logger";
 import { SERVER } from "@/constants";
 import CustomError from "@/utils/customError";
-import { NextFunction, Request, Response } from "express";
 
 interface CustomErrorWithValidation extends CustomError {
   validationErrors?: unknown;

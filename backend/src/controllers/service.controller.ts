@@ -1,13 +1,14 @@
-import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
-import { inject, injectable } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import CustomError from "@/utils/customError";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
+
 import { HTTPSTATUS, WORKER } from "@/constants";
-import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
-import { TYPES } from "@/di/types";
-import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { SERVICE } from "@/constants/messages/service";
+import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
+import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
+import { TYPES } from "@/di/types";
+import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class ServiceController implements IServiceController {

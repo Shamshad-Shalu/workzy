@@ -1,8 +1,9 @@
-import type { UseFormReturn } from 'react-hook-form';
-import type { CategoryFormData } from '../validation/categorySchema';
-import Label from '@/components/atoms/Label';
 import Input from '@/components/atoms/Input';
+import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
+
+import type { CategoryFormData } from '../validation/categorySchema';
+import type { UseFormReturn } from 'react-hook-form';
 
 interface CategoryBasicInfoProps {
   form: UseFormReturn<CategoryFormData>;

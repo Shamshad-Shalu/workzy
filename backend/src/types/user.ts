@@ -1,5 +1,6 @@
-import { Role } from "@/constants";
 import { Document } from "mongoose";
+
+import { Role } from "@/constants";
 
 export interface ILocation {
   type: "Point";

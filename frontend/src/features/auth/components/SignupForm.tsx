@@ -1,16 +1,18 @@
-import { useForm } from 'react-hook-form';
-import { signupSchema, type SignupSchemaType } from '../validation/signupSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowRight, Mail, User } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+
+import Button from '@/components/atoms/Button';
+import Input from '@/components/atoms/Input';
+import Label from '@/components/atoms/Label';
+import PasswordInput from '@/components/atoms/PasswordInput';
+import PageHeader from '@/components/molecules/PageHeader';
 import { registerService } from '@/services/auth.service';
 import { handleApiError } from '@/utils/handleApiError';
-import { toast } from 'sonner';
-import Label from '@/components/atoms/Label';
-import Input from '@/components/atoms/Input';
-import { ArrowRight, Mail, User } from 'lucide-react';
-import PasswordInput from '@/components/atoms/PasswordInput';
-import Button from '@/components/atoms/Button';
-import PageHeader from '@/components/molecules/PageHeader';
+
+import { signupSchema, type SignupSchemaType } from '../validation/signupSchema';
 
 export default function SignupForm() {
   const navigate = useNavigate();

@@ -1,14 +1,16 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Briefcase, DollarSign } from 'lucide-react';
+import { Controller, useForm } from 'react-hook-form';
+
 import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/molecules/ImageUpload';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
 import { Textarea } from '@/components/atoms/Textarea';
-import { Briefcase, DollarSign } from 'lucide-react';
-import { Controller, useForm } from 'react-hook-form';
-import { JoinWorkerSchema, type JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { UploadPurposes } from '@/constants/upload';
+
+import { JoinWorkerSchema, type JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
 
 interface BecomeWorkerFormType {
   onSubmit: (data: JoinWorkerSchemaType) => void;

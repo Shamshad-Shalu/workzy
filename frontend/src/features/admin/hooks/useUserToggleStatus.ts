@@ -1,7 +1,8 @@
-import AdminUserService from '@/services/admin/userManagement.service';
-import { handleApiError } from '@/utils/handleApiError';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
+
+import AdminUserService from '@/services/admin/userManagement.service';
+import { handleApiError } from '@/utils/handleApiError';
 
 export const useToggleStatus = (onClose: () => void) => {
   const queryClient = useQueryClient();

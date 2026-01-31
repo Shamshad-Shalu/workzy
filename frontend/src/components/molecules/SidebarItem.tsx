@@ -1,6 +1,8 @@
-import { cn } from '@/lib/utils';
 import { NavLink, useLocation } from 'react-router-dom';
+
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
+
 import type { ReactNode } from 'react';
 
 interface SidebarItemProps {

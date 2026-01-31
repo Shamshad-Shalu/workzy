@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
+import { useEffect, useRef } from 'react';
+
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { MAPBOX_TOKEN } from '@/constants';
 import type { Address } from '@/types/user';

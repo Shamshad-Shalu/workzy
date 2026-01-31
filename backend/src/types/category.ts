@@ -1,5 +1,6 @@
-import { PricingMode, ServiceType } from "@/constants";
 import mongoose, { Document } from "mongoose";
+
+import { PricingMode, ServiceType } from "@/constants";
 
 export interface ICategory extends Document<string> {
   name: string;

@@ -1,7 +1,8 @@
+import { IsBoolean, IsEmail, IsNotEmpty, IsString } from "class-validator";
+
 import { DEFAULT_IMAGE_URL } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUser } from "@/types/user";
-import { IsBoolean, IsEmail, IsNotEmpty, IsString } from "class-validator";
 
 export class UsersResponseDTO {
   @IsString()

@@ -1,4 +1,4 @@
-import { PasswordRule } from "@/validations/rules";
+import { Type } from "class-transformer";
 import {
   IsString,
   IsOptional,
@@ -10,8 +10,9 @@ import {
   ArrayMaxSize,
   ValidateNested,
 } from "class-validator";
-import { Type } from "class-transformer";
+
 import { PLACE_REGEX } from "@/constants";
+import { PasswordRule } from "@/validations/rules";
 
 export class ChangePasswordDTO {
   @IsString()

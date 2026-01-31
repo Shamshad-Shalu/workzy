@@ -1,6 +1,8 @@
-import { useFieldArray } from 'react-hook-form';
 import { Plus, Trash2, Hash, Percent } from 'lucide-react';
+import { useFieldArray } from 'react-hook-form';
+
 import Label from '@/components/atoms/Label';
+
 import { useServiceForm } from '../hooks/useServiceForm';
 
 type ServiceFormHook = ReturnType<typeof useServiceForm>;

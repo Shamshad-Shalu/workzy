@@ -1,5 +1,6 @@
-import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
 import crypto from "crypto";
+
+import { AWS_REGION, AWS_S3_BUCKET } from "@/constants";
 
 export function generateUniqueFileName(prefix: string, extension: string): string {
   const randomId = crypto.randomBytes(6).toString("hex");

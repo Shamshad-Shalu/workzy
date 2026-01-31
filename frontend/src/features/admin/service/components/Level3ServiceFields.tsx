@@ -1,10 +1,11 @@
-import type { FieldErrors, UseFormReturn } from 'react-hook-form';
-import type { CategoryFormData } from '../validation/categorySchema';
+import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
-import { PRICING_MODE, SERVICE_TYPE, type ServiceType } from '@/constants';
-import Input from '@/components/atoms/Input';
 import SlotTimeInput from '@/components/molecules/SlotTimeInput';
+import { PRICING_MODE, SERVICE_TYPE, type ServiceType } from '@/constants';
+
+import type { CategoryFormData } from '../validation/categorySchema';
+import type { FieldErrors, UseFormReturn } from 'react-hook-form';
 
 interface Level3ServiceFieldsProps {
   form: UseFormReturn<CategoryFormData>;

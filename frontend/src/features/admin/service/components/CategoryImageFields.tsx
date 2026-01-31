@@ -1,8 +1,10 @@
 import { Controller, type UseFormReturn } from 'react-hook-form';
-import type { CategoryFormData } from '../validation/categorySchema';
+
 import Label from '@/components/atoms/Label';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { UploadPurposes } from '@/constants/upload';
+
+import type { CategoryFormData } from '../validation/categorySchema';
 
 interface Props {
   form: UseFormReturn<CategoryFormData>;

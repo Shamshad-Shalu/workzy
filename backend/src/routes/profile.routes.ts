@@ -1,3 +1,5 @@
+import { Router } from "express";
+
 import { ROLE } from "@/constants";
 import { IProfileController } from "@/core/interfaces/controllers/IProfileController";
 import { container } from "@/di/container";
@@ -5,7 +7,6 @@ import { TYPES } from "@/di/types";
 import { ChangePasswordDTO } from "@/dtos/requests/profile.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
-import { Router } from "express";
 
 const router = Router();
 

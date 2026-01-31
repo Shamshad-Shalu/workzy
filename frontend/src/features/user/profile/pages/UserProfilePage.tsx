@@ -1,21 +1,22 @@
-import { useEffect, useState } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
-import z from 'zod';
 import { Mail, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import z from 'zod';
+
 import PageHeader from '@/components/molecules/PageHeader';
-import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
-import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
-import { emailRule, phoneRule } from '@/lib/validation/rules';
-import ProfileImageModal from '@/components/molecules/ProfileImageModal';
-import { useProfile } from '@/features/profile/hooks/useProfile';
-import { Separator } from '@/components/ui/separator';
-import OtpModal from '@/features/profile/modals/OtpModal';
-import { updateUser } from '@/store/slices/authSlice';
 import ProfileImage from '@/components/molecules/ProfileImage';
+import ProfileImageModal from '@/components/molecules/ProfileImageModal';
+import { Separator } from '@/components/ui/separator';
 import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
 import ProfileInfoCard from '@/features/profile/components/ProfileInfoCard';
+import { useProfile } from '@/features/profile/hooks/useProfile';
+import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
+import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
+import OtpModal from '@/features/profile/modals/OtpModal';
+import { emailRule, phoneRule } from '@/lib/validation/rules';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { updateUser } from '@/store/slices/authSlice';
+import type { RootState } from '@/store/store';
 
 export default function ProfilePage() {
   const { user } = useAppSelector((s: RootState) => s.auth);

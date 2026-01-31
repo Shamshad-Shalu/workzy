@@ -1,8 +1,9 @@
+import { Navigate, useLocation } from 'react-router-dom';
+
 import { ROLE } from '@/constants';
 import HomePage from '@/pages/Home';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import { Navigate, useLocation } from 'react-router-dom';
 
 export default function RoleBasedRoot() {
   const { user, isAuthenticated, status } = useAppSelector((s: RootState) => s.auth);

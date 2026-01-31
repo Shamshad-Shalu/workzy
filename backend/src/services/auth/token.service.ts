@@ -1,7 +1,9 @@
-import { injectable } from "inversify";
-import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import crypto from "crypto";
+
+import { injectable } from "inversify";
+
 import redisClient from "@/config/redisClient";
+import { ITokenService } from "@/core/interfaces/services/ITokenService";
 
 @injectable()
 export class TokenService implements ITokenService {

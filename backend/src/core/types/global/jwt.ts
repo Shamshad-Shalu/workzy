@@ -1,5 +1,6 @@
-import { Role } from "@/constants";
 import { JwtPayload } from "jsonwebtoken";
+
+import { Role } from "@/constants";
 
 export interface AccessTokenPayload extends JwtPayload {
   _id: string;

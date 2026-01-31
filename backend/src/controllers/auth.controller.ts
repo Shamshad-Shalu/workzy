@@ -1,25 +1,26 @@
-import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
-import { inject, injectable } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { IAuthService } from "@/core/interfaces/services/IAuthService";
-import { TYPES } from "@/di/types";
-import CustomError from "@/utils/customError";
-import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
-import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
+import { Profile } from "passport";
+import validator from "validator";
+
 import logger from "@/config/logger";
+import redisClient from "@/config/redisClient";
+import { AUTH, CLIENT_URL, EMAIL, HTTPSTATUS, ROLE, Role, USER, WORKER } from "@/constants";
+import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
+import { IAuthService } from "@/core/interfaces/services/IAuthService";
+import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { ITokenService } from "@/core/interfaces/services/ITokenService";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
+import { AccessTokenPayload } from "@/core/types/global/jwt";
+import { TYPES } from "@/di/types";
+import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
 import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
-import validator from "validator";
-import { ITokenService } from "@/core/interfaces/services/ITokenService";
-import redisClient from "@/config/redisClient";
-import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
-import { Profile } from "passport";
-import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
-import { AccessTokenPayload } from "@/core/types/global/jwt";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class AuthController implements IAuthController {

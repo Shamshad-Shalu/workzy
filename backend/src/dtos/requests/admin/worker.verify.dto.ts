@@ -1,5 +1,6 @@
-import { DESCRIPTION_REGEX, WORKER_STATUS, WORKER_STATUSES } from "@/constants";
 import { IsEnum, IsString, Matches, MinLength, ValidateIf } from "class-validator";
+
+import { DESCRIPTION_REGEX, WORKER_STATUS, WORKER_STATUSES } from "@/constants";
 
 export class VerifyWorkerRequestDTO {
   @ValidateIf((o) => o.status === "verified")

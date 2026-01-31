@@ -1,7 +1,8 @@
+import { Award, Clock, MapPin } from 'lucide-react';
+
 import { StatusBadge } from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
 import type { Service } from '@/types/service';
-import { Award, Clock, MapPin } from 'lucide-react';
 
 interface ServiceCardTypes {
   service: Service;

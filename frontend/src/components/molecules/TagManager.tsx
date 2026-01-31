@@ -1,6 +1,8 @@
 import { AlertCircle, Plus, X } from 'lucide-react';
-import Button from '../atoms/Button';
+
 import { cn } from '@/lib/utils';
+
+import Button from '../atoms/Button';
 
 interface TagManagerProps {
   label: string;

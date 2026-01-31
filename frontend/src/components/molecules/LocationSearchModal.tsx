@@ -1,9 +1,12 @@
-import { useState, useEffect } from 'react';
 import { MapPin } from 'lucide-react';
-import { AppModal } from './AppModal';
-import SearchInput from './SearchInput';
+import { useState, useEffect } from 'react';
+
 import { MAPBOX_TOKEN } from '@/constants';
 import { handleApiError } from '@/utils/handleApiError';
+
+import { AppModal } from './AppModal';
+import SearchInput from './SearchInput';
+
 const INDIA_BBOX = '68.1766,6.7479,97.4025,35.5087';
 
 interface LocationResult {

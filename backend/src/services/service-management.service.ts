@@ -1,3 +1,6 @@
+import { inject } from "inversify";
+import { Types } from "mongoose";
+
 import redisClient from "@/config/redisClient";
 import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS, SERVICE, WORKER } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -12,8 +15,6 @@ import { WorkerServicesAggregationResult } from "@/types/service-aggregation.typ
 import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
-import { inject } from "inversify";
-import { Types } from "mongoose";
 
 export class ServiceManagement implements IServiceManagement {
   constructor(

@@ -1,7 +1,10 @@
-import { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import Button from '../atoms/Button';
+import { useState, useEffect } from 'react';
+
 import type { PaginationAdapter } from '@/types/table.types';
+
+import Button from '../atoms/Button';
+
 
 interface Props {
   table: PaginationAdapter;

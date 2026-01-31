@@ -1,14 +1,16 @@
-import OtpInput from '@/components/atoms/OtpInput';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { DialogDescription } from '@radix-ui/react-dialog';
+import { ArrowRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import { useProfile } from '../hooks/useProfile';
-import { DialogDescription } from '@radix-ui/react-dialog';
+
 import Button from '@/components/atoms/Button';
+import OtpInput from '@/components/atoms/OtpInput';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useOtpTimer } from '@/features/auth/hooks/useOtpTimer';
-import { ArrowRight } from 'lucide-react';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
+
+import { useProfile } from '../hooks/useProfile';
 
 type OtpDataProp = {
   type: 'email' | 'phone';

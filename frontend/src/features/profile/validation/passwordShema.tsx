@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { passwordRule } from '../../../lib/validation/rules';
 
 export const changePasswordSchema = z.object({

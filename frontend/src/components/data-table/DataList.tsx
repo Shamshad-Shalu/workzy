@@ -1,4 +1,3 @@
-import React, { useEffect, useState, type ReactNode } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -6,10 +5,12 @@ import {
   flexRender,
   type SortingState,
 } from '@tanstack/react-table';
-import { DataTableSkeletonRow } from '@/components/data-table/TableSkeletonRow';
-import type { TableColumnDef, PaginationAdapter, RowWithAnyId } from '@/types/table.types';
+import React, { useEffect, useState, type ReactNode } from 'react';
+
 import DataTableMobileCard from '@/components/data-table/DataTableMobileCard';
 import { DataTablePagination } from '@/components/data-table/DataTablePagination';
+import { DataTableSkeletonRow } from '@/components/data-table/TableSkeletonRow';
+import type { TableColumnDef, PaginationAdapter, RowWithAnyId } from '@/types/table.types';
 
 type DataListMode = 'table' | 'card';
 

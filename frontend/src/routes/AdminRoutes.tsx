@@ -1,7 +1,9 @@
 import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
+
 import { Skeleton } from '@/components/ui/skeleton';
+
+import ProtectedRoute from './ProtectedRoute';
 
 const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/Dashboard'));
 const AdminLayout = lazy(() => import('@/layouts/admin/AdminLayout'));

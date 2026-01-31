@@ -1,7 +1,3 @@
-import { useEffect, useRef, useState } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { clearUser } from '@/store/slices/authSlice';
 import {
   Bell,
   User,
@@ -18,6 +14,14 @@ import {
   ChevronRight,
   ChevronDown,
 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+
+import {
+  LocationSearchModal,
+  type SelectedLocation,
+} from '@/components/molecules/LocationSearchModal';
+import SearchInput from '@/components/molecules/SearchInput';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -27,19 +31,16 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import ModeToggle from '@/components/ui/ModeToggle';
-import {
-  LocationSearchModal,
-  type SelectedLocation,
-} from '@/components/molecules/LocationSearchModal';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
+import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
 import { setAxiosToken } from '@/lib/api/axios';
 import { logoutService } from '@/services/auth.service';
-import type { RootState } from '@/store/store';
+import { useAppSelector, useAppDispatch } from '@/store/hooks';
+import { clearUser } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
-import SearchInput from '@/components/molecules/SearchInput';
-import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
+import type { RootState } from '@/store/store';
 
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },

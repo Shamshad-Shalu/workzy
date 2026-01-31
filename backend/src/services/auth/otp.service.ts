@@ -1,13 +1,15 @@
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
-import { inject, injectable } from "inversify";
 import crypto from "crypto";
-import redisClient from "@/config/redisClient";
-import CustomError from "@/utils/customError";
-import { AUTH, HTTPSTATUS } from "@/constants";
-import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+
+import { inject, injectable } from "inversify";
+
 import logger from "@/config/logger";
-import { TYPES } from "@/di/types";
+import redisClient from "@/config/redisClient";
+import { AUTH, HTTPSTATUS } from "@/constants";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { TYPES } from "@/di/types";
+import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class OTPService implements IOTPService {

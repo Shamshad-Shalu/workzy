@@ -1,5 +1,6 @@
-import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { ArrowRight, TrendingUp } from 'lucide-react';
+
+import { AppCarousel } from '@/components/molecules/AppCarousel';
 
 export interface TopService {
   id: string;

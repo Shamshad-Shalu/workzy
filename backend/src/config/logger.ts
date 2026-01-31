@@ -1,6 +1,7 @@
 import { createLogger, format, transports } from "winston";
-import DailyRotateFile from "winston-daily-rotate-file";
 import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
+
 import { NODE_ENV } from "@/constants";
 
 const customColors = {

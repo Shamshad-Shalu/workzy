@@ -1,3 +1,10 @@
+import { Mail, Phone } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
+import { toast } from 'sonner';
+import z from 'zod';
+
+import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
 import ProfileInfoCard from '@/features/profile/components/ProfileInfoCard';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
@@ -6,18 +13,18 @@ import OtpModal from '@/features/profile/modals/OtpModal';
 import { emailRule, phoneRule } from '@/lib/validation/rules';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import { Mail, Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
-import z from 'zod';
-import WorkerSection from '../components/WorkerSection';
-import type { WorkerProfile } from '@/types/worker';
-import { useWorkerProfile } from '../hooks/useWorkerProfile';
-import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
-import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
-import { handleApiError } from '@/utils/handleApiError';
-import { useOutletContext } from 'react-router-dom';
 import type { RootState } from '@/store/store';
+import type { WorkerProfile } from '@/types/worker';
+import { handleApiError } from '@/utils/handleApiError';
+
+import WorkerSection from '../components/WorkerSection';
+import { useWorkerProfile } from '../hooks/useWorkerProfile';
+
+
+import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
+
+
+
 
 type OutletContext = {
   reloadWorkerData: () => Promise<void>;

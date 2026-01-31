@@ -1,5 +1,7 @@
-import { profileApi } from '@/features/profile/api/profile.api';
 import { createAsyncThunk } from '@reduxjs/toolkit';
+
+import { profileApi } from '@/features/profile/api/profile.api';
+
 import { updateUser } from '../slices/authSlice';
 import { setLocation } from '../slices/locationSlice';
 

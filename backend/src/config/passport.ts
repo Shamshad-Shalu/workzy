@@ -1,6 +1,7 @@
-import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "@/constants";
 import passport from "passport";
 import passportGoogle from "passport-google-oauth20";
+
+import { GOOGLE_CALLBACK_URL, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET } from "@/constants";
 
 const GoogleStrategy = passportGoogle.Strategy;
 

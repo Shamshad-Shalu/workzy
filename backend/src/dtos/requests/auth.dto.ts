@@ -1,5 +1,6 @@
-import { NameRule, PasswordRule } from "@/validations/rules";
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
+
+import { NameRule, PasswordRule } from "@/validations/rules";
 
 export class RegisterRequestDTO {
   @IsString()

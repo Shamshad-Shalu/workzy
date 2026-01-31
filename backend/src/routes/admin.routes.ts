@@ -1,9 +1,11 @@
-import adminUserRoutes from "./admin/admin.users.routes";
-import adminWorkerRoutes from "./admin/admin.workers.routes";
-import adminCategoryRoutes from "./admin/admin.categories.routes";
+import { Router } from "express";
+
 import { ROLE } from "@/constants";
 import { authenticate } from "@/middlewares/auth.middleware";
-import { Router } from "express";
+
+import adminCategoryRoutes from "./admin/admin.categories.routes";
+import adminUserRoutes from "./admin/admin.users.routes";
+import adminWorkerRoutes from "./admin/admin.workers.routes";
 
 const router = Router();
 

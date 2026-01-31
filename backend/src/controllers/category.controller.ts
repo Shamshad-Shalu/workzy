@@ -1,10 +1,11 @@
-import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
-import { inject, injectable } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { TYPES } from "@/di/types";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
+
 import { HTTPSTATUS } from "@/constants";
+import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
+import { TYPES } from "@/di/types";
 
 @injectable()
 export class CategoryController implements ICategoryController {

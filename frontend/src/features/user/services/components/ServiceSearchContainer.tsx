@@ -1,6 +1,9 @@
-import type { CategorySuggestion } from '@/types/category';
 import { useEffect, useState } from 'react';
+
+import type { CategorySuggestion } from '@/types/category';
+
 import { useCategorySuggestions, useTrendingCategories } from '../hooks/useServices';
+
 import ServiceSearchModal from './ServiceSearchModal';
 
 interface ServiceSearchContainerProps {

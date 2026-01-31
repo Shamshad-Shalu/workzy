@@ -1,5 +1,7 @@
-import { NODE_ENV, REFRESH_TOKEN_TTL_SECONDS, Role } from "@/constants";
 import { Response } from "express";
+
+import { NODE_ENV, REFRESH_TOKEN_TTL_SECONDS, Role } from "@/constants";
+
 import { generateRefreshToken } from "./jwt.util";
 
 const isProd = NODE_ENV === "production";

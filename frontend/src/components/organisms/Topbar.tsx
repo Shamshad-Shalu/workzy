@@ -1,6 +1,8 @@
 import { Bell, Sun, Moon, Menu } from 'lucide-react';
+
 import workzyLogo from '@/assets/icons/logo-icon.jpg';
 import { useTheme } from '@/context/use-theme';
+
 import Button from '../atoms/Button';
 
 interface TopbarProps {

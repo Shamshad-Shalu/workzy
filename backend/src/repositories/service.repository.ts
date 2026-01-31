@@ -1,12 +1,14 @@
+import { injectable } from "inversify";
+import { PipelineStage, Types } from "mongoose";
+
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
-import { IService } from "@/types/service";
-import { injectable } from "inversify";
-import Service from "../models/service.model";
-import { CategorySearchMatch, ServiceMatchStage } from "@/types/mongo-filters.types";
-import { PipelineStage, Types } from "mongoose";
-import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
 import { CategoryOption } from "@/types/category";
+import { CategorySearchMatch, ServiceMatchStage } from "@/types/mongo-filters.types";
+import { IService } from "@/types/service";
+import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
+
+import Service from "../models/service.model";
 
 @injectable()
 export class ServiceRepository extends BaseRepository<IService> implements IServiceRepository {

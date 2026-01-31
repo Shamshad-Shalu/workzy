@@ -1,4 +1,5 @@
 import z from 'zod';
+
 import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
 
 export const JoinWorkerSchema = z.object({

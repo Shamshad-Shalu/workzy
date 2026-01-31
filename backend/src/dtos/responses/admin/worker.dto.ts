@@ -1,7 +1,7 @@
-import { DocumentDto, IDocument, IWorker } from "@/types/worker";
-import { IUser } from "@/types/user";
 import { DEFAULT_IMAGE_URL } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUser } from "@/types/user";
+import { DocumentDto, IDocument, IWorker } from "@/types/worker";
 
 export class WorkerResponseDTO {
   id!: string;

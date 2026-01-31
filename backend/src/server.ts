@@ -1,8 +1,8 @@
-import logger from "./config/logger";
-import { connectDB } from "./config/db";
-import { PORT } from "./constants";
 import app from "./app";
+import { connectDB } from "./config/db";
+import logger from "./config/logger";
 import { connectRedis } from "./config/redisClient";
+import { PORT } from "./constants";
 
 const startServer = async () => {
   try {

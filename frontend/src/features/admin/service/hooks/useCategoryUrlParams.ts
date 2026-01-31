@@ -1,6 +1,7 @@
-import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { useCallback } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 
 type Updates = Record<string, string | number | null | undefined>;
 

@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
+
 import { MONGO_URI } from "@/constants";
+
 import logger from "./logger";
 
 export const connectDB = async () => {

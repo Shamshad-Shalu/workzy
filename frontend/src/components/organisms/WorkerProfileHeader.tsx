@@ -1,5 +1,7 @@
-import type { WorkerInfo } from '@/types/worker';
 import { Check, MapPin, Clock, Star, Award } from 'lucide-react';
+
+import type { WorkerInfo } from '@/types/worker';
+
 import type React from 'react';
 
 interface Props {

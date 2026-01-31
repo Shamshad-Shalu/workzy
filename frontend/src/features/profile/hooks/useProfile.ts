@@ -1,11 +1,13 @@
 import { useCallback, useState } from 'react';
-import { profileApi } from '../api/profile.api';
-import type { User } from '@/types/user';
 import { toast } from 'sonner';
-import { handleApiError } from '@/utils/handleApiError';
-import { uploadToS3 } from '@/services/upload.service';
-import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
+
 import { UploadPurposes } from '@/constants/upload';
+import { uploadToS3 } from '@/services/upload.service';
+import type { User } from '@/types/user';
+import { handleApiError } from '@/utils/handleApiError';
+import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
+
+import { profileApi } from '../api/profile.api';
 
 export function useProfile() {
   const [loading, setLoading] = useState(false);

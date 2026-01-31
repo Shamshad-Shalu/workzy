@@ -1,5 +1,6 @@
-import { IService } from "@/types/service";
 import mongoose, { Schema } from "mongoose";
+
+import { IService } from "@/types/service";
 
 const ServiceSchema: Schema<IService> = new Schema(
   {

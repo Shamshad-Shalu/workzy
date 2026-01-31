@@ -1,12 +1,13 @@
-import { ROLE } from "@/constants";
-import { authenticate } from "@/middlewares/auth.middleware";
-import { TYPES } from "@/di/types";
-import { container } from "@/di/container";
 import { Router } from "express";
+
+import { ROLE } from "@/constants";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
-import { validateDto } from "@/middlewares/validate-dto.middleware";
-import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
+import { container } from "@/di/container";
+import { TYPES } from "@/di/types";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
+import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
+import { authenticate } from "@/middlewares/auth.middleware";
+import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 const router = Router();
 

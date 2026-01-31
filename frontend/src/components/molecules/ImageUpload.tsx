@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect } from 'react';
 import { Camera, X, AlertCircle } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
+
 import type { UploadPurpose } from '@/constants/upload';
-import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
+import { cn } from '@/lib/utils';
 import { uploadToS3 } from '@/services/upload.service';
+import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompression';
+
 import Button from '../atoms/Button';
 
 interface ImageUploadProps {

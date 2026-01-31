@@ -1,6 +1,6 @@
-import { setCredentials } from '@/store/slices/authSlice';
 import { verifyOtpService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store/hooks';
+import { setCredentials } from '@/store/slices/authSlice';
 
 export function useAuthOtp() {
   const dispatch = useAppDispatch();

@@ -1,6 +1,6 @@
+import { ADMIN_ROUTES } from '@/constants';
 import api from '@/lib/api/axios';
 import type { UserResponse } from '@/types/admin/user';
-import { ADMIN_ROUTES } from '@/constants';
 
 const AdminUserService = {
   getUsers: async (page = 1, limit = 10, search = '', status = 'all'): Promise<UserResponse> => {

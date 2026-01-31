@@ -1,14 +1,16 @@
-import WorkerProfileService from '@/services/worker/workerProfile.service';
 import {
   useMutation,
   useQueries,
   useQueryClient,
   type UseQueryResult,
 } from '@tanstack/react-query';
-import type { JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
+
 import { profileApi } from '@/features/profile/api/profile.api';
-import type { ResubmitDocumentPayload, Worker } from '@/types/worker';
+import WorkerProfileService from '@/services/worker/workerProfile.service';
 import type { User } from '@/types/user';
+import type { ResubmitDocumentPayload, Worker } from '@/types/worker';
+
+import type { JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
 
 export function useWorkerJoin() {
   const queryClient = useQueryClient();

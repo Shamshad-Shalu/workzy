@@ -1,9 +1,10 @@
+import { Router } from "express";
+
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { CategoryRequestDTO, CategoryUpdateRequestDTO } from "@/dtos/requests/category.dto";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
-import { Router } from "express";
 
 const router = Router();
 

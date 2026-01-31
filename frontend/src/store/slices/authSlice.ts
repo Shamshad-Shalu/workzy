@@ -1,7 +1,8 @@
+import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
+
 import { AUTH_ROUTES, HOST, SESSION_MESSAGES } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import type { User } from '@/types/user';
-import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 interface AuthState {
   isAuthenticated: boolean;

@@ -1,9 +1,11 @@
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { Suspense, useState } from 'react';
 import { Outlet } from 'react-router-dom';
-import { WorkerSidebar } from './WorkerSidebar';
+
 import { Topbar } from '@/components/organisms/Topbar';
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet';
-import { Suspense, useState } from 'react';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+
+import { WorkerSidebar } from './WorkerSidebar';
 
 export default function WorkerLayout() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);

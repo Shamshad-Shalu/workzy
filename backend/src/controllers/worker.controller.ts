@@ -1,13 +1,14 @@
-import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
-import { inject, injectable } from "inversify";
-import asyncHandler from "express-async-handler";
 import { Request, Response } from "express";
-import { TYPES } from "@/di/types";
-import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
-import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
+
 import { AUTH, HTTPSTATUS, WORKER } from "@/constants";
-import CustomError from "@/utils/customError";
+import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
+import { TYPES } from "@/di/types";
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
+import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class WorkerController implements IWorkerController {

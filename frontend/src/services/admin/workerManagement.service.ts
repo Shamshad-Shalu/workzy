@@ -1,8 +1,8 @@
-import api from '@/lib/api/axios';
 
 import { ADMIN_ROUTES } from '@/constants';
-import type { ReviewWorkerSchemaType } from '@/features/admin/worker/validation/reviewWorkerShema';
 import type { VerifyWorkerResponse } from '@/features/admin/worker/hooks/useWorkerMutations';
+import type { ReviewWorkerSchemaType } from '@/features/admin/worker/validation/reviewWorkerShema';
+import api from '@/lib/api/axios';
 import type { WorkerResponse } from '@/types/admin/worker';
 
 const AdminWorkerService = {

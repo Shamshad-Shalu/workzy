@@ -1,19 +1,20 @@
-import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import { IProfileService } from "@/core/interfaces/services/IProfileService";
-import { TYPES } from "@/di/types";
-import { inject, injectable } from "inversify";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { compare, hash } from "bcryptjs";
-import CustomError from "@/utils/customError";
-import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
-import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
-import { IOTPService } from "@/core/interfaces/services/IOTPService";
-import { IEmailService } from "@/core/interfaces/services/IEmailService";
-import redisClient from "@/config/redisClient";
+import { inject, injectable } from "inversify";
 import validator from "validator";
+
 import logger from "@/config/logger";
-import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
+import redisClient from "@/config/redisClient";
+import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
+import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { TYPES } from "@/di/types";
+import { ChangePasswordDTO, ProfileRequestDTO } from "@/dtos/requests/profile.dto";
+import { UserProfileResponseDTO } from "@/dtos/responses/profile.dto";
+import CustomError from "@/utils/customError";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
 
 @injectable()

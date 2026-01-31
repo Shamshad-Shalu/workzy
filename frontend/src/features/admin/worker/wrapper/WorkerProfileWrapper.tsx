@@ -1,11 +1,12 @@
-import ProfileImage from '@/components/molecules/ProfileImage';
 import { useCallback, useEffect, useState } from 'react';
-import type { WorkerInfo } from '@/types/worker';
+
+import ProfileImage from '@/components/molecules/ProfileImage';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
+import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkerProfileSkeleton';
 import { useWorkerProfile } from '@/features/worker/profile/hooks/useWorkerProfile';
 import type { StatItem } from '@/features/worker/profile/layouts/WorkerProfileLayout';
-import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkerProfileSkeleton';
 import WorkerProfileLayout from '@/features/worker/profile/layouts/WorkerProfileLayout';
+import type { WorkerInfo } from '@/types/worker';
 
 export default function WorkerProfileRouteWrapper() {
   const { getWorkerSummary } = useWorkerProfile();

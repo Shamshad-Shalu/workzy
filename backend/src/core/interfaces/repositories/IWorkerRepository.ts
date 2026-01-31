@@ -1,6 +1,7 @@
+import { FilterQuery } from "mongoose";
+
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorker } from "@/types/worker";
-import { FilterQuery } from "mongoose";
 
 export interface IWorkerRepository extends BaseRepository<IWorker> {
   getAllWorkers(

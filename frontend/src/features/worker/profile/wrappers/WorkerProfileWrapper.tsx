@@ -1,13 +1,15 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import ProfileImage from '@/components/molecules/ProfileImage';
+import ProfileImageModal from '@/components/molecules/ProfileImageModal';
 import { useProfile } from '@/features/profile/hooks/useProfile';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import { useCallback, useEffect, useState } from 'react';
-import WorkerProfileLayout, { type StatItem } from '../layouts/WorkerProfileLayout';
-import { useWorkerProfile } from '../hooks/useWorkerProfile';
 import type { WorkerInfo } from '@/types/worker';
-import ProfileImageModal from '@/components/molecules/ProfileImageModal';
+
 import WorkerProfileLayoutSkeleton from '../components/WorkerProfileSkeleton';
+import { useWorkerProfile } from '../hooks/useWorkerProfile';
+import WorkerProfileLayout, { type StatItem } from '../layouts/WorkerProfileLayout';
 
 export default function WorkerProfileRouteWrapper() {
   const dispatch = useAppDispatch();

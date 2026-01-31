@@ -1,7 +1,9 @@
 import { Camera } from 'lucide-react';
 import React, { useRef, useState } from 'react';
-import { Skeleton } from '../ui/skeleton';
+
 import userprofile from '@/assets/images/userprofile.avif';
+
+import { Skeleton } from '../ui/skeleton';
 
 interface Props {
   src: string | undefined;

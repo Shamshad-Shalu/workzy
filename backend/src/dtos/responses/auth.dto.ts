@@ -1,8 +1,9 @@
+import { Expose } from "class-transformer";
+import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
+
 import { DEFAULT_IMAGE_URL, Role } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IUser } from "@/types/user";
-import { Expose } from "class-transformer";
-import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
 
 export class RegisterResponseDTO {
   @Expose()

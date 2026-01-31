@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
-import type { InputProps } from '../atoms/Input';
-import Input from '../atoms/Input';
 import { Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+
+import Input from '../atoms/Input';
+
+import type { InputProps } from '../atoms/Input';
 
 interface SearchInputProps extends Omit<InputProps, 'onChange' | 'onFocus' | 'value' | 'leftIcon'> {
   value?: string;

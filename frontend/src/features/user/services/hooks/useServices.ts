@@ -1,5 +1,6 @@
-import CategoryService from '@/services/category.service';
 import { useQuery } from '@tanstack/react-query';
+
+import CategoryService from '@/services/category.service';
 
 export const useCategorySuggestions = (search: string, searchEnabled?: boolean) => {
   return useQuery({

@@ -1,9 +1,10 @@
+import { Eye, Pencil } from 'lucide-react';
+
+import categoryImage from '@/assets/images/categoryImage.jpeg';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
-import type { TableColumnDef } from '@/types/table.types';
-import { Eye, Pencil } from 'lucide-react';
 import type { Category } from '@/types/admin/category';
-import categoryImage from '@/assets/images/categoryImage.jpeg';
+import type { TableColumnDef } from '@/types/table.types';
 
 const categoryColumns = (
   currentLevel: number,

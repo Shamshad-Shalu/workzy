@@ -1,7 +1,9 @@
 import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
-import ProtectedRoute from './ProtectedRoute';
+
 import { ROLE } from '@/constants';
+
+import ProtectedRoute from './ProtectedRoute';
 
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/Dashboard'));

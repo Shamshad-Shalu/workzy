@@ -1,6 +1,7 @@
+import { z } from 'zod';
+
 import { PRICING_MODE, SERVICE_TYPE } from '@/constants';
 import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
-import { z } from 'zod';
 
 const baseSchema = z.object({
   name: serviceNameRule,

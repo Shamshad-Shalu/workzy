@@ -1,4 +1,5 @@
 import globals from "globals";
+import importPlugin from "eslint-plugin-import";
 import pluginJs from "@eslint/js";
 import tseslint from "typescript-eslint";
 import eslintPluginPrettier from "eslint-plugin-prettier";
@@ -13,35 +14,54 @@ export default [
   {
     plugins: {
       prettier: eslintPluginPrettier,
+      import: importPlugin,
     },
     files: ["**/*.ts"],
     rules: {
       "prettier/prettier": "error",
+      "import/order": [
+      "error",
+      {
+        groups: [
+          "builtin",
+          "external",
+          "internal",
+          "parent",
+          "sibling",
+          "index",
+          "type",
+        ],
+        pathGroups: [
+          {
+            pattern: "@/**",
+            group: "internal",
+          },
+        ],
+        "newlines-between": "always",
+        alphabetize: { order: "asc", caseInsensitive: true,
+        },
+      },
+    ],
+      eqeqeq: "error",
+      curly: "error",
       "no-console": "off",
       "no-undef": "off",
-      eqeqeq: "error", // Enforces strict equality (=== and !==)
-      curly: "error", // Enforces consistent brace style for control statements
-      quotes: ["error", "single"], // Enforces single quotes for strings
-      semi: ["error", "always"], // Enforces semicolons at the end of statements
 
-      "@typescript-eslint/explicit-function-return-type": "off", // Allows implicit return types
-      "@typescript-eslint/no-explicit-any": "warn", // Warns about using `any` type
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_", // Ignores unused variables starting with `_`
-          ignoreRestSiblings: true,
-        },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
-      "@typescript-eslint/ban-ts-comment": "warn", // Warns about using `@ts-ignore` comments
-      "@typescript-eslint/no-empty-function": "warn", // Warns about empty functions
 
-      indent: ["error", 2], // Enforce 2-space indentation
-      "comma-dangle": ["error", "always-multiline"], // Enforce trailing commas in multiline objects/arrays
-      "object-curly-spacing": ["error", "always"], // Enforce spacing inside curly braces
-      "array-bracket-spacing": ["error", "never"], // Disallow spacing inside array brackets
-      "arrow-parens": ["error", "always"], // Enforce parentheses around arrow function parameters
+      indent: "off",
+      quotes: "off",
+      semi: "off",
+      "comma-dangle": "off",
+      "object-curly-spacing": "off",
+      "array-bracket-spacing": "off",
+      "arrow-parens": "off",
+
     },
   },
   eslintConfigPrettier,

@@ -1,5 +1,6 @@
-import { UploadPurpose, UploadPurposes } from "@/constants";
 import { IsString, IsEnum, IsNumber } from "class-validator";
+
+import { UploadPurpose, UploadPurposes } from "@/constants";
 
 export class RequestUploadUrlDTO {
   @IsString() fileName!: string;

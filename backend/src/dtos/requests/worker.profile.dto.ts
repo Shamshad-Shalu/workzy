@@ -1,5 +1,3 @@
-import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
-import { IAvailabilitySlots } from "@/types/worker";
 import {
   ArrayMaxSize,
   ArrayMinSize,
@@ -8,6 +6,9 @@ import {
   Matches,
   ValidateIf,
 } from "class-validator";
+
+import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
+import { IAvailabilitySlots } from "@/types/worker";
 
 export class WorkerProfileRequestDTO {
   @IsString()

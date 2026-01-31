@@ -1,4 +1,5 @@
 import { Document, Types } from "mongoose";
+
 import { IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";

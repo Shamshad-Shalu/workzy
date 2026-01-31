@@ -1,6 +1,7 @@
-import Button from '@/components/atoms/Button';
 import { ArrowRight, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+
+import Button from '@/components/atoms/Button';
 
 interface CTASectionProps {
   onBecomeProvider?: () => void;

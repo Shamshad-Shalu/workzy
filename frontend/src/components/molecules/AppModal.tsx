@@ -1,4 +1,6 @@
-import type React from 'react';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+
+import Button from '../atoms/Button';
 import {
   Dialog,
   DialogContent,
@@ -7,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '../ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import Button from '../atoms/Button';
+
+import type React from 'react';
 
 interface AppModalProps {
   open: boolean;

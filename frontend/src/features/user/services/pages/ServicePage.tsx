@@ -1,6 +1,3 @@
-import { useState } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useAppSelector } from '@/store/hooks';
 import {
   SlidersHorizontal,
   Star,
@@ -20,6 +17,10 @@ import {
   ChevronUp,
   TrendingUp,
 } from 'lucide-react';
+import { useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+
+import { useAppSelector } from '@/store/hooks';
 
 // Service Icon Mapping
 const SERVICE_ICONS = {

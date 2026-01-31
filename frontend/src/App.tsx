@@ -1,5 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
+
 import { Skeleton } from './components/ui/skeleton';
 
 const UserRoutes = lazy(() => import('./routes/UserRoutes'));

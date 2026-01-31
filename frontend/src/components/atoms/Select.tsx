@@ -1,3 +1,6 @@
+import { AlertCircle } from 'lucide-react';
+import React from 'react';
+
 import {
   Select as ShadSelect,
   SelectContent,
@@ -6,8 +9,6 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
-import { AlertCircle } from 'lucide-react';
-import React from 'react';
 
 interface Option<T extends string> {
   label: string;

@@ -1,3 +1,5 @@
+import { inject, injectable } from "inversify";
+
 import { transporter } from "@/config/nodemailer";
 import redisClient from "@/config/redisClient";
 import { AUTH, CLIENT_URL, EMAIL_OTP_EXPIRY, HTTPSTATUS, NODEMAILER_EMAIL } from "@/constants";
@@ -8,7 +10,6 @@ import { RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { otpEmailTemplate } from "@/templates/emails/otpEmailTemplate";
 import { resetPasswordTemplate } from "@/templates/emails/resetPasswordTemplate";
 import CustomError from "@/utils/customError";
-import { inject, injectable } from "inversify";
 
 @injectable()
 export class EmailService implements IEmailService {

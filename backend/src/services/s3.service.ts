@@ -1,3 +1,12 @@
+import {
+  DeleteObjectCommand,
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { injectable } from "inversify";
+
 import { s3 } from "@/config/s3";
 import { AWS_REGION, AWS_S3_BUCKET, AWS_S3_EXPIRY, PURPOSE_POLICY } from "@/constants";
 import { IS3Service, UploadUrlResponse } from "@/core/interfaces/services/IS3Service";
@@ -9,14 +18,6 @@ import {
   getDefaultPrefix,
   getFileExtension,
 } from "@/utils/upload";
-import {
-  DeleteObjectCommand,
-  GetObjectCommand,
-  PutObjectCommand,
-  S3Client,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { injectable } from "inversify";
 
 interface S3Config {
   bucket: string;

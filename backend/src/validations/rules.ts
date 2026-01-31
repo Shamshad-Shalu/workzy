@@ -1,4 +1,5 @@
 import { Matches } from "class-validator";
+
 import { PASSWORD_REGEX, NAME_REGEX, PHONE_REGEX } from "@/constants/validation";
 
 export const PasswordRule = () =>

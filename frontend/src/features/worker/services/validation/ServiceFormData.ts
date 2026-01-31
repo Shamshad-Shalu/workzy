@@ -1,6 +1,7 @@
+import { z } from 'zod';
+
 import { BULK_DISCOUNT } from '@/constants';
 import { DESCRIPTION_REGEX } from '@/lib/validation/rules';
-import { z } from 'zod';
 
 const bulkDiscountSchema = z.object({
   count: z.preprocess(

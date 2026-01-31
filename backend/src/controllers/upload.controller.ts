@@ -1,11 +1,12 @@
+import { Request, Response } from "express";
+import asyncHandler from "express-async-handler";
+import { inject, injectable } from "inversify";
+
+import { HTTPSTATUS } from "@/constants";
 import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { RequestUploadUrlDTO } from "@/dtos/requests/upload.dto";
-import asyncHandler from "express-async-handler";
-import { Request, Response } from "express";
-import { inject, injectable } from "inversify";
-import { HTTPSTATUS } from "@/constants";
-import { IS3Service } from "@/core/interfaces/services/IS3Service";
 
 @injectable()
 export class UploadController implements IUploadController {
