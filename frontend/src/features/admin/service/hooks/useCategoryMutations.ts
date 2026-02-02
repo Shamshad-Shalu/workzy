@@ -8,12 +8,8 @@ import { toast } from 'sonner';
 
 import AdminCategoryService from '@/services/admin/categoryManagement.service';
 import CategoryService from '@/services/category.service';
-import type {
-  Category,
-  CategoryAncestor,
-  CategoryFilters,
-  CategoryResponse,
-} from '@/types/admin/category';
+import type { CategoryAncestor, CategoryFilters, CategoryResponse } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 
 import type { CategoryFormData } from '../validation/categorySchema';
 

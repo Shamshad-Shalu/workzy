@@ -2,7 +2,7 @@ import { Info, Loader2, Zap } from 'lucide-react';
 
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 import type { Service } from '@/types/service';
 
 type OptionType = {

@@ -1,26 +1,4 @@
-import type { PricingMode, ServiceType } from '@/constants';
-
-export interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  level: number;
-  iconUrl: string;
-  imageUrl: string;
-  isAvailable: boolean;
-  platformFee: number;
-  parentId?: null | string;
-
-  baseRate: number;
-  rateDeviationPercent?: number;
-  estimatedDuration: number;
-  bufferTime: number;
-  travelRatePerKM?: number;
-  serviceType?: ServiceType;
-  pricingMode?: PricingMode;
-  allowBulkOffers?: boolean;
-  allowSuddenBooking?: boolean;
-}
+import type { Category } from '../category';
 
 export interface CategoryResponse {
   categories: Category[];
@@ -40,10 +18,4 @@ export interface CategoryAncestor {
   name: string;
   level: number;
   parentId: string | null;
-}
-
-export interface CategoryLite {
-  id: string;
-  name: string;
-  level: number;
 }

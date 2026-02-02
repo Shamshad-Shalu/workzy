@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function ServiceSkeleton() {
+export default function SearchSuggestionSkeleton() {
   return (
     <div className="divide-y divide-border">
       {Array.from({ length: 6 }).map((_, i) => (

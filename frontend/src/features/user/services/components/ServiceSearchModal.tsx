@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import SearchInput from '@/components/molecules/SearchInput';
 import type { CategorySuggestion } from '@/types/category';
 
-import ServiceSkeleton from './ServiceSkeleton';
+import SearchSuggestionSkeleton from './SearchSuggestionSkeleton';
 import TrendingSkeleton from './TrendingSkeleton';
 
 interface ServiceSearchModalProps {
@@ -104,7 +104,7 @@ export default function ServiceSearchModal({
             <div className="max-h-[calc(100vh-180px)] overflow-y-auto">
               {searchQuery.trim() ? (
                 <>
-                  {isSearching && <ServiceSkeleton />}
+                  {isSearching && <SearchSuggestionSkeleton />}
                   {hasResults ? (
                     <div className="divide-y divide-border">
                       {categoryServices.map(service => (
@@ -205,7 +205,7 @@ export default function ServiceSearchModal({
             <>
               {/* Search Results */}
               <div className="max-h-[calc(100vh-180px)] overflow-y-auto">
-                {isSearching && <ServiceSkeleton />}
+                {isSearching && <SearchSuggestionSkeleton />}
 
                 {hasResults ? (
                   <div className="divide-y divide-border">

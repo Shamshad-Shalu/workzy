@@ -3,8 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
-import ServicesPage from '@/features/user/services/pages/ServicePage';
-import ServicesPageDummy from '@/features/user/services/pages/ServicePageDummy';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
@@ -22,6 +20,8 @@ const RoleBasedRoot = lazy(() => import('./RoleBasedRoot'));
 const JoinUsPage = lazy(() => import('@/pages/JoinUsPage'));
 const UserLayout = lazy(() => import('@/layouts/user/UserLayout'));
 
+const ServicesPage = lazy(() => import('@/features/user/services/pages/ServicePage'));
+
 export default function UserRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
@@ -38,7 +38,6 @@ export default function UserRoutes() {
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/services" element={<ServicesPage />} />
-          <Route path="/about" element={<ServicesPageDummy />} />
           <Route path="/join-us" element={<JoinUsPage />} />
           <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
             <Route path="/profile" element={<UserProfilePage />} />

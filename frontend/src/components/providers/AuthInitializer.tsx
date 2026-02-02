@@ -7,7 +7,7 @@ import { bootstrapUserProfile } from '@/store/thunks/userThunks';
 
 export default function AuthInitializer({ children }: { children: React.ReactNode }) {
   const dispatch = useAppDispatch();
-  const { status } = useAppSelector((s: RootState) => s.auth);
+  const { status, user } = useAppSelector((s: RootState) => s.auth);
 
   useEffect(() => {
     if (status === 'idle') {
@@ -16,10 +16,10 @@ export default function AuthInitializer({ children }: { children: React.ReactNod
   }, [dispatch, status]);
 
   useEffect(() => {
-    if (status === 'succeeded') {
+    if (status === 'succeeded' && user?.role !== 'admin') {
       dispatch(bootstrapUserProfile());
     }
-  }, [status, dispatch]);
+  }, [status, dispatch, user?.role]);
 
   if (status === 'idle' || status === 'loading') {
     return (

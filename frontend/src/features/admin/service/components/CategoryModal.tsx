@@ -1,7 +1,7 @@
 import { toast } from 'sonner';
 
 import { AppModal } from '@/components/molecules/AppModal';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 import { handleApiError } from '@/utils/handleApiError';
 
 import { useCategoryForm } from '../hooks/useCategoryForm';

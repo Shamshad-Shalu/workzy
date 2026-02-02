@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 import type { Service } from '@/types/service';
 
 import { serviceSchema } from '../validation/ServiceFormData';
@@ -40,7 +40,7 @@ export function useServiceForm(service?: Service | null, category?: Category | n
     if (category && !service) {
       reset({
         ...baseDefaults,
-        categoryId: category._id,
+        categoryId: category.id,
         rate: category.baseRate,
         description: category.description ?? '',
         estimatedDuration: category.estimatedDuration ?? 0,

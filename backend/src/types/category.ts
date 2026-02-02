@@ -30,6 +30,12 @@ export interface CategoryOption {
 }
 
 export type CategoryAncestorEntity = Pick<ICategory, "_id" | "name" | "level" | "parentId">;
-export type CategoryLevelsEntity = Pick<ICategory, "_id" | "name" | "level">;
-export type CategorySuggestionEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
-export type CategoryTrendingEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
+export type CategoryLevelsEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
+export type CategorySuggestionEntity = Pick<
+  ICategory,
+  "_id" | "name" | "level" | "iconUrl" | "parentId"
+>;
+export type CategoryTrendingEntity = Pick<
+  ICategory,
+  "_id" | "name" | "level" | "iconUrl" | "parentId"
+>;

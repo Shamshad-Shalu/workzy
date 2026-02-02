@@ -81,7 +81,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     }
     return this.model
       .find(filter)
-      .select("_id name level")
+      .select("_id name level iconUrl")
       .sort({ createdAt: 1 })
       .lean<CategoryLevelsEntity[]>();
   }
@@ -130,6 +130,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
         name: item.name,
         iconUrl: item.iconUrl,
         level: item.level,
+        parentId: item.parentId,
       });
     }
     return Array.from(uniqueMap.values());

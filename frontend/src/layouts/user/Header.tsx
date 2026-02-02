@@ -41,6 +41,7 @@ import { useAppSelector, useAppDispatch } from '@/store/hooks';
 import { clearUser } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
 import type { RootState } from '@/store/store';
+import type { CategorySuggestion } from '@/types/category';
 
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
@@ -51,12 +52,6 @@ const NAV_LINKS = [
 
 const SEARCH_ROUTES = ['/', '/services'];
 
-interface CategorySuggestion {
-  id: string;
-  name: string;
-  iconUrl: string;
-  level: number;
-}
 export default function Header() {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const { city } = useAppSelector((s: RootState) => s.location);
@@ -119,9 +114,20 @@ export default function Header() {
   };
 
   const handleServiceSelect = (service: CategorySuggestion) => {
-    navigate(
-      `/services?service=${encodeURIComponent(service.name)}&location=${encodeURIComponent(city)}`
-    );
+    setSearchQuery('');
+    if (service.level === 2) {
+      navigate(
+        `/services?category=${encodeURIComponent(service.id)}&location=${encodeURIComponent(city)}`
+      );
+    } else if (service.level === 3) {
+      if (!service.parentId) {
+        console.warn('Selected level-3 service missing parentId:', service);
+        return;
+      }
+      navigate(
+        `/services?category=${encodeURIComponent(service.parentId)}&service=${encodeURIComponent(service.id)}&location=${encodeURIComponent(city)}`
+      );
+    }
     setServiceModalOpen(false);
     setMobileMenuOpen(false);
   };

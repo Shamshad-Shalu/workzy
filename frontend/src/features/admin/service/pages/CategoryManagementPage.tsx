@@ -10,7 +10,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 import { handleApiError } from '@/utils/handleApiError';
 
 import categoryColumns from '../components/CategoryColumns';
