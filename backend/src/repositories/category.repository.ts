@@ -11,7 +11,7 @@ import {
   CategorySuggestionEntity,
   ICategory,
 } from "@/types/category";
-import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
+import { buildCategoryFilter } from "@/utils/admin/filters/buildCategoryFilter";
 
 @injectable()
 export class CategoryRepository extends BaseRepository<ICategory> implements ICategoryRepository {

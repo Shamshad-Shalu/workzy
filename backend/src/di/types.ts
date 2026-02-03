@@ -40,6 +40,13 @@ const TYPES = {
   ServiceController: Symbol.for("ServiceController"),
   ServiceManagement: Symbol.for("ServiceManagement"),
   ServiceRepository: Symbol.for("ServiceRepository"),
+
+  // home
+  HomeController: Symbol.for("HomeController"),
+  HomeLayoutService: Symbol.for("HomeLayoutService"),
+  HomeSectionService: Symbol.for("HomeSectionService"),
+  HomeSectionRepository: Symbol.for("HomeSectionRepository"),
+  HomeLayoutRepository: Symbol.for("HomeLayoutRepository"),
 };
 
 export { TYPES };

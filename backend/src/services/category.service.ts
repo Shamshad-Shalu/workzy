@@ -14,7 +14,7 @@ import {
   CategoryTrendingResponseDTO,
 } from "@/dtos/responses/category.dto";
 import { ICategory } from "@/types/category";
-import { buildCategoryFilter } from "@/utils/admin/buildCategoryFilter";
+import { buildCategoryFilter } from "@/utils/admin/filters/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 

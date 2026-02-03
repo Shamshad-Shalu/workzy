@@ -38,6 +38,30 @@ export const PURPOSE_POLICY = {
     maxSizeMB: 10,
     allowedTypes: FILE_TYPES.IMAGES,
   },
+
+  HOME_BANNER_IMAGE: {
+    folder: "public/home/banners",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  HOME_HOW_IT_WORKS_IMAGE: {
+    folder: "public/home/how-it-works",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  HOME_WHY_CHOOSE_IMAGE: {
+    folder: "public/home/why-choose",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  HOME_TESTIMONIAL_IMAGE: {
+    folder: "public/home/testimonials",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
 } as const;
 
 export type UploadPurpose = keyof typeof PURPOSE_POLICY;

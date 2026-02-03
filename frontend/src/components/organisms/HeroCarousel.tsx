@@ -17,7 +17,6 @@ interface SlideData {
 }
 
 interface HeroData {
-  type: string;
   autoPlay: boolean;
   interval: number;
   slides: SlideData[];
@@ -159,7 +158,7 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
                     onClick={() => onCategoryClick?.(slide.category)}
                     className="px-6 py-6 font-semibold"
                   >
-                    {slide.cta || 'Explore Services'}
+                    Explore Services
                   </Button>
                 </div>
               </div>

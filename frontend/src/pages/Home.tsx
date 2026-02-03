@@ -13,11 +13,11 @@ import { WorkerCard } from '@/features/user/home/components/WorkerCard';
 
 const API_DATA = {
   hero: {
-    type: 'carousel',
     autoPlay: true,
     interval: 5000,
     slides: [
       {
+        id: '12',
         imageUrl: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=1200&q=80',
         title: 'Professional Services',
         subtitle: 'At Your Doorstep',
@@ -26,6 +26,7 @@ const API_DATA = {
         category: 'Home Services',
       },
       {
+        id: '12',
         imageUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=1200&q=80',
         title: 'Beauty & Wellness',
         subtitle: 'Premium Care at Home',
@@ -33,6 +34,7 @@ const API_DATA = {
         category: 'Beauty',
       },
       {
+        id: '12',
         imageUrl: 'https://images.unsplash.com/photo-1621905252507-b35492cc74b4?w=1200&q=80',
         title: 'Tech Solutions',
         subtitle: 'Quick & Reliable',

@@ -5,7 +5,7 @@ import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import User from "@/models/user.model";
 import { IUser } from "@/types/user";
-import { buildUserFilter } from "@/utils/admin/buildUserFilter";
+import { buildUserFilter } from "@/utils/admin/filters/buildUserFilter";
 
 @injectable()
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository {

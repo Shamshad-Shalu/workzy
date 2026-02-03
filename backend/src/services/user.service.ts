@@ -8,7 +8,7 @@ import { IUserService } from "@/core/interfaces/services/IUserService";
 import { TYPES } from "@/di/types";
 import { UsersResponseDTO } from "@/dtos/responses/admin/users.dto";
 import { IUser } from "@/types/user";
-import { buildUserFilter } from "@/utils/admin/buildUserFilter";
+import { buildUserFilter } from "@/utils/admin/filters/buildUserFilter";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
