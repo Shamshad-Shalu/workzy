@@ -2,11 +2,13 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { HOME_SECTION, HTTPSTATUS } from "@/constants";
+import { HOME_LAYOUT, HOME_SECTION, HTTPSTATUS } from "@/constants";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutService";
 import { IHomeSectionService, ListType } from "@/core/interfaces/services/IHomeSectionService";
+import { IHomeService } from "@/core/interfaces/services/IHomeService";
 import { TYPES } from "@/di/types";
+import { SaveLayoutDTO } from "@/dtos/requests/admin/homeLayout.request.dto";
 import {
   HomeSectionRequestDTO,
   HomeSectionUpdateRequestDTO,
@@ -16,10 +18,14 @@ import {
 export class HomeController implements IHomeController {
   constructor(
     @inject(TYPES.HomeLayoutService) private _homeLayoutService: IHomeLayoutService,
-    @inject(TYPES.HomeSectionService) private _homeSectionService: IHomeSectionService
+    @inject(TYPES.HomeSectionService) private _homeSectionService: IHomeSectionService,
+    @inject(TYPES.HomeService) private _homeService: IHomeService
   ) {}
 
-  getHome = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getHome = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
+    const home = await this._homeService.getHome();
+    res.status(HTTPSTATUS.OK).json(home);
+  });
 
   listSections = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
@@ -57,14 +63,20 @@ export class HomeController implements IHomeController {
     const { message } = await this._homeSectionService.toggleStatus(sectionId);
     res.status(HTTPSTATUS.OK).json({ message });
   });
+
   deleteSection = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { sectionId } = req.params;
     const message = await this._homeSectionService.deleteSection(sectionId);
     res.status(HTTPSTATUS.OK).json({ message });
   });
 
-  //   getLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  //   addToLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  //   removeFromLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  //   saveLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const layout = await this._homeLayoutService.getLayout();
+    res.status(HTTPSTATUS.OK).json({ layout });
+  });
+  saveLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const dto = req.body as SaveLayoutDTO;
+    const layout = await this._homeLayoutService.saveLayout(dto.items);
+    res.status(HTTPSTATUS.OK).json({ message: HOME_LAYOUT.SAVED, layout });
+  });
 }

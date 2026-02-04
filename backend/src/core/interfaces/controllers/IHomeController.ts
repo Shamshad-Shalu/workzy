@@ -7,10 +7,7 @@ export interface IHomeController {
   updateSection: RequestHandler;
   deleteSection: RequestHandler;
   toggleSectionStatus: RequestHandler;
-
   //   layout
-  //   getLayout: RequestHandler;
-  //   addToLayout: RequestHandler;
-  //   removeFromLayout: RequestHandler;
-  //   saveLayout: RequestHandler;
+  getLayout: RequestHandler;
+  saveLayout: RequestHandler;
 }

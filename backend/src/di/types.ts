@@ -43,6 +43,7 @@ const TYPES = {
 
   // home
   HomeController: Symbol.for("HomeController"),
+  HomeService: Symbol.for("HomeService"),
   HomeLayoutService: Symbol.for("HomeLayoutService"),
   HomeSectionService: Symbol.for("HomeSectionService"),
   HomeSectionRepository: Symbol.for("HomeSectionRepository"),

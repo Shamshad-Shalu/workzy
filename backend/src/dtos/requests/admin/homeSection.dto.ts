@@ -223,7 +223,7 @@ class TestimonialsDataDTO {
   items!: TestimonialItemDTO[];
 }
 
-/* ================= NEARBY_WORKERS & TOP_SERVICES ================= */
+// NEARBY_WORKERS & TOP_SERVICES
 
 class NearbyWorkersDataDTO {
   @IsOptional()

@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 
 import redisClient from "@/config/redisClient";
 import { HOME_SECTION, HTTPSTATUS, PURPOSE_POLICY, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import {
   IHomeSectionService,
@@ -27,6 +28,7 @@ import { extractKeyFromUrl } from "@/utils/upload";
 export class HomeSectionService implements IHomeSectionService {
   constructor(
     @inject(TYPES.HomeSectionRepository) private _homeSectionRepository: IHomeSectionRepository,
+    @inject(TYPES.HomeLayoutRepository) private _homeLayoutRepository: IHomeLayoutRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
   async createSection(payload: HomeSectionRequestDTO): Promise<HomeSectionResponseDTO> {
@@ -63,6 +65,16 @@ export class HomeSectionService implements IHomeSectionService {
     });
     if (alreadyExist) throw new CustomError(HOME_SECTION.EXISTS, HTTPSTATUS.FORBIDDEN);
 
+    if (section.type !== payload.type) {
+      const layout = await this._homeLayoutRepository.findOne({
+        key: "HOME",
+        "items.sectionId": sectionId,
+      });
+      if (layout) {
+        throw new CustomError(HOME_SECTION.IN_LAYOUT_CANNOT_CHANGE_TYPE, HTTPSTATUS.FORBIDDEN);
+      }
+    }
+
     const newData = this.sanitizeHomeSectionData(
       payload.data as Record<string, unknown>
     ) as unknown as HomeSectionDataType;
@@ -74,7 +86,6 @@ export class HomeSectionService implements IHomeSectionService {
 
     const removed = oldKeys.filter((k) => !newSet.has(k));
 
-    await Promise.allSettled(removed.map((k) => this._s3Service.deleteFile(k)));
     const updated = await this._homeSectionRepository.update(sectionId, {
       name: payload.name,
       type: payload.type,
@@ -84,7 +95,11 @@ export class HomeSectionService implements IHomeSectionService {
     if (!updated) {
       if (!updated) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
+    await Promise.allSettled(removed.map((k) => this._s3Service.deleteFile(k)));
+
     await clearRedisListCache("sections:list");
+    await clearRedisListCache("layout:admin");
+    await clearRedisListCache("home:public");
     return HomeSectionResponseDTO.fromEntity(updated);
   }
 
@@ -94,6 +109,7 @@ export class HomeSectionService implements IHomeSectionService {
       sectionId,
       HOME_SECTION.NOT_FOUND
     );
+    await this.preventIfInLayout(section.id, "disable");
     const newStatus = !section.isActive;
     const message = newStatus ? HOME_SECTION.ENABLED : HOME_SECTION.DISABLED;
 
@@ -112,13 +128,33 @@ export class HomeSectionService implements IHomeSectionService {
       sectionId,
       HOME_SECTION.NOT_FOUND
     );
+    await this.preventIfInLayout(section.id, "delete");
 
     const urlKeys = this.extractManagedKeys(section.data);
-    await Promise.allSettled(urlKeys.map((k) => this._s3Service.deleteFile(k)));
     const deleted = await this._homeSectionRepository.delete(sectionId);
     if (!deleted) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+
+    await Promise.allSettled(urlKeys.map((k) => this._s3Service.deleteFile(k)));
     await clearRedisListCache("sections:list");
     return HOME_SECTION.DELETED;
+  }
+  private async preventIfInLayout(
+    sectionId: Types.ObjectId,
+    action: "delete" | "disable"
+  ): Promise<void> {
+    const layout = await this._homeLayoutRepository.findOne({
+      key: "HOME",
+      "items.sectionId": sectionId,
+    });
+
+    if (layout) {
+      const message =
+        action === "delete"
+          ? HOME_SECTION.IN_LAYOUT_CANNOT_DELETE
+          : HOME_SECTION.IN_LAYOUT_CANNOT_DISABLE;
+
+      throw new CustomError(message, HTTPSTATUS.FORBIDDEN);
+    }
   }
 
   async listSections(
@@ -131,7 +167,6 @@ export class HomeSectionService implements IHomeSectionService {
     const cacheKey = `sections:list:${type}:${status}:${page}:${limit}:${search}`;
     const cachedData = await redisClient.get(cacheKey);
     if (cachedData) {
-      console.log("from the key::", cacheKey);
       return JSON.parse(cachedData);
     }
     const skip = (page - 1) * limit;

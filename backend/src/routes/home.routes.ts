@@ -4,6 +4,7 @@ import { ROLE } from "@/constants";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
+import { SaveLayoutDTO } from "@/dtos/requests/admin/homeLayout.request.dto";
 import {
   HomeSectionRequestDTO,
   HomeSectionUpdateRequestDTO,
@@ -30,6 +31,6 @@ router.delete("/sections/:sectionId", controller.deleteSection);
 router.patch("/sections/:sectionId/toggle-status", controller.toggleSectionStatus);
 
 // layout
-// router.get("layout", controller.getLayout);
-
+router.get("/layout", controller.getLayout);
+router.put("/layout", validateDto(SaveLayoutDTO), controller.saveLayout);
 export default router;

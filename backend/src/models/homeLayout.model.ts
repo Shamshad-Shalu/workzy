@@ -3,7 +3,6 @@ import mongoose, { HydratedDocument, Schema, Types } from "mongoose";
 interface IHomeLayoutItem {
   sectionId: Types.ObjectId;
   order: number;
-  isActive: boolean;
 }
 
 type HomeLayoutFields = {
@@ -17,7 +16,6 @@ const HomeLayoutItemSchema = new Schema<IHomeLayoutItem>(
   {
     sectionId: { type: Schema.Types.ObjectId, ref: "HomeSection", required: true },
     order: { type: Number, required: true, min: 1 },
-    isActive: { type: Boolean, default: true },
   },
   { _id: false }
 );

@@ -1,10 +1,11 @@
 import { Types } from "mongoose";
 
-import { WhyChooseIcon } from "@/constants/home";
+import { HomeSectionType, WhyChooseIcon } from "@/constants/home";
+import { IHomeSection } from "@/models/homeSection.model";
 
 export interface IHeroSlide {
   categoryId: Types.ObjectId;
-  eyebrow: string; // badge label shown above title
+  eyebrow: string; // badge label
   title: string; // categor.name or custom name ,
   subTitle: string;
   description: string; // categor.discription or custom discription ,
@@ -112,3 +113,24 @@ export type HomeSectionDataType =
   | IHowItWorksData
   | IWhyChooseData
   | ITestimonialsData;
+
+export interface IHomeLayoutEntity {
+  sectionId: Types.ObjectId;
+  order: number;
+  name: string;
+  type: HomeSectionType;
+}
+
+export interface IHomeSectionWithOrder extends IHomeSection {
+  order: number;
+}
+
+export interface IHeroSlideEnriched extends IHeroSlide {
+  categoryImage: string;
+}
+
+export interface IHeroSectionDataEnriched {
+  autoPlay: boolean;
+  interval: number;
+  slides: IHeroSlideEnriched[];
+}
