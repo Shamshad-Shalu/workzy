@@ -4,11 +4,14 @@ import type { ServiceItem } from '@/types/home';
 
 interface ServiceCardProps {
   service: ServiceItem;
+  onServiceClick?: (categoryId: string) => void;
+  onSubServiceClick?: (categoryId: string, serviceId: string) => void;
 }
 
-export const ServiceCard = ({ service }: ServiceCardProps) => {
+export const ServiceCard = ({ service, onServiceClick, onSubServiceClick }: ServiceCardProps) => {
   return (
     <div
+      onClick={() => onServiceClick?.(service.id)}
       className="
           w-full  h-full
           bg-popover rounded-2xl overflow-hidden
@@ -45,13 +48,17 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
 
         <div className="mb-4">
           <div className="flex flex-wrap gap-2">
-            {service.subServices.slice(0, 3).map((sub, idx) => (
-              <span
-                key={idx}
-                className="px-2 py-1 bg-secondary text-muted-foreground text-xs rounded-full"
+            {service.subServices.slice(0, 3).map(sub => (
+              <button
+                key={sub.id}
+                onClick={e => {
+                  e.stopPropagation();
+                  onSubServiceClick?.(service.id, sub.id);
+                }}
+                className="px-2 py-1 bg-secondary text-muted-foreground text-xs rounded-full hover:bg-secondary/80 transition cursor-pointer"
               >
-                {sub}
-              </span>
+                {sub.name}
+              </button>
             ))}
             {service.subServices.length > 3 && (
               <span className="px-2 py-1 rounded-full text-xs font-medium transition-colors bg-indigo-500/20 text-indigo-200  dark:text-indigo-400">
@@ -61,7 +68,13 @@ export const ServiceCard = ({ service }: ServiceCardProps) => {
           </div>
         </div>
         <div className="flex items-center justify-center pt-4 border-t border-muted-secondary">
-          <button className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm group-hover:gap-3 transition-all">
+          <button
+            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm group-hover:gap-3 transition-all"
+            onClick={e => {
+              e.stopPropagation();
+              onServiceClick?.(service.id);
+            }}
+          >
             View Details
             <ArrowRight className="w-4 h-4" />
           </button>

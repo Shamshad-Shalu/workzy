@@ -4,6 +4,7 @@ import {
   CategoryLevelsEntity,
   CategorySuggestionEntity,
   ICategory,
+  ServiceItemEntity,
 } from "@/types/category";
 
 export interface ICategoryRepository extends BaseRepository<ICategory> {
@@ -17,4 +18,5 @@ export interface ICategoryRepository extends BaseRepository<ICategory> {
   findAncestors(categoryId: string): Promise<CategoryAncestorEntity[]>;
   findCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLevelsEntity[]>;
   findSuggestions(search: string, limit: number): Promise<CategorySuggestionEntity[]>;
+  findServicesByCategory(categoryId: string, limit: number): Promise<ServiceItemEntity[]>;
 }

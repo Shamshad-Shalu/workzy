@@ -8,7 +8,7 @@ const CategorySchema: Schema<ICategory> = new Schema(
     description: { type: String },
     iconUrl: { type: String, default: null },
     imageUrl: { type: String, default: null },
-    parentId: { type: Schema.Types.ObjectId, ref: "Services", default: null },
+    parentId: { type: Schema.Types.ObjectId, ref: "Category", default: null },
     level: {
       type: Number,
       enum: [1, 2, 3],

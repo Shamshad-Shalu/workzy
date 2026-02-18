@@ -124,7 +124,7 @@ export interface WorkersApiResponse {
 }
 
 export interface ServiceItem {
-  categoryId: string;
+  id: string;
   name: string;
   description: string;
   imageUrl: string;

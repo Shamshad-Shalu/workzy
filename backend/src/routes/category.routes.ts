@@ -13,7 +13,7 @@ router.get("/levels", categoryController.getCategoryLevels);
 router.get("/suggestions", categoryController.getCategorySuggestions);
 router.get("/trending", categoryController.getTrendingCategories);
 router.get("/:id/ancestors", categoryController.getCategoryAncestors);
-// router.get("/:categoryId/services", categoryController.getServicesByCategory);
+router.get("/:categoryId/services", categoryController.getServicesByCategory);
 router.get("/:categoryId", categoryController.getCategory);
 
 export default router;

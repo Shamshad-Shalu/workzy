@@ -10,6 +10,7 @@ import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dt
 import {
   CategoryAncestorResponseDTO,
   CategoryLiteDTO,
+  CategoryServicesResponseDTO,
   CategorySuggestionResponseDTO,
   CategoryTrendingResponseDTO,
 } from "@/dtos/responses/category.dto";
@@ -120,5 +121,16 @@ export class CategoryService implements ICategoryService {
 
     await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 * 10 }); // 10 minutes
     return response;
+  }
+
+  async getServicesByCategory(
+    categoryId: string,
+    limit: number
+  ): Promise<CategoryServicesResponseDTO[]> {
+    if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+      throw new CustomError("Invalid categoryId", HTTPSTATUS.BAD_REQUEST);
+    }
+    const categories = await this._categoryRepository.findServicesByCategory(categoryId, limit);
+    return CategoryServicesResponseDTO.fromEntities(categories);
   }
 }

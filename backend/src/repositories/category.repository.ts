@@ -10,6 +10,7 @@ import {
   CategoryLevelsEntity,
   CategorySuggestionEntity,
   ICategory,
+  ServiceItemEntity,
 } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/filters/buildCategoryFilter";
 
@@ -134,5 +135,79 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       });
     }
     return Array.from(uniqueMap.values());
+  }
+
+  async findServicesByCategory(categoryId: string, limit: number): Promise<ServiceItemEntity[]> {
+    const _id = new mongoose.Types.ObjectId(categoryId);
+
+    const pipeline: PipelineStage[] = [
+      {
+        $match: { _id, isAvailable: true },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          let: { parentId: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$parentId", "$$parentId"] },
+                isAvailable: true,
+              },
+            },
+            { $sort: { name: 1 } },
+            { $limit: limit },
+            {
+              $lookup: {
+                from: "categories",
+                let: { parent2: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: { $eq: ["$parentId", "$$parent2"] },
+                      isAvailable: true,
+                    },
+                  },
+                  {
+                    $project: {
+                      _id: 1,
+                      name: 1,
+                    },
+                  },
+                ],
+                as: "subServices",
+              },
+            },
+
+            {
+              $project: {
+                _id: 1,
+                name: 1,
+                description: 1,
+                imageUrl: 1,
+                iconUrl: 1,
+                subServices: 1,
+              },
+            },
+          ],
+          as: "services",
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          services: 1,
+        },
+      },
+    ];
+
+    const result = await this.model
+      .aggregate<{
+        _id: mongoose.Types.ObjectId;
+        services: ServiceItemEntity[];
+      }>(pipeline)
+      .exec();
+
+    return result[0]?.services || [];
   }
 }

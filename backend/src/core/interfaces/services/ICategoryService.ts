@@ -2,6 +2,7 @@ import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dt
 import {
   CategoryAncestorResponseDTO,
   CategoryLiteDTO,
+  CategoryServicesResponseDTO,
   CategorySuggestionResponseDTO,
   CategoryTrendingResponseDTO,
 } from "@/dtos/responses/category.dto";
@@ -19,4 +20,5 @@ export interface ICategoryService {
   getCategoriesByLevel(level: number, parentId: string | null): Promise<CategoryLiteDTO[]>;
   getCategorySuggestions(search: string, limit: number): Promise<CategorySuggestionResponseDTO[]>;
   getTrendingCategories(limit: number): Promise<CategoryTrendingResponseDTO[]>;
+  getServicesByCategory(categoryId: string, limit: number): Promise<CategoryServicesResponseDTO[]>;
 }

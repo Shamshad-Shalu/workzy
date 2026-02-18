@@ -69,5 +69,10 @@ export class CategoryController implements ICategoryController {
     res.status(200).json({ results });
   });
 
-  // getServicesByCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getServicesByCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { categoryId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const services = await this._categoryService.getServicesByCategory(categoryId, limit);
+    res.status(200).json({ services });
+  });
 }

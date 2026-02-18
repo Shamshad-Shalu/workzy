@@ -39,3 +39,11 @@ export type CategoryTrendingEntity = Pick<
   ICategory,
   "_id" | "name" | "level" | "iconUrl" | "parentId"
 >;
+
+export type SubServiceEntity = Pick<ICategory, "_id" | "name">;
+export type ServiceItemEntity = Pick<
+  ICategory,
+  "_id" | "name" | "description" | "iconUrl" | "imageUrl"
+> & {
+  subServices: SubServiceEntity[];
+};

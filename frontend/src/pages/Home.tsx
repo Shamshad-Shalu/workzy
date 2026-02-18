@@ -1,3 +1,5 @@
+import { useRef, useState } from 'react';
+
 import { HeroCarousel } from '@/components/organisms/HeroCarousel';
 import { HOME_SECTION_TYPE } from '@/constants';
 import BannerSection from '@/features/user/home/components/BannerSection';
@@ -19,6 +21,9 @@ const appStats = {
 };
 
 export default function HomePage() {
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const categoryShowcaseRef = useRef<HTMLDivElement | null>(null);
+
   const { homeData, isLoading, error } = useHomeSections();
 
   if (isLoading) {
@@ -31,9 +36,12 @@ export default function HomePage() {
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
 
   const handleHeroCategoryClick = (categoryId: string) => {
-    //   navigate(`#/${categoryId}`);
-    console.log('Clicked category ID:', categoryId);
+    setSelectedCategoryId(categoryId);
+    requestAnimationFrame(() => {
+      categoryShowcaseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
+  console.log('Selected category:', selectedCategoryId);
 
   return (
     <main>
@@ -50,7 +58,11 @@ export default function HomePage() {
             );
 
           case HOME_SECTION_TYPE.CATEGORY_SHOWCASE:
-            return <CategoryShowcaseSection key={section.order} section={section} />;
+            return (
+              <div key={section.order} ref={categoryShowcaseRef}>
+                <CategoryShowcaseSection section={section} />;
+              </div>
+            );
 
           case HOME_SECTION_TYPE.BANNER:
             return <BannerSection key={section.order} section={section} />;

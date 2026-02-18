@@ -1,4 +1,4 @@
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from '@/components/ui/skeleton';
 
 export default function LoadingHome() {
   return (
@@ -63,7 +63,7 @@ function SectionHeadingSkeleton() {
   );
 }
 
-function CarouselRowSkeleton({ cards = 5 }: { cards?: number }) {
+export function CarouselRowSkeleton({ cards = 5 }: { cards?: number }) {
   return (
     <div className="flex gap-4 overflow-hidden">
       {Array.from({ length: cards }).map((_, i) => (
@@ -80,7 +80,7 @@ function CarouselRowSkeleton({ cards = 5 }: { cards?: number }) {
   );
 }
 
-function CategoryShowcaseSkeleton() {
+export function CategoryShowcaseSkeleton() {
   return (
     <section className="py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

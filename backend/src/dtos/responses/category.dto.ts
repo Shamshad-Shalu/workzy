@@ -5,6 +5,7 @@ import {
   CategoryLevelsEntity,
   CategorySuggestionEntity,
   CategoryTrendingEntity,
+  ServiceItemEntity,
 } from "@/types/category";
 
 type ObjectIdLike = { toString(): string };
@@ -110,5 +111,34 @@ export class CategoryAncestorResponseDTO {
 
   static fromEntities(entities: CategoryAncestorEntity[]): CategoryAncestorResponseDTO[] {
     return entities.map((entity) => CategoryAncestorResponseDTO.fromEntity(entity));
+  }
+}
+
+export class CategoryServicesResponseDTO {
+  @Expose() id!: string;
+  @Expose() name!: string;
+  @Expose() description!: string;
+  @Expose() imageUrl!: string;
+  @Expose() iconUrl!: string;
+  @Expose() subServices!: { id: string; name: string }[];
+
+  static fromEntity(entity: ServiceItemEntity): CategoryServicesResponseDTO {
+    const dto = new CategoryServicesResponseDTO();
+
+    dto.id = entity._id.toString();
+    dto.name = entity.name;
+    dto.description = entity.description;
+    dto.imageUrl = entity.imageUrl;
+    dto.iconUrl = entity.iconUrl;
+    dto.subServices = entity.subServices.map((subService) => ({
+      id: subService._id.toString(),
+      name: subService.name,
+    }));
+
+    return dto;
+  }
+
+  static fromEntities(entities: ServiceItemEntity[]): CategoryServicesResponseDTO[] {
+    return entities.map((entity) => CategoryServicesResponseDTO.fromEntity(entity));
   }
 }
