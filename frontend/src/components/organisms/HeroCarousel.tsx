@@ -3,29 +3,16 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+import type { HeroSection } from '@/types/home';
+
 import Button from '../atoms/Button';
 
 import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 
-interface SlideData {
-  imageUrl: string;
-  title: string;
-  subtitle: string;
-  description: string;
-  category: string;
-  cta?: string;
-}
-
-interface HeroData {
-  autoPlay: boolean;
-  interval: number;
-  slides: SlideData[];
-}
-
 interface HeroCarouselProps {
-  data: HeroData;
+  data: HeroSection;
   stats: Record<string, string>;
-  onCategoryClick?: (category: string) => void;
+  onCategoryClick?: (categoryId: string) => void;
 }
 
 function CoreCarousel({
@@ -128,7 +115,7 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
               >
                 <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-white/15 backdrop-blur-md rounded-full text-white text-xs mb-4 border border-white/20">
                   <Sparkles className="w-3 h-3" />
-                  {slide.category}
+                  {slide.eyebrow}
                 </div>
                 <h1
                   className="
@@ -145,7 +132,7 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
                   {slide.title}
                   <br />
                   <span className="bg-gradient-to-r from-yellow-300 via-orange-400 to-pink-500 bg-clip-text text-transparent">
-                    {slide.subtitle}
+                    {slide.subTitle}
                   </span>
                 </h1>
                 <p className="text-base lg:text-lg text-white/90 mb-6 max-w-xl">
@@ -155,7 +142,7 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
                   <Button
                     iconRight={<ArrowRight className="w-4 h-4" />}
                     variant="secondary"
-                    onClick={() => onCategoryClick?.(slide.category)}
+                    onClick={() => onCategoryClick?.(slide.categoryId)}
                     className="px-6 py-6 font-semibold"
                   >
                     Explore Services

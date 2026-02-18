@@ -179,8 +179,8 @@ export default function JoinUsPage() {
       <section className="py-12 sm:py-16 bg-card border-y border-border overflow-hidden">
         <div className="section-container">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-10 gap-x-4 text-center">
-            {STATS_CARDS.map(stat => (
-              <div className="flex flex-col items-center p-2">
+            {STATS_CARDS.map((stat, i) => (
+              <div key={i} className="flex flex-col items-center p-2">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} prefix={stat.prefix} />
                 <p className="mt-2 text-base sm:text-lg font-medium text-muted-foreground">
                   {stat.name}

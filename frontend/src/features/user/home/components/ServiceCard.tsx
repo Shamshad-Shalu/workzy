@@ -1,16 +1,9 @@
 import { ArrowRight } from 'lucide-react';
 
-export interface Service {
-  id: string;
-  name: string;
-  description: string;
-  imageUrl: string;
-  bookings: string;
-  subServices: string[];
-}
+import type { ServiceItem } from '@/types/home';
 
 interface ServiceCardProps {
-  service: Service;
+  service: ServiceItem;
 }
 
 export const ServiceCard = ({ service }: ServiceCardProps) => {

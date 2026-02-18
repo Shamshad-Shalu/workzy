@@ -7,24 +7,40 @@ import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutService";
 import { IHomeSectionService, ListType } from "@/core/interfaces/services/IHomeSectionService";
 import { IHomeService } from "@/core/interfaces/services/IHomeService";
+import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { SaveLayoutDTO } from "@/dtos/requests/admin/homeLayout.request.dto";
 import {
   HomeSectionRequestDTO,
   HomeSectionUpdateRequestDTO,
 } from "@/dtos/requests/admin/homeSection.dto";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class HomeController implements IHomeController {
   constructor(
     @inject(TYPES.HomeLayoutService) private _homeLayoutService: IHomeLayoutService,
     @inject(TYPES.HomeSectionService) private _homeSectionService: IHomeSectionService,
-    @inject(TYPES.HomeService) private _homeService: IHomeService
+    @inject(TYPES.HomeService) private _homeService: IHomeService,
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService
   ) {}
 
   getHome = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
     const home = await this._homeService.getHome();
     res.status(HTTPSTATUS.OK).json(home);
+  });
+
+  getNearbyWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const radius = Number(req.query.radius ?? 20);
+    const limit = Number(req.query.limit ?? 10);
+    const lat = Number(req.query.lat);
+    const lng = Number(req.query.lng);
+
+    if (isNaN(lat) || isNaN(lng)) {
+      throw new CustomError("Invalid query parameters", HTTPSTATUS.BAD_REQUEST);
+    }
+    const workers = await this._workerService.getNearbyWorkers(lat, lng, radius, limit);
+    res.status(HTTPSTATUS.OK).json({ workers });
   });
 
   listSections = asyncHandler(async (req: Request, res: Response): Promise<void> => {

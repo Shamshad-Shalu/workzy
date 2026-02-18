@@ -1,20 +1,13 @@
 import { CheckCircle, MapPin } from 'lucide-react';
-export interface Worker {
-  id: string;
-  displayName: string;
-  tagline: string;
-  profileImage: string;
-  experience: number;
-  completedJobs: number;
-  distance: string;
-  verified: boolean;
-}
+
+import type { Worker } from '@/types/home';
 
 interface WorkerCardProps {
   worker: Worker;
+  onclick?: (workerId: string) => void;
 }
 
-export const WorkerCard = ({ worker }: WorkerCardProps) => {
+export const WorkerCard = ({ worker, onclick }: WorkerCardProps) => {
   return (
     <div
       className="
@@ -26,16 +19,21 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
         overflow-hidden
         cursor-pointer group
         hover:-translate-y-1
+        min-h-[220px]
+        flex flex-col
       "
+      onClick={() => onclick?.(worker.workerId)}
+      role="button"
+      tabIndex={0}
     >
-      <div className="p-5">
+      <div className="p-5 flex-1 flex flex-col">
         {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className="relative">
+        <div className="flex items-start gap-4 ">
+          <div className="relative shrink-0">
             <img
               src={worker.profileImage}
               alt={worker.displayName}
-              className="w-16 h-16 rounded-full object-cover"
+              className="w-14 h-14 rounded-full object-cover"
             />
 
             {worker.verified && (
@@ -49,19 +47,21 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
             <h3 className="font-bold text-foreground text-lg group-hover:text-indigo-600 transition-colors">
               {worker.displayName}
             </h3>
-            <p className="text-sm text-indigo-600 font-medium">{worker.tagline}</p>
+            <p className="text-sm text-indigo-600 font-medium leading-snug overflow-hidden text-ellipsis [display:-webkit-box] [-webkit-line-clamp:2] [-webkit-box-orient:vertical]">
+              {worker.tagline}
+            </p>
 
             <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
               <span>{worker.experience}y exp</span>
-              <span>•</span>
-              <span>{worker.completedJobs} jobs</span>
+              {/* <span>•</span>
+              <span>{worker.completedJobs} jobs</span> */}
             </div>
           </div>
         </div>
         <div className="grid grid-cols-2 gap-3 mb-4">
           <div className="flex items-center gap-2 text-sm">
             <MapPin className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">{worker.distance} away</span>
+            <span className="text-muted-foreground">{worker.distance}km away</span>
           </div>
 
           {/* <div className="flex items-center gap-2 text-sm">
@@ -70,6 +70,10 @@ export const WorkerCard = ({ worker }: WorkerCardProps) => {
           </div> */}
         </div>
         <button
+          onClick={e => {
+            e.stopPropagation();
+            onclick?.(worker.workerId);
+          }}
           className="
             w-full py-3 rounded-lg
             bg-gradient-to-r from-indigo-600 to-purple-600

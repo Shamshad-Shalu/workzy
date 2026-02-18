@@ -19,6 +19,7 @@ import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto"
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
+import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import {
   WorkerAdditionalInfo,
@@ -217,5 +218,15 @@ export class WorkerService implements IWorkerService {
       throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
     }
     return await WorkerProfileResponseDTO.fromEntity(updatedWorker, this._s3Service);
+  }
+
+  async getNearbyWorkers(
+    lat: number,
+    lng: number,
+    radiusKm: number,
+    limit: number
+  ): Promise<NearbyWorkerResponseDTO[]> {
+    const workers = await this._workerRepository.findNearbyWorkers(lat, lng, radiusKm, limit);
+    return await NearbyWorkerResponseDTO.fromEntities(workers, this._s3Service);
   }
 }

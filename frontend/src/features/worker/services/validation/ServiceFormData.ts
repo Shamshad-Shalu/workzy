@@ -76,7 +76,7 @@ export const serviceSchema = z
     ),
     bulkDiscounts: progressiveBulkDiscountSchema.optional(),
     allowSuddenBooking: z.boolean().optional(),
-    isAvailable: z.boolean().optional(),
+    isActive: z.boolean().optional(),
     experience: z.preprocess(v => Number(v), z.number().min(0)).optional(),
     maxTravelCost: z.preprocess(
       v => (v === '' || v === null || v === undefined ? null : Number(v)),

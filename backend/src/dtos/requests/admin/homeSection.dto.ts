@@ -86,7 +86,7 @@ class CategoryShowcaseDataDTO {
 
   @IsInt()
   @Min(1)
-  @Max(20)
+  @Max(10, { message: "only the 10 services will be showcased at max" })
   limit!: number;
 }
 /* ====== BANNER ====== */

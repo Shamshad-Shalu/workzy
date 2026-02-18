@@ -16,6 +16,7 @@ const router = Router();
 const controller = container.get<IHomeController>(TYPES.HomeController);
 
 router.get("/", controller.getHome);
+router.get("/nearby-workers", controller.getNearbyWorkers);
 
 router.use(authenticate([ROLE.ADMIN]));
 

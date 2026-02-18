@@ -7,4 +7,5 @@ export interface ICategoryController {
   getCategoryLevels: RequestHandler;
   getCategorySuggestions: RequestHandler;
   getTrendingCategories: RequestHandler;
+  // getServicesByCategory: RequestHandler;
 }

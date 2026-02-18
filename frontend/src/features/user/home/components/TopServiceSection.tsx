@@ -1,19 +1,28 @@
+import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 
 import { AppCarousel } from '@/components/molecules/AppCarousel';
-
-export interface TopService {
-  id: string;
-  name: string;
-  imageUrl: string;
-  bookings: string;
-}
+import { homeService } from '@/services/home.service';
+import type { TopServiceItem, TopServicesApiResponse, TopServicesSection } from '@/types/home';
 
 interface TopServiceSectionProps {
-  topServices: TopService[];
+  section: TopServicesSection;
 }
 
-export default function TopServiceSection({ topServices }: TopServiceSectionProps) {
+export default function TopServiceSection({ section }: TopServiceSectionProps) {
+  const { title, limit, subTitle } = section;
+
+  const { data: services = [], isLoading } = useQuery<
+    TopServicesApiResponse,
+    Error,
+    TopServiceItem[]
+  >({
+    queryKey: ['topServices', limit],
+    queryFn: () => homeService.getTopServices(limit),
+    select: res => res.services,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   return (
     <section className="py-16 bg-section-blue">
       {/* bg-gradient-to-br from-indigo-50 to-purple-50  */}
@@ -25,23 +34,30 @@ export default function TopServiceSection({ topServices }: TopServiceSectionProp
               Most Popular
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-              Top Booked Services
+              {title || 'Top Booked Services'}
             </h2>
-            <p className="text-muted-foreground">Join thousands of satisfied customers</p>
+            <p className="text-muted-foreground">
+              {subTitle || 'Join thousands of satisfied customers'}
+            </p>
           </div>
         </div>
-
-        <AppCarousel
-          items={topServices}
-          renderItem={service => <TopService key={service.id} service={service} />}
-          className="pl-4 basis-full min-[400px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
-        />
+        {isLoading ? (
+          <div>Loading services...</div>
+        ) : (
+          <AppCarousel
+            items={services}
+            renderItem={(service: TopServiceItem) => (
+              <TopService key={service.categoryId} service={service} />
+            )}
+            className="pl-4 basis-full min-[400px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5"
+          />
+        )}
       </div>
     </section>
   );
 }
 
-export const TopService = ({ service }: { service: TopService }) => {
+export const TopService = ({ service }: { service: TopServiceItem }) => {
   return (
     <div
       className="

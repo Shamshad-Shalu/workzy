@@ -50,3 +50,13 @@ export interface IWorker extends Document<string> {
 
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
 // completedJobs
+
+export type NearbyWorkerEntity = {
+  _id: IUser["_id"];
+  profileImage: IUser["profileImage"];
+  workerId: IWorker["_id"];
+  displayName: IWorker["displayName"];
+  tagline: IWorker["tagline"];
+  experience: IWorker["experience"];
+  distance: number;
+};

@@ -1,23 +1,23 @@
 import { CheckCircle, Search, Users } from 'lucide-react';
 
-interface HowItWorksStep {
-  step: number;
-  title: string;
-  description: string;
-  imageUrl: string;
-}
+import type { HowItWorksSection } from '@/types/home';
 
 interface HowItWorksSectionProps {
-  steps: HowItWorksStep[];
+  section: HowItWorksSection;
 }
 
-export default function HowItWorksSection({ steps }: HowItWorksSectionProps) {
+export default function HowItWorksSection({ section }: HowItWorksSectionProps) {
+  const { title, subTitle, steps } = section;
   return (
     <section className="py-16 bg-card transition-colors duration-300">
       <div className="section-container">
         <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">How It Works</h2>
-          <p className="text-xl text-muted-foreground">Simple, secure, and transparent</p>
+          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-3">
+            {title || 'How It Works'}
+          </h2>
+          <p className="text-xl text-muted-foreground">
+            {subTitle || 'Simple, secure, and transparent'}
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

@@ -128,6 +128,9 @@ export class BannerSectionDTO {
   @Expose()
   ctaText?: string;
 
+  @Expose()
+  categoryId?: string;
+
   static fromEntity(section: IHomeSectionWithOrder): BannerSectionDTO {
     const data = section.data as IBannerSectionData;
 
@@ -349,7 +352,7 @@ export class TestimonialsSectionDTO {
 
   @Expose()
   @Type(() => TestimonialItemDTO)
-  items!: TestimonialItemDTO[];
+  testimonials!: TestimonialItemDTO[];
 
   static fromEntity(section: IHomeSectionWithOrder): TestimonialsSectionDTO {
     const data = section.data as ITestimonialsData;
@@ -358,7 +361,7 @@ export class TestimonialsSectionDTO {
     dto.type = section.type;
     dto.order = section.order;
     dto.title = data.title;
-    dto.items = data.items.map((item) => {
+    dto.testimonials = data.items.map((item) => {
       const itemDto = new TestimonialItemDTO();
       itemDto.name = item.name;
       itemDto.service = item.service;

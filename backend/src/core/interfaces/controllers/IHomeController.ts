@@ -2,6 +2,8 @@ import { RequestHandler } from "express";
 
 export interface IHomeController {
   getHome: RequestHandler;
+  getNearbyWorkers: RequestHandler;
+  //serctions
   listSections: RequestHandler;
   createSection: RequestHandler;
   updateSection: RequestHandler;

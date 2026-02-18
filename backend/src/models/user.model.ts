@@ -12,6 +12,7 @@ const LocationSchema = new Schema<ILocation>(
     },
     coordinates: {
       type: [Number],
+      required: true, // [lng , lat]
     },
   },
   { _id: false }

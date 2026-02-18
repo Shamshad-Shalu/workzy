@@ -1,26 +1,21 @@
 import { Shield, Star, Clock, Award } from 'lucide-react';
 
-interface TrustPoint {
-  icon: string;
-  imageUrl: string;
-  stat: string;
-  title: string;
-  description: string;
-}
+import type { WhyChooseSection } from '@/types/home';
 
 interface TrustSectionProps {
-  trustPoints: TrustPoint[];
+  section: WhyChooseSection;
 }
 
-export default function TrustSection({ trustPoints }: TrustSectionProps) {
+export default function TrustSection({ section }: TrustSectionProps) {
+  const { title, subTitle, items: trustPoints } = section;
   return (
     <section className=" bg-section-dark py-20 transition-colors duration-500">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h2 className="text-4xl md:text-5xl font-bold mb-4 text-background">
-            Why Choose Workzy?
+            {title || 'Why Choose Workzy?'}
           </h2>
-          <p className="text-xl text-muted">Your trust, our priority</p>
+          <p className="text-xl text-muted">{subTitle || 'Your trust, our priority'}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
