@@ -62,10 +62,10 @@ export default function WorkerManagementPage() {
   };
 
   const handleSubmitReview = async (data: ReviewWorkerSchemaType) => {
-    if (!selectedWorker?.id) {
+    if (!verifySelectedWorker?.id) {
       return;
     }
-    verifyWorkerMutation.mutate({ id: selectedWorker.id, data });
+    verifyWorkerMutation.mutate({ id: verifySelectedWorker.id, data });
   };
 
   return (

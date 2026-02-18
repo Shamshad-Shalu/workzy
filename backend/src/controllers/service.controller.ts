@@ -20,7 +20,6 @@ export class ServiceController implements IServiceController {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.UNAUTHORIZED);
     }
     const data = req.body as ServiceRequestDTO;
-    console.log({ data, workerId });
     const service = await this._serviceMangement.createService(workerId, data);
 
     res.status(HTTPSTATUS.CREATED).json({ message: SERVICE.CREATED, service });

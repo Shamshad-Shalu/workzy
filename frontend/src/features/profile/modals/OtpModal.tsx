@@ -48,8 +48,16 @@ export default function OtpModal({ open, onOpenChange, otpData }: Props) {
     onOpenChange(false);
   }
   useEffect(() => {
-    resetTimer();
+    if (open) {
+      resetTimer();
+    }
   }, [open, resetTimer]);
+
+  useEffect(() => {
+    if (!open) {
+      setOtpValue('');
+    }
+  }, [open]);
 
   const handleResendOtp = async () => {
     if (timer !== 0) {
@@ -60,6 +68,7 @@ export default function OtpModal({ open, onOpenChange, otpData }: Props) {
       return;
     }
     const res = await resendOtp(otpData?.type, otpData?.value);
+    setOtpValue('');
     toast.success(res.message);
     resetTimer();
   };

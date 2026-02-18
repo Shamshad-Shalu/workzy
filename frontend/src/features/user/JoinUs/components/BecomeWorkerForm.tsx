@@ -5,7 +5,6 @@ import { Controller, useForm } from 'react-hook-form';
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
-import Select from '@/components/atoms/Select';
 import { Textarea } from '@/components/atoms/Textarea';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
 import { UploadPurposes } from '@/constants/upload';
@@ -22,19 +21,15 @@ export default function BecomeWorkerForm({ onSubmit, disabled = false }: BecomeW
     displayName: '',
     about: '',
     tagline: '',
-    defaultRate: {
-      type: 'fixed',
-      amount: 0,
-    },
+    defaultRate: 0,
     document: '',
+    experience: 0,
   };
 
   const {
     register,
     control,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<JoinWorkerSchemaType>({
     resolver: zodResolver(JoinWorkerSchema),
@@ -112,24 +107,23 @@ export default function BecomeWorkerForm({ onSubmit, disabled = false }: BecomeW
               />
             </div>
             <div>
+              <div>
+                <Label>Service Experience *</Label>
+                <Input
+                  type="number"
+                  placeholder="Enter experience in years"
+                  className="px-3"
+                  error={errors.experience?.message}
+                  {...register('experience', { valueAsNumber: true })}
+                />
+              </div>
               <Label>Service Rate Amount *</Label>
               <Input
                 type="number"
                 placeholder="Enter amount"
                 className="px-3"
-                error={errors.defaultRate?.amount?.message}
-                {...register('defaultRate.amount', { valueAsNumber: true })}
-              />
-              <Label>Rate Type *</Label>
-              <Select
-                placeholder="Select Type"
-                value={watch('defaultRate.type')}
-                onChange={v => setValue('defaultRate.type', v as 'hourly' | 'fixed')}
-                error={errors.defaultRate?.type?.message}
-                options={[
-                  { label: 'Per Hour', value: 'hourly' },
-                  { label: 'Fixed Rate', value: 'fixed' },
-                ]}
+                error={errors.defaultRate?.message}
+                {...register('defaultRate', { valueAsNumber: true })}
               />
             </div>
           </div>

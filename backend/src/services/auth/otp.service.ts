@@ -33,9 +33,8 @@ export class OTPService implements IOTPService {
     await this._emailService.sendOtpEmail(existingData.userData, newOtp);
   }
 
-  async verifyAndRetrieveUser(email: string, otp: string): Promise<RegisterRequestDTO> {
-    const storedData = await redisClient.get(`otp:${email}`);
-
+  async verifyAndRetrieveUser(key: string, otp: string): Promise<RegisterRequestDTO> {
+    const storedData = await redisClient.get(`otp:${key}`);
     if (!storedData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }

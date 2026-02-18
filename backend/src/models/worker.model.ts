@@ -45,9 +45,7 @@ const workerSchema: Schema = new Schema<IWorker>(
       default: null,
     },
     defaultRate: {
-      amount: {
-        type: Number,
-      },
+      type: Number,
     },
     experience: {
       type: Number,

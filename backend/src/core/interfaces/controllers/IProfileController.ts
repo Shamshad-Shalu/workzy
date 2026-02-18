@@ -6,6 +6,7 @@ export interface IProfileController {
   uploadImage: RequestHandler;
   changePassword: RequestHandler;
   changeEmail: RequestHandler;
+  changePhone: RequestHandler;
   resentOtp: RequestHandler;
   verifyOtp: RequestHandler;
 }

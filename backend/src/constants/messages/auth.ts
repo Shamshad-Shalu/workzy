@@ -31,6 +31,8 @@ export const AUTH = {
   TOKEN_INVALID: "Invalid or expired access token",
   UNAUTHORIZED: "Unauthorized access",
   WEAK_PASSWORD: "Please enter strong password",
+
+  PHONE_BELONG_ANOTHER: "Phone number is belongs to another User",
 };
 export const EMAIL = {
   INVALID: "Invalid email ",

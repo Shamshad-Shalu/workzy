@@ -20,6 +20,10 @@ export class JoinUsDTO {
   @IsUrl()
   document!: string;
 
+  @IsNumber()
+  @Min(0, { message: "Experience cannot be negative" })
+  experience!: number;
+
   @IsNumber({}, { message: "Amount is required" })
   @Min(1, { message: "Rate must be a valid amount" })
   defaultRate!: number;

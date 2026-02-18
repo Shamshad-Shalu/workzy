@@ -18,6 +18,7 @@ router.get("/me", profileController.getProfile);
 router.patch("/me", profileController.updateProfile);
 router.post("/change-password", validateDto(ChangePasswordDTO), profileController.changePassword);
 router.post("/change-email", profileController.changeEmail);
+router.post("/change-phone", profileController.changePhone);
 router.post("/resend-otp", profileController.resentOtp);
 router.post("/verify-otp", profileController.verifyOtp);
 router.post("/upload-profile", profileController.uploadImage);

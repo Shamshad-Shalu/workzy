@@ -128,11 +128,11 @@ export default function WorkeAboutContentPage() {
         title="Change Phone"
         label="New Phone Number"
         leftIcon={<Phone size={18} />}
-        description="We'll send a verification code to your WhatsApp number."
+        description="We'll send a verification code to your email address." //WhatsApp number
         placeholder="Enter phone number"
         loading={loading}
         schema={z.object({ value: phoneRule })}
-        initialValue={user.phone}
+        initialValue={String(user.phone)}
         onSubmit={async phone => {
           const res = await changePhone(phone);
           toast.success(res.message);

@@ -27,7 +27,7 @@ router.get("/:workerId/profile", workerController.getWorkerSummary);
 router.get("/:workerId/profile/about", workerController.getWorkerProfile);
 router.patch(
   "/:workerId/profile",
-  validateDto(WorkerProfileRequestDTO, { skipMissingProperties: true }),
+  validateDto(WorkerProfileRequestDTO),
   workerController.updateWorkerProfile
 );
 

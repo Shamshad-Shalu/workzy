@@ -182,6 +182,7 @@ export default function Header() {
                     variant="inline"
                     onChange={setSearchQuery}
                     onFocus={handleOpenServiceModal}
+                    onClick={handleOpenServiceModal}
                     placeholder="Search for services"
                     className="w-full pl-9 pr-3 py-2 bg-accent border border-border rounded-r-lg text-sm outline-none focus:ring-2 focus:ring-primary/20 transition-shadow"
                   />

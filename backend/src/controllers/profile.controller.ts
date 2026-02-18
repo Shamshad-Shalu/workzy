@@ -49,7 +49,17 @@ export class ProfileController implements IProfileController {
     if (!validator.isEmail(email)) {
       throw new CustomError(EMAIL.INVALID, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._profileService.sentMail(userId, email);
+    await this._profileService.requestChangeEmail(userId, email);
+    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_SENT });
+  });
+
+  changePhone = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const { phone } = req.body;
+    await this._profileService.requestChangePhone(userId, phone);
     res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_SENT });
   });
 

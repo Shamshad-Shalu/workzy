@@ -57,9 +57,6 @@ export class EmailService implements IEmailService {
   }
 
   async sendEmail(email: string, otp: string) {
-    const data = JSON.stringify({ email, otp });
-    await redisClient.set(`otp:${email}`, data, { EX: EMAIL_OTP_EXPIRY });
-
     try {
       await transporter.sendMail({
         from: NODEMAILER_EMAIL,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useOtpTimer(initialTime: number = 30) {
   const [timer, setTimer] = useState<number>(initialTime);
@@ -7,12 +7,14 @@ export function useOtpTimer(initialTime: number = 30) {
     if (timer === 0) {
       return;
     }
-    const id = setInterval(() => setTimer(t => t - 1), 1000);
+    const id = setInterval(() => setTimer(t => Math.max(0, t - 1)), 1000);
 
     return () => clearInterval(id);
   }, [timer]);
 
-  const resetTimer = () => setTimer(initialTime);
+  const resetTimer = useCallback(() => {
+    setTimer(initialTime);
+  }, [initialTime]);
 
   return { timer, resetTimer };
 }

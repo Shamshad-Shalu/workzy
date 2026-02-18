@@ -4,7 +4,7 @@ import validator from "validator";
 
 import logger from "@/config/logger";
 import redisClient from "@/config/redisClient";
-import { AUTH, EMAIL, HTTPSTATUS, USER } from "@/constants";
+import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS, USER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
@@ -52,7 +52,23 @@ export class ProfileService implements IProfileService {
     return true;
   }
 
-  async sentMail(userId: string, email: string): Promise<boolean> {
+  async requestChangePhone(userId: string, phone: string): Promise<boolean> {
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
+    if (!validator.isMobilePhone(phone)) {
+      throw new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
+    }
+    const existing = await this._userRepository.findOne({ phone, _id: { $ne: userId } });
+    if (existing) {
+      throw new CustomError(AUTH.PHONE_BELONG_ANOTHER, HTTPSTATUS.BAD_REQUEST);
+    }
+    const otp = this._otpService.generateOTP();
+    logger.info(`otp:${otp}`);
+    await redisClient.set(`otp:${phone}`, JSON.stringify({ otp, phone }), { EX: EMAIL_OTP_EXPIRY });
+    await this._emailService.sendEmail(user.email, otp);
+    return true;
+  }
+
+  async requestChangeEmail(userId: string, email: string): Promise<boolean> {
     await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
 
     const existing = await this._userRepository.findByEmail(email);
@@ -62,18 +78,22 @@ export class ProfileService implements IProfileService {
 
     const otp = this._otpService.generateOTP();
     logger.info(`otp:${otp}`);
+    await redisClient.set(`otp:${email}`, JSON.stringify({ email, otp }), { EX: EMAIL_OTP_EXPIRY });
     await this._emailService.sendEmail(email, otp);
     return true;
   }
 
   async resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean> {
-    await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     const existingData = JSON.parse((await redisClient.get(`otp:${value}`)) as string);
     if (!existingData) {
       throw new CustomError(AUTH.OTP_EXPIRED, HTTPSTATUS.BAD_REQUEST);
     }
     const newOtp = this._otpService.generateOTP();
     logger.info(`newOtp:${newOtp}`);
+    await redisClient.set(`otp:${value}`, JSON.stringify({ otp: newOtp, type: value }), {
+      EX: EMAIL_OTP_EXPIRY,
+    });
 
     if (type === "email") {
       if (!validator.isEmail(value)) {
@@ -84,6 +104,7 @@ export class ProfileService implements IProfileService {
       if (!validator.isMobilePhone(value)) {
         throw new CustomError(AUTH.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
       }
+      await this._emailService.sendEmail(user.email, newOtp);
     }
     return true;
   }
