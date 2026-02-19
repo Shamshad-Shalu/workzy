@@ -1,3 +1,4 @@
+import { SERVICE_API } from '@/constants/apiRoutes/service.routes';
 import type { ServiceFormType } from '@/features/worker/services/validation/ServiceFormData';
 import api from '@/lib/api/axios';
 import type { CategoryOption } from '@/types/category';
@@ -20,27 +21,27 @@ const ServiceMangement = {
     workerId: string,
     { page = 1, limit = 10, search = '', status = 'all', categoryId = null }: Filters
   ): Promise<ServiceResponse> => {
-    const res = await api.get(`/services/${workerId}`, {
+    const res = await api.get(SERVICE_API.BY_ID(workerId), {
       params: { page, limit, search, status, categoryId: categoryId === 'all' ? null : categoryId },
     });
     return res.data;
   },
   getWorkerServiceCategories: async (workerId: string): Promise<CategoryOption[]> => {
-    const res = await api.get(`services/${workerId}/service-filters`);
+    const res = await api.get(SERVICE_API.FILTERS(workerId));
     return res.data;
   },
 
   toggleStatus: async (serviceId: string): Promise<{ message: string }> => {
-    const res = await api.patch(`services/${serviceId}/status`);
+    const res = await api.patch(SERVICE_API.STATUS(serviceId));
     return res.data;
   },
 
   updateService: async (serviceId: string, data: ServiceFormType): Promise<SResponse> => {
-    const res = await api.patch(`services/${serviceId}`, data);
+    const res = await api.patch(SERVICE_API.UPDATE(serviceId), data);
     return res.data;
   },
   addService: async (data: ServiceFormType): Promise<SResponse> => {
-    const res = await api.post('services', data);
+    const res = await api.post(SERVICE_API.ROOT, data);
     return res.data;
   },
 };

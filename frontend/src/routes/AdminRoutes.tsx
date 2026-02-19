@@ -15,6 +15,7 @@ const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDet
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
+const AdminHomePage = lazy(() => import('@/features/admin/home/pages/AdminHomePage'));
 
 export default function AdminRoutes() {
   return (
@@ -29,6 +30,7 @@ export default function AdminRoutes() {
             <Route path="workers" element={<WorkerManagementPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
+            <Route path="home" element={<AdminHomePage />} />
           </Route>
         </Route>
       </Routes>

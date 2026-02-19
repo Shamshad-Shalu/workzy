@@ -1,3 +1,4 @@
+import { WORKER_API } from '@/constants';
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
 import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
@@ -13,12 +14,12 @@ const WorkerProfileService = {
   getWorkerSummaryById: async (
     workerId: string
   ): Promise<{ workerInfo: WorkerInfo; workerStats: WorkerStats }> => {
-    const res = await api.get(`/worker/${workerId}/profile`);
+    const res = await api.get(WORKER_API.PROFILE(workerId));
     return res.data;
   },
 
   getWorkerProfileById: async (workerId: string): Promise<WorkerProfile> => {
-    const res = await api.get(`/worker/${workerId}/profile/about`);
+    const res = await api.get(WORKER_API.PROFILE_ABOUT(workerId));
     return res.data;
   },
 
@@ -26,7 +27,7 @@ const WorkerProfileService = {
     workerId: string,
     data: WorkerProfileSchemaType
   ): Promise<{ message: string; workerData: WorkerProfile }> => {
-    const res = await api.patch(`/worker/${workerId}/profile`, data);
+    const res = await api.patch(WORKER_API.PROFILE(workerId), data);
     return res.data;
   },
 
@@ -34,12 +35,12 @@ const WorkerProfileService = {
     userId: string,
     data: JoinWorkerSchemaType
   ): Promise<{ worker: Worker; message: string }> => {
-    const res = await api.post(`/worker/joinUs/${userId}`, data);
+    const res = await api.post(WORKER_API.JOIN(userId), data);
     return res.data;
   },
 
   getMe: async (): Promise<Worker> => {
-    const res = await api.get('/worker/me');
+    const res = await api.get(WORKER_API.ME);
     return res.data;
   },
 
@@ -47,7 +48,7 @@ const WorkerProfileService = {
     workerId: string,
     data: ResubmitDocumentPayload
   ): Promise<{ worker: Worker; message: string }> => {
-    const res = await api.patch(`/worker/${workerId}/reApply`, data);
+    const res = await api.patch(WORKER_API.REAPPLICATION(workerId), data);
     return res.data;
   },
 };

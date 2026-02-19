@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
-import { AUTH_ROUTES, HOST, SESSION_MESSAGES } from '@/constants';
+import { AUTH_API, HOST, SESSION_MESSAGES } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import type { User } from '@/types/user';
 
@@ -23,9 +23,9 @@ export const refreshAccessToken = createAsyncThunk(
   'auth/refreshAccessToken',
   async (_, { rejectWithValue }) => {
     try {
-      const baseURL = import.meta.env.MODE === 'development' ? `${HOST}/api` : '/api';
+      const baseURL = import.meta.env.MODE === 'development' ? `${HOST}` : '';
 
-      const res = await fetch(`${baseURL}${AUTH_ROUTES.REFRESH_TOKEN}`, {
+      const res = await fetch(`${baseURL}${AUTH_API.REFRESH_TOKEN}`, {
         method: 'POST',
         credentials: 'include',
       });

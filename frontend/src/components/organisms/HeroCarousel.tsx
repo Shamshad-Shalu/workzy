@@ -127,6 +127,7 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
                     text-white
                     mb-4
                     leading-tight
+                    whitespace-nowrap
                   "
                 >
                   {slide.title}

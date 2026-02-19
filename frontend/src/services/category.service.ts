@@ -1,3 +1,4 @@
+import { CATEGORY_API } from '@/constants';
 import api from '@/lib/api/axios';
 import type { CategoryAncestor, CategoryResponse } from '@/types/admin/category';
 import type { Category, CategoryLite, CategorySuggestion } from '@/types/category';
@@ -10,35 +11,35 @@ const CategoryService = {
     status = 'all',
     parentId: string | null = null
   ): Promise<CategoryResponse> => {
-    const res = await api.get('/categories', {
+    const res = await api.get(CATEGORY_API.ROOT, {
       params: { page, limit, search, status, parentId },
     });
     return res.data;
   },
 
   getCategory: async (categoryId: string): Promise<Category> => {
-    const res = await api.get(`/categories/${categoryId}`);
+    const res = await api.get(CATEGORY_API.BY_ID(categoryId));
     return res.data.category;
   },
   getCategoryAncestors: async (categoryId: string): Promise<CategoryAncestor[]> => {
-    const res = await api.get(`/categories/${categoryId}/ancestors`);
+    const res = await api.get(CATEGORY_API.ANCESTORS(categoryId));
     return res.data.ancestors;
   },
   getCategoryLevels: async (level = 1, parentId?: string | null): Promise<CategoryLite[]> => {
-    const res = await api.get('/categories/levels', {
+    const res = await api.get(CATEGORY_API.LEVELS, {
       params: { level, parentId },
     });
     return res.data.categories;
   },
 
   getCategoriesSuggestions: async (search: string): Promise<CategorySuggestion[]> => {
-    const res = await api.get('/categories/suggestions', {
+    const res = await api.get(CATEGORY_API.CATEGORY_SUGGESTIONS, {
       params: { search, limit: 20 },
     });
     return res.data.results;
   },
   getTrendingCategories: async (): Promise<CategorySuggestion[]> => {
-    const res = await api.get('/categories/trending');
+    const res = await api.get(CATEGORY_API.TRENDING);
     console.log('trending::', res.data);
     return res.data.results;
   },

@@ -7,6 +7,7 @@ import {
   FileText,
   CreditCard,
   Settings,
+  PanelsTopLeft,
 } from 'lucide-react';
 
 import type { MenuItem } from '@/types/navigation';
@@ -20,6 +21,7 @@ export const adminMenuItems: MenuItem[] = [
   { icon: <MessageSquare />, label: 'Messages', to: '/admin/messages' },
   { icon: <FileText />, label: 'Subscription', to: '/admin/subscriptions' },
   { icon: <CreditCard />, label: 'Transactions', to: '/admin/transactions' },
+  { icon: <PanelsTopLeft />, label: 'Home Sections', to: '/admin/home' },
 ];
 
 export const adminSupportItems: MenuItem[] = [

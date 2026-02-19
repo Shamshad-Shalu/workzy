@@ -1,9 +1,9 @@
 import axios, { AxiosError, type AxiosResponse, type AxiosRequestConfig } from 'axios';
 
-import { HOST } from '@/constants';
+import { AUTH_API, HOST } from '@/constants';
 import type { User } from '@/types/user';
 
-const baseURL = import.meta.env.MODE === 'development' ? `${HOST}/api` : '/api';
+const baseURL = import.meta.env.MODE === 'development' ? `${HOST}` : '';
 
 const api = axios.create({
   baseURL,
@@ -83,7 +83,7 @@ api.interceptors.response.use(
 
       try {
         const response = await api.post<RefreshResponse>(
-          '/auth/refresh-token',
+          AUTH_API.REFRESH_TOKEN,
           {},
           {
             withCredentials: true,

@@ -54,7 +54,7 @@ export default function ChangeFieldModal<TSchema extends ZodType<BaseField>>({
     formState: { errors, isValid, isSubmitting },
   } = useForm<BaseField>({
     resolver: zodResolver(schema as any),
-    defaultValues: { value: String(initialValue  ?? '')},
+    defaultValues: { value: String(initialValue ?? '') },
     mode: 'onChange',
   });
   const currentValue = watch('value');

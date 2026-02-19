@@ -3,7 +3,7 @@ import { useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { PRICING_MODE, SERVICE_TYPE } from '@/constants';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 
 import { categorySchema, type CategoryFormData } from '../validation/categorySchema';
 

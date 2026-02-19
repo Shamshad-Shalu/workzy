@@ -127,7 +127,7 @@ export default function ProfilePage() {
           placeholder="Enter phone number"
           loading={loading}
           schema={z.object({ value: phoneRule })}
-          initialValue={String(user.phone)}
+          initialValue={String(user.phone ?? '')}
           onSubmit={async phone => {
             const res = await changePhone(phone);
             toast.success(res.message);

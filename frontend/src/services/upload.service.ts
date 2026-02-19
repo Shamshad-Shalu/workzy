@@ -1,4 +1,4 @@
-import type { UploadPurpose } from '@/constants/upload';
+import { UPLOAD_API, type UploadPurpose } from '@/constants';
 import api from '@/lib/api/axios';
 
 interface UploadUrlResponse {
@@ -12,7 +12,7 @@ interface UploadProps {
 }
 
 export async function uploadToS3({ file, purpose }: UploadProps): Promise<string> {
-  const { data } = await api.post<UploadUrlResponse>('/upload/request-url', {
+  const { data } = await api.post<UploadUrlResponse>(UPLOAD_API.REQUEST_URL, {
     fileName: file.name,
     fileType: file.type,
     fileSize: file.size,
