@@ -86,7 +86,7 @@ export class ServiceRequestDTO {
   allowSuddenBooking?: boolean;
 
   @IsBoolean()
-  isActive: boolean = true;
+  isAvailable: boolean = true;
 
   @IsNumber()
   @Min(0)

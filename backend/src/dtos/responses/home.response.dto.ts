@@ -352,7 +352,7 @@ export class TestimonialsSectionDTO {
 
   @Expose()
   @Type(() => TestimonialItemDTO)
-  testimonials!: TestimonialItemDTO[];
+  items!: TestimonialItemDTO[];
 
   static fromEntity(section: IHomeSectionWithOrder): TestimonialsSectionDTO {
     const data = section.data as ITestimonialsData;
@@ -361,7 +361,7 @@ export class TestimonialsSectionDTO {
     dto.type = section.type;
     dto.order = section.order;
     dto.title = data.title;
-    dto.testimonials = data.items.map((item) => {
+    dto.items = data.items.map((item) => {
       const itemDto = new TestimonialItemDTO();
       itemDto.name = item.name;
       itemDto.service = item.service;

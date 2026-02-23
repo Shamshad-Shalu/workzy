@@ -1,9 +1,9 @@
 import { Shield, Star, Clock, Award } from 'lucide-react';
 
-import type { WhyChooseSection } from '@/types/home';
+import type { WhyChooseContent } from '@/types/home/home.sectionContent';
 
 interface TrustSectionProps {
-  section: WhyChooseSection;
+  section: WhyChooseContent;
 }
 
 export default function TrustSection({ section }: TrustSectionProps) {

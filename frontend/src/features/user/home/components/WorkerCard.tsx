@@ -1,6 +1,6 @@
 import { CheckCircle, MapPin } from 'lucide-react';
 
-import type { Worker } from '@/types/home';
+import type { Worker } from '@/types/home/home';
 
 interface WorkerCardProps {
   worker: Worker;

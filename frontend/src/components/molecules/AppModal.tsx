@@ -1,5 +1,7 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
+import { cn } from '@/lib/utils';
+
 import Button from '../atoms/Button';
 import {
   Dialog,
@@ -73,8 +75,8 @@ export function AppModal({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className={className}>
-        <DialogHeader>
+      <DialogContent className={cn('max-h-[90vh] flex flex-col', className)}>
+        <DialogHeader className="flex-shrink-0">
           {TitleComponent}
           {description &&
             (isDescriptionHidden ? (
@@ -85,7 +87,7 @@ export function AppModal({
               <DialogDescription>{description}</DialogDescription>
             ))}
         </DialogHeader>
-        <div className="py-4 flex flex-col gap-4 items-start">{children}</div>
+        <div className="py-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">{children}</div>
         {footer || DefaultFooter}
       </DialogContent>
     </Dialog>

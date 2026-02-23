@@ -57,7 +57,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
-            className="hidden lg:inline-flex"
+            className="hidden @lg:inline-flex"
             onClick={() => {
               onPageChange?.(0);
             }}
@@ -88,7 +88,7 @@ export function DataTablePagination({ table, onPageChange, onPageSizeChange }: P
           </Button>
           <Button
             variant="outline"
-            className="hidden lg:inline-flex"
+            className="hidden @lg:inline-flex"
             onClick={() => {
               onPageChange?.(table.getPageCount() - 1);
             }}

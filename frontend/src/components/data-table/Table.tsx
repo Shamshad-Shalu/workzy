@@ -129,7 +129,7 @@ export default function Table<TData extends RowWithAnyId>({
           ))
         )}
 
-        <div className="bg-card rounded-lg px-4 mt-6">
+        <div className="bg-card rounded-lg px-4 mt-6 @container">
           <DataTablePagination
             table={table}
             onPageChange={onPageChange}

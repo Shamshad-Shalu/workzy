@@ -1,9 +1,9 @@
 import { ArrowRight } from 'lucide-react';
 
-import type { BannerSection } from '@/types/home';
+import type { BannerContent } from '@/types/home/home.sectionContent';
 
 interface Props {
-  section: BannerSection;
+  section: BannerContent;
 }
 export default function BannerSection({ section }: Props) {
   const { imageUrl, title, description, ctaText } = section;

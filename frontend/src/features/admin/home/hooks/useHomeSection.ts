@@ -26,9 +26,9 @@ export function useHomeSections({
     error: sectionsError,
     isLoading: sectionsIsLoading,
   } = useQuery({
-    queryKey: ['admin-home-sections'],
+    queryKey: ['admin-home-sections', pageIndex, pageSize, search, status, type],
     queryFn: () =>
-      AdminHomeService.getSections({ page: pageIndex, limit: pageSize, search, status, type }),
+      AdminHomeService.getSections({ page: pageIndex + 1, limit: pageSize, search, status, type }),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -40,10 +40,28 @@ export function useHomeSections({
     },
   });
 
+  const updateSectionStatus = useMutation({
+    mutationFn: (sectionId: string) => AdminHomeService.updateSectionStatus(sectionId),
+    onSuccess: res => {
+      toast.success(res.message);
+      queryClient.invalidateQueries({ queryKey: ['admin-home-sections'] });
+    },
+  });
+
+  const addSection = useMutation({
+    mutationFn: data => AdminHomeService.addSection(data),
+    onSuccess: res => {
+      toast.success(res.message);
+      queryClient.invalidateQueries({ queryKey: ['admin-home-sections'] });
+    },
+  });
+
   return {
     sectionData,
     sectionsError,
     sectionsIsLoading,
     updateSection,
+    updateSectionStatus,
+    addSection,
   };
 }

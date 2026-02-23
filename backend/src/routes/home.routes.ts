@@ -33,5 +33,6 @@ router.patch("/sections/:sectionId/toggle-status", controller.toggleSectionStatu
 
 // layout
 router.get("/layout", controller.getLayout);
+
 router.put("/layout", validateDto(SaveLayoutDTO), controller.saveLayout);
 export default router;

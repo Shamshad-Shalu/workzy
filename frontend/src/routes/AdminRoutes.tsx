@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -15,7 +16,9 @@ const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDet
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
-const AdminHomePage = lazy(() => import('@/features/admin/home/pages/AdminHomePage'));
+
+const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
+const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));
 
 export default function AdminRoutes() {
   return (
@@ -30,7 +33,11 @@ export default function AdminRoutes() {
             <Route path="workers" element={<WorkerManagementPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
-            <Route path="home" element={<AdminHomePage />} />
+
+            <Route path="home" element={<HomePageLayout />}>
+              <Route index element={<HomeLayoutPage />} />
+              <Route path="sections" element={<HomeSectionPage />} />
+            </Route>
           </Route>
         </Route>
       </Routes>

@@ -32,6 +32,7 @@ export default function HomePage() {
   if (error || !homeData) {
     return <div className="p-6">Failed to load home</div>;
   }
+  console.log('home', homeData);
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
 
@@ -77,7 +78,7 @@ export default function HomePage() {
             return (
               <TestimonialsSection
                 key={section.order}
-                testimonials={section.testimonials}
+                items={section.items}
                 title={section.title}
               />
             );

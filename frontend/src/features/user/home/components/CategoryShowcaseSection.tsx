@@ -5,17 +5,14 @@ import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { homeService } from '@/services/home.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type {
-  CategoryShowcaseSection,
-  ServiceItem,
-  ServiceSuggestionApiResponse,
-} from '@/types/home';
+import type { ServiceItem, ServiceSuggestionApiResponse } from '@/types/home/home';
+import type { CategoryShowcaseContent } from '@/types/home/home.sectionContent';
 
 import { CarouselRowSkeleton } from './LoadingHome';
 import { ServiceCard } from './ServiceCard';
 
 interface CategoryShowcaseBlockProps {
-  section: CategoryShowcaseSection;
+  section: CategoryShowcaseContent;
   // forcedCategoryId?: string | null;
 }
 

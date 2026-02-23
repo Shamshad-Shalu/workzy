@@ -5,12 +5,13 @@ import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { homeService } from '@/services/home.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type { NearbyWorkersSection, Worker, WorkersApiResponse } from '@/types/home';
+import type { Worker, WorkersApiResponse } from '@/types/home/home';
+import type { NearbyWorkersContent } from '@/types/home/home.sectionContent';
 
 import { WorkerCard } from './WorkerCard';
 
 interface NearWorkersSectionProps {
-  section: NearbyWorkersSection;
+  section: NearbyWorkersContent;
 }
 export default function NearWorkersSection({ section }: NearWorkersSectionProps) {
   const { title, subTitle, limit = 15, radiusKm = 100 } = section;

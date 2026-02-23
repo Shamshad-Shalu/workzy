@@ -5,7 +5,7 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import SlotTimeInput from '@/components/molecules/SlotTimeInput';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 
 import { useServiceForm } from '../hooks/useServiceForm';
 

@@ -3,10 +3,11 @@ import { ArrowRight, TrendingUp } from 'lucide-react';
 
 import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { homeService } from '@/services/home.service';
-import type { TopServiceItem, TopServicesApiResponse, TopServicesSection } from '@/types/home';
+import type { TopServiceItem, TopServicesApiResponse } from '@/types/home/home';
+import type { TopServicesContent } from '@/types/home/home.sectionContent';
 
 interface TopServiceSectionProps {
-  section: TopServicesSection;
+  section: TopServicesContent;
 }
 
 export default function TopServiceSection({ section }: TopServiceSectionProps) {

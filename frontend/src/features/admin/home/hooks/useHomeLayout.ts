@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { toast } from 'sonner';
 
 import { AdminHomeService } from '@/services/admin/home.service';
+import type { LayoutSectionItem } from '@/types/home/layoutSection';
 
-export function useLayout() {
+export function useHomeLayout() {
   const queryClient = useQueryClient();
 
   const {
-    data: layout,
+    data,
     error: layoutError,
     isLoading: layoutIsLoading,
   } = useQuery({
@@ -17,15 +17,15 @@ export function useLayout() {
   });
 
   const updateLayout = useMutation({
-    mutationFn: () => AdminHomeService.updateLayout(),
+    mutationFn: (items: LayoutSectionItem[]) => AdminHomeService.updateLayout({ items }),
     onSuccess: res => {
-      toast.success(res.message);
       queryClient.invalidateQueries({ queryKey: ['admin-home-layout'] });
+      return res;
     },
   });
 
   return {
-    layout,
+    layout: data?.layout,
     layoutError,
     layoutIsLoading,
     updateLayout,

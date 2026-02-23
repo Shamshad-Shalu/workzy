@@ -1,6 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 
-import type { ServiceItem } from '@/types/home';
+import type { ServiceItem } from '@/types/home/home';
 
 interface ServiceCardProps {
   service: ServiceItem;

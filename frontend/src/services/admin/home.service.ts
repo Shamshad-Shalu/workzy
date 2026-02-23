@@ -1,6 +1,7 @@
 import { HOME_API } from '@/constants';
 import api from '@/lib/api/axios';
 import type { HomeLayout, HomeSectionsApiResponse, ListType } from '@/types/admin/home';
+import type { LayoutSectionForm } from '@/types/home/layoutSection';
 
 interface SectionParams {
   page: number;
@@ -14,8 +15,10 @@ export const AdminHomeService = {
     const res = await api.get(HOME_API.LAYOUT);
     return res.data;
   },
-  updateLayout: async (): Promise<{ message: string; layout: HomeLayout }> => {
-    const res = await api.put(HOME_API.LAYOUT);
+  updateLayout: async (
+    form: LayoutSectionForm
+  ): Promise<{ message: string; layout: HomeLayout }> => {
+    const res = await api.put(HOME_API.LAYOUT, form);
     return res.data;
   },
   getSections: async (params: SectionParams): Promise<HomeSectionsApiResponse> => {

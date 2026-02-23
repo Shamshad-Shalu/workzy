@@ -4,7 +4,7 @@ import type {
   ServiceSuggestionApiResponse,
   TopServicesApiResponse,
   WorkersApiResponse,
-} from '@/types/home';
+} from '@/types/home/home';
 
 import { CATEGORY_API, HOME_API } from '../constants/apiRoutes';
 

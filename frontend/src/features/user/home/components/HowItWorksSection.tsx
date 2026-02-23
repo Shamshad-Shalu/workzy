@@ -1,9 +1,9 @@
 import { CheckCircle, Search, Users } from 'lucide-react';
 
-import type { HowItWorksSection } from '@/types/home';
+import type { HowItWorksContent } from '@/types/home/home.sectionContent';
 
 interface HowItWorksSectionProps {
-  section: HowItWorksSection;
+  section: HowItWorksContent;
 }
 
 export default function HowItWorksSection({ section }: HowItWorksSectionProps) {

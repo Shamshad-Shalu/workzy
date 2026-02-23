@@ -1,10 +1,10 @@
 import { Heart, Star } from 'lucide-react';
 
-import type { TestimonialsSection } from '@/types/home';
+import type { TestimonialsContent } from '@/types/home/home.sectionContent';
 
-type TestimonialsSectionProps = Pick<TestimonialsSection, 'testimonials' | 'title'>;
+type TestimonialsSectionProps = Pick<TestimonialsContent, 'items' | 'title'>;
 
-export default function TestimonialsSection({ testimonials, title }: TestimonialsSectionProps) {
+export default function TestimonialsSection({ items, title }: TestimonialsSectionProps) {
   return (
     <section className="py-16  bg-section-blue ">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -20,7 +20,7 @@ export default function TestimonialsSection({ testimonials, title }: Testimonial
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {testimonials.map((testimonial, i) => (
+          {items.map((testimonial, i) => (
             <div
               key={i}
               className="bg-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all"

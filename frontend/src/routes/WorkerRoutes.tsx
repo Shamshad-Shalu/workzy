@@ -34,7 +34,7 @@ export default function WorkerRoutes() {
 
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
-            <Route path="about" element={<WorkerAboutContentPage />} />
+            {/* <Route path="about" element={<WorkerAboutContentPage />} /> */}
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
             <Route path="subscription" element={<WorkerSubcriptionContentPage />} />
           </Route>

@@ -148,7 +148,7 @@ export function DataList<T extends RowWithAnyId>({
           </div>
         )}
 
-        <div className="bg-card rounded-lg px-4">
+        <div className="bg-card rounded-lg px-4 @container">
           <DataTablePagination
             table={table}
             onPageChange={onPageChange}
@@ -198,8 +198,7 @@ export function DataList<T extends RowWithAnyId>({
           </tbody>
         </table>
       </div>
-
-      <div className="bg-card rounded-lg px-4">
+      <div className="bg-card rounded-lg px-4 @container">
         <DataTablePagination
           table={table}
           onPageChange={onPageChange}

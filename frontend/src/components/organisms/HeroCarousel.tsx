@@ -3,14 +3,14 @@ import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-import type { HeroSection } from '@/types/home';
+import type { HeroContent } from '@/types/home/home.sectionContent';
 
 import Button from '../atoms/Button';
 
 import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 
 interface HeroCarouselProps {
-  data: HeroSection;
+  data: HeroContent;
   stats: Record<string, string>;
   onCategoryClick?: (categoryId: string) => void;
 }
