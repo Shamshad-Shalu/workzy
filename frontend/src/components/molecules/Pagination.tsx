@@ -15,7 +15,9 @@ export default function Pagination({
   const pages: number[] = [];
   const start = Math.max(0, pageIndex - 2);
   const end = Math.min(pageCount - 1, pageIndex + 2);
-  for (let i = start; i <= end; i++) {pages.push(i);}
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
 
   return (
     <div className="flex items-center justify-between gap-2">

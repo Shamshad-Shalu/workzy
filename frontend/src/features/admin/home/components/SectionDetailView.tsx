@@ -1,4 +1,4 @@
-import { Layers, ToggleLeft, ToggleRight, Hash } from 'lucide-react';
+import { Layers, ToggleLeft, ToggleRight, Hash, Pencil, Trash } from 'lucide-react';
 
 import Button from '@/components/atoms/Button';
 import { Badge } from '@/components/ui/badge';
@@ -20,10 +20,17 @@ import {
 
 interface Props {
   section: AdminHomeSection;
+  isLayoutSection?: boolean;
   onEdit?: (section: AdminHomeSection) => void;
+  onDelete?: (section: AdminHomeSection) => void;
 }
 
-export default function SectionDetailView({ section, onEdit }: Props) {
+export default function SectionDetailView({
+  section,
+  onEdit,
+  onDelete,
+  isLayoutSection = false,
+}: Props) {
   const renderPreview = () => {
     switch (section.type) {
       case HOME_SECTION_TYPE.HERO:
@@ -87,8 +94,19 @@ export default function SectionDetailView({ section, onEdit }: Props) {
           )}
           {section.isActive ? 'Active' : 'Inactive'}
         </Badge>
-        <div className="ml-auto">
-          <Button onClick={() => onEdit?.(section)}>Edit</Button>
+        <div className="ml-auto flex gap-2">
+          <Button iconLeft={<Pencil size={15} />} onClick={() => onEdit?.(section)}>
+            Edit
+          </Button>
+          {!isLayoutSection && (
+            <Button
+              iconLeft={<Trash size={15} />}
+              variant="red"
+              onClick={() => onDelete?.(section)}
+            >
+              Delete
+            </Button>
+          )}
         </div>
       </div>
       <div>{renderPreview()}</div>

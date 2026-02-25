@@ -10,10 +10,7 @@ import type { AdminHomeSection, ListType } from '@/types/admin/home';
 
 import { useHomeSections } from '../hooks/useHomeSection';
 
-
-
 import LayoutSkeleton from './LayoutSkeleton';
-
 
 interface Props {
   onAdd: (selection: AdminHomeSection) => void;
@@ -119,7 +116,11 @@ function AvailableSectionRow({
         <p className="text-[11px] text-muted-foreground">{getSectionTypeLabel(section.type)}</p>
       </div>
 
-      <Button size="sm" disabled={isAdded} onClick={() => onAdd(section as unknown as AdminHomeSection)}>
+      <Button
+        size="sm"
+        disabled={isAdded}
+        onClick={() => onAdd(section as unknown as AdminHomeSection)}
+      >
         {isAdded ? 'Added' : 'Add'}
       </Button>
     </div>

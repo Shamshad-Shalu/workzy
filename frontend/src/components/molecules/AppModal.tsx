@@ -24,6 +24,7 @@ interface AppModalProps {
   isTitleHidden?: boolean;
   onConfirm?: () => void;
   confirmText?: string;
+  buttonVariant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'blue' | 'green' | 'red';
   cancelText?: string;
   className?: string;
   isConfirmLoading?: boolean;
@@ -41,6 +42,7 @@ export function AppModal({
   isTitleHidden = false,
   onConfirm,
   confirmText = 'Confirm',
+  buttonVariant,
   cancelText = 'Cancel',
   isConfirmLoading = false,
   footer,
@@ -61,7 +63,12 @@ export function AppModal({
         {cancelText}
       </Button>
       {onConfirm && (
-        <Button onClick={onConfirm} disabled={isConfirmLoading} loading={isConfirmLoading}>
+        <Button
+          variant={buttonVariant}
+          onClick={onConfirm}
+          disabled={isConfirmLoading}
+          loading={isConfirmLoading}
+        >
           {confirmText}
         </Button>
       )}

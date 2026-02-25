@@ -10,16 +10,22 @@ import { HomeSectionsFilterOptions } from '@/constants';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import type { AdminHomeSection, HomeSection, ListType } from '@/types/admin/home';
 
+import { DeleteSectionModal } from '../components/DeleteSectionModal';
 import HomeSectionCard from '../components/HomeSectionCard';
 import SectionDetailView from '../components/SectionDetailView';
+import SectionModal from '../components/SectionModal';
 import { useHomeLayout } from '../hooks/useHomeLayout';
 import { useHomeSections } from '../hooks/useHomeSection';
+
+import type { HomeSectionFormData } from '../validation/section-schemas';
 
 type CustomParams = { type: ListType };
 export default function HomeSectionPage() {
   const [selectedSection, setSelectedSection] = useState<AdminHomeSection | null>(null);
+  const [deletingSection, setDeletingSection] = useState<AdminHomeSection | null>(null);
   const [statusSection, setStatusSection] = useState<AdminHomeSection | null>(null);
-  const [_addModalOpen, setAddModalOpen] = useState(false);
+  const [sectionModalOpen, setSectionModalOpen] = useState(false);
+  const [editingSection, setEditingSection] = useState<AdminHomeSection | null>(null);
 
   const { pageIndex, pageSize, search, status, updateParams, type } =
     useUrlFilterParams<CustomParams>([{ key: 'type' }]);
@@ -27,9 +33,10 @@ export default function HomeSectionPage() {
     sectionData,
     sectionsError,
     sectionsIsLoading,
-    // updateSection,
-    // addSection,
+    updateSection,
+    addSection,
     updateSectionStatus,
+    deleteSection,
   } = useHomeSections({ pageIndex, pageSize, search, status, type });
   const { layout } = useHomeLayout();
 
@@ -39,6 +46,30 @@ export default function HomeSectionPage() {
     },
     [updateParams]
   );
+
+  const handleSectionSubmit = async (sectionData: HomeSectionFormData) => {
+    if (editingSection) {
+      await updateSection.mutateAsync({
+        sectionId: editingSection.id,
+        data: sectionData,
+      });
+    } else {
+      await addSection.mutateAsync(sectionData);
+    }
+  };
+
+  const handleCloseSectionModal = () => {
+    setEditingSection(null);
+    setSectionModalOpen(false);
+    console.log({ editingSection, sectionModalOpen });
+  };
+
+  const onEdit = (section: AdminHomeSection) => {
+    setSelectedSection(null);
+    setEditingSection(section);
+    setSectionModalOpen(true);
+  };
+
   return (
     <main>
       <div className="flex justify-end -mt-6">
@@ -46,7 +77,7 @@ export default function HomeSectionPage() {
           variant="blue"
           disabled={!!sectionsError}
           size="lg"
-          onClick={() => setAddModalOpen(true)}
+          onClick={() => setSectionModalOpen(true)}
           iconLeft={<Layers />}
         >
           Add Section
@@ -115,7 +146,17 @@ export default function HomeSectionPage() {
         title={selectedSection?.name ?? 'Section Preview'}
         onClose={() => setSelectedSection(null)}
       >
-        {selectedSection && <SectionDetailView section={selectedSection} onEdit={() => {}} />}
+        {selectedSection && (
+          <SectionDetailView
+            section={selectedSection}
+            onEdit={onEdit}
+            onDelete={(section: AdminHomeSection) => {
+              setSelectedSection(null);
+              setDeletingSection(section);
+            }}
+            isLayoutSection={layout?.sections.some(s => s.sectionId === selectedSection.id)}
+          />
+        )}
       </AppModal>
 
       <AppModal
@@ -137,6 +178,26 @@ export default function HomeSectionPage() {
           <b>{statusSection?.name}</b>
         </span>
       </AppModal>
+      <DeleteSectionModal
+        open={!!deletingSection}
+        sectionName={deletingSection?.name}
+        loading={deleteSection.isPending}
+        onClose={() => setDeletingSection(null)}
+        onConfirm={() => {
+          if (!deletingSection?.id) {
+            return;
+          }
+          deleteSection.mutate(deletingSection.id);
+          setDeletingSection(null);
+        }}
+      />
+
+      <SectionModal
+        open={sectionModalOpen}
+        onClose={handleCloseSectionModal}
+        onSubmit={handleSectionSubmit}
+        section={editingSection}
+      />
     </main>
   );
 }

@@ -34,7 +34,9 @@ export function useLayoutEditor({ layoutSections, saveSchema, onSave }: Props) {
   }, [layoutSections]);
 
   useEffect(() => {
-    if (!isEditMode) {setLayoutItems(buildInitialItems());}
+    if (!isEditMode) {
+      setLayoutItems(buildInitialItems());
+    }
   }, [isEditMode, buildInitialItems]);
 
   const layoutIds = useMemo(() => new Set(layoutItems.map(i => i.sectionId)), [layoutItems]);
@@ -78,7 +80,9 @@ export function useLayoutEditor({ layoutSections, saveSchema, onSave }: Props) {
   };
 
   const dragEnter = (index: number) => {
-    if (dragIndex.current === null || dragIndex.current === index) {return;}
+    if (dragIndex.current === null || dragIndex.current === index) {
+      return;
+    }
 
     setLayoutItems(prev => {
       const next = [...prev];

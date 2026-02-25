@@ -1,137 +1,137 @@
-import { z } from 'zod';
+import z from 'zod';
 
-import { HOME_SECTION_TYPE, WHY_CHOOSE_ICON } from '@/constants/home';
-import { serviceNameRule } from '@/lib/validation/rules';
+import { HOME_SECTION_TYPE, WHY_CHOOSE_ICON } from '@/constants';
+import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
 
-const description = z
+const mongoId = z
   .string()
-  .min(5)
-  .max(500)
-  .regex(/^[A-Za-z0-9 &',.!\-\n]+$/, 'Invalid format');
+  .min(1, 'Please select the category')
+  .regex(/^[a-f\d]{24}$/i, 'Invalid MongoId');
 
-const url = z.string().url('Must be a valid URL');
-const mongoId = z.string().regex(/^[a-f\d]{24}$/i, 'Invalid ID');
-const eyebrow = z.string().min(3).max(20);
-
-export const heroSlideSchema = z.object({
-  categoryId: mongoId,
-  eyebrow: eyebrow,
-  title: serviceNameRule,
-  subTitle: serviceNameRule,
-  description: description,
+const baseSchema = z.object({
+  name: serviceNameRule,
 });
 
-export const heroSchema = z.object({
+const heroSlideSchema = z.object({
+  categoryId: mongoId,
+  eyebrow: serviceNameRule,
+  title: serviceNameRule,
+  subTitle: serviceNameRule,
+  description: descriptionRuleRequired,
+});
+
+const heroDataSchema = z.object({
   autoPlay: z.boolean(),
-  interval: z.number().int().min(1000).max(30_000),
+  interval: z
+    .number('Interval is required')
+    .int()
+    .min(1, 'Minimum 1 second')
+    .max(30, 'Maximum 30 seconds')
+    .transform(val => val * 1000),
   slides: z.array(heroSlideSchema).min(1).max(5),
 });
 
-export const categoryShowcaseSchema = z.object({
+const categoryShowcaseDataSchema = z.object({
   categoryId: mongoId,
   title: serviceNameRule,
-  subTitle: serviceNameRule.optional().or(z.literal('')),
-  limit: z.number().int().min(1).max(10),
+  subTitle: descriptionRuleRequired,
+  limit: z.number().int().min(1).max(10, 'only the 10 services will be showcased at max'),
 });
 
-export const bannerSchema = z.object({
-  categoryId: mongoId,
+const bannerDataSchema = z.object({
+  serviceId: z.string(),
   title: serviceNameRule,
-  description: description,
-  imageUrl: url,
-  ctaText: z.string().optional().or(z.literal('')),
+  description: descriptionRuleRequired,
+  imageUrl: z.string(),
+  ctaText: z.string().optional(),
 });
 
-export const topServicesSchema = z.object({
-  title: serviceNameRule.optional().or(z.literal('')),
-  subTitle: serviceNameRule.optional().or(z.literal('')),
-  limit: z.number().int().min(1).max(15).optional(),
-});
-
-export const nearbyWorkersSchema = z.object({
-  title: serviceNameRule.optional().or(z.literal('')),
-  subTitle: serviceNameRule.optional().or(z.literal('')),
-  radiusKm: z.number().min(1).max(50).optional(),
-  limit: z.number().int().min(1).max(30).optional(),
-});
-
-export const howItWorksStepSchema = z.object({
-  step: z.union([z.literal(1), z.literal(2), z.literal(3)]),
-  title: serviceNameRule,
-  description: description,
-  imageUrl: url,
-});
-
-export const howItWorksSchema = z.object({
-  title: serviceNameRule.optional().or(z.literal('')),
-  subTitle: serviceNameRule.optional().or(z.literal('')),
-  steps: z.array(howItWorksStepSchema).length(3),
-});
-
-export const whyChooseItemSchema = z.object({
-  icon: z.enum(Object.values(WHY_CHOOSE_ICON) as [string, ...string[]]),
-  title: serviceNameRule,
-  description: description,
-  stat: z.string().min(1),
-  imageUrl: url,
-});
-
-export const whyChooseSchema = z.object({
+const topServicesDataSchema = z.object({
   title: serviceNameRule,
   subTitle: serviceNameRule,
-  items: z.array(whyChooseItemSchema).length(4),
+  limit: z.number().max(15, 'limit cant exceed 15').optional(),
 });
 
-export const testimonialItemSchema = z.object({
-  name: z.string().min(2).max(50),
+const nearByWorkersDataSchema = z.object({
+  title: serviceNameRule,
+  subTitle: serviceNameRule,
+  radiusKm: z.number().min(2).max(50, 'pls provide something below 50'),
+  limit: z.number().max(30, 'limit cant exceed 30').optional(),
+});
+
+const howItWorksStepSchema = z.object({
+  step: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+  title: serviceNameRule,
+  description: descriptionRuleRequired,
+  imageUrl: z.string(),
+});
+
+const howItWorksDataSchema = z.object({
+  title: serviceNameRule,
+  subTitle: serviceNameRule,
+  steps: z.array(howItWorksStepSchema).length(3, 'Exactly 3 steps required'),
+});
+
+const whyChooseItemSchema = z.object({
+  icon: z.enum(WHY_CHOOSE_ICON),
+  title: serviceNameRule,
+  description: descriptionRuleRequired,
+  stat: z.string().min(1),
+  imageUrl: z.string(),
+});
+
+const whyChooseDataSchema = z.object({
+  title: serviceNameRule,
+  subTitle: serviceNameRule,
+  items: z.array(whyChooseItemSchema).length(4, 'Exactly 4 items required'),
+});
+
+const testimonialItemSchema = z.object({
+  name: serviceNameRule,
   service: serviceNameRule,
-  comment: description,
-  imageUrl: url,
+  comment: descriptionRuleRequired,
+  imageUrl: z.string(),
   date: z.string().min(1),
 });
 
-export const testimonialsSchema = z.object({
+const testimonialsDataSchema = z.object({
   title: serviceNameRule,
-  items: z.array(testimonialItemSchema).length(3),
+  items: z.array(testimonialItemSchema).length(3, 'Exactly 3 items required'),
 });
 
-export const homeSectionFormSchema = z.discriminatedUnion('type', [
-  z.object({ name: serviceNameRule, type: z.literal(HOME_SECTION_TYPE.HERO), data: heroSchema }),
-  z.object({
-    name: serviceNameRule,
+export const homeSectionSchema = z.discriminatedUnion('type', [
+  baseSchema.extend({
+    type: z.literal(HOME_SECTION_TYPE.HERO),
+    data: heroDataSchema,
+  }),
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.CATEGORY_SHOWCASE),
-    data: categoryShowcaseSchema,
+    data: categoryShowcaseDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.BANNER),
-    data: bannerSchema,
+    data: bannerDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.TOP_SERVICES),
-    data: topServicesSchema,
+    data: topServicesDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.NEARBY_WORKERS),
-    data: nearbyWorkersSchema,
+    data: nearByWorkersDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.HOW_IT_WORKS),
-    data: howItWorksSchema,
+    data: howItWorksDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.WHY_CHOOSE),
-    data: whyChooseSchema,
+    data: whyChooseDataSchema,
   }),
-  z.object({
-    name: serviceNameRule,
+  baseSchema.extend({
     type: z.literal(HOME_SECTION_TYPE.TESTIMONIALS),
-    data: testimonialsSchema,
+    data: testimonialsDataSchema,
   }),
 ]);
 
-export type HomeSectionFormValues = z.infer<typeof homeSectionFormSchema>;
+export type HomeSectionFormData = z.infer<typeof homeSectionSchema>;
