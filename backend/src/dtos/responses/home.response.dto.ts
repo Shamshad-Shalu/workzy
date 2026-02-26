@@ -137,6 +137,7 @@ export class BannerSectionDTO {
     const dto = new BannerSectionDTO();
     dto.type = section.type;
     dto.order = section.order;
+    dto.categoryId = data.categoryId.toString();
     dto.title = data.title;
     dto.description = data.description;
     dto.imageUrl = data.imageUrl;
@@ -338,6 +339,9 @@ export class TestimonialItemDTO {
 
   @Expose()
   date!: string;
+
+  @Expose()
+  rating!: number;
 }
 
 export class TestimonialsSectionDTO {
@@ -368,6 +372,7 @@ export class TestimonialsSectionDTO {
       itemDto.comment = item.comment;
       itemDto.imageUrl = item.imageUrl;
       itemDto.date = item.date;
+      itemDto.rating = item.rating;
       return itemDto;
     });
 

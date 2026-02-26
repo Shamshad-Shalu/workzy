@@ -27,7 +27,7 @@ const DEFAULT_SECTION_DATA: { [K in HomeSectionFormData['type']]: SectionData<K>
     ],
   },
   CATEGORY_SHOWCASE: { categoryId: '', title: '', subTitle: '', limit: 5 },
-  BANNER: { serviceId: '', title: '', description: '', imageUrl: '', ctaText: '' },
+  BANNER: { categoryId: '', title: '', description: '', imageUrl: '', ctaText: '' },
   TOP_SERVICES: { title: '', subTitle: '', limit: 10 },
   NEARBY_WORKERS: { title: '', subTitle: '', radiusKm: 20, limit: 10 },
   HOW_IT_WORKS: {
@@ -52,9 +52,9 @@ const DEFAULT_SECTION_DATA: { [K in HomeSectionFormData['type']]: SectionData<K>
   TESTIMONIALS: {
     title: '',
     items: [
-      { name: '', service: '', comment: '', imageUrl: '', date: '' },
-      { name: '', service: '', comment: '', imageUrl: '', date: '' },
-      { name: '', service: '', comment: '', imageUrl: '', date: '' },
+      { name: '', service: '', comment: '', imageUrl: '', date: '', rating: 5 },
+      { name: '', service: '', comment: '', imageUrl: '', date: '', rating: 5 },
+      { name: '', service: '', comment: '', imageUrl: '', date: '', rating: 5 },
     ],
   },
 };

@@ -32,7 +32,6 @@ export default function HomePage() {
   if (error || !homeData) {
     return <div className="p-6">Failed to load home</div>;
   }
-  console.log('home', homeData);
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
 

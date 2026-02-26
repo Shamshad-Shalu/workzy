@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 import CategoryService from '@/services/category.service';
 
-export const useCategoryLevels = (categoryId: string | undefined) => {
+export const useCategoryLevels = (categoryId?: string) => {
   const [level1Id, setLevel1Id] = useState<string>('');
   const [level2Id, setLevel2Id] = useState<string>('');
   const [level3Id, setLevel3Id] = useState<string>(categoryId ?? '');

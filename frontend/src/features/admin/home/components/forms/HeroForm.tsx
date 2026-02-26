@@ -129,7 +129,7 @@ export default function HeroForm() {
         {fields.length < 5 && (
           <Button
             type="button"
-            className="mt-5"
+            className="mt-5 "
             onClick={() =>
               append({
                 categoryId: '',

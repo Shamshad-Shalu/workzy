@@ -61,7 +61,6 @@ export default function HomeSectionPage() {
   const handleCloseSectionModal = () => {
     setEditingSection(null);
     setSectionModalOpen(false);
-    console.log({ editingSection, sectionModalOpen });
   };
 
   const onEdit = (section: AdminHomeSection) => {

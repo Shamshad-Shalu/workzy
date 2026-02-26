@@ -26,10 +26,11 @@ export default function TestimonialsSection({ items, title }: TestimonialsSectio
               className="bg-card rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all"
             >
               <div className="flex gap-1 mb-4">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                ))}
-              </div>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className={`w-5 h-5 ${ i < testimonial.rating  ? "fill-yellow-400 text-yellow-400" : "fill-transparent text-gray-300"}`}
+                />
+              ))}
+            </div>
               <p className="text-muted-foreground mb-6 italic leading-relaxed">
                 "{testimonial.comment}"
               </p>

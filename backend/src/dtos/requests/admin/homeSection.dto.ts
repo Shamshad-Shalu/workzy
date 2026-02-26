@@ -91,6 +91,9 @@ class CategoryShowcaseDataDTO {
 }
 /* ====== BANNER ====== */
 class BannerSectionDataDTO {
+  @IsMongoId()
+  categoryId!: string;
+
   @IsString()
   @Matches(SERVICE_NAME_REGEX, { message: "Invalid title format." })
   title!: string;
@@ -204,6 +207,11 @@ class TestimonialItemDTO {
   @IsString()
   @IsUrl()
   imageUrl!: string;
+
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  rating!: number;
 
   @IsString()
   @MinLength(1)

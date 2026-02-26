@@ -27,7 +27,7 @@ export interface ICategoryShowcaseData {
 /* ================= BANNER ================= */
 
 export interface IBannerSectionData {
-  //   categoryId:Types.ObjectId;
+  categoryId: Types.ObjectId;
   title: string;
   description: string;
   imageUrl: string;
@@ -71,6 +71,7 @@ export interface ITestimonialItem {
   comment: string;
   imageUrl: string;
   date: string;
+  rating: number;
 }
 
 export interface ITestimonialsData {

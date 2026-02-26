@@ -70,6 +70,7 @@ export interface TestimonialItem {
   comment: string;
   imageUrl: string;
   date: string;
+  rating: number;
 }
 
 export interface TestimonialsContent {
@@ -78,6 +79,7 @@ export interface TestimonialsContent {
 }
 
 export interface BannerContent {
+  categoryId: string;
   title: string;
   description: string;
   imageUrl: string;

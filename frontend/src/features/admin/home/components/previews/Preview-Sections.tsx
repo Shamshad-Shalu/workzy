@@ -6,21 +6,21 @@ import {
   TrendingUp,
   Star,
   Layers,
-  Tag,
-  MousePointerClick,
   LayoutGrid,
   MapPin,
   Users,
   ListOrdered,
   MessageSquareQuote,
-  User,
   CalendarDays,
   Wrench,
   Shield,
   Award,
   Clock,
+  ArrowRight,
 } from 'lucide-react';
 
+import Button from '@/components/atoms/Button';
+import ProfileImage from '@/components/molecules/ProfileImage';
 import { HOME_SECTION_TYPE, WHY_CHOOSE_ICON } from '@/constants';
 import CategoryService from '@/services/category.service';
 import type { AdminSection } from '@/types/admin/home';
@@ -94,34 +94,30 @@ function HeroSlideCard({ slide }: { slide: HeroSlide }) {
 }
 
 export function BannerPreview({ section }: BannerProps) {
-  const { data } = section;
+  const {
+    data: { title, imageUrl, description, ctaText },
+  } = section;
   return (
-    <PreviewShell icon={Tag} label="Banner">
-      <div className="relative">
-        <div className="h-0.5 w-full bg-gradient-to-r from-primary/40 via-primary to-primary/40" />
-      </div>
-      <Field label="Title">{data.title}</Field>
-      <Separator />
-      <Field label="Description">
-        <p className="text-sm font-normal text-foreground/80 line-clamp-3">{data.description}</p>
-      </Field>
-      {data.ctaText && (
-        <>
-          <Separator />
-          <div className="flex items-center gap-3 px-4 pb-4">
-            <MousePointerClick className="w-4 h-4 text-muted-foreground shrink-0" />
-            <div className="space-y-1">
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground">
-                CTA
-              </p>
-              <span className="inline-flex items-center rounded-lg border border-primary/40 bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                {data.ctaText}
-              </span>
-            </div>
+    <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative rounded-3xl overflow-hidden shadow-2xl group cursor-pointer">
+        <img
+          src={imageUrl}
+          alt={title}
+          className="w-full h-64 md:h-80 object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+        <div className="absolute inset-0 flex items-center">
+          <div className="max-w-2xl px-8 md:px-12">
+            <h3 className="text-2xl md:text-4xl font-bold text-white mb-3">{title}</h3>
+            <p className="md:text-lg text-sm text-white/90 mb-6">{description}</p>
+            <Button className="bg-white text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all inline-flex items-center gap-2 shadow-xl">
+              {ctaText}
+              <ArrowRight className="w-5 h-5" />
+            </Button>
           </div>
-        </>
-      )}
-    </PreviewShell>
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -216,9 +212,13 @@ function TestimonialCard({ item }: { item: TestimonialItem }) {
         "{item.comment}"
       </p>
       <Separator />
-      <MetaRow icon={User}>{item.name}</MetaRow>
+      <div className="flex items-center gap-1.5">
+        <ProfileImage src={item.imageUrl} size={30} />
+        <span className="text-xs text-muted-foreground truncate">{item.name}</span>
+      </div>
       <MetaRow icon={Wrench}>{item.service}</MetaRow>
       <MetaRow icon={CalendarDays}>{item.date}</MetaRow>
+      <MetaRow icon={Star}>{item.rating}</MetaRow>
     </PreviewCard>
   );
 }

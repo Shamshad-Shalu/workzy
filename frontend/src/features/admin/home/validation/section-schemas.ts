@@ -1,7 +1,11 @@
 import z from 'zod';
 
 import { HOME_SECTION_TYPE, WHY_CHOOSE_ICON } from '@/constants';
-import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
+import {
+  createDescriptionRule,
+  descriptionRuleRequired,
+  serviceNameRule,
+} from '@/lib/validation/rules';
 
 const mongoId = z
   .string()
@@ -34,36 +38,36 @@ const heroDataSchema = z.object({
 const categoryShowcaseDataSchema = z.object({
   categoryId: mongoId,
   title: serviceNameRule,
-  subTitle: descriptionRuleRequired,
+  subTitle: createDescriptionRule('subTitle'),
   limit: z.number().int().min(1).max(10, 'only the 10 services will be showcased at max'),
 });
 
 const bannerDataSchema = z.object({
-  serviceId: z.string(),
+  categoryId: mongoId,
   title: serviceNameRule,
-  description: descriptionRuleRequired,
-  imageUrl: z.string(),
+  description: createDescriptionRule('subTitle'),
+  imageUrl: z.string().min(1, 'image is required'),
   ctaText: z.string().optional(),
 });
 
 const topServicesDataSchema = z.object({
   title: serviceNameRule,
-  subTitle: serviceNameRule,
+  subTitle: createDescriptionRule('subTitle'),
   limit: z.number().max(15, 'limit cant exceed 15').optional(),
 });
 
 const nearByWorkersDataSchema = z.object({
   title: serviceNameRule,
-  subTitle: serviceNameRule,
+  subTitle: createDescriptionRule('subTitle'),
   radiusKm: z.number().min(2).max(50, 'pls provide something below 50'),
-  limit: z.number().max(30, 'limit cant exceed 30').optional(),
+  limit: z.number().max(10, 'limit cant exceed 30').optional(),
 });
 
 const howItWorksStepSchema = z.object({
   step: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   title: serviceNameRule,
   description: descriptionRuleRequired,
-  imageUrl: z.string(),
+  imageUrl: z.string().min(1, 'image is required'),
 });
 
 const howItWorksDataSchema = z.object({
@@ -76,8 +80,8 @@ const whyChooseItemSchema = z.object({
   icon: z.enum(WHY_CHOOSE_ICON),
   title: serviceNameRule,
   description: descriptionRuleRequired,
-  stat: z.string().min(1),
-  imageUrl: z.string(),
+  stat: z.string().min(1, 'stat is required'),
+  imageUrl: z.string().min(1, 'image is required'),
 });
 
 const whyChooseDataSchema = z.object({
@@ -90,7 +94,8 @@ const testimonialItemSchema = z.object({
   name: serviceNameRule,
   service: serviceNameRule,
   comment: descriptionRuleRequired,
-  imageUrl: z.string(),
+  rating: z.number('rating is required').int().min(1).max(5),
+  imageUrl: z.string().min(1, 'image is required'),
   date: z.string().min(1),
 });
 
