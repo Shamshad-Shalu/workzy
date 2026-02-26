@@ -45,7 +45,7 @@ const categoryShowcaseDataSchema = z.object({
 const bannerDataSchema = z.object({
   categoryId: mongoId,
   title: serviceNameRule,
-  description: createDescriptionRule('subTitle'),
+  description: createDescriptionRule('description'),
   imageUrl: z.string().min(1, 'image is required'),
   ctaText: z.string().optional(),
 });
