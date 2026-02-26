@@ -39,4 +39,6 @@ const ServiceSchema: Schema<IService> = new Schema(
 
 ServiceSchema.index({ workerId: 1, categoryId: 1 }, { unique: true });
 
+ServiceSchema.index({ categoryId: 1, isActive: 1 });
+
 export default mongoose.model<IService>("Service", ServiceSchema);

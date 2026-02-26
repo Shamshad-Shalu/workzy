@@ -37,6 +37,8 @@ const CategorySchema: Schema<ICategory> = new Schema(
 );
 
 CategorySchema.index({ name: 1, parentId: 1 }, { unique: true });
+CategorySchema.index({ level: 1, isAvailable: 1 });
+CategorySchema.index({ parentId: 1, level: 1 });
 
 const Category = mongoose.model<ICategory>("Category", CategorySchema);
 export default Category;
