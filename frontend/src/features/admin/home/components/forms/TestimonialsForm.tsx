@@ -9,7 +9,6 @@ import { UploadPurposes, type HOME_SECTION_TYPE } from '@/constants';
 
 import type { HomeSectionFormData } from '../../validation/section-schemas';
 
-
 type TestimonialsValues = Extract<
   HomeSectionFormData,
   { type: typeof HOME_SECTION_TYPE.TESTIMONIALS }

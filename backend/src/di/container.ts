@@ -5,6 +5,7 @@ import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
 import { CategoryController } from "@/controllers/category.controller";
 import { HomeController } from "@/controllers/home.controller";
+import { PlanController } from "@/controllers/plan.controller";
 import { ProfileController } from "@/controllers/profile.controller";
 import { ServiceController } from "@/controllers/service.controller";
 import { UploadController } from "@/controllers/upload.controller";
@@ -14,6 +15,7 @@ import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminCont
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
+import { IPlanController } from "@/core/interfaces/controllers/IPlanController";
 import { IProfileController } from "@/core/interfaces/controllers/IProfileController";
 import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
 import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
@@ -21,6 +23,7 @@ import { IWorkerController } from "@/core/interfaces/controllers/IWorkerControll
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
+import { IPlanRepository } from "@/core/interfaces/repositories/IPlanRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -32,6 +35,7 @@ import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutServic
 import { IHomeSectionService } from "@/core/interfaces/services/IHomeSectionService";
 import { IHomeService } from "@/core/interfaces/services/IHomeService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IPlanService } from "@/core/interfaces/services/IPlanService";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
@@ -41,6 +45,7 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { CategoryRepository } from "@/repositories/category.repository";
 import { HomeLayoutRepository } from "@/repositories/homeLayout..repository";
 import { HomeSectionRepository } from "@/repositories/homeSection.repository";
+import { PlanRepository } from "@/repositories/plan.repository";
 import { ServiceRepository } from "@/repositories/service.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { WorkerRepository } from "@/repositories/worker.repository";
@@ -53,6 +58,7 @@ import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
 import { CategoryService } from "@/services/category.service";
 import { HomeService } from "@/services/home.service";
+import { PlanService } from "@/services/plan.service";
 import { ProfileService } from "@/services/profile.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
@@ -104,5 +110,9 @@ container.bind<IHomeSectionService>(TYPES.HomeSectionService).to(HomeSectionServ
 container.bind<IHomeLayoutService>(TYPES.HomeLayoutService).to(HomeLayoutService);
 container.bind<IHomeLayoutRepository>(TYPES.HomeLayoutRepository).to(HomeLayoutRepository);
 container.bind<IHomeSectionRepository>(TYPES.HomeSectionRepository).to(HomeSectionRepository);
+
+container.bind<IPlanController>(TYPES.PlanController).to(PlanController);
+container.bind<IPlanService>(TYPES.PlanService).to(PlanService);
+container.bind<IPlanRepository>(TYPES.PlanRepository).to(PlanRepository);
 
 export { container };

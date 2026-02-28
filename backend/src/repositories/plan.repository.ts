@@ -1,0 +1,22 @@
+import { injectable } from "inversify";
+
+import { BaseRepository } from "@/core/abstracts/base.repository";
+import { IPlanRepository } from "@/core/interfaces/repositories/IPlanRepository";
+import planModel from "@/models/plan.model";
+import { IPlan } from "@/types/plan";
+import { ListBaseParams } from "@/types/query";
+import { buildPlanFilter } from "@/utils/admin/filters/buildPlanFilter";
+
+@injectable()
+export class PlanRepository extends BaseRepository<IPlan> implements IPlanRepository {
+  constructor() {
+    super(planModel);
+  }
+
+  getAllPlans({ page, limit, search, status }: ListBaseParams): Promise<IPlan[]> {
+    const skip = (page - 1) * limit;
+
+    const filter = buildPlanFilter(search, status);
+    return this.model.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
+  }
+}

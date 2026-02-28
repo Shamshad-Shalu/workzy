@@ -48,6 +48,11 @@ const TYPES = {
   HomeSectionService: Symbol.for("HomeSectionService"),
   HomeSectionRepository: Symbol.for("HomeSectionRepository"),
   HomeLayoutRepository: Symbol.for("HomeLayoutRepository"),
+
+  // plan /subcription
+  PlanController: Symbol.for("PlanController"),
+  PlanService: Symbol.for("PlanService"),
+  PlanRepository: Symbol.for("PlanRepository"),
 };
 
 export { TYPES };

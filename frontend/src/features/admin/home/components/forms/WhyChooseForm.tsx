@@ -11,7 +11,6 @@ import TitleSubtitleFields from './TitleSubtitleFields';
 
 import type { HomeSectionFormData } from '../../validation/section-schemas';
 
-
 type WhyChooseValues = Extract<HomeSectionFormData, { type: typeof HOME_SECTION_TYPE.WHY_CHOOSE }>;
 
 const iconOptions = Object.values(WHY_CHOOSE_ICON).map(icon => ({

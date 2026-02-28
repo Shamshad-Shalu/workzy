@@ -35,7 +35,9 @@ export default function BannerForm() {
 
   useEffect(() => {
     const fetchAncestors = async () => {
-      if (!selectedL2Id) {return;}
+      if (!selectedL2Id) {
+        return;
+      }
       try {
         const ancestors = await CategoryService.getCategoryAncestors(selectedL2Id);
         const l1 = ancestors.find(a => a.level === 1);

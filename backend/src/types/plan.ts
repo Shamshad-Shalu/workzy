@@ -7,7 +7,7 @@ export interface IPlanPrice {
   yearly?: number;
 }
 
-export interface IPlan extends Document {
+export interface IPlan extends Document<string> {
   name: string;
   description?: string;
   price: IPlanPrice;

@@ -10,7 +10,6 @@ import TitleSubtitleFields from './TitleSubtitleFields';
 
 import type { HomeSectionFormData } from '../../validation/section-schemas';
 
-
 type HowItWorksValues = Extract<
   HomeSectionFormData,
   { type: typeof HOME_SECTION_TYPE.HOW_IT_WORKS }

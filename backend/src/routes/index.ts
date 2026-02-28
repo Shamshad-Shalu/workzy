@@ -4,6 +4,7 @@ import adminRoutes from "./admin.routes";
 import authRoute from "./auth.routes";
 import categoryRoutes from "./category.routes";
 import homeRoutes from "./home.routes";
+import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
 import serviceRoutes from "./service.routes";
 import uploadRoutes from "./upload.routes";
@@ -19,5 +20,6 @@ router.use("/upload", uploadRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/services", serviceRoutes);
 router.use("/home", homeRoutes);
+router.use("/plans", planRoutes);
 
 export default router;
