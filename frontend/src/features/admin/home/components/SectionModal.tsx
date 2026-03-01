@@ -75,7 +75,7 @@ export default function SectionModal({ open, onClose, onSubmit, section }: Secti
       className="sm:max-w-3xl w-full"
     >
       <FormProvider {...form}>
-        <form onSubmit={() => {}} className="flex flex-col gap-6 px-1">
+        <form onSubmit={handleSubmit(onSubmitForm)} className="flex flex-col gap-6 px-1">
           <div className="flex flex-col gap-4">
             <div className="grid gap-x-4 grid-cols-1 sm:grid-cols-2">
               <div>

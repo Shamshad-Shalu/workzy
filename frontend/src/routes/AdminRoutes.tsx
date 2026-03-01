@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
+import DummySubscriptionPage from '@/features/admin/subcription/pages/DummySubscriptionPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -20,6 +21,12 @@ const CategoryManagementPage = lazy(
 const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
 const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));
 
+const SubscriptionLayout = lazy(
+  () => import('@/features/admin/subcription/pages/SubscriptionLayout')
+);
+const SubscriptionPage = lazy(() => import('@/features/admin/subcription/pages/SubscriptionPage'));
+const PlanManagementPage = lazy(() => import('@/features/admin/subcription/pages/PlanManagement'));
+
 export default function AdminRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
@@ -33,6 +40,13 @@ export default function AdminRoutes() {
             <Route path="workers" element={<WorkerManagementPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
+
+            <Route path="transactions" element={<DummySubscriptionPage />} />
+
+            <Route path="subscriptions" element={<SubscriptionLayout />}>
+              <Route index element={<PlanManagementPage />} />
+              <Route path="subscriptions" element={<SubscriptionPage />} />
+            </Route>
 
             <Route path="home" element={<HomePageLayout />}>
               <Route index element={<HomeLayoutPage />} />

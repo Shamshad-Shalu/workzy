@@ -1,6 +1,6 @@
 export interface PlanFilter {
   name?: { $regex: string; $options: "i" };
-  isAvailable?: boolean;
+  isActive?: boolean;
 }
 
 export function buildPlanFilter(search?: string, status?: string): PlanFilter {
@@ -10,7 +10,7 @@ export function buildPlanFilter(search?: string, status?: string): PlanFilter {
     filter.name = { $regex: search, $options: "i" };
   }
 
-  if (status === "active") filter.isAvailable = true;
-  if (status === "inactive") filter.isAvailable = false;
+  if (status === "active") filter.isActive = true;
+  if (status === "inactive") filter.isActive = false;
   return filter;
 }

@@ -98,7 +98,6 @@ export class PlanService implements IPlanService {
       return JSON.parse(cachedData);
     }
     const query = buildPlanFilter(search, status);
-
     const [rowPlans, total] = await Promise.all([
       this._planRepository.getAllPlans({ page, limit, search, status }),
       this._planRepository.countDocuments(query),
