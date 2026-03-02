@@ -110,6 +110,21 @@ export class PlanService implements IPlanService {
     return response;
   }
 
+  async getActiveOffers(): Promise<{ premium: PlanResponseDTO; special: PlanResponseDTO | null }> {
+    const now = new Date();
+    const [premium, special] = await Promise.all([
+      this._planRepository.findActivePremium(),
+      this._planRepository.findActiveSpecial(now),
+    ]);
+    if (!premium) {
+      throw new CustomError(PLAN.PREMIUM_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+    return {
+      premium: PlanResponseDTO.fromEntity(premium),
+      special: special ? PlanResponseDTO.fromEntity(special) : null,
+    };
+  }
+
   private async _checkSpecialOfferOverlap(
     validFrom: Date | undefined,
     validTill: Date | undefined,

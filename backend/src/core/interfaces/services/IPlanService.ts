@@ -12,4 +12,5 @@ export interface IPlanService {
     search,
     status,
   }: ListBaseParams): Promise<{ total: number; plans: PlanResponseDTO[] }>;
+  getActiveOffers(): Promise<{ premium: PlanResponseDTO; special: PlanResponseDTO | null }>;
 }

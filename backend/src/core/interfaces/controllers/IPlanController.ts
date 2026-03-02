@@ -5,4 +5,5 @@ export interface IPlanController {
   getAllPlans: RequestHandler;
   createPlan: RequestHandler;
   updatePlan: RequestHandler;
+  getActiveOffers: RequestHandler;
 }

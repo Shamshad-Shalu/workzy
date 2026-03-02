@@ -19,4 +19,18 @@ export class PlanRepository extends BaseRepository<IPlan> implements IPlanReposi
     const filter = buildPlanFilter(search, status);
     return this.model.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
   }
+
+  async findActivePremium(): Promise<IPlan | null> {
+    return this.model.findOne({ isActive: true, isSpecialOffer: false, name: "Premium" });
+  }
+  async findActiveSpecial(now: Date): Promise<IPlan | null> {
+    return this.model
+      .findOne({
+        isActive: true,
+        isSpecialOffer: true,
+        validFrom: { $lte: now },
+        validTill: { $gte: now },
+      })
+      .sort({ createdAt: -1 });
+  }
 }

@@ -8,6 +8,7 @@ export const PLAN = {
   ONLY_ONE_PREMIUM: "A premium plan already exists. Only one premium plan can exist at a time.",
   PREMIUM_REQUIRED: "At least one premium plan is required before adding special plans.",
   TYPE_CHANGE_NOT_ALLOWED: "plan cant change the type",
+  PREMIUM_FAILED: "Counnd get Premium Plan",
 
   VALID_FROM_FUTURE: "validFrom must be a valid date",
   VALID_TILL_FUTURE: "validTill must be a valid date",

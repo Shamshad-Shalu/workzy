@@ -2,7 +2,9 @@ import { Document, Types } from "mongoose";
 
 import { BillingCycle, SubscriptionStatus } from "@/constants";
 
-export interface ISubscription extends Document {
+import { IPlan } from "./plan";
+
+export interface ISubscription extends Document<string> {
   workerId: Types.ObjectId;
   planId: Types.ObjectId;
   billingCycle: BillingCycle;
@@ -18,3 +20,10 @@ export interface ISubscription extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export type SubscriptionInfoEntity = Omit<
+  ISubscription,
+  "stripeSubscriptionId" | "stripeCustomerId" | "cancelReason" | "planId"
+> & {
+  planId: Pick<IPlan, "_id" | "name" | "description" | "price" | "isSpecialOffer">;
+};

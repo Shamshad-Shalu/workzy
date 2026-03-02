@@ -7,6 +7,7 @@ import homeRoutes from "./home.routes";
 import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
 import serviceRoutes from "./service.routes";
+import subscriptionRoutes from "./subscription.routes";
 import uploadRoutes from "./upload.routes";
 import workerRoutes from "./worker.routes";
 
@@ -21,5 +22,6 @@ router.use("/categories", categoryRoutes);
 router.use("/services", serviceRoutes);
 router.use("/home", homeRoutes);
 router.use("/plans", planRoutes);
+router.use("/subscription", subscriptionRoutes);
 
 export default router;

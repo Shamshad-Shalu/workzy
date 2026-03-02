@@ -12,11 +12,13 @@ const router = Router();
 
 const controller = container.get<IPlanController>(TYPES.PlanController);
 
-// router.use(authenticate([ROLE.ADMIN]));
+router.get("/active-offers", controller.getActiveOffers);
+router.get("/:planId", controller.getPlan);
+
+router.use(authenticate([ROLE.ADMIN]));
 
 router.get("/", controller.getAllPlans);
-router.get("/:planId", controller.getPlan);
 router.post("/", validateDto(PlanRequestDTO), controller.createPlan);
-router.patch("/:planId", validateDto(PlanRequestDTO), controller.updatePlan);
+router.post("/:planId", validateDto(PlanRequestDTO), controller.updatePlan);
 
 export default router;

@@ -23,11 +23,13 @@ export class PlanController implements IPlanController {
     const plan = await this._planService.updatePlan(planId, data);
     res.status(HTTPSTATUS.CREATED).json({ message: PLAN.UPDATED, plan });
   });
+
   getPlan = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { planId } = req.params;
     const plan = await this._planService.getPlanById(planId);
     res.status(HTTPSTATUS.OK).json(plan);
   });
+
   getAllPlans = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = Math.min(100, Number(req.query.limit) || 5);
@@ -39,5 +41,9 @@ export class PlanController implements IPlanController {
       plans,
       total,
     });
+  });
+  getActiveOffers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { premium, special } = await this._planService.getActiveOffers();
+    res.status(HTTPSTATUS.CREATED).json({ premium, special });
   });
 }

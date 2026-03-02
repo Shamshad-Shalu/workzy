@@ -53,6 +53,10 @@ const TYPES = {
   PlanController: Symbol.for("PlanController"),
   PlanService: Symbol.for("PlanService"),
   PlanRepository: Symbol.for("PlanRepository"),
+
+  SubscriptionController: Symbol.for("SubscriptionController"),
+  SubscriptionService: Symbol.for("SubscriptionService"),
+  SubscriptionRepository: Symbol.for("SubscriptionRepository"),
 };
 
 export { TYPES };

@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { BILLING_CYCLE, SUBSCRIPTION_STATUS } from "@/constants";
-import { ISubscription } from "@/types/Subscription";
+import { ISubscription } from "@/types/subscription";
 
 const SubscriptionSchema: Schema<ISubscription> = new Schema(
   {

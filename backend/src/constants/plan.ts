@@ -15,6 +15,7 @@ export const BILLING_CYCLE_MONTHS: Record<BillingCycle, number> = {
 };
 
 export const SUBSCRIPTION_STATUS = {
+  PENDING: "pending",
   ACTIVE: "active",
   EXPIRED: "expired",
   CANCELLED: "cancelled",
