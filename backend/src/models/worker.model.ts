@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
+import { STRIPE_ACCOUNT_STATUS } from "@/constants";
 import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 
 const AvailabilitySchema = new Schema<IAvailabilitySlots>(
@@ -76,6 +77,12 @@ const workerSchema: Schema = new Schema<IWorker>(
       default: [],
     },
     rejectReason: { type: String },
+    stripeAccountId: { type: String, default: undefined },
+    stripeAccountStatus: {
+      type: String,
+      enum: Object.values(STRIPE_ACCOUNT_STATUS),
+      default: STRIPE_ACCOUNT_STATUS.NOT_CONNECTED,
+    },
   },
   { timestamps: true }
 );

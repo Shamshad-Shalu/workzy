@@ -55,8 +55,6 @@ export default function PlanManagementPage() {
     setPlanModalOpen(true);
   };
 
-  console.log('data:', planData?.plans);
-
   return (
     <main>
       <div className="flex justify-end -mt-6">

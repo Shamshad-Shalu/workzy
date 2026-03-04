@@ -20,8 +20,8 @@ const WorkerAboutContentPage = lazy(
 const WorkerDocumentsContentPage = lazy(
   () => import('@/features/worker/profile/pages/DocumentsContentPage')
 );
-const WorkerSubcriptionContentPage = lazy(
-  () => import('@/features/worker/profile/pages/SubscriptionContentPage')
+const SubscriptionPage = lazy(
+  () => import('@/features/worker/subscription/pages/SubscriptionPage')
 );
 
 export default function WorkerRoutes() {
@@ -31,12 +31,10 @@ export default function WorkerRoutes() {
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="services" element={<WorkerServicesPage />} />
-
+          <Route path="subscriptions" element={<SubscriptionPage />} />
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
-            {/* <Route path="about" element={<WorkerAboutContentPage />} /> */}
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
-            <Route path="subscription" element={<WorkerSubcriptionContentPage />} />
           </Route>
         </Route>
       </Route>

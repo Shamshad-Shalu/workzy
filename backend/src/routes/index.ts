@@ -4,6 +4,7 @@ import adminRoutes from "./admin.routes";
 import authRoute from "./auth.routes";
 import categoryRoutes from "./category.routes";
 import homeRoutes from "./home.routes";
+import paymentRoutes from "./payment.routes";
 import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
 import serviceRoutes from "./service.routes";
@@ -23,5 +24,6 @@ router.use("/services", serviceRoutes);
 router.use("/home", homeRoutes);
 router.use("/plans", planRoutes);
 router.use("/subscription", subscriptionRoutes);
+router.use("/payment", paymentRoutes);
 
 export default router;

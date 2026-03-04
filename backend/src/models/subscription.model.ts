@@ -32,12 +32,12 @@ const SubscriptionSchema: Schema<ISubscription> = new Schema(
     },
     startDate: { type: Date, required: true },
     expiryDate: { type: Date, required: true },
-    autoRenew: { type: Boolean, default: true },
-    stripeSubscriptionId: {
-      type: String,
-      default: undefined,
-    },
-    stripeCustomerId: { type: String, default: undefined },
+    // autoRenew: { type: Boolean, default: true },
+    // stripeSubscriptionId: {
+    //   type: String,
+    //   default: undefined,
+    // },
+    // stripeCustomerId: { type: String, default: undefined },
     cancelledAt: { type: Date, default: undefined },
     cancelReason: { type: String, default: undefined },
   },
@@ -48,5 +48,8 @@ SubscriptionSchema.index({ workerId: 1, status: 1 });
 SubscriptionSchema.index({ status: 1, expiryDate: 1 });
 SubscriptionSchema.index({ workerId: 1, createdAt: -1 });
 SubscriptionSchema.index({ planId: 1, status: 1 });
-
+SubscriptionSchema.index(
+  { workerId: 1, status: 1 },
+  { unique: true, partialFilterExpression: { status: SUBSCRIPTION_STATUS.ACTIVE } }
+);
 export default mongoose.model<ISubscription>("Subscription", SubscriptionSchema);

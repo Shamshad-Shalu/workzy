@@ -11,7 +11,6 @@ export class SubscriptionStatusResponseDTO {
   status!: SubscriptionStatus;
   startDate!: Date;
   expiryDate!: Date;
-  autoRenew!: boolean;
   cancelledAt?: Date;
   name!: string;
   description?: string;
@@ -33,9 +32,7 @@ export class SubscriptionStatusResponseDTO {
     dto.status = entity.status;
     dto.startDate = entity.startDate;
     dto.expiryDate = entity.expiryDate;
-    dto.autoRenew = entity.autoRenew;
     dto.cancelledAt = entity.cancelledAt;
-
     return dto;
   }
 }

@@ -57,7 +57,6 @@ export default function PlanModal({ open, onClose, onSubmit, plan }: PlanModalPr
   const onSubmitForm = async (data: PlanFormData) => {
     try {
       await onSubmit(data);
-      console.log('formData::', data);
       onClose();
       reset();
     } catch (error) {
@@ -153,29 +152,31 @@ export default function PlanModal({ open, onClose, onSubmit, plan }: PlanModalPr
               })}
             </div>
           </div>
-          <div>
-            <label className="block text-sm text-slate-400 mb-1.5">Offer Duration</label>
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <Label>Valid From</Label>
-                <Input
-                  type="date"
-                  {...register('validFrom')}
-                  className="px-4"
-                  error={errors.validFrom?.message}
-                />
-              </div>
-              <div>
-                <Label>Valid Till</Label>
-                <Input
-                  type="date"
-                  {...register('validTill')}
-                  className="px-4"
-                  error={errors.validTill?.message}
-                />
+          {isSpecialOffer && (
+            <div>
+              <label className="block text-sm text-slate-400 mb-1.5">Offer Duration</label>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label>Valid From</Label>
+                  <Input
+                    type="date"
+                    {...register('validFrom')}
+                    className="px-4"
+                    error={errors.validFrom?.message}
+                  />
+                </div>
+                <div>
+                  <Label>Valid Till</Label>
+                  <Input
+                    type="date"
+                    {...register('validTill')}
+                    className="px-4"
+                    error={errors.validTill?.message}
+                  />
+                </div>
               </div>
             </div>
-          </div>
+          )}
           <div className="bg-muted/50 border border-border rounded-xl p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-3">
               Included Benefits

@@ -20,6 +20,23 @@ export class SubscriptionController implements ISubscriptionController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const { subscription } = await this._subscriptionService.getMySubscription(workerId);
-    res.status(HTTPSTATUS.OK).json({ data: subscription });
+    res.status(HTTPSTATUS.OK).json({ subscription });
   });
+
+  addSubscription = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = req.user?.workerId;
+    if (!workerId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const result = await this._subscriptionService.addSubscription(workerId, req.body);
+    res.status(HTTPSTATUS.OK).json(result);
+  });
+
+  // updateAutoRenew = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  //   const workerId = req.user?.workerId;
+  //   if (!workerId) {
+  //     throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+  //   }
+
+  // })
 }

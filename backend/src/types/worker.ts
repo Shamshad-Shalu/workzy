@@ -1,5 +1,7 @@
 import { Document, Types } from "mongoose";
 
+import { StripeAccountStatus } from "@/constants";
+
 import { IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
@@ -32,7 +34,7 @@ export interface IDocument {
 }
 
 export interface IWorker extends Document<string> {
-  userId: Types.ObjectId | IUser;
+  userId: Types.ObjectId;
   displayName: string;
   tagline: string;
   about: string;
@@ -46,6 +48,8 @@ export interface IWorker extends Document<string> {
   availability: IAvailabilitySlots;
   createdAt: Date;
   rejectReason?: string;
+  stripeAccountId?: string;
+  stripeAccountStatus: StripeAccountStatus;
 }
 
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };

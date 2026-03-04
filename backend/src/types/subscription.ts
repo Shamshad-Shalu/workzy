@@ -12,9 +12,10 @@ export interface ISubscription extends Document<string> {
   status: SubscriptionStatus;
   startDate: Date;
   expiryDate: Date;
-  autoRenew: boolean;
-  stripeSubscriptionId?: string;
-  stripeCustomerId?: string;
+  // autoRenew: boolean;
+  // stripeSubscriptionId?: string;
+  // stripeCustomerId?: string;
+
   cancelledAt?: Date;
   cancelReason?: string;
   createdAt: Date;
@@ -27,3 +28,11 @@ export type SubscriptionInfoEntity = Omit<
 > & {
   planId: Pick<IPlan, "_id" | "name" | "description" | "price" | "isSpecialOffer">;
 };
+
+export interface AddSubscriptionDto {
+  name: string;
+  workerId: string;
+  planId: string;
+  billingCycle: BillingCycle;
+  amount: number;
+}

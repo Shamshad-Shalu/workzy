@@ -33,7 +33,12 @@ const PlanService = {
     planId: string;
     data: PlanFormData;
   }): Promise<{ message: string; plan: Plan }> => {
-    const res = await api.patch(PLAN_API.BY_ID(planId), data);
+    const res = await api.post(PLAN_API.BY_ID(planId), data);
+    return res.data;
+  },
+
+  getActiveOffers: async (): Promise<{ premium: Plan; special: Plan | null }> => {
+    const res = await api.get(PLAN_API.ACTIVE);
     return res.data;
   },
 };

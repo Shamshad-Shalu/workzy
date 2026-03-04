@@ -57,6 +57,10 @@ const TYPES = {
   SubscriptionController: Symbol.for("SubscriptionController"),
   SubscriptionService: Symbol.for("SubscriptionService"),
   SubscriptionRepository: Symbol.for("SubscriptionRepository"),
+
+  PaymentController: Symbol.for("PaymentController"),
+  PaymentRepository: Symbol.for("PaymentRepository"),
+  PaymentService: Symbol.for("PaymentService"),
 };
 
 export { TYPES };

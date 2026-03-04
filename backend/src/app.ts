@@ -7,6 +7,7 @@ import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import apiRouter from "./routes";
+import webhookRouter from "./routes/webhook.routes";
 
 const app = express();
 
@@ -20,6 +21,8 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
+
+app.use("/api/webhook", express.raw({ type: "application/json" }), webhookRouter);
 
 app.use(cors(corsOptions));
 app.use(express.json());

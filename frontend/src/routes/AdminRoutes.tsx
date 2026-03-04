@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
-import DummySubscriptionPage from '@/features/admin/subcription/pages/DummySubscriptionPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -40,8 +39,6 @@ export default function AdminRoutes() {
             <Route path="workers" element={<WorkerManagementPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
-
-            <Route path="transactions" element={<DummySubscriptionPage />} />
 
             <Route path="subscriptions" element={<SubscriptionLayout />}>
               <Route index element={<PlanManagementPage />} />

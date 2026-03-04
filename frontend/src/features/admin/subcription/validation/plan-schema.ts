@@ -54,21 +54,21 @@ export const planSchema = z
     }
 
     if (!data.isSpecialOffer) {
-      if (quarterly === null) {
+      if (!quarterly) {
         ctx.addIssue({
           code: 'custom',
           path: ['price', 'quarterly'],
           message: 'Quarterly is required',
         });
       }
-      if (halfYearly === null) {
+      if (!halfYearly) {
         ctx.addIssue({
           code: 'custom',
           path: ['price', 'halfYearly'],
           message: 'Half-yearly is required',
         });
       }
-      if (yearly === null) {
+      if (!yearly) {
         ctx.addIssue({ code: 'custom', path: ['price', 'yearly'], message: 'Yearly is required' });
       }
     }

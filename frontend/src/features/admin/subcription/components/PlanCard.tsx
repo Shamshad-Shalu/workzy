@@ -41,7 +41,13 @@ export default function PlanCard({ plan, onEdit }: PlanCardProps) {
         </div>
 
         {!expired && (
-          <div className="flex items-center gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <div
+            className={cn(
+              'flex items-center gap-2 transition-all duration-300 ease-in-out',
+              'sm:opacity-0 sm:group-hover:opacity-100',
+              'sm:translate-x-2 sm:group-hover:translate-x-0'
+            )}
+          >
             <Button onClick={() => onEdit(plan)} variant="blue" size="sm" className="text-xs">
               Edit <Pencil size={15} />
             </Button>
