@@ -21,6 +21,8 @@ router.patch(
   authenticate([ROLE.WORKER, ROLE.USER]),
   workerController.reSubmitWorkerDocument
 );
+router.get("/:serviceId", workerController.listWorkers);
+
 router.use(authenticate([ROLE.WORKER]));
 
 router.get("/:workerId/profile", workerController.getWorkerSummary);

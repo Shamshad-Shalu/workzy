@@ -1,11 +1,13 @@
 import { compare, hash } from "bcryptjs";
 import { inject, injectable } from "inversify";
+import { Types } from "mongoose";
 import validator from "validator";
 
 import logger from "@/config/logger";
 import redisClient from "@/config/redisClient";
 import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS, USER } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
@@ -21,6 +23,7 @@ import { extractKeyFromUrl } from "@/utils/upload";
 export class ProfileService implements IProfileService {
   constructor(
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
@@ -128,14 +131,22 @@ export class ProfileService implements IProfileService {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
     return await UserProfileResponseDTO.fromEntity(user, this._s3Service);
   }
+
   async updateProfileBasic(
     userId: string,
     payload: ProfileRequestDTO
   ): Promise<UserProfileResponseDTO> {
-    const updatedUser = await this._userRepository.update(userId, payload);
-    if (!updatedUser) {
+    const updatedUser = this._userRepository.update(userId, payload);
+    const updatedWorker = this._workerRepository.updateOne(
+      { userId: new Types.ObjectId(userId) },
+      { location: payload.profile.location }
+    );
+
+    const [userResult] = await Promise.allSettled([updatedUser, updatedWorker]);
+
+    if (userResult.status === "rejected" || !userResult.value) {
       throw new CustomError(USER.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    return UserProfileResponseDTO.fromEntity(updatedUser, this._s3Service);
+    return UserProfileResponseDTO.fromEntity(userResult.value, this._s3Service);
   }
 }

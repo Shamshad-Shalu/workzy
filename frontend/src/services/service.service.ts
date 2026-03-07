@@ -1,8 +1,11 @@
+import { WORKER_API } from '@/constants';
 import { SERVICE_API } from '@/constants/apiRoutes/service.routes';
+import type { WorkerListParams } from '@/features/user/services/components/WorkerList';
 import type { ServiceFormType } from '@/features/worker/services/validation/ServiceFormData';
 import api from '@/lib/api/axios';
 import type { CategoryOption } from '@/types/category';
 import type { Service, ServiceResponse } from '@/types/service';
+import type { WorkerListingInfo } from '@/types/worker';
 
 interface Filters {
   page?: number;
@@ -16,7 +19,7 @@ interface SResponse {
   service: Service;
 }
 
-const ServiceMangement = {
+const ServiceManagement = {
   getServices: async (
     workerId: string,
     { page = 1, limit = 10, search = '', status = 'all', categoryId = null }: Filters
@@ -44,6 +47,13 @@ const ServiceMangement = {
     const res = await api.post(SERVICE_API.ROOT, data);
     return res.data;
   },
+  listWorkers: async (
+    serviceId: string,
+    params: WorkerListParams
+  ): Promise<{ total: number; workers: WorkerListingInfo[] }> => {
+    const res = await api.get(WORKER_API.BY_ID(serviceId), { params });
+    return res.data;
+  },
 };
 
-export default ServiceMangement;
+export default ServiceManagement;

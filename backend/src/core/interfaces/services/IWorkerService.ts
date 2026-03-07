@@ -2,10 +2,11 @@ import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto"
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
+import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing.response.dto";
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker } from "@/types/worker";
+import { IWorker, WorkerListingFilters } from "@/types/worker";
 
 export interface IWorkerService {
   getWorkerByUserId(userId: string): Promise<IWorker | null>;
@@ -34,4 +35,8 @@ export interface IWorkerService {
     radiusKm: number,
     limit: number
   ): Promise<NearbyWorkerResponseDTO[]>;
+  listWorkers(
+    serviceId: string,
+    data: WorkerListingFilters
+  ): Promise<{ total: number; workers: WorkerListingResponseDto[] }>;
 }

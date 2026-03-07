@@ -1,7 +1,12 @@
 import { FilterQuery } from "mongoose";
 
 import { BaseRepository } from "@/core/abstracts/base.repository";
-import { IWorker, NearbyWorkerEntity } from "@/types/worker";
+import {
+  IWorker,
+  NearbyWorkerEntity,
+  WorkerListingEntity,
+  WorkerListingFiltersDist,
+} from "@/types/worker";
 
 export interface IWorkerRepository extends BaseRepository<IWorker> {
   getAllWorkers(
@@ -15,4 +20,8 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
     radiusKm: number,
     limit: number
   ): Promise<NearbyWorkerEntity[]>;
+  listWorkers(
+    serviceId: string,
+    params: WorkerListingFiltersDist
+  ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }>;
 }

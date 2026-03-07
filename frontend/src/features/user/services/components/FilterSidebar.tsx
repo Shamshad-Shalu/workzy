@@ -71,7 +71,7 @@ export default function FilterSidebar({
               <input
                 type="range"
                 min={1}
-                max={50}
+                max={500}
                 value={radius}
                 onChange={e => setRadius(Number(e.target.value))}
                 className="w-full accent-primary h-2 bg-accent rounded-lg cursor-pointer"
@@ -79,7 +79,7 @@ export default function FilterSidebar({
 
               <div className="flex justify-between text-xs text-muted-foreground mt-1">
                 <span>1 km</span>
-                <span>50 km</span>
+                <span>500 km</span>
               </div>
             </div>
           )}

@@ -55,7 +55,7 @@ export function useProfileForm({ user, onSave }: UseProfileFormProps) {
 
   useEffect(() => {
     reset(defaultValues);
-  }, [user, reset]);
+  }, [user, reset ]);
 
   const handleLocationSelect = (coordinates: [number, number], address?: Address) => {
     setValue(

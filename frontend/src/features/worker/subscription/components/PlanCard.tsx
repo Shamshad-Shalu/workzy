@@ -33,10 +33,14 @@ export default function PlanCard({ plan, onAddPlan, isLoading = false }: PlanCar
   const selectedPrice = (price[selectedCycle] ?? price.monthly) as number;
 
   const save = useMemo(() => {
-    if (selectedCycle === BILLING_CYCLE.MONTHLY) {return null;}
+    if (selectedCycle === BILLING_CYCLE.MONTHLY) {
+      return null;
+    }
     const monthly = price.monthly;
     const cyclePrice = price[selectedCycle];
-    if (!cyclePrice) {return null;}
+    if (!cyclePrice) {
+      return null;
+    }
     const diff = monthly * BILLING_CYCLE_MONTHS[selectedCycle] - cyclePrice;
     return diff > 0 ? `Save ₹${diff.toLocaleString()}` : null;
   }, [selectedCycle, price]);

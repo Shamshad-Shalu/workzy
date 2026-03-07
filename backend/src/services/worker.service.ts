@@ -6,10 +6,12 @@ import {
   HTTPSTATUS,
   ROLE,
   SERVER,
+  SERVICE,
   USER,
   WORKER,
   WORKER_STATUS,
 } from "@/constants";
+import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -19,13 +21,14 @@ import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto"
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
 import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
+import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing.response.dto";
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import {
   WorkerAdditionalInfo,
   WorkerSummaryResponseDTO,
 } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker } from "@/types/worker";
+import { IWorker, WorkerListingEntity, WorkerListingFilters } from "@/types/worker";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -35,6 +38,7 @@ export class WorkerService implements IWorkerService {
   constructor(
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
@@ -228,5 +232,30 @@ export class WorkerService implements IWorkerService {
   ): Promise<NearbyWorkerResponseDTO[]> {
     const workers = await this._workerRepository.findNearbyWorkers(lat, lng, radiusKm, limit);
     return await NearbyWorkerResponseDTO.fromEntities(workers, this._s3Service);
+  }
+
+  async listWorkers(
+    serviceId: string,
+    data: WorkerListingFilters
+  ): Promise<{ total: number; workers: WorkerListingResponseDto[] }> {
+    if (!serviceId) {
+      throw new CustomError(SERVICE.REQUIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const { lat, lng, radiusKm, ...rest } = data;
+    let workersRaw: WorkerListingEntity[];
+    let total: number;
+
+    if (lat && lng && radiusKm) {
+      ({ workersRaw, total } = await this._workerRepository.listWorkers(serviceId, {
+        lat,
+        lng,
+        radiusKm,
+        ...rest,
+      }));
+    } else {
+      ({ workersRaw, total } = await this._serviceRepository.listWorkers(serviceId, data));
+    }
+    const workers = await WorkerListingResponseDto.fromEntities(workersRaw, this._s3Service);
+    return { total, workers };
   }
 }

@@ -1,3 +1,5 @@
+import type { PricingMode } from '@/constants';
+
 export type WorkerStatus = 'pending' | 'verified' | 'rejected' | 'needs_revision';
 
 export interface TimeSlot {
@@ -75,4 +77,26 @@ export interface ResubmitDocumentPayload {
   id: string;
   WorkerStatus?: string;
   url: string;
+}
+
+export interface WorkerListingInfo {
+  workerId: string;
+  userId: string;
+  displayName: string;
+  tagline: string;
+  about: string;
+  coverImage: string | null;
+  profileImage: string;
+  experience: number;
+  skills: string[];
+  serviceRate: number;
+  estimatedDuration: number | null;
+  isAvailable: boolean;
+  averageRating: number;
+  reviewCount: number;
+  categoryName: string;
+  PricingMode: PricingMode;
+  isPremium: boolean;
+  travelCost: number | null;
+  distanceKm?: number;
 }

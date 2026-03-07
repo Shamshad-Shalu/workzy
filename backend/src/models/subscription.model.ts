@@ -44,7 +44,6 @@ const SubscriptionSchema: Schema<ISubscription> = new Schema(
   { timestamps: true }
 );
 
-SubscriptionSchema.index({ workerId: 1, status: 1 });
 SubscriptionSchema.index({ status: 1, expiryDate: 1 });
 SubscriptionSchema.index({ workerId: 1, createdAt: -1 });
 SubscriptionSchema.index({ planId: 1, status: 1 });

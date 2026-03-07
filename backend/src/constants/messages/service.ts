@@ -7,4 +7,5 @@ export const SERVICE = {
   ALREADY_EXISTS: "A service for this category already exists.",
   BLOCKED: "Service blocked successfully.",
   UNBLOCKED: "Service unblocked successfully.",
+  REQUIRED: "ServiceId is required.",
 };

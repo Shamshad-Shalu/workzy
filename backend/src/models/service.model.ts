@@ -37,8 +37,8 @@ const ServiceSchema: Schema<IService> = new Schema(
   { timestamps: true }
 );
 
-ServiceSchema.index({ workerId: 1, categoryId: 1 }, { unique: true });
+ServiceSchema.index({ workerId: 1, categoryId: 1, isAvailable: 1 });
 
-ServiceSchema.index({ categoryId: 1, isActive: 1 });
+ServiceSchema.index({ categoryId: 1, isAvailable: 1 });
 
 export default mongoose.model<IService>("Service", ServiceSchema);

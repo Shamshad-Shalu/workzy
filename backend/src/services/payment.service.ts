@@ -7,6 +7,7 @@ import {
   BILL_TYPE,
   BillingCycle,
   CLIENT_URL,
+  HTTPSTATUS,
   PAYMENT_STATUS,
   SUBSCRIPTION_STATUS,
   WORKER,
@@ -18,8 +19,8 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IPaymentService, VerifySessionType } from "@/core/interfaces/services/IPaymentService";
 import { TYPES } from "@/di/types";
 import { AddSubscriptionDto } from "@/types/subscription";
+import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -126,9 +127,10 @@ export class PaymentService implements IPaymentService {
       amount: string;
     };
     const { workerId, planId, billingCycle, amount } = metadata;
-
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-
+    const worker = await this._workerRepository.update(workerId, { isPremium: true });
+    if (!worker) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
     const startDate = new Date();
     const expiryDate = this._calcExpiry(startDate, billingCycle);
 

@@ -57,7 +57,7 @@ class AddressDTO {
 
 class LocationDTO {
   @IsString()
-  type!: string;
+  type!: "Point";
 
   @IsArray()
   @IsNumber({}, { each: true })
@@ -66,11 +66,7 @@ class LocationDTO {
   coordinates!: [number, number];
 }
 
-export class ProfileRequestDTO {
-  @IsString()
-  @MinLength(1, { message: "Name is required" })
-  name!: string;
-
+class ProfileDTO {
   @IsOptional()
   @ValidateNested()
   @Type(() => AddressDTO)
@@ -79,4 +75,14 @@ export class ProfileRequestDTO {
   @ValidateNested()
   @Type(() => LocationDTO)
   location!: LocationDTO;
+}
+
+export class ProfileRequestDTO {
+  @IsString()
+  @MinLength(1, { message: "Name is required" })
+  name!: string;
+
+  @ValidateNested()
+  @Type(() => ProfileDTO)
+  profile!: ProfileDTO;
 }

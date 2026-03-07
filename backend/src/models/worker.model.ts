@@ -3,6 +3,8 @@ import mongoose, { Schema } from "mongoose";
 import { STRIPE_ACCOUNT_STATUS } from "@/constants";
 import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 
+import { LocationSchema } from "./user.model";
+
 const AvailabilitySchema = new Schema<IAvailabilitySlots>(
   {
     monday: [{ startTime: String, endTime: String }],
@@ -76,7 +78,26 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: [DocumentSchema],
       default: [],
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    averageRating: {
+      type: Number,
+      default: 0,
+    },
+    reviewCount: {
+      type: Number,
+      default: 0,
+    },
+    worksCompleted: {
+      type: Number,
+      default: 0,
+    },
     rejectReason: { type: String },
+    location: {
+      type: LocationSchema,
+    },
     stripeAccountId: { type: String, default: undefined },
     stripeAccountStatus: {
       type: String,
@@ -88,6 +109,7 @@ const workerSchema: Schema = new Schema<IWorker>(
 );
 
 workerSchema.index({ displayName: "text" });
+workerSchema.index({ location: "2dsphere" });
 
 const Worker = mongoose.model<IWorker>("Worker", workerSchema);
 export default Worker;

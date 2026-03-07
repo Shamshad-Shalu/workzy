@@ -33,4 +33,8 @@ export class PlanRepository extends BaseRepository<IPlan> implements IPlanReposi
       })
       .sort({ createdAt: -1 });
   }
+
+  async getAllPlanFromDate(validFrom: Date): Promise<IPlan[] | null> {
+    return await this.model.find({ validFrom: { $gte: validFrom } });
+  }
 }

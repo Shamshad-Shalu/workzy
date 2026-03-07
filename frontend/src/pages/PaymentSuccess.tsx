@@ -42,23 +42,26 @@ export default function PaymentSuccess() {
         if (data.success) {
           setDetails(data);
           setStatus('success');
-        } else {setStatus('failed');}
+        } else {
+          setStatus('failed');
+        }
       })
       .catch(() => setStatus('failed'));
   }, [sessionId]);
 
-  if (status === 'loading')
-    {return (
+  if (status === 'loading') {
+    return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-3">
           <Loader2 className="animate-spin text-violet-500" size={40} />
           <p className="text-sm text-muted-foreground">Verifying payment...</p>
         </div>
       </div>
-    );}
+    );
+  }
 
-  if (status === 'failed')
-    {return (
+  if (status === 'failed') {
+    return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
         <div className="rounded-2xl border border-border bg-card p-8 flex flex-col items-center gap-4 max-w-sm w-full text-center">
           <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center">
@@ -79,7 +82,8 @@ export default function PaymentSuccess() {
           </button>
         </div>
       </div>
-    );}
+    );
+  }
 
   const config = TYPE_CONFIG[details?.type as PaymentType] ?? TYPE_CONFIG.SUBSCRIPTION;
 

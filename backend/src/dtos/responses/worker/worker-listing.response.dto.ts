@@ -1,0 +1,72 @@
+import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE, PricingMode } from "@/constants";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { BulkDiscountType } from "@/types/service";
+import { WorkerListingEntity } from "@/types/worker";
+
+export class WorkerListingResponseDto {
+  workerId!: string;
+  userId!: string;
+  displayName!: string;
+  tagline!: string;
+  about!: string;
+  coverImage!: string | null;
+  profileImage!: string;
+  experience!: number;
+  skills!: string[];
+  serviceRate!: number;
+  estimatedDuration!: number | null;
+  averageRating!: number;
+  worksCompleted!: number;
+  reviewCount!: number;
+  categoryName!: string;
+  PricingMode!: PricingMode;
+  isPremium!: boolean;
+  bulkDiscounts!: BulkDiscountType[] | null;
+  travelCost!: number | null;
+  distanceKm?: number | null;
+
+  static async fromEntity(
+    entity: WorkerListingEntity,
+    s3Service: IS3Service
+  ): Promise<WorkerListingResponseDto> {
+    const dto = new WorkerListingResponseDto();
+
+    const profileImage = entity.profileImage?.includes("private")
+      ? await s3Service.generateSignedUrl(entity.profileImage)
+      : entity.profileImage || DEFAULT_IMAGE_URL;
+
+    const coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
+
+    dto.workerId = entity.workerId.toString();
+    dto.userId = entity.userId.toString();
+    dto.displayName = entity.displayName;
+    dto.tagline = entity.tagline;
+    dto.about = entity.about;
+    dto.coverImage = coverImage;
+    dto.profileImage = profileImage;
+    dto.experience = entity.experience;
+    dto.skills = entity.skills;
+    dto.serviceRate = entity.serviceRate;
+    dto.worksCompleted = entity.worksCompleted;
+    dto.estimatedDuration = entity.estimatedDuration ?? null;
+    dto.averageRating = entity.averageRating;
+    dto.bulkDiscounts = entity.bulkDiscounts;
+    dto.reviewCount = entity.reviewCount;
+    dto.categoryName = entity.categoryName;
+    dto.isPremium = entity.isPremium;
+    dto.PricingMode = entity.pricingMode;
+    dto.travelCost = entity.travelCost ? Math.floor(entity.travelCost) : null;
+
+    if (entity.distanceKm !== undefined) {
+      dto.distanceKm = entity.distanceKm ?? null;
+    }
+    return dto;
+  }
+
+  static async fromEntities(
+    entities: WorkerListingEntity[],
+    s3Service: IS3Service
+  ): Promise<WorkerListingResponseDto[]> {
+    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+  }
+}

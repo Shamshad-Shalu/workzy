@@ -1,8 +1,9 @@
 import { Document, Types } from "mongoose";
 
-import { StripeAccountStatus } from "@/constants";
+import { PricingMode, StripeAccountStatus } from "@/constants";
 
-import { IUser } from "./user";
+import { BulkDiscountType } from "./service";
+import { ILocation, IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
 
@@ -40,16 +41,21 @@ export interface IWorker extends Document<string> {
   about: string;
   coverImage: string | null;
   status: WorkerStatus;
+  isPremium: boolean;
   experience: number;
   defaultRate: number;
   documents: IDocument[];
   skills: string[];
   cities: string[];
   availability: IAvailabilitySlots;
-  createdAt: Date;
   rejectReason?: string;
+  averageRating: number;
+  reviewCount: number;
+  worksCompleted: number;
+  location: ILocation;
   stripeAccountId?: string;
   stripeAccountStatus: StripeAccountStatus;
+  createdAt: Date;
 }
 
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
@@ -64,3 +70,44 @@ export type NearbyWorkerEntity = {
   experience: IWorker["experience"];
   distance: number;
 };
+
+export interface WorkerListingFilters {
+  lat?: number;
+  lng?: number;
+  radiusKm?: number;
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
+  availableNow?: boolean;
+  page: number;
+  limit: number;
+}
+
+export type WorkerListingFiltersDist = Omit<WorkerListingFilters, "lat" | "lng" | "radiusKm"> & {
+  lat: number;
+  lng: number;
+  radiusKm: number;
+};
+
+export interface WorkerListingEntity {
+  workerId: string;
+  userId: string;
+  displayName: string;
+  tagline: string;
+  about: string;
+  coverImage: string | null;
+  profileImage: string | null;
+  experience: number;
+  skills: string[];
+  serviceRate: number;
+  bulkDiscounts: BulkDiscountType[] | null;
+  estimatedDuration: number | null;
+  pricingMode: PricingMode;
+  averageRating: number;
+  worksCompleted: number;
+  reviewCount: number;
+  categoryName: string;
+  isPremium: boolean;
+  travelCost: number | null;
+  distanceKm?: number | null;
+}
