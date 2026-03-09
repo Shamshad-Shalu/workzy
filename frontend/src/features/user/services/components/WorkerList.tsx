@@ -1,3 +1,7 @@
+import { AnimatePresence, motion } from 'framer-motion';
+import { SearchX } from 'lucide-react';
+
+import EmptyState from '@/components/molecules/EmptyState';
 import Pagination from '@/components/molecules/Pagination';
 import type { WorkerListingInfo } from '@/types/worker';
 
@@ -11,7 +15,6 @@ type WorkerListProps = {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onViewProfile?: (id: string) => void;
 };
 
 export interface WorkerListParams {
@@ -25,6 +28,7 @@ export interface WorkerListParams {
   minRating?: number;
   availableNow?: boolean;
 }
+
 export function WorkerList({
   workers,
   isLoading,
@@ -32,25 +36,53 @@ export function WorkerList({
   onPageChange,
   page,
   total,
-  onViewProfile,
 }: WorkerListProps) {
   const pageCount = Math.ceil(total / limit);
 
   return (
     <div className="flex flex-col gap-4">
-      {isLoading ? (
-        Array.from({ length: 3 }).map((_, i) => <WorkerCardSkeleton key={i} />)
-      ) : workers.length === 0 ? (
-        <div className="bg-card border border-border rounded-lg p-8 text-center">
-          <p className="text-muted-foreground">
-            No professionals found. Try adjusting your filters.
-          </p>
-        </div>
-      ) : (
-        workers.map(worker => (
-          <WorkerCard key={worker.userId} worker={worker} onViewProfile={onViewProfile!} />
-        ))
-      )}
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="skeletons"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col gap-4"
+          >
+            {Array.from({ length: 3 }).map((_, i) => (
+              <WorkerCardSkeleton key={i} />
+            ))}
+          </motion.div>
+        ) : workers.length === 0 ? (
+          <motion.div
+            key="empty"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <EmptyState
+              icon={<SearchX className="w-6 h-6" />}
+              title="No professionals found"
+              description="Try adjusting your filters or expanding your search radius."
+              className="py-12"
+            />
+          </motion.div>
+        ) : (
+          <motion.div
+            key={`page-${page}`}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="flex flex-col gap-4"
+          >
+            {workers.map((worker, i) => (
+              <WorkerCard key={worker.userId} worker={worker} index={i} />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {pageCount > 1 && (
         <Pagination

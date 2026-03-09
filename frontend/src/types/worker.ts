@@ -1,5 +1,7 @@
 import type { PricingMode } from '@/constants';
 
+import type { BulkDiscountType } from './service';
+
 export type WorkerStatus = 'pending' | 'verified' | 'rejected' | 'needs_revision';
 
 export interface TimeSlot {
@@ -56,21 +58,19 @@ export interface WorkerInfo {
   id: string;
   displayName: string;
   tagline: string;
-  location: string;
-  experience?: string;
-  responseTime?: string;
-  rating: number;
-  reviewsCount?: number;
-  rate: number;
-  availability: string;
+  about: string;
   profileImage: string;
-  coverImage?: string;
-}
-
-export interface WorkerStats {
-  jobsCompleted: number;
+  coverImage: string;
+  experience: number;
+  rate: number;
+  skills: string[];
+  cities: string[];
+  address: string;
+  isPremium: boolean;
   averageRating: number;
-  completionRate: number;
+  completionRate: number | null;
+  reviewCount: number;
+  worksCompleted: number;
 }
 
 export interface ResubmitDocumentPayload {
@@ -84,19 +84,21 @@ export interface WorkerListingInfo {
   userId: string;
   displayName: string;
   tagline: string;
-  about: string;
+  description: string;
   coverImage: string | null;
   profileImage: string;
   experience: number;
-  skills: string[];
   serviceRate: number;
   estimatedDuration: number | null;
   isAvailable: boolean;
   averageRating: number;
+  completionRate: number | null;
+  bulkDiscounts: BulkDiscountType[] | null;
   reviewCount: number;
   categoryName: string;
   PricingMode: PricingMode;
   isPremium: boolean;
+  totalAmount: number;
   travelCost: number | null;
-  distanceKm?: number;
+  distanceKm: number | null;
 }

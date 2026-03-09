@@ -1,4 +1,5 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -54,12 +55,12 @@ export function AppModal({
       <DialogTitle>{title}</DialogTitle>
     </VisuallyHidden>
   ) : (
-    <DialogTitle>{title}</DialogTitle>
+    <DialogTitle className="text-lg font-semibold tracking-tight">{title}</DialogTitle>
   );
 
-  const DefaultFooter = (onConfirm || !footer) && !footer && (
-    <DialogFooter>
-      <Button variant="outline" onClick={onClose} disabled={isConfirmLoading}>
+  const DefaultFooter = !footer && (
+    <DialogFooter className="gap-2 pt-2">
+      <Button variant="outline" onClick={onClose} disabled={isConfirmLoading} size="sm">
         {cancelText}
       </Button>
       {onConfirm && (
@@ -68,35 +69,69 @@ export function AppModal({
           onClick={onConfirm}
           disabled={isConfirmLoading}
           loading={isConfirmLoading}
+          size="sm"
         >
           {confirmText}
         </Button>
       )}
     </DialogFooter>
   );
-  const handleOpenChange = (newOpenState: boolean) => {
-    if (newOpenState === false && canCloseOnOutsideClick) {
-      onClose();
-    }
+
+  const handleOpenChange = (next: boolean) => {
+    if (!next && canCloseOnOutsideClick) {onClose();}
   };
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className={cn('max-h-[90vh] flex flex-col', className)}>
-        <DialogHeader className="flex-shrink-0">
-          {TitleComponent}
-          {description &&
-            (isDescriptionHidden ? (
-              <VisuallyHidden>
-                <DialogDescription>{description}</DialogDescription>
-              </VisuallyHidden>
-            ) : (
-              <DialogDescription>{description}</DialogDescription>
-            ))}
-        </DialogHeader>
-        <div className="py-4 flex-1 overflow-y-auto pr-2 custom-scrollbar">{children}</div>
-        {footer || DefaultFooter}
-      </DialogContent>
+      <AnimatePresence>
+        {open && (
+          <DialogContent
+            className={cn(
+              'max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border border-border shadow-2xl',
+              className
+            )}
+            onAnimationStart={() => {}}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96, y: 8 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: 8 }}
+              transition={{ duration: 0.22, ease: 'easeOut' }}
+              className="flex flex-col max-h-[90vh]"
+            >
+              {!isTitleHidden && (
+                <DialogHeader className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-border">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      {TitleComponent}
+                      {description && !isDescriptionHidden && (
+                        <DialogDescription className="text-sm text-muted-foreground mt-0.5">
+                          {description}
+                        </DialogDescription>
+                      )}
+                      {isDescriptionHidden && (
+                        <VisuallyHidden>
+                          <DialogDescription>{description}</DialogDescription>
+                        </VisuallyHidden>
+                      )}
+                    </div>
+                  </div>
+                </DialogHeader>
+              )}
+
+              <div className="flex-1 min-h-0 overflow-y-auto px-6 py-5 custom-scrollbar">
+                {children}
+              </div>
+
+              {(footer || DefaultFooter) && (
+                <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-muted/30">
+                  {footer || DefaultFooter}
+                </div>
+              )}
+            </motion.div>
+          </DialogContent>
+        )}
+      </AnimatePresence>
     </Dialog>
   );
 }

@@ -2,22 +2,9 @@ import { WORKER_API } from '@/constants';
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
 import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
-import type {
-  ResubmitDocumentPayload,
-  Worker,
-  WorkerInfo,
-  WorkerProfile,
-  WorkerStats,
-} from '@/types/worker';
+import type { ResubmitDocumentPayload, Worker, WorkerProfile } from '@/types/worker';
 
 const WorkerProfileService = {
-  getWorkerSummaryById: async (
-    workerId: string
-  ): Promise<{ workerInfo: WorkerInfo; workerStats: WorkerStats }> => {
-    const res = await api.get(WORKER_API.PROFILE(workerId));
-    return res.data;
-  },
-
   getWorkerProfileById: async (workerId: string): Promise<WorkerProfile> => {
     const res = await api.get(WORKER_API.PROFILE_ABOUT(workerId));
     return res.data;

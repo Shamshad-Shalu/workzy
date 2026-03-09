@@ -1,91 +1,64 @@
-import { Expose } from "class-transformer";
+import dayjs from "dayjs";
 
 import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { IUser } from "@/types/user";
-import { IWorker } from "@/types/worker";
-
-export interface WorkerAdditionalInfo {
-  jobsCompleted: number;
-  averageRating: number;
-  completionRate: number;
-  finalRate?: number;
-  rating: number;
-  reviewsCount: number;
-  responseTime: string;
-  availability?: string;
-}
+import { WorkerSummaryEntity } from "@/types/worker";
 
 export class WorkerSummaryResponseDTO {
-  @Expose() workerInfo!: {
-    id: string;
-    displayName: string;
-    tagline: string;
-    about: string;
-    profileImage: string;
-    coverImage: string;
-    rate: number;
-    skills: string[];
-    cities: string[];
-    availability: string;
-    location: string;
-    rating?: number;
-    reviewsCount?: number;
-    experience?: number;
-    responseTime?: string;
-    certificates?: string[];
-  };
-  @Expose() workerStats!: {
-    jobsCompleted: number;
-    averageRating: number;
-    completionRate: number;
-  };
+  id!: string;
+  displayName!: string;
+  tagline!: string;
+  about!: string;
+  profileImage!: string;
+  coverImage!: string;
+  experience!: number;
+  rate!: number;
+  skills!: string[];
+  cities!: string[];
+  address!: string;
+  isPremium!: boolean;
 
-  static async format(
-    worker: IWorker,
-    user: IUser,
-    stats: WorkerAdditionalInfo,
+  averageRating!: number;
+  completionRate!: number | null;
+  reviewCount!: number;
+  worksCompleted!: number;
+
+  static async fromEntity(
+    entity: WorkerSummaryEntity,
     s3Service: IS3Service
   ): Promise<WorkerSummaryResponseDTO> {
     const dto = new WorkerSummaryResponseDTO();
 
-    const address = user.profile?.address;
+    const address = entity.profile?.address;
     const formattedAddress = address
       ? `${address.place}, ${address.city}, ${address.state} - ${address.pincode}`
       : "";
 
-    const profileImage = user.profileImage?.includes("private")
-      ? await s3Service.generateSignedUrl(user.profileImage)
-      : user.profileImage || DEFAULT_IMAGE_URL;
+    const profileImage = entity.profileImage?.includes("private")
+      ? await s3Service.generateSignedUrl(entity.profileImage)
+      : entity.profileImage || DEFAULT_IMAGE_URL;
 
-    const experience =
-      (worker.experience ?? 0) + (new Date().getFullYear() - worker.createdAt.getFullYear());
+    const yearsSinceJoining = dayjs().diff(entity.createdAt, "year");
+    const totalExperience = (entity.experience ?? 0) + yearsSinceJoining;
 
-    dto.workerInfo = {
-      id: worker._id.toString(),
-      displayName: worker.displayName,
-      tagline: worker.tagline || "",
-      about: worker.about || "",
-      profileImage,
-      coverImage: worker.coverImage || DEFAULT_WORKER_COVER_IMAGE,
+    dto.id = entity._id.toString();
+    dto.displayName = entity.displayName;
+    dto.tagline = entity.tagline || "";
+    dto.about = entity.about || "";
+    dto.profileImage = profileImage;
+    dto.coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
 
-      skills: worker.skills,
-      cities: worker.cities,
-      location: formattedAddress,
-      experience,
+    dto.skills = entity.skills;
+    dto.cities = entity.cities;
+    dto.address = formattedAddress;
+    dto.experience = totalExperience;
+    dto.rate = entity.defaultRate;
+    dto.isPremium = entity.isPremium;
 
-      rate: stats.finalRate || worker.defaultRate,
-      rating: stats.rating,
-      availability: "available",
-      reviewsCount: stats.reviewsCount,
-      responseTime: stats.responseTime,
-      certificates: worker.documents.flatMap((doc) => (doc.name ? [doc.name] : [])),
-    };
-    dto.workerStats = {
-      jobsCompleted: stats.jobsCompleted,
-      averageRating: stats.averageRating,
-      completionRate: stats.completionRate,
-    };
+    dto.averageRating = entity.averageRating;
+    dto.completionRate = entity.completionRate ?? null;
+    dto.reviewCount = entity.reviewCount;
+    dto.worksCompleted = entity.worksCompleted;
 
     return dto;
   }

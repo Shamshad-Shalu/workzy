@@ -7,7 +7,6 @@ import {
   ROLE,
   SERVER,
   SERVICE,
-  USER,
   WORKER,
   WORKER_STATUS,
 } from "@/constants";
@@ -24,10 +23,7 @@ import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
 import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing.response.dto";
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
-import {
-  WorkerAdditionalInfo,
-  WorkerSummaryResponseDTO,
-} from "@/dtos/responses/worker/worker.summery.dto";
+import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
 import { IWorker, WorkerListingEntity, WorkerListingFilters } from "@/types/worker";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -45,23 +41,11 @@ export class WorkerService implements IWorkerService {
     return this._workerRepository.findOne({ userId });
   };
   async getWorkerSummary(workerId: string): Promise<WorkerSummaryResponseDTO> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-
-    const user = await getEntityOrThrow(
-      this._userRepository,
-      worker.userId.toString(),
-      USER.NOT_FOUND
-    );
-    // dummy data for stats
-    const WorkerAdditionalInfo: WorkerAdditionalInfo = {
-      jobsCompleted: 123,
-      averageRating: 4.9,
-      completionRate: 90,
-      rating: 4.2,
-      reviewsCount: 450,
-      responseTime: "2 hours", // no need ( complex right ? or easy  ??)
-    };
-    return WorkerSummaryResponseDTO.format(worker, user, WorkerAdditionalInfo, this._s3Service);
+    const worker = await this._workerRepository.getWorkerSummary(workerId);
+    if (!worker) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    return WorkerSummaryResponseDTO.fromEntity(worker, this._s3Service);
   }
 
   async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {

@@ -6,9 +6,11 @@ import {
   NearbyWorkerEntity,
   WorkerListingEntity,
   WorkerListingFiltersDist,
+  WorkerSummaryEntity,
 } from "@/types/worker";
 
 export interface IWorkerRepository extends BaseRepository<IWorker> {
+  getWorkerSummary(workerId: string): Promise<WorkerSummaryEntity | null>;
   getAllWorkers(
     filter: FilterQuery<IWorker>,
     skip: number,

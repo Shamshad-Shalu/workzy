@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp } from 'lucide-react';
 
 import { AppCarousel } from '@/components/molecules/AppCarousel';
@@ -21,12 +22,11 @@ export default function TopServiceSection({ section }: TopServiceSectionProps) {
     queryKey: ['topServices', limit],
     queryFn: () => homeService.getTopServices(limit),
     select: res => res.services,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   return (
     <section className="py-16 bg-section-blue">
-      {/* bg-gradient-to-br from-indigo-50 to-purple-50  */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -42,8 +42,19 @@ export default function TopServiceSection({ section }: TopServiceSectionProps) {
             </p>
           </div>
         </div>
+
         {isLoading ? (
-          <div>Loading services...</div>
+          <div className="flex gap-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div
+                key={i}
+                className="basis-full min-[400px]:basis-1/2 md:basis-1/3 lg:basis-1/4 xl:basis-1/5 flex-shrink-0"
+              >
+                <div className="h-48 bg-muted rounded-xl animate-pulse" />
+                <div className="h-4 w-3/4 bg-muted rounded mt-3 animate-pulse" />
+              </div>
+            ))}
+          </div>
         ) : (
           <AppCarousel
             items={services}
@@ -58,59 +69,33 @@ export default function TopServiceSection({ section }: TopServiceSectionProps) {
   );
 }
 
-export const TopService = ({ service }: { service: TopServiceItem }) => {
+export function TopService({ service }: { service: TopServiceItem }) {
   return (
-    <div
-      className="
-        w-full xl:w-56 min-[400px]-w-64 flex-shrink-0   
-        bg-light rounded-xl overflow-hidden
-        border border-muted-foreground/10
-        shadow-md hover:shadow-xl
-        transition-all duration-300
-        cursor-pointer group
-        hover:-translate-y-1
-      "
+    <motion.div
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
+      whileTap={{ scale: 0.98 }}
+      className="w-full flex-shrink-0 bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-shadow cursor-pointer group"
     >
       <div className="relative h-40 overflow-hidden">
         <img
           src={service.imageUrl}
           alt={service.name}
           loading="lazy"
-          className="
-            w-full h-full object-cover
-            transition-transform duration-500
-            group-hover:scale-110
-          "
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
-
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-
-        {/* Badge */}
-        <div className="absolute top-3 right-3 px-2 py-1 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-indigo-600">
+        <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-indigo-600">
           {service.bookings}
         </div>
       </div>
-
-      {/* Content */}
-      <div className="p-4">
-        <div className="flex items-center justify-between">
-          <h4 className="font-bold text-dark group-hover:text-indigo-600  dark:group-hover:text-indigo-400 transition-colors">
-            {service.name}
-          </h4>
-
-          <button
-            className="
-              p-2 rounded-full
-              bg-indigo-50 text-indigo-600
-              group-hover:bg-indigo-600
-              group-hover:text-white
-              transition-all
-            "
-          >
-            <ArrowRight className="w-4 h-4" />
-          </button>
+      <div className="p-4 flex items-center justify-between">
+        <h4 className="font-bold text-sm text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+          {service.name}
+        </h4>
+        <div className="p-1.5 rounded-full bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+          <ArrowRight className="w-3.5 h-3.5" />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
-};
+}

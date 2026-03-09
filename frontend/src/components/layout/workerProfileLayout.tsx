@@ -14,7 +14,8 @@ interface WorkerProfileLayoutProps {
 
 const TABS = [
   { name: 'About', path: '' },
-  { name: 'Documents', path: 'documents' },
+  { name: 'Services', path: 'services' },
+  { name: 'Reviews', path: 'reviews' },
 ];
 
 export default function WorkerProfileLayout({
@@ -32,10 +33,6 @@ export default function WorkerProfileLayout({
 
   return (
     <div className="pb-12 bg-background">
-      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden rounded-t-2xl">
-        <img src={workerInfo.coverImage} className="w-full h-full object-cover" alt="banner" />
-        <div className="absolute inset-0 bg-black/10" />
-      </div>
       <WorkerProfileHeader workerInfo={workerInfo} workerAction={workerAction} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-7">

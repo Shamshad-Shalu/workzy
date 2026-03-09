@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { useRef, useState } from 'react';
 
 import { HeroCarousel } from '@/components/organisms/HeroCarousel';
@@ -13,6 +14,8 @@ import TopServiceSection from '@/features/user/home/components/TopServiceSection
 import TrustSection from '@/features/user/home/components/TrustSection';
 import { useHomeSections } from '@/features/user/home/hooks/useHomeSections';
 
+import PageError from './PageError';
+
 const appStats = {
   customers: '12M+',
   professionals: '50K+',
@@ -20,17 +23,29 @@ const appStats = {
   services: '200+',
 };
 
+function SectionReveal({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      viewport={{ once: true, amount: 0.05 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
 export default function HomePage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const categoryShowcaseRef = useRef<HTMLDivElement | null>(null);
-
   const { homeData, isLoading, error } = useHomeSections();
 
   if (isLoading) {
     return <LoadingHome />;
   }
   if (error || !homeData) {
-    return <div className="p-6">Failed to load home</div>;
+    return <PageError />;
   }
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
@@ -49,51 +64,77 @@ export default function HomePage() {
         switch (section.type) {
           case HOME_SECTION_TYPE.HERO:
             return (
-              <HeroCarousel
+              <motion.div
                 key={section.order}
-                data={section}
-                stats={appStats}
-                onCategoryClick={handleHeroCategoryClick}
-              />
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6 }}
+              >
+                <HeroCarousel
+                  data={section}
+                  stats={appStats}
+                  onCategoryClick={handleHeroCategoryClick}
+                />
+              </motion.div>
             );
 
           case HOME_SECTION_TYPE.CATEGORY_SHOWCASE:
             return (
-              <div key={section.order} ref={categoryShowcaseRef}>
-                <CategoryShowcaseSection section={section} />;
-              </div>
+              <SectionReveal key={section.order}>
+                <div ref={categoryShowcaseRef}>
+                  <CategoryShowcaseSection section={section} />
+                </div>
+              </SectionReveal>
             );
 
           case HOME_SECTION_TYPE.BANNER:
-            return <BannerSection key={section.order} section={section} />;
+            return (
+              <SectionReveal key={section.order}>
+                <BannerSection section={section} />
+              </SectionReveal>
+            );
 
           case HOME_SECTION_TYPE.TOP_SERVICES:
-            return <TopServiceSection key={section.order} section={section} />;
+            return (
+              <SectionReveal key={section.order}>
+                <TopServiceSection section={section} />
+              </SectionReveal>
+            );
 
           case HOME_SECTION_TYPE.NEARBY_WORKERS:
-            return <NearWorkersSection key={section.order} section={section} />;
+            return (
+              <SectionReveal key={section.order}>
+                <NearWorkersSection section={section} />
+              </SectionReveal>
+            );
 
           case HOME_SECTION_TYPE.TESTIMONIALS:
             return (
-              <TestimonialsSection
-                key={section.order}
-                items={section.items}
-                title={section.title}
-              />
+              <SectionReveal key={section.order}>
+                <TestimonialsSection items={section.items} title={section.title} />
+              </SectionReveal>
             );
 
           case HOME_SECTION_TYPE.HOW_IT_WORKS:
-            return <HowItWorksSection key={section.order} section={section} />;
+            return (
+              <SectionReveal key={section.order}>
+                <HowItWorksSection section={section} />
+              </SectionReveal>
+            );
 
           case HOME_SECTION_TYPE.WHY_CHOOSE:
-            return <TrustSection key={section.order} section={section} />;
-
+            return (
+              <SectionReveal key={section.order}>
+                <TrustSection section={section} />
+              </SectionReveal>
+            );
           default:
             return null;
         }
       })}
-
-      <CTASection />
+      <SectionReveal>
+        <CTASection />
+      </SectionReveal>
     </main>
   );
 }

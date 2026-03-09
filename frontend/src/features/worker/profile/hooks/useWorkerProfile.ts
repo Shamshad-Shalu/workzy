@@ -1,5 +1,6 @@
-import { useCallback } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { useWorker } from '@/features/profile/hooks/useWorker';
 import WorkerProfileService from '@/services/worker/workerProfile.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
@@ -7,27 +8,29 @@ import type { RootState } from '@/store/store';
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
 
 export function useWorkerProfile() {
+  const queryClient = useQueryClient();
   const { user } = useAppSelector((s: RootState) => s.auth);
+  const workerId = user?.workerId;
 
-  if (!user || !user.workerId) {
-    throw new Error('Worker ID not available');
-  }
-  const workerId = user.workerId;
-
-  const getWorkerSummary = useCallback(() => {
-    return WorkerProfileService.getWorkerSummaryById(workerId);
-  }, [workerId]);
-
-  const getWorkerProfile = useCallback(() => {
-    return WorkerProfileService.getWorkerProfileById(workerId);
-  }, [workerId]);
-
-  const updateWorkerProfile = useCallback(
-    (data: WorkerProfileSchemaType) => {
-      return WorkerProfileService.updateWorkerProfile(workerId, data);
+  // const updateWorkerProfile = useCallback(
+  //   (data: WorkerProfileSchemaType) => {
+  //     return WorkerProfileService.updateWorkerProfile(workerId, data);
+  //   },
+  //   [workerId]
+  // );
+  const workerQueries = useWorker(workerId);
+  const updateMutation = useMutation({
+    mutationFn: (data: WorkerProfileSchemaType) =>
+      WorkerProfileService.updateWorkerProfile(workerId!, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['worker-summary', workerId] });
     },
-    [workerId]
-  );
+  });
+  const reload = () => queryClient.invalidateQueries({ queryKey: ['worker-summary', workerId] });
 
-  return { getWorkerSummary, getWorkerProfile, updateWorkerProfile };
+  return {
+    summaryQuery: workerQueries.summaryQuery,
+    updateMutation,
+    reload,
+  };
 }

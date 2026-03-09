@@ -11,6 +11,7 @@ import {
   NearbyWorkerEntity,
   WorkerListingEntity,
   WorkerListingFiltersDist,
+  WorkerSummaryEntity,
 } from "@/types/worker";
 import { getCurrentTime, getTodayKey } from "@/utils/time.utils";
 
@@ -18,6 +19,54 @@ import { getCurrentTime, getTodayKey } from "@/utils/time.utils";
 export class WorkerRepository extends BaseRepository<IWorker> implements IWorkerRepository {
   constructor() {
     super(Worker);
+  }
+
+  async getWorkerSummary(workerId: string): Promise<WorkerSummaryEntity | null> {
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          _id: new Types.ObjectId(workerId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: false,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          displayName: 1,
+          tagline: 1,
+          coverImage: 1,
+          about: 1,
+          experience: 1,
+          worksCompleted: 1,
+          reviewCount: 1,
+          defaultRate: 1,
+          averageRating: 1,
+          completionRate: 1,
+          cities: 1,
+          skills: 1,
+          isPremium: 1,
+          profileImage: "$user.profileImage",
+          profile: "$user.profile",
+          createdAt: 1,
+        },
+      },
+    ];
+
+    const result = await this.model.aggregate<WorkerSummaryEntity>(pipeline).exec();
+    return result[0];
   }
 
   async getAllWorkers(
@@ -226,10 +275,9 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                 userId: "$userId",
                 displayName: "$displayName",
                 tagline: "$tagline",
-                about: "$about",
+                description: "$services.description",
                 coverImage: "$coverImage",
                 isPremium: "$isPremium",
-                skills: "$skills",
                 reviewCount: "$reviewCount",
                 worksCompleted: "$worksCompleted",
                 profileImage: "$user.profileImage",

@@ -1,8 +1,9 @@
-import { Check, MapPin, Clock, Star, Award } from 'lucide-react';
+import { Award, Check, MapPin, Star } from 'lucide-react';
 
 import type { WorkerInfo } from '@/types/worker';
 
 import type React from 'react';
+
 
 interface Props {
   workerInfo: WorkerInfo;
@@ -18,114 +19,104 @@ export default function WorkerProfileHeader({
   const {
     displayName,
     tagline,
-    location,
+    isPremium,
+    address,
     experience,
-    responseTime,
-    rating,
-    reviewsCount,
+    averageRating,
+    reviewCount,
     rate,
-    availability,
     profileImage,
-    coverImage,
   } = workerInfo;
 
   return (
-    <div className="w-full ">
-      {/* Top Banner*/}
-      <div className="relative w-full h-[260px] md:h-[320px] overflow-hidden rounded-t-2xl">
-        <img src={coverImage} className="w-full h-full object-cover" alt="banner" />
-        <div className="absolute inset-0 bg-black/10" />
-      </div>
-      <div className="relative mx-auto -mt-15">
-        <div className="bg-card rounded-2xl shadow-lg p-6 md:p-8">
-          <div className="flex flex-col md:flex-row justify-between gap-10">
-            <div className="flex flex-col md:flex-row gap-6 w-full">
-              <div className="flex justify-center md:justify-start w-full md:w-auto">
-                <div className="relative">
-                  <div>
-                    {workerAction ? (
-                      workerAction
-                    ) : (
-                      <div className="w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow ">
-                        <img
-                          src={profileImage}
-                          alt="Worker"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
+    <div className="bg-card border border-border rounded-2xl shadow-sm p-6 md:p-8">
+      <div className="flex flex-col md:flex-row justify-between gap-6 md:gap-10">
+        <div className="flex flex-col md:flex-row gap-5 w-full">
+          <div className="flex justify-center md:justify-start flex-shrink-0">
+            <div className="relative">
+              {workerAction ? (
+                workerAction
+              ) : (
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden ring-2 ring-border shadow-md">
+                  <img
+                    src={profileImage}
+                    alt={displayName}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
-              </div>
-
-              <div className="flex flex-col justify-center text-left w-full">
-                <div className="flex items-center flex-wrap gap-3">
-                  <h1 className="text-2xl md:text-3xl font-bold text-foreground">{displayName}</h1>
-                  <span className="px-2 py-1 bg-green-100 text-green-600 text-xs font-semibold rounded-full flex items-center gap-1">
-                    <Check className="w-3 h-3" /> Verified
-                  </span>
-                </div>
-
-                <p className="text-muted-foreground text-lg">{tagline}</p>
-
-                <div className="flex flex-wrap items-center gap-4 text-muted-foreground text-sm mt-3">
-                  <div className="flex items-center gap-2">
-                    <MapPin size={16} /> {location}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Award size={16} /> {experience}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} /> {responseTime}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col items-start md:items-end gap-3 w-full md:w-auto">
-              <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 hover:underline">
-                <div className="flex text-yellow-500">
-                  {[1, 2, 3, 4, 5].map((_, i) => {
-                    const fillAmount = Math.max(0, Math.min(1, (rating || 0) - i));
-                    return (
-                      <div key={i} className="relative w-5 h-5">
-                        <Star className="w-5 h-5 text-gray-300 absolute top-0 left-0" />
-                        <div
-                          className="absolute top-0 left-0 overflow-hidden h-full"
-                          style={{ width: `${fillAmount * 100}%` }}
-                        >
-                          <Star key={i} className="w-5 h-5 fill-yellow-500" />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <span className="text-xl font-bold text-foreground">{rating}</span>
-                <span className="text-muted-foreground text-sm whitespace-nowrap">
-                  ({reviewsCount} reviews)
+              )}
+              {isPremium && (
+                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
+                  <Check className="w-2.5 h-2.5" /> Verified
                 </span>
-              </div>
-              <div className="text-left md:text-right">
-                <p className="text-3xl font-bold text-foreground">₹{rate}</p>
-                <span className="inline-block mt-2 px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                  {availability}
-                </span>
-              </div>
+              )}
             </div>
           </div>
-          {showUserButtons && (
-            <div className="mt-8 flex flex-col md:flex-row gap-4 justify-center">
-              <button className="px-10 py-3 bg-[#4c3f36] text-white rounded-full font-medium hover:bg-[#3a2f29] transition">
-                Send Message
-              </button>
+          <div className="flex flex-col justify-center text-center md:text-left w-full gap-1.5">
+            <h1 className="text-2xl md:text-[28px] font-extrabold text-foreground tracking-tight leading-tight">
+              {displayName}
+            </h1>
+            <p className="text-sm text-muted-foreground">{tagline}</p>
 
-              <button className="px-10 py-3 border border-border rounded-full font-medium hover:bg-accent transition">
-                Show Bookings
-              </button>
+            <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 text-xs text-muted-foreground mt-1">
+              {address && (
+                <span className="flex items-center gap-1">
+                  <MapPin className="w-3.5 h-3.5" /> {address}
+                </span>
+              )}
+              {experience && (
+                <span className="flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5" /> {experience} yrs exp
+                </span>
+              )}
             </div>
-          )}
+          </div>
+        </div>
+        <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-4 flex-shrink-0">
+          <div className="flex flex-col items-center md:items-end gap-0.5">
+            <div className="flex items-center gap-1.5">
+              <div className="flex">
+                {[1, 2, 3, 4, 5].map((_, i) => {
+                  const fill = Math.max(0, Math.min(1, (averageRating || 0) - i));
+                  return (
+                    <div key={i} className="relative w-4 h-4">
+                      <Star className="w-4 h-4 text-muted-foreground/20 absolute" />
+                      <div
+                        className="absolute overflow-hidden h-full"
+                        style={{ width: `${fill * 100}%` }}
+                      >
+                        <Star className="w-4 h-4 fill-amber-400 text-amber-400" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <span className="text-base font-bold text-foreground">{averageRating}</span>
+            </div>
+            <span className="text-xs text-muted-foreground">({reviewCount} reviews)</span>
+          </div>
+          <div className="text-right">
+            <div className="flex items-start justify-end gap-0.5">
+              <span className="text-sm font-bold text-foreground/60 mt-1">₹</span>
+              <span className="text-3xl font-black text-foreground tracking-tighter leading-none">
+                {rate}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">per visit</p>
+          </div>
         </div>
       </div>
+
+      {showUserButtons && (
+        <div className="mt-6 flex flex-col sm:flex-row gap-3">
+          <button className="flex-1 py-2.5 bg-foreground text-background text-sm font-semibold rounded-xl hover:opacity-85 transition-opacity">
+            Send Message
+          </button>
+          <button className="flex-1 py-2.5 border border-border text-sm font-semibold rounded-xl hover:bg-muted transition-colors">
+            Show Bookings
+          </button>
+        </div>
+      )}
     </div>
   );
 }

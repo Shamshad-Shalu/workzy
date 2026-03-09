@@ -51,7 +51,7 @@ const ServiceManagement = {
     serviceId: string,
     params: WorkerListParams
   ): Promise<{ total: number; workers: WorkerListingInfo[] }> => {
-    const res = await api.get(WORKER_API.BY_ID(serviceId), { params });
+    const res = await api.get(WORKER_API.LIST_BY_SERVICE(serviceId), { params });
     return res.data;
   },
 };

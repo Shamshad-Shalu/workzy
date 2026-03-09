@@ -8,11 +8,10 @@ export class WorkerListingResponseDto {
   userId!: string;
   displayName!: string;
   tagline!: string;
-  about!: string;
+  description!: string;
   coverImage!: string | null;
   profileImage!: string;
   experience!: number;
-  skills!: string[];
   serviceRate!: number;
   estimatedDuration!: number | null;
   averageRating!: number;
@@ -24,6 +23,7 @@ export class WorkerListingResponseDto {
   bulkDiscounts!: BulkDiscountType[] | null;
   travelCost!: number | null;
   distanceKm?: number | null;
+  totalAmount!: number;
 
   static async fromEntity(
     entity: WorkerListingEntity,
@@ -36,16 +36,15 @@ export class WorkerListingResponseDto {
       : entity.profileImage || DEFAULT_IMAGE_URL;
 
     const coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
-
+    const travelCost = entity.travelCost ? Math.floor(entity.travelCost) : null;
     dto.workerId = entity.workerId.toString();
     dto.userId = entity.userId.toString();
     dto.displayName = entity.displayName;
     dto.tagline = entity.tagline;
-    dto.about = entity.about;
+    dto.description = entity.description;
     dto.coverImage = coverImage;
     dto.profileImage = profileImage;
     dto.experience = entity.experience;
-    dto.skills = entity.skills;
     dto.serviceRate = entity.serviceRate;
     dto.worksCompleted = entity.worksCompleted;
     dto.estimatedDuration = entity.estimatedDuration ?? null;
@@ -55,11 +54,9 @@ export class WorkerListingResponseDto {
     dto.categoryName = entity.categoryName;
     dto.isPremium = entity.isPremium;
     dto.PricingMode = entity.pricingMode;
-    dto.travelCost = entity.travelCost ? Math.floor(entity.travelCost) : null;
-
-    if (entity.distanceKm !== undefined) {
-      dto.distanceKm = entity.distanceKm ?? null;
-    }
+    dto.travelCost = travelCost;
+    dto.distanceKm = entity.distanceKm ?? null;
+    dto.totalAmount = travelCost ? travelCost + entity.serviceRate : entity.serviceRate;
     return dto;
   }
 

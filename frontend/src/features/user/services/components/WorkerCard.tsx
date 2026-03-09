@@ -1,11 +1,27 @@
-import { Clock, IndianRupee, MapPin, ShieldCheck, Star, Zap } from 'lucide-react';
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import { motion } from 'framer-motion';
+import { Clock, MapPin, Percent, ShieldCheck, Star, Zap } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
+import Button from '@/components/atoms/Button';
 import type { WorkerListingInfo } from '@/types/worker';
+
+dayjs.extend(duration);
 
 type WorkerCardProps = {
   worker: WorkerListingInfo;
-  onViewProfile: (id: string) => void;
+  index?: number;
 };
+
+function formatDuration(minutes: number): string {
+  const d = dayjs.duration(minutes, 'minutes');
+  const h = d.hours();
+  const m = d.minutes();
+  if (h === 0) {return `${m}m`;}
+  if (m === 0) {return `${h}h`;}
+  return `${h}h ${m}m`;
+}
 
 function StarRating({ rating }: { rating: number }) {
   return (
@@ -16,7 +32,7 @@ function StarRating({ rating }: { rating: number }) {
           className={`w-3 h-3 ${
             i <= Math.round(rating)
               ? 'fill-amber-400 text-amber-400'
-              : 'fill-muted text-muted-foreground/30'
+              : 'fill-muted text-muted-foreground/20'
           }`}
         />
       ))}
@@ -24,133 +40,152 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function WorkerCard({ worker, onViewProfile }: WorkerCardProps) {
+export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
   return (
-    <div className="group relative bg-card border border-border rounded-2xl p-4 sm:p-5 flex gap-4 hover:shadow-[0_8px_30px_rgba(0,0,0,0.1)] hover:-translate-y-0.5 transition-all duration-300 overflow-hidden">
-      <div className="pointer-events-none absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-green-50/60 to-transparent rounded-2xl" />
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, delay: index * 0.06, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{ y: -2, transition: { duration: 0.15 } }}
+      className="relative bg-card border border-border rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
+    >
+      {worker.isPremium && (
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-400" />
+      )}
 
-      <div className="flex-shrink-0 flex flex-col items-center gap-2.5">
-        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden ring-2 ring-border shadow-md">
-          <img
-            src={worker.profileImage}
-            alt={worker.displayName}
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          />
-          {worker.isAvailable && (
-            <span className="absolute bottom-1.5 right-1.5 w-2.5 h-2.5 bg-green-500 rounded-full ring-2 ring-card" />
+      <div className="p-4 sm:p-5 flex gap-4">
+        <div className="flex-shrink-0 flex flex-col items-center gap-2">
+          <div className="relative">
+            <div className="w-[68px] h-[68px] sm:w-[76px] sm:h-[76px] rounded-xl overflow-hidden ring-1 ring-border/80">
+              <img
+                src={worker.profileImage}
+                alt={worker.displayName}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {worker.isAvailable && (
+              <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-card" />
+              </span>
+            )}
+          </div>
+          {worker.isPremium && (
+            <span className="inline-flex items-center gap-0.5 text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-md whitespace-nowrap">
+              <ShieldCheck className="w-2.5 h-2.5" />
+              Verified
+            </span>
           )}
         </div>
 
-        {worker.isPremium && (
-          <span className="inline-flex items-center gap-1 bg-green-50 text-green-700 text-[10px] font-700 px-2 py-1 rounded-lg border border-green-200 leading-none font-semibold whitespace-nowrap">
-            <ShieldCheck className="w-3 h-3" />
-            Verified
-          </span>
-        )}
-      </div>
-
-      <div className="flex-1 min-w-0 flex flex-col gap-2.5 relative">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-bold text-base sm:text-lg text-foreground leading-tight tracking-tight">
-                {worker.displayName}
-              </h3>
-              {worker.categoryName && (
-                <span className="text-[10px] font-semibold bg-muted text-muted-foreground px-2 py-0.5 rounded-md border border-border">
-                  {worker.categoryName}
-                </span>
-              )}
-            </div>
-            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 truncate">
-              {worker.tagline}
-            </p>
+        <div className="flex-1 min-w-0 flex flex-col gap-2">
+          <div className="flex items-start gap-2 flex-wrap">
+            <h3 className="font-bold text-[15px] sm:text-base text-foreground leading-snug tracking-tight">
+              {worker.displayName}
+            </h3>
+            {worker.categoryName && (
+              <span className="text-[10px] font-medium bg-muted text-muted-foreground px-2 py-0.5 rounded-full border border-border mt-0.5 leading-none">
+                {worker.categoryName}
+              </span>
+            )}
           </div>
-
-          <div className="flex flex-col items-end gap-2 flex-shrink-0">
-            <div className="text-right">
-              <div className="flex items-baseline gap-0.5 justify-end">
-                <IndianRupee className="w-3.5 h-3.5 text-foreground mt-0.5" />
-                <span className="text-xl sm:text-2xl font-extrabold text-foreground leading-none tracking-tight">
-                  {worker.serviceRate}
-                </span>
-              </div>
-              <p className="text-[10px] text-muted-foreground mt-0.5">{worker.PricingMode}</p>
-            </div>
-            <button
-              onClick={() => onViewProfile(worker.workerId)}
-              className="bg-foreground text-background text-xs sm:text-sm font-semibold px-4 py-2 rounded-xl hover:opacity-85 active:scale-95 transition-all duration-150 whitespace-nowrap shadow-sm"
-            >
-              View Profile →
-            </button>
-          </div>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-          <span className="flex items-center gap-1.5">
-            <StarRating rating={worker.averageRating} />
-            <span className="text-xs font-bold text-foreground">
-              {worker.averageRating.toFixed(1)}
+          <p className="text-xs text-muted-foreground -mt-1 truncate">{worker.tagline}</p>
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="flex items-center gap-1">
+              <StarRating rating={worker.averageRating} />
+              <span className="text-xs font-bold text-foreground">
+                {worker.averageRating.toFixed(1)}
+              </span>
+              <span className="text-xs text-muted-foreground">({worker.reviewCount})</span>
             </span>
-            <span className="text-xs text-muted-foreground">({worker.reviewCount})</span>
-          </span>
 
-          <span className="w-px h-3.5 bg-border" />
-
-          {worker.distanceKm !== undefined && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin className="w-3 h-3" />
-              {worker.distanceKm} km
-            </span>
-          )}
-
-          {worker.distanceKm !== undefined && worker.estimatedDuration !== null && (
-            <span className="w-px h-3.5 bg-border" />
-          )}
-
-          {worker.estimatedDuration !== null && (
-            <span className="flex items-center gap-1 text-xs text-muted-foreground">
-              <Clock className="w-3 h-3" />
-              {worker.estimatedDuration} hrs
-            </span>
-          )}
-
-          {worker.travelCost !== null &&
-            worker.travelCost !== undefined &&
-            worker.travelCost > 0 && (
+            {worker.distanceKm !== undefined && (
               <>
-                <span className="w-px h-3.5 bg-border" />
+                <span className="w-px h-3 bg-border" />
                 <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <MapPin className="w-3 h-3" />
+                  {worker.distanceKm} km
+                </span>
+              </>
+            )}
+
+            {worker.estimatedDuration !== null && (
+              <>
+                <span className="w-px h-3 bg-border" />
+                <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <Clock className="w-3 h-3" />
+                  {formatDuration(worker.estimatedDuration)}
+                </span>
+              </>
+            )}
+
+            {worker.travelCost !== null && worker.travelCost > 0 && (
+              <>
+                <span className="w-px h-3 bg-border" />
+                <span className="flex items-center gap-1 text-xs font-medium text-amber-600">
                   <Zap className="w-3 h-3" />₹{worker.travelCost} travel
                 </span>
               </>
             )}
-        </div>
-
-        {worker.about && (
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-            {worker.about}
-          </p>
-        )}
-
-        {worker.skills.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {worker.skills.slice(0, 4).map(tag => (
-              <span
-                key={tag}
-                className="text-[11px] font-medium bg-muted/60 text-muted-foreground px-2.5 py-1 rounded-lg border border-border hover:bg-muted transition-colors"
-              >
-                {tag}
-              </span>
-            ))}
-            {worker.skills.length > 4 && (
-              <span className="text-[11px] font-medium text-muted-foreground px-2.5 py-1">
-                +{worker.skills.length - 4} more
-              </span>
-            )}
           </div>
-        )}
+
+          {worker.bulkDiscounts && worker.bulkDiscounts.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {worker.bulkDiscounts.map((d, i) => (
+                <span
+                  key={i}
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full"
+                >
+                  <Percent className="w-2.5 h-2.5" />
+                  {d.percent}% off · {d.count}+ bookings
+                </span>
+              ))}
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+            {worker.description}
+          </p>
+        </div>
+        <div className="flex-shrink-0 flex flex-col items-end justify-between gap-4 min-w-[110px]">
+          <div className="text-right">
+            <div className="flex items-start justify-end gap-0.5 leading-none">
+              <span className="text-sm font-bold text-foreground/70 mt-[3px]">₹</span>
+              <span className="text-[32px] font-black text-foreground leading-none tracking-tighter">
+                {worker.serviceRate.toLocaleString('en-IN')}
+              </span>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{worker.PricingMode}</p>
+          </div>
+          <div className="flex flex-col gap-1.5 w-full">
+            <motion.div whileTap={{ scale: 0.97 }} className="w-full">
+              <Link
+                to={`/workers/${worker.workerId}`}
+                className="flex items-center justify-center w-full text-xs font-semibold px-3 py-2 rounded-lg border border-border bg-background hover:bg-muted transition-colors whitespace-nowrap"
+              >
+                View Profile →
+              </Link>
+            </motion.div>
+            <motion.div whileTap={{ scale: 0.97 }} className="w-full">
+              <Button
+                variant="green"
+                size="sm"
+                fullWidth
+                className="rounded-lg text-xs font-semibold"
+              >
+                Book Now
+              </Button>
+            </motion.div>
+          </div>
+        </div>
       </div>
-    </div>
+      {worker.totalAmount > 0 && (
+        <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 mt-0 pt-3 border-t border-border/50 flex items-center justify-between">
+          <span className="text-[11px] text-muted-foreground font-medium">Estimated total</span>
+          <span className="text-sm font-extrabold text-foreground tracking-tight">
+            ₹{worker.totalAmount.toLocaleString('en-IN')}
+          </span>
+        </div>
+      )}
+    </motion.div>
   );
 }

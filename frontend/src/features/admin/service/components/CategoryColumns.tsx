@@ -3,7 +3,7 @@ import { Eye, Pencil } from 'lucide-react';
 import categoryImage from '@/assets/images/categoryImage.jpeg';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
-import type { Category } from '@/types/admin/category';
+import type { Category } from '@/types/category';
 import type { TableColumnDef } from '@/types/table.types';
 
 const categoryColumns = (

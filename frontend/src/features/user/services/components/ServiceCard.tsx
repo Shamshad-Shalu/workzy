@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import { CheckCircle2 } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
@@ -11,40 +12,43 @@ interface ServiceCardProps {
 
 export function ServiceCard({ service, isActive = false, onSelect }: ServiceCardProps) {
   return (
-    <button
+    <motion.button
+      whileHover={{ y: -2 }}
+      whileTap={{ scale: 0.97 }}
+      transition={{ duration: 0.15 }}
       onClick={() => onSelect?.(service.id)}
       className={cn(
-        'group relative border rounded-lg p-4 transition-all hover:shadow-md bg-card',
+        'group relative border rounded-xl p-3 transition-all text-center flex flex-col items-center gap-2.5',
         isActive
-          ? 'bg-section-blue border-section-blue-border shadow-md'
-          : 'border-border hover:border-primary'
+          ? 'bg-primary/5 border-primary shadow-sm'
+          : 'bg-card border-border hover:border-primary/50 hover:shadow-sm'
       )}
     >
-      <div className="flex flex-col items-center text-center gap-3">
-        <div
-          className={cn(
-            'p-3 rounded-full transition-colors',
-            isActive ? 'bg-[var(--section-blue)]' : 'bg-accent group-hover:bg-primary/10'
-          )}
-        >
-          <img src={service.iconUrl} alt={service.name} className="w-8 h-8 sm:w-7 sm:h-7" />
-        </div>
-
-        <h3
-          className={cn(
-            'text-xs sm:text-sm font-medium leading-tight transition-colors',
-            isActive ? 'text-primary' : 'text-foreground'
-          )}
-        >
-          {service.name}
-        </h3>
+      <div
+        className={cn(
+          'w-11 h-11 rounded-xl flex items-center justify-center transition-colors',
+          isActive ? 'bg-primary/10' : 'bg-muted group-hover:bg-primary/8'
+        )}
+      >
+        <img src={service.iconUrl} alt={service.name} className="w-6 h-6" />
       </div>
-
+      <span
+        className={cn(
+          'text-[11px] sm:text-xs font-medium leading-snug transition-colors',
+          isActive ? 'text-primary font-semibold' : 'text-foreground'
+        )}
+      >
+        {service.name}
+      </span>
       {isActive && (
-        <div className="absolute -top-1 -right-1 bg-primary text-primary-foreground p-1 rounded-full">
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          className="absolute -top-1.5 -right-1.5 bg-primary text-primary-foreground rounded-full p-0.5 shadow-sm"
+        >
           <CheckCircle2 className="w-3 h-3" />
-        </div>
+        </motion.div>
       )}
-    </button>
+    </motion.button>
   );
 }

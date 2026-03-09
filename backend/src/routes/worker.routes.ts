@@ -21,11 +21,11 @@ router.patch(
   authenticate([ROLE.WORKER, ROLE.USER]),
   workerController.reSubmitWorkerDocument
 );
-router.get("/:serviceId", workerController.listWorkers);
+router.get("/service/:serviceId", workerController.listWorkers);
+router.get("/:workerId", workerController.getWorkerSummary);
 
 router.use(authenticate([ROLE.WORKER]));
 
-router.get("/:workerId/profile", workerController.getWorkerSummary);
 router.get("/:workerId/profile/about", workerController.getWorkerProfile);
 router.patch(
   "/:workerId/profile",

@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
+import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
 import ProtectedRoute from './ProtectedRoute';
@@ -22,6 +23,13 @@ const UserLayout = lazy(() => import('@/layouts/user/UserLayout'));
 
 const ServicesPage = lazy(() => import('@/features/user/services/pages/ServicePage'));
 
+const WorkerProfileRouteLayout = lazy(
+  () => import('@/features/user/worker/WorkerProfileRouteLayout')
+);
+const WorkerProfilePage = lazy(() => import('@/features/user/worker/pages/WorkerProfilePage'));
+const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/WorkerServicesPage'));
+const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
+
 export default function UserRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
@@ -39,10 +47,17 @@ export default function UserRoutes() {
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/join-us" element={<JoinUsPage />} />
+
+          <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
+            <Route index element={<WorkerProfilePage />} />
+            <Route path="services" element={<WorkerServicesPage />} />
+            <Route path="reviews" element={<WorkerReviewsPage />} />
+          </Route>
           <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
             <Route path="/profile" element={<UserProfilePage />} />
           </Route>
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

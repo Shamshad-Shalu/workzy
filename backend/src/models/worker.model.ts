@@ -94,6 +94,12 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: Number,
       default: 0,
     },
+    completionRate: {
+      type: Number,
+      min: 0,
+      max: 100,
+      default: null,
+    },
     rejectReason: { type: String },
     location: {
       type: LocationSchema,

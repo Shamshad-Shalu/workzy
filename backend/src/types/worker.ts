@@ -51,6 +51,7 @@ export interface IWorker extends Document<string> {
   rejectReason?: string;
   averageRating: number;
   reviewCount: number;
+  completionRate: number | null;
   worksCompleted: number;
   location: ILocation;
   stripeAccountId?: string;
@@ -60,6 +61,26 @@ export interface IWorker extends Document<string> {
 
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
 // completedJobs
+
+export type WorkerSummaryEntity = Pick<
+  IWorker,
+  | "_id"
+  | "displayName"
+  | "tagline"
+  | "coverImage"
+  | "about"
+  | "experience"
+  | "worksCompleted"
+  | "reviewCount"
+  | "defaultRate"
+  | "averageRating"
+  | "completionRate"
+  | "cities"
+  | "skills"
+  | "isPremium"
+  | "createdAt"
+> &
+  Pick<IUser, "profileImage" | "profile">;
 
 export type NearbyWorkerEntity = {
   _id: IUser["_id"];
@@ -94,11 +115,10 @@ export interface WorkerListingEntity {
   userId: string;
   displayName: string;
   tagline: string;
-  about: string;
+  description: string;
   coverImage: string | null;
   profileImage: string | null;
   experience: number;
-  skills: string[];
   serviceRate: number;
   bulkDiscounts: BulkDiscountType[] | null;
   estimatedDuration: number | null;
@@ -110,4 +130,5 @@ export interface WorkerListingEntity {
   isPremium: boolean;
   travelCost: number | null;
   distanceKm?: number | null;
+  totalAmount: number;
 }

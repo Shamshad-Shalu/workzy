@@ -8,5 +8,6 @@ export const WORKER_API = {
   PROFILE: (id: string) => worker(`/${id}/profile`),
   PROFILE_ABOUT: (id: string) => worker(`/${id}/profile/about`),
   REAPPLICATION: (id: string) => worker(`/${id}/reApply`),
+  LIST_BY_SERVICE: (serviceId: string) => worker(`/service/${serviceId}`),
   BY_ID: (id: string) => worker(`/${id}`),
 } as const;
