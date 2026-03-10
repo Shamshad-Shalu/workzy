@@ -8,6 +8,7 @@ import paymentRoutes from "./payment.routes";
 import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
 import serviceRoutes from "./service.routes";
+import slotRoutes from "./slot.routes";
 import subscriptionRoutes from "./subscription.routes";
 import uploadRoutes from "./upload.routes";
 import workerRoutes from "./worker.routes";
@@ -25,5 +26,6 @@ router.use("/home", homeRoutes);
 router.use("/plans", planRoutes);
 router.use("/subscription", subscriptionRoutes);
 router.use("/payment", paymentRoutes);
+router.use("/slot", slotRoutes);
 
 export default router;

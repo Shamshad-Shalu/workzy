@@ -7,3 +7,4 @@ export * from "./service";
 export * from "./home";
 export * from "./plan";
 export * from "./subscription";
+export * from "./slot";

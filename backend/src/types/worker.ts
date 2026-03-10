@@ -59,6 +59,7 @@ export interface IWorker extends Document<string> {
   createdAt: Date;
 }
 
+export type Day = keyof IAvailabilitySlots;
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
 // completedJobs
 

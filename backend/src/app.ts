@@ -5,6 +5,7 @@ import express from "express";
 
 import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
+import { startCleanupJob } from "./jobs/cleanup-slots";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import apiRouter from "./routes";
 import webhookRouter from "./routes/webhook.routes";
@@ -33,5 +34,7 @@ app.use(passport.initialize());
 app.use("/api", apiRouter);
 
 app.use(errorMiddleware);
+
+startCleanupJob();
 
 export default app;

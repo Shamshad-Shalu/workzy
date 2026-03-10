@@ -16,3 +16,12 @@ export const BOOKING_PAYMENT_STATUS = {
 } as const;
 export type BookingPaymentStatus =
   (typeof BOOKING_PAYMENT_STATUS)[keyof typeof BOOKING_PAYMENT_STATUS];
+
+export const SLOT_STATUS = {
+  // AVAILABLE: "available",
+  RESERVED: "reserved",
+  BOOKED: "booked",
+} as const;
+export const SLOT_STATUS_VALUES = Object.values(SLOT_STATUS);
+
+export type SlotStatus = (typeof SLOT_STATUS)[keyof typeof SLOT_STATUS];

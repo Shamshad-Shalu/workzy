@@ -9,6 +9,7 @@ import { PaymentController } from "@/controllers/payment.controller";
 import { PlanController } from "@/controllers/plan.controller";
 import { ProfileController } from "@/controllers/profile.controller";
 import { ServiceController } from "@/controllers/service.controller";
+import { SlotController } from "@/controllers/slot.controller";
 import { SubscriptionController } from "@/controllers/subscription.controller";
 import { UploadController } from "@/controllers/upload.controller";
 import { WorkerController } from "@/controllers/worker.controller";
@@ -21,6 +22,7 @@ import { IPaymentController } from "@/core/interfaces/controllers/IPaymentContro
 import { IPlanController } from "@/core/interfaces/controllers/IPlanController";
 import { IProfileController } from "@/core/interfaces/controllers/IProfileController";
 import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
+import { ISlotController } from "@/core/interfaces/controllers/ISlotController";
 import { ISubscriptionController } from "@/core/interfaces/controllers/ISubscriptionController";
 import { IUploadController } from "@/core/interfaces/controllers/IUploadController";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
@@ -30,6 +32,7 @@ import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSect
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IPlanRepository } from "@/core/interfaces/repositories/IPlanRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
+import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { ISubscriptionRepository } from "@/core/interfaces/repositories/ISubscriptionRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -46,6 +49,7 @@ import { IPlanService } from "@/core/interfaces/services/IPlanService";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
+import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -56,6 +60,7 @@ import { HomeSectionRepository } from "@/repositories/homeSection.repository";
 import { PaymentRepository } from "@/repositories/payment.repository";
 import { PlanRepository } from "@/repositories/plan.repository";
 import { ServiceRepository } from "@/repositories/service.repository";
+import { SlotRepository } from "@/repositories/slot.repository";
 import { SubscriptionRepository } from "@/repositories/subscription.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { WorkerRepository } from "@/repositories/worker.repository";
@@ -73,6 +78,7 @@ import { PlanService } from "@/services/plan.service";
 import { ProfileService } from "@/services/profile.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
+import { SlotService } from "@/services/slot.service";
 import { SubscriptionService } from "@/services/subscription.service";
 import { UserService } from "@/services/user.service";
 import { WorkerService } from "@/services/worker.service";
@@ -134,5 +140,9 @@ container.bind<ISubscriptionRepository>(TYPES.SubscriptionRepository).to(Subscri
 container.bind<IPaymentController>(TYPES.PaymentController).to(PaymentController);
 container.bind<IPaymentRepository>(TYPES.PaymentRepository).to(PaymentRepository);
 container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
+
+container.bind<ISlotController>(TYPES.SlotController).to(SlotController);
+container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
+container.bind<ISlotRepository>(TYPES.SlotRepository).to(SlotRepository);
 
 export { container };

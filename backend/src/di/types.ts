@@ -61,6 +61,10 @@ const TYPES = {
   PaymentController: Symbol.for("PaymentController"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   PaymentService: Symbol.for("PaymentService"),
+
+  SlotController: Symbol.for("SlotController"),
+  SlotRepository: Symbol.for("SlotRepository"),
+  SlotService: Symbol.for("SlotService"),
 };
 
 export { TYPES };
