@@ -67,9 +67,9 @@ export class SlotController implements ISlotController {
     }
     const data = req.body as CreateSlotDTO;
     const { slotId, reservedUntil } = await this._slotService.reserveSlot(userId, data);
-
     res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotId, reservedUntil });
   });
+
   releaseSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.user?.id;
     if (!userId) {

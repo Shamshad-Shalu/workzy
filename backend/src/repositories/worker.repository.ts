@@ -271,6 +271,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
             {
               $project: {
                 _id: 0,
+                serviceId: "$services._id",
                 workerId: "$_id",
                 userId: "$userId",
                 displayName: "$displayName",
@@ -287,6 +288,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                 estimatedDuration: "$services.estimatedDuration",
                 categoryName: "$category.name",
                 pricingMode: "$category.pricingMode",
+                serviceType: "$category.serviceType",
                 distanceKm: "$distanceKm",
                 bulkDiscounts: {
                   $cond: [

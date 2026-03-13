@@ -241,6 +241,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
             {
               $project: {
                 _id: 0,
+                serviceId: "$_id",
                 workerId: "$workerId",
                 userId: "$worker.userId",
                 displayName: "$worker.displayName",
@@ -256,6 +257,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
                 serviceRate: "$rate",
                 estimatedDuration: "$estimatedDuration",
                 categoryName: "$category.name",
+                serviceType: "$category.serviceType",
                 pricingMode: "$category.pricingMode",
                 bulkDiscounts: {
                   $cond: [

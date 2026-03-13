@@ -1,13 +1,12 @@
 import { Document, Types } from "mongoose";
 
-import { PricingMode, StripeAccountStatus } from "@/constants";
+import { PricingMode, ServiceType, StripeAccountStatus } from "@/constants";
 
 import { BulkDiscountType } from "./service";
 import { ILocation, IUser } from "./user";
 
 export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
 
-export type RateType = "hourly" | "fixed";
 export type DocumentType = "id_proof" | "license" | "certificate" | "other";
 
 export interface ITimeSlot {
@@ -112,6 +111,7 @@ export type WorkerListingFiltersDist = Omit<WorkerListingFilters, "lat" | "lng" 
 };
 
 export interface WorkerListingEntity {
+  serviceId: string;
   workerId: string;
   userId: string;
   displayName: string;
@@ -124,6 +124,7 @@ export interface WorkerListingEntity {
   bulkDiscounts: BulkDiscountType[] | null;
   estimatedDuration: number | null;
   pricingMode: PricingMode;
+  serviceType: ServiceType;
   averageRating: number;
   worksCompleted: number;
   reviewCount: number;

@@ -25,7 +25,6 @@ import { IService } from "@/types/service";
 import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO } from "@/types/slot";
 import { Day, IWorker } from "@/types/worker";
 import CustomError from "@/utils/customError";
-import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
 
@@ -161,10 +160,10 @@ export class SlotService implements ISlotService {
   }
 
   async getAvailableSlots(dto: GetSlotsDTO): Promise<AvailableSlot[]> {
-    const { date, serviceId, workerId, lat, lng } = dto;
+    const { date, serviceId, workerId, lat, lng, itemCount = 1 } = dto;
     const { worker, service, category } = await this.getSlotContext(workerId, serviceId);
 
-    const serviceDuration = service.estimatedDuration ?? category.estimatedDuration ?? 60;
+    const serviceDuration = this.resolveServiceDuration(service, category, itemCount);
     const bufferTime = service.bufferTime ?? category.bufferTime ?? 15;
     const isRemote = category.serviceType === SERVICE_TYPE.REMOTE;
 
@@ -205,7 +204,8 @@ export class SlotService implements ISlotService {
   }
 
   async releaseSlot(slotId: string, userId: string): Promise<boolean> {
-    const slot = await getEntityOrThrow(this._slotRepository, slotId, SLOT.NOT_FOUND);
+    const slot = await this._slotRepository.findById(slotId);
+    if (!slot) return true;
     const result = await this._slotRepository.findOneAndDelete({
       _id: new Types.ObjectId(slotId),
       reservedBy: new Types.ObjectId(userId),

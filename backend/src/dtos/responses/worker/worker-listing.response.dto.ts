@@ -1,9 +1,15 @@
-import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE, PricingMode } from "@/constants";
+import {
+  DEFAULT_IMAGE_URL,
+  DEFAULT_WORKER_COVER_IMAGE,
+  PricingMode,
+  ServiceType,
+} from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { BulkDiscountType } from "@/types/service";
 import { WorkerListingEntity } from "@/types/worker";
 
 export class WorkerListingResponseDto {
+  serviceId!: string;
   workerId!: string;
   userId!: string;
   displayName!: string;
@@ -19,6 +25,7 @@ export class WorkerListingResponseDto {
   reviewCount!: number;
   categoryName!: string;
   PricingMode!: PricingMode;
+  serviceType!: ServiceType;
   isPremium!: boolean;
   bulkDiscounts!: BulkDiscountType[] | null;
   travelCost!: number | null;
@@ -37,6 +44,8 @@ export class WorkerListingResponseDto {
 
     const coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
     const travelCost = entity.travelCost ? Math.floor(entity.travelCost) : null;
+
+    dto.serviceId = entity.serviceId.toString();
     dto.workerId = entity.workerId.toString();
     dto.userId = entity.userId.toString();
     dto.displayName = entity.displayName;
@@ -54,6 +63,7 @@ export class WorkerListingResponseDto {
     dto.categoryName = entity.categoryName;
     dto.isPremium = entity.isPremium;
     dto.PricingMode = entity.pricingMode;
+    dto.serviceType = entity.serviceType;
     dto.travelCost = travelCost;
     dto.distanceKm = entity.distanceKm ?? null;
     dto.totalAmount = travelCost ? travelCost + entity.serviceRate : entity.serviceRate;

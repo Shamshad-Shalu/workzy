@@ -26,6 +26,6 @@ router.use("/home", homeRoutes);
 router.use("/plans", planRoutes);
 router.use("/subscription", subscriptionRoutes);
 router.use("/payment", paymentRoutes);
-router.use("/slot", slotRoutes);
+router.use("/slots", slotRoutes);
 
 export default router;

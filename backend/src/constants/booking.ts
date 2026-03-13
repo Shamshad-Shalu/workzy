@@ -18,7 +18,6 @@ export type BookingPaymentStatus =
   (typeof BOOKING_PAYMENT_STATUS)[keyof typeof BOOKING_PAYMENT_STATUS];
 
 export const SLOT_STATUS = {
-  // AVAILABLE: "available",
   RESERVED: "reserved",
   BOOKED: "booked",
 } as const;
