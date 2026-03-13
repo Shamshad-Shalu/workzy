@@ -40,7 +40,6 @@ const CategoryService = {
   },
   getTrendingCategories: async (): Promise<CategorySuggestion[]> => {
     const res = await api.get(CATEGORY_API.TRENDING);
-    console.log('trending::', res.data);
     return res.data.results;
   },
 };

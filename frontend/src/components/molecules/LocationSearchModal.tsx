@@ -20,6 +20,7 @@ interface LocationResult {
 
 export interface SelectedLocation {
   name: string;
+  address: string;
   latitude: number;
   longitude: number;
 }
@@ -134,6 +135,7 @@ export function LocationSearchModal({
     const [longitude, latitude] = location.center;
     onSelectLocation({
       name: location.text,
+      address: location.place_name,
       latitude,
       longitude,
     });

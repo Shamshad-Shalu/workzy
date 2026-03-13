@@ -1,4 +1,4 @@
-import type { PricingMode } from '@/constants';
+import type { PricingMode, ServiceType } from '@/constants';
 
 import type { BulkDiscountType } from './service';
 
@@ -49,7 +49,6 @@ export interface WorkerProfile {
   about: string;
   coverImage: string;
   defaultRate: number;
-  skills: string[];
   cities: string[];
   availability: AvailabilitySlots;
 }
@@ -80,6 +79,7 @@ export interface ResubmitDocumentPayload {
 }
 
 export interface WorkerListingInfo {
+  serviceId: string;
   workerId: string;
   userId: string;
   displayName: string;
@@ -96,6 +96,7 @@ export interface WorkerListingInfo {
   bulkDiscounts: BulkDiscountType[] | null;
   reviewCount: number;
   categoryName: string;
+  serviceType: ServiceType;
   PricingMode: PricingMode;
   isPremium: boolean;
   totalAmount: number;

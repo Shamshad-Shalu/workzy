@@ -15,6 +15,7 @@ type WorkerListProps = {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
+  onBook: (worker: WorkerListingInfo) => void;
 };
 
 export interface WorkerListParams {
@@ -36,6 +37,7 @@ export function WorkerList({
   onPageChange,
   page,
   total,
+  onBook,
 }: WorkerListProps) {
   const pageCount = Math.ceil(total / limit);
 
@@ -78,7 +80,7 @@ export function WorkerList({
             className="flex flex-col gap-4"
           >
             {workers.map((worker, i) => (
-              <WorkerCard key={worker.userId} worker={worker} index={i} />
+              <WorkerCard key={worker.userId} worker={worker} index={i} onBook={onBook} />
             ))}
           </motion.div>
         )}

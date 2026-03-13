@@ -1,4 +1,5 @@
 import { CheckCircle, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import type { Worker } from '@/types/home/home';
 
@@ -27,7 +28,6 @@ export const WorkerCard = ({ worker, onclick }: WorkerCardProps) => {
       tabIndex={0}
     >
       <div className="p-5 flex-1 flex flex-col">
-        {/* Header */}
         <div className="flex items-start gap-4 ">
           <div className="relative shrink-0">
             <img
@@ -63,27 +63,20 @@ export const WorkerCard = ({ worker, onclick }: WorkerCardProps) => {
             <MapPin className="w-4 h-4 text-muted-foreground" />
             <span className="text-muted-foreground">{worker.distance}km away</span>
           </div>
-
-          {/* <div className="flex items-center gap-2 text-sm">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <span className="text-muted-foreground">{worker.responseTime}</span>
-          </div> */}
         </div>
-        <button
-          onClick={e => {
-            e.stopPropagation();
-            onclick?.(worker.workerId);
-          }}
-          className="
+        <Link to={`/workers/${worker.workerId}`}>
+          <button
+            className="
             w-full py-3 rounded-lg
             bg-gradient-to-r from-indigo-600 to-purple-600
             text-white font-semibold
             hover:shadow-lg
             transition-all
-          "
-        >
-          View Profile
-        </button>
+            "
+          >
+            View Profile
+          </button>
+        </Link>
       </div>
     </div>
   );

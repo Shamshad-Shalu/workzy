@@ -78,7 +78,9 @@ export function AppModal({
   );
 
   const handleOpenChange = (next: boolean) => {
-    if (!next && canCloseOnOutsideClick) {onClose();}
+    if (!next && canCloseOnOutsideClick) {
+      onClose();
+    }
   };
 
   return (

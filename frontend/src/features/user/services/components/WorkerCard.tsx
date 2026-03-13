@@ -12,12 +12,13 @@ dayjs.extend(duration);
 type WorkerCardProps = {
   worker: WorkerListingInfo;
   index?: number;
+  onBook: (worker: WorkerListingInfo) => void;
 };
 
 function formatDuration(minutes: number): string {
   const d = dayjs.duration(minutes, 'minutes');
-  const h = d.hours();
-  const m = d.minutes();
+  const h = d.hours(),
+    m = d.minutes();
   if (h === 0) {return `${m}m`;}
   if (m === 0) {return `${h}h`;}
   return `${h}h ${m}m`;
@@ -40,7 +41,7 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
+export function WorkerCard({ worker, index = 0, onBook }: WorkerCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
@@ -89,7 +90,9 @@ export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
               </span>
             )}
           </div>
+
           <p className="text-xs text-muted-foreground -mt-1 truncate">{worker.tagline}</p>
+
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
             <span className="flex items-center gap-1">
               <StarRating rating={worker.averageRating} />
@@ -137,15 +140,17 @@ export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
                   className="inline-flex items-center gap-1 text-[11px] font-semibold text-violet-700 bg-violet-50 border border-violet-200 px-2 py-0.5 rounded-full"
                 >
                   <Percent className="w-2.5 h-2.5" />
-                  {d.percent}% off · {d.count}+ bookings
+                  {d.percent}% off · {d.count}+ items
                 </span>
               ))}
             </div>
           )}
+
           <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
             {worker.description}
           </p>
         </div>
+
         <div className="flex-shrink-0 flex flex-col items-end justify-between gap-4 min-w-[110px]">
           <div className="text-right">
             <div className="flex items-start justify-end gap-0.5 leading-none">
@@ -156,6 +161,7 @@ export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">{worker.PricingMode}</p>
           </div>
+
           <div className="flex flex-col gap-1.5 w-full">
             <motion.div whileTap={{ scale: 0.97 }} className="w-full">
               <Link
@@ -170,6 +176,7 @@ export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
                 variant="green"
                 size="sm"
                 fullWidth
+                onClick={() => onBook(worker)}
                 className="rounded-lg text-xs font-semibold"
               >
                 Book Now
@@ -178,6 +185,7 @@ export function WorkerCard({ worker, index = 0 }: WorkerCardProps) {
           </div>
         </div>
       </div>
+
       {worker.totalAmount > 0 && (
         <div className="mx-4 sm:mx-5 mb-4 sm:mb-5 mt-0 pt-3 border-t border-border/50 flex items-center justify-between">
           <span className="text-[11px] text-muted-foreground font-medium">Estimated total</span>

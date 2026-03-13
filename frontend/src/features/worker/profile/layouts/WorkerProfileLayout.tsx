@@ -52,7 +52,7 @@ export default function WorkerProfileLayout({
           <StatCard
             icon={<TrendingUp className="w-6 h-6" />}
             label="Completion Rate"
-            value={`${workerInfo.worksCompleted}%`}
+            value={`${workerInfo.worksCompleted ?? 0}%`}
           />
         </div>
         <div className="bg-card rounded-2xl shadow-sm mb-6 flex px-6 flex justify-between border-b border-border">

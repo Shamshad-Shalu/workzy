@@ -4,7 +4,6 @@ import type { WorkerInfo } from '@/types/worker';
 
 import type React from 'react';
 
-
 interface Props {
   workerInfo: WorkerInfo;
   workerAction?: React.ReactNode;

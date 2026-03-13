@@ -25,13 +25,16 @@ export default function WorkerProfileRouteLayout() {
   const { summaryQuery } = useWorker(workerId);
   const { data: workerInfo, isLoading, isError } = summaryQuery;
 
-  if (isLoading) {return <WorkerProfileLayoutSkeleton />;}
-  if (isError || !workerInfo)
-    {return (
+  if (isLoading) {
+    return <WorkerProfileLayoutSkeleton />;
+  }
+  if (isError || !workerInfo) {
+    return (
       <div className="flex items-center justify-center min-h-[40vh] text-muted-foreground text-sm">
         Failed to load profile.
       </div>
-    );}
+    );
+  }
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(

@@ -122,24 +122,34 @@ export default function ServiceSearchModal({
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (isMobile || !open) {return;}
+    if (isMobile || !open) {
+      return;
+    }
     const handler = (e: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {onClose();}
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        onClose();
+      }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, [open, isMobile, onClose]);
 
   useEffect(() => {
-    if (!open) {return;}
+    if (!open) {
+      return;
+    }
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {onClose();}
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [open, onClose]);
 
-  if (!open) {return null;}
+  if (!open) {
+    return null;
+  }
 
   const hasResults = categoryServices.length > 0;
   const isSearchMode = searchQuery.trim().length > 0;

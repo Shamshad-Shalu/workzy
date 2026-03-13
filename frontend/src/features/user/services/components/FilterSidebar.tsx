@@ -10,7 +10,7 @@ interface Props {
   setShowFilters: Dispatch<SetStateAction<boolean>>;
   filterConfig: FilterConfig;
   radius: number;
-  setRadius: Dispatch<SetStateAction<number>>;
+  setRadius: (value: number) => void;
   priceRange: [number, number];
   setPriceRange: Dispatch<SetStateAction<[number, number]>>;
   minRating: number;

@@ -11,13 +11,14 @@ import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
 import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
 import OtpModal from '@/features/profile/modals/OtpModal';
 import { emailRule, phoneRule } from '@/lib/validation/rules';
+import PageError from '@/pages/PageError';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
 import type { RootState } from '@/store/store';
-import type { WorkerProfile } from '@/types/worker';
 import { handleApiError } from '@/utils/handleApiError';
 
 import WorkerSection from '../components/WorkerSection';
+import WorkerSectionSkeleton from '../components/WorkerSectionSkeleton';
 import { useWorkerProfile } from '../hooks/useWorkerProfile';
 
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
@@ -32,24 +33,22 @@ export default function WorkeAboutContentPage() {
   const [openPass, setOpenPass] = useState(false);
   const [openOtpModal, setOpenOtpModal] = useState(false);
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
-  const [workerInfo, setWorkerInfo] = useState<WorkerProfile | null>(null);
 
   const { user } = useAppSelector((s: RootState) => s.auth);
   const { reloadWorkerData } = useOutletContext<OutletContext>();
   const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
-  const { getWorkerProfile, updateWorkerProfile } = useWorkerProfile();
+  const { workerProfileQueries, updateMutation } = useWorkerProfile();
   const dispatch = useAppDispatch();
+  const { data: workerInfo, isLoading: isWorkerLoading, error: workerError } = workerProfileQueries;
 
   useEffect(() => {
     async function loadProfile() {
-      const [userInfo, workerInfo] = await Promise.all([getUserProfilePage(), getWorkerProfile()]);
+      const [userInfo] = await Promise.all([getUserProfilePage()]);
       if (userInfo) {
         dispatch(updateUser(userInfo));
       }
-      if (workerInfo) {
-        setWorkerInfo(workerInfo);
-      }
     }
+
     loadProfile();
   }, []);
 
@@ -63,10 +62,9 @@ export default function WorkeAboutContentPage() {
 
   async function handleWorkerProfileSubmit(data: WorkerProfileSchemaType) {
     try {
-      const { message, workerData } = await updateWorkerProfile(data);
+      const { message } = await updateMutation.mutateAsync(data);
       reloadWorkerData();
       toast.success(message);
-      setWorkerInfo(workerData);
     } catch (error) {
       toast.error(handleApiError(error));
     }
@@ -100,7 +98,13 @@ export default function WorkeAboutContentPage() {
         </div>
       </div>
 
-      {workerInfo && <WorkerSection workerData={workerInfo} onSubmit={handleWorkerProfileSubmit} />}
+      {isWorkerLoading ? (
+        <WorkerSectionSkeleton />
+      ) : workerError || !workerInfo ? (
+        <PageError fullScreen={false} onRetry={() => workerProfileQueries.refetch()} />
+      ) : (
+        <WorkerSection workerData={workerInfo} onSubmit={handleWorkerProfileSubmit} />
+      )}
 
       {/* email  */}
       <ChangeFieldModal

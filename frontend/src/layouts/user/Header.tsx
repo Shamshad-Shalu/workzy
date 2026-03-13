@@ -107,6 +107,7 @@ export default function Header() {
     dispatch(
       setLocation({
         city: location.name,
+        address: location.address,
         latitude: location.latitude,
         longitude: location.longitude,
       })

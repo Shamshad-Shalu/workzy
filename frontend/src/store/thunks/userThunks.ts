@@ -13,13 +13,16 @@ export const bootstrapUserProfile = createAsyncThunk(
     dispatch(updateUser(user));
 
     const location = user.profile?.location;
-    const city = user.profile?.address?.city;
+    const profile = user.profile?.address;
+    const city = profile?.city;
+    const address = `${profile?.place},${profile?.city}, ${profile?.state}-${profile?.pincode}`;
     if (location) {
       dispatch(
         setLocation({
           latitude: location.coordinates[1],
           longitude: location.coordinates[0],
           city: city ?? 'Unknown',
+          address: address ?? 'Unknow',
         })
       );
     }
