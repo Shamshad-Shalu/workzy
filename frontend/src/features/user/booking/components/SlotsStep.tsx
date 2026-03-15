@@ -39,7 +39,9 @@ export default function SlotsStep({
 
   const totalMinutes = (worker?.estimatedDuration || 0) * (booking.itemCount || 1);
   const groups = useMemo(() => {
-    if (!data?.slots) {return {} as Record<string, AvailableSlot[]>;}
+    if (!data?.slots) {
+      return {} as Record<string, AvailableSlot[]>;
+    }
     const slots = [...data.slots];
     if (booking.slot) {
       const already = slots.some(s => s.startTime === booking.slot?.startTime);
@@ -51,9 +53,13 @@ export default function SlotsStep({
     const g: Record<string, AvailableSlot[]> = { Morning: [], Afternoon: [], Evening: [] };
     data.slots.forEach(s => {
       const h = parseInt(s.startTime.split(':')[0], 10);
-      if (h < 12) {g['Morning'].push(s);}
-      else if (h < 17) {g['Afternoon'].push(s);}
-      else {g['Evening'].push(s);}
+      if (h < 12) {
+        g['Morning'].push(s);
+      } else if (h < 17) {
+        g['Afternoon'].push(s);
+      } else {
+        g['Evening'].push(s);
+      }
     });
     return g;
   }, [data, booking.slot]);
@@ -93,7 +99,9 @@ export default function SlotsStep({
       ) : (
         <div className="flex flex-col gap-4">
           {Object.entries(groups).map(([period, slots]) => {
-            if (!slots.length) {return null;}
+            if (!slots.length) {
+              return null;
+            }
             return (
               <div key={period}>
                 <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">

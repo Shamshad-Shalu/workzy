@@ -10,8 +10,6 @@ import type { WorkerListingInfo } from '@/types/worker';
 
 import { useAvailableDates } from '../../slot/hooks/useSlot';
 
-
-
 export default function DateStep({
   worker,
   booking,

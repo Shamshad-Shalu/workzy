@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { toast } from 'sonner';
 
-import { SERVICE_TYPE } from '@/constants';
+import { PRICING_MODE, SERVICE_TYPE } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import type { BulkDiscountType } from '@/types/service';
@@ -15,7 +15,6 @@ import { useCreateBooking } from './useBookingQuery';
 
 import type { bookingFormData } from '../validation/bookingFormData';
 
-
 export interface BookingPricing {
   rate: number;
   subtotal: number;
@@ -26,9 +25,13 @@ export interface BookingPricing {
   total: number;
 }
 function getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
-  if (!discounts?.length) {return null;}
+  if (!discounts?.length) {
+    return null;
+  }
   const eligible = discounts.filter(d => count >= d.count);
-  if (!eligible.length) {return null;}
+  if (!eligible.length) {
+    return null;
+  }
   return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
 }
 
@@ -53,6 +56,7 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
   const { mutateAsync: createBooking, isPending: isBooking } = useCreateBooking();
 
   const [booking, setBooking] = useState<BookingState>(INITIAL);
+  console.log('booking::', booking);
 
   const buildPricing = useCallback(
     (state: BookingState) => {
@@ -100,13 +104,17 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
   );
 
   const handleDateSelect = async (date: string) => {
-    if (booking.slotId) {await releaseSlot(booking.slotId);}
+    if (booking.slotId) {
+      await releaseSlot(booking.slotId);
+    }
     setBooking(b => ({ ...b, date: date, slot: null, slotId: null, reservedUntil: null }));
   };
 
   const handleSlotSelect = async (slot: AvailableSlot) => {
     try {
-      if (booking.slotId) {await releaseSlot(booking.slotId);}
+      if (booking.slotId) {
+        await releaseSlot(booking.slotId);
+      }
       setBooking(b => ({ ...b, slot, slotId: null, reservedUntil: null }));
     } catch (err) {
       toast.error(handleApiError(err));
@@ -114,9 +122,13 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
   };
 
   const handleReserve = useCallback(async (): Promise<boolean> => {
-    if (!booking.slot) {return false;}
+    if (!booking.slot) {
+      return false;
+    }
     try {
-      if (booking.slotId) {await releaseSlot(booking.slotId);}
+      if (booking.slotId) {
+        await releaseSlot(booking.slotId);
+      }
       const res = await reserveSlot({
         workerId: worker.workerId,
         serviceId: worker.serviceId,
@@ -140,7 +152,9 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
 
   const handleClose = useCallback(async () => {
     try {
-      if (booking.slotId) {await releaseSlot(booking.slotId);}
+      if (booking.slotId) {
+        await releaseSlot(booking.slotId);
+      }
       setBooking(INITIAL);
     } catch (err) {
       console.error(handleApiError(err));
@@ -173,5 +187,6 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
     handleConfirm,
     handleClose,
     isRemote: worker.serviceType === SERVICE_TYPE.REMOTE,
+    isDaily: worker.PricingMode === PRICING_MODE.PER_DAY,
   };
 }

@@ -13,8 +13,12 @@ export function formatDuration(minutes: number): string {
   const hours = d.hours();
   const mins = d.minutes();
 
-  if (hours === 0) {return `${mins}m`;}
-  if (mins === 0) {return `${hours}h`;}
+  if (hours === 0) {
+    return `${mins}m`;
+  }
+  if (mins === 0) {
+    return `${hours}h`;
+  }
 
   return `${hours}h ${mins}m`;
 }

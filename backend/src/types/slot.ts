@@ -22,6 +22,11 @@ export interface ISlot extends Document<string> {
   createdAt?: Date;
 }
 
+export interface TimeSlot {
+  startTime: string;
+  endTime: string;
+}
+
 export interface GetSlotsDTO {
   workerId: string;
   serviceId: string;

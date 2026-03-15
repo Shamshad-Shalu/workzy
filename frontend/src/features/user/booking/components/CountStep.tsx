@@ -6,9 +6,13 @@ import type { WorkerListingInfo } from '@/types/worker';
 import { formatDuration } from '@/utils/time.utils';
 
 function getBestDiscount(w: WorkerListingInfo, count: number) {
-  if (!w.bulkDiscounts?.length) {return null;}
+  if (!w.bulkDiscounts?.length) {
+    return null;
+  }
   const eligible = w.bulkDiscounts.filter(d => count >= d.count);
-  if (!eligible.length) {return null;}
+  if (!eligible.length) {
+    return null;
+  }
   return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
 }
 

@@ -19,8 +19,12 @@ function formatDuration(minutes: number): string {
   const d = dayjs.duration(minutes, 'minutes');
   const h = d.hours(),
     m = d.minutes();
-  if (h === 0) {return `${m}m`;}
-  if (m === 0) {return `${h}h`;}
+  if (h === 0) {
+    return `${m}m`;
+  }
+  if (m === 0) {
+    return `${h}h`;
+  }
   return `${h}h ${m}m`;
 }
 

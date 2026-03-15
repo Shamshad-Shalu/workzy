@@ -16,7 +16,6 @@ import ReviewStep from './ReviewStep';
 import SlotsStep from './SlotsStep';
 import StepIndicator from './StepIndicator';
 
-
 const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 40 : -40 }),
   center: { opacity: 1, x: 0 },
@@ -69,7 +68,9 @@ export default function BookingModal({ open, onClose, worker, onBookService }: B
   });
 
   const goTo = (idx: number) => {
-    if (idx < 0 || idx >= steps.length) {return;}
+    if (idx < 0 || idx >= steps.length) {
+      return;
+    }
     setDirection(idx > stepIndex ? 1 : -1);
     setStepIndex(idx);
   };
@@ -93,7 +94,9 @@ export default function BookingModal({ open, onClose, worker, onBookService }: B
   const handleContinue = async () => {
     if (step === BOOKING_STEPS.SLOTS) {
       const ok = await handleReserve();
-      if (!ok) {return;}
+      if (!ok) {
+        return;
+      }
     }
     goTo(stepIndex + 1);
   };
