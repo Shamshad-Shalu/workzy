@@ -32,7 +32,7 @@ export type SubscriptionInfoEntity = Omit<
 export interface AddSubscriptionDto {
   name: string;
   workerId: string;
-  planId: string;
-  billingCycle: BillingCycle;
+  userId: string;
+  subscriptionId: string;
   amount: number;
 }

@@ -1,7 +1,4 @@
 import dayjs from 'dayjs';
-import duration from 'dayjs/plugin/duration';
-
-dayjs.extend(duration);
 
 export function formatTime12(time: string): string {
   return dayjs(`2000-01-01 ${time}`).format('h:mm A');

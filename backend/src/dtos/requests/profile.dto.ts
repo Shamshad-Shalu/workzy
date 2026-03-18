@@ -23,6 +23,17 @@ export class ChangePasswordDTO {
   newPassword!: string;
 }
 
+export class LocationDTO {
+  @IsString()
+  type!: "Point";
+
+  @IsArray()
+  @IsNumber({}, { each: true })
+  @ArrayMinSize(2)
+  @ArrayMaxSize(2)
+  coordinates!: [number, number];
+}
+
 class AddressDTO {
   @IsOptional()
   @IsString()
@@ -53,17 +64,6 @@ class AddressDTO {
   @IsString()
   @Matches(/^[0-9]{6}$/, { message: "Pincode must be exactly 6 digits" })
   pincode?: string;
-}
-
-class LocationDTO {
-  @IsString()
-  type!: "Point";
-
-  @IsArray()
-  @IsNumber({}, { each: true })
-  @ArrayMinSize(2)
-  @ArrayMaxSize(2)
-  coordinates!: [number, number];
 }
 
 class ProfileDTO {

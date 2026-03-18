@@ -26,7 +26,9 @@ export function useSubscriptions() {
     mutationFn: (data: { planId: string; billingCycle: BillingCycle }) =>
       SubscriptionService.addSubscription(data),
     onSuccess: ({ url }) => {
-      window.location.href = url;
+      setTimeout(() => {
+        window.location.href = url;
+      }, 100);
     },
     onError: error => {
       toast.error(handleApiError(error));

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 import { PRICING_MODE, SERVICE_TYPE } from '@/constants';
@@ -35,7 +35,7 @@ function getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
   return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
 }
 
-const INITIAL: BookingState = {
+const INITIAL_BOOKING_STATE: BookingState = {
   itemCount: 1,
   date: '',
   slot: null,
@@ -44,7 +44,7 @@ const INITIAL: BookingState = {
   reservedUntil: null,
 };
 
-export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
+export function useBooking(worker: WorkerListingInfo) {
   const {
     latitude: lat,
     longitude: lng,
@@ -53,53 +53,59 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
 
   const { mutateAsync: releaseSlot, isPending: isReleasing } = useReleaseSlot();
   const { mutateAsync: reserveSlot, isPending: isReserving } = useReserveSlot();
-  const { mutateAsync: createBooking, isPending: isBooking } = useCreateBooking();
+  const {
+    mutateAsync: createBooking,
+    isPending: isBooking,
+    reset: resetBooking,
+  } = useCreateBooking();
 
-  const [booking, setBooking] = useState<BookingState>(INITIAL);
-  console.log('booking::', booking);
+  const [booking, setBooking] = useState<BookingState>(INITIAL_BOOKING_STATE);
 
-  const buildPricing = useCallback(
-    (state: BookingState) => {
-      const best = getBestDiscount(worker.bulkDiscounts, state.itemCount);
-      const rate = worker.serviceRate;
-      const subtotal = rate * state.itemCount;
-      const discountPercent = best?.percent ?? 0;
-      const discountAmount = Math.round((subtotal * discountPercent) / 100);
-      const chargeableAmount = subtotal - discountAmount;
-      const travelCost = worker.travelCost ?? 0;
-      const total = chargeableAmount + travelCost;
-      return {
-        rate,
-        subtotal,
-        discountPercent,
-        discountAmount,
-        chargeableAmount,
-        travelCost,
-        total,
-      };
-    },
-    [worker]
-  );
+  const pricing = useMemo(() => {
+    const best = getBestDiscount(worker.bulkDiscounts, booking.itemCount);
+    const rate = worker.serviceRate;
+    const subtotal = rate * booking.itemCount;
+    const discountPercent = best?.percent ?? 0;
+    const discountAmount = Math.round((subtotal * discountPercent) / 100);
+    const chargeableAmount = subtotal - discountAmount;
+    const travelCost = worker.travelCost ?? 0;
+    const total = chargeableAmount + travelCost;
+
+    return {
+      rate,
+      subtotal,
+      discountPercent,
+      discountAmount,
+      chargeableAmount,
+      travelCost,
+      total,
+    };
+  }, [worker, booking.itemCount]);
 
   const buildPayload = useCallback(
-    (state: BookingState): bookingFormData => ({
-      serviceId: worker.serviceId,
-      workerId: worker.workerId,
-      slotId: state.slotId!,
-      date: state.date,
-      startTime: state.slot!.startTime,
-      endTime: state.slot!.endTime,
-      duration: (worker.estimatedDuration ?? 0) * state.itemCount,
-      itemCount: state.itemCount,
-      address:
-        worker.serviceType === SERVICE_TYPE.REMOTE
-          ? null
-          : {
-              label: userAddress ?? '',
-              location: { type: 'Point', coordinates: [lng ?? 0, lat ?? 0] },
-            },
-      userNote: state.note?.trim() || undefined,
-    }),
+    (state: BookingState): bookingFormData => {
+      if (!state.slot || !state.slotId) {
+        throw new Error('Slot not reserved');
+      }
+      return {
+        serviceId: worker.serviceId,
+        workerId: worker.workerId,
+        slotId: state.slotId,
+        date: state.date,
+        startTime: state.slot.startTime,
+        endTime: state.slot.endTime,
+        duration: (worker.estimatedDuration ?? 0) * state.itemCount,
+        itemCount: state.itemCount,
+        address:
+          worker.serviceType === SERVICE_TYPE.REMOTE
+            ? null
+            : {
+                label: userAddress ?? '',
+                location: { type: 'Point', coordinates: [lng ?? 0, lat ?? 0] },
+              },
+        userNote: state.note?.trim() || '',
+      };
+    },
     [worker, userAddress, lat, lng]
   );
 
@@ -155,32 +161,36 @@ export function useBooking(worker: WorkerListingInfo, onSuccess: () => void) {
       if (booking.slotId) {
         await releaseSlot(booking.slotId);
       }
-      setBooking(INITIAL);
+      setBooking(INITIAL_BOOKING_STATE);
+      resetBooking();
     } catch (err) {
       console.error(handleApiError(err));
     }
-  }, [booking.slotId, releaseSlot]);
+  }, [booking.slotId, releaseSlot,resetBooking]);
 
   const handleConfirm = useCallback(async () => {
+    if (booking.reservedUntil && new Date() > booking.reservedUntil) {
+      toast.error('Slot reservation expired. Please reserve again.');
+      return;
+    }
     try {
       const payload = buildPayload(booking);
       await createBooking(payload);
-      setBooking(INITIAL);
-      onSuccess();
     } catch (err) {
       toast.error(handleApiError(err));
     }
-  }, [booking, buildPayload, createBooking, onSuccess]);
+  }, [booking, buildPayload, createBooking]);
 
   return {
     booking,
     setBooking,
-    pricing: buildPricing(booking),
+    pricing,
     lat,
     lng,
     isReleasing,
     isReserving,
     isBooking,
+    resetBooking,
     handleDateSelect,
     handleSlotSelect,
     handleReserve,

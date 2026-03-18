@@ -280,9 +280,9 @@ export default function ServicesPage() {
           open={!!bookingWorker}
           onClose={() => setBookingWorker(null)}
           worker={bookingWorker}
-          onBookService={() => {
-            setBookingWorker(null);
-          }}
+          // onBookService={() => {
+          //   setBookingWorker(null);
+          // }}
         />
       )}
     </main>

@@ -32,5 +32,7 @@ router.patch(
   validateDto(WorkerProfileRequestDTO),
   workerController.updateWorkerProfile
 );
+router.get("/stripe/connect", workerController.connectStripe);
+router.get("/stripe/status", workerController.getStripeStatus);
 
 export default router;

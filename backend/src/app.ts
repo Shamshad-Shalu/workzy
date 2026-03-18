@@ -23,7 +23,7 @@ const corsOptions = {
   credentials: true,
 };
 
-app.use("/api/webhook", express.raw({ type: "application/json" }), webhookRouter);
+app.use("/api/webhook", express.raw({ type: "*/*" }), webhookRouter);
 
 app.use(cors(corsOptions));
 app.use(express.json());

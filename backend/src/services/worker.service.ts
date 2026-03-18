@@ -7,12 +7,14 @@ import {
   ROLE,
   SERVER,
   SERVICE,
+  StripeAccountStatus,
   WORKER,
   WORKER_STATUS,
 } from "@/constants";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
@@ -35,7 +37,8 @@ export class WorkerService implements IWorkerService {
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.PaymentService) private _paymentservice: IPaymentService
   ) {}
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
     return this._workerRepository.findOne({ userId });
@@ -241,5 +244,24 @@ export class WorkerService implements IWorkerService {
     }
     const workers = await WorkerListingResponseDto.fromEntities(workersRaw, this._s3Service);
     return { total, workers };
+  }
+
+  async getStripeStatus(
+    workerId: string
+  ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    return {
+      status: worker.stripeAccountStatus,
+      stripeAccountId: worker.stripeAccountId ?? null,
+    };
+  }
+  async connectStripe(workerId: string): Promise<string> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+
+    if (worker.status !== WORKER_STATUS.VERIFIED) {
+      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.FORBIDDEN);
+    }
+
+    return this._paymentservice.createStripeConnectLink(worker);
   }
 }

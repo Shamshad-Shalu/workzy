@@ -1,3 +1,4 @@
+import { StripeAccountStatus } from "@/constants";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
@@ -39,4 +40,8 @@ export interface IWorkerService {
     serviceId: string,
     data: WorkerListingFilters
   ): Promise<{ total: number; workers: WorkerListingResponseDto[] }>;
+  connectStripe(workerId: string): Promise<string>;
+  getStripeStatus(
+    workerId: string
+  ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }>;
 }

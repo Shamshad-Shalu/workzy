@@ -1,8 +1,10 @@
 import { inject, injectable } from "inversify";
+import { Types } from "mongoose";
 
-import { HTTPSTATUS, PLAN, SUBSCRIPTION, SUBSCRIPTION_STATUS } from "@/constants";
+import { HTTPSTATUS, PLAN, SUBSCRIPTION, SUBSCRIPTION_STATUS, WORKER } from "@/constants";
 import { IPlanRepository } from "@/core/interfaces/repositories/IPlanRepository";
 import { ISubscriptionRepository } from "@/core/interfaces/repositories/ISubscriptionRepository";
+import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISubscriptionService } from "@/core/interfaces/services/SubscriptionService";
 import { TYPES } from "@/di/types";
@@ -16,7 +18,8 @@ export class SubscriptionService implements ISubscriptionService {
   constructor(
     @inject(TYPES.SubscriptionRepository) private _subscriptionRepository: ISubscriptionRepository,
     @inject(TYPES.PlanRepository) private _planRepository: IPlanRepository,
-    @inject(TYPES.PaymentService) private _paymentService: IPaymentService
+    @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.WorkerRepository) private _workerRepo: IWorkerRepository
   ) {}
   async getMySubscription(
     workerId: string
@@ -32,8 +35,10 @@ export class SubscriptionService implements ISubscriptionService {
     data: AddSubscriptionRequestDTO
   ): Promise<{ url: string }> {
     const { planId, billingCycle } = data;
-    const plan = await getEntityOrThrow(this._planRepository, planId, PLAN.NOT_FOUND);
-
+    const [worker, plan] = await Promise.all([
+      getEntityOrThrow(this._workerRepo, workerId, WORKER.NOT_FOUND),
+      getEntityOrThrow(this._planRepository, planId, PLAN.NOT_FOUND),
+    ]);
     const amount = plan.price[billingCycle];
     if (!amount) {
       throw new CustomError(SUBSCRIPTION.INVALID_BILLING, HTTPSTATUS.BAD_REQUEST);
@@ -44,16 +49,40 @@ export class SubscriptionService implements ISubscriptionService {
       status: SUBSCRIPTION_STATUS.ACTIVE,
     });
     if (existing) throw new CustomError(SUBSCRIPTION.ALREADY_EXISTS, HTTPSTATUS.CONFLICT);
+
+    const startDate = new Date();
+    const expiryDate = this._calcExpiry(startDate, billingCycle);
+
+    const subscription = await this._subscriptionRepository.create({
+      workerId: new Types.ObjectId(workerId),
+      planId: new Types.ObjectId(planId),
+      billingCycle,
+      amountPaid: Number(amount),
+      status: SUBSCRIPTION_STATUS.PENDING,
+      startDate,
+      expiryDate,
+    });
     const name = `${plan.name} - ${billingCycle}`;
     const url = await this._paymentService.createSubscriptionCheckout({
       workerId,
-      planId,
+      userId: worker.userId.toString(),
+      subscriptionId: subscription._id.toString(),
       amount,
-      billingCycle,
       name,
     });
     return {
       url,
     };
+  }
+  private _calcExpiry(start: Date, cycle: string): Date {
+    const d = new Date(start);
+    const map: Record<string, () => void> = {
+      monthly: () => d.setMonth(d.getMonth() + 1),
+      quarterly: () => d.setMonth(d.getMonth() + 3),
+      halfYearly: () => d.setMonth(d.getMonth() + 6),
+      yearly: () => d.setFullYear(d.getFullYear() + 1),
+    };
+    map[cycle]?.();
+    return d;
   }
 }

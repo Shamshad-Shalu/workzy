@@ -1,19 +1,28 @@
 export const BOOKING_STATUS = {
-  PENDING_PAYMENT: "pending_payment", // before user pays
-  CONFIRMED: "confirmed", // user paid
-  IN_PROGRESS: "in_progress", // worker started
-  COMPLETED: "completed", // worker marked done
-  CANCELLED: "cancelled",
-  DISPUTED: "disputed",
+  PENDING: "pending",
+  CONFIRMED: "confirmed", // payment success, worker notified
+  IN_PROGRESS: "in_progress", // worker started job
+  COMPLETED: "completed", // job finished
+  APPROVED: "approved", // user approved
+  CANCELLED: "cancelled", // cancelled before start
+  REJECTED: "rejected", // worker rejected
+  DISPUTED: "disputed", // user raised dispute
 } as const;
+
+export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);
 export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
 
 export const BOOKING_PAYMENT_STATUS = {
-  UNPAID: "unpaid", // not paid yet
-  HELD: "held", // paid, frozen in Stripe ← escrow
-  RELEASED: "released", // captured, worker paid
-  REFUNDED: "refunded", // cancelled, money returned
+  PENDING: "pending",
+  HELD: "held",
+  RELEASED: "released",
+  REFUNDED: "refunded",
+  CANCELLED: "cancelled",
+  FAILED: "failed",
 } as const;
+
+export const BOOKING_PAYMENT_STATUS_VALUES = Object.values(BOOKING_PAYMENT_STATUS);
+
 export type BookingPaymentStatus =
   (typeof BOOKING_PAYMENT_STATUS)[keyof typeof BOOKING_PAYMENT_STATUS];
 

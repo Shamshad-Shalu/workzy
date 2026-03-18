@@ -2,6 +2,7 @@ import { Router } from "express";
 
 import adminRoutes from "./admin.routes";
 import authRoute from "./auth.routes";
+import bookingRoutes from "./booking.routes";
 import categoryRoutes from "./category.routes";
 import homeRoutes from "./home.routes";
 import paymentRoutes from "./payment.routes";
@@ -27,5 +28,6 @@ router.use("/plans", planRoutes);
 router.use("/subscription", subscriptionRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/slots", slotRoutes);
+router.use("/booking", bookingRoutes);
 
 export default router;

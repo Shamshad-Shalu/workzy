@@ -16,10 +16,10 @@ const WorkerProfileRouteWrapper = lazy(
 const WorkerAboutContentPage = lazy(
   () => import('@/features/worker/profile/pages/AboutContentPage')
 );
-
 const WorkerDocumentsContentPage = lazy(
   () => import('@/features/worker/profile/pages/DocumentsContentPage')
 );
+const AccountPage = lazy(() => import('@/features/worker/profile/pages/AccountPage'));
 const SubscriptionPage = lazy(
   () => import('@/features/worker/subscription/pages/SubscriptionPage')
 );
@@ -35,6 +35,7 @@ export default function WorkerRoutes() {
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
+            <Route path="account" element={<AccountPage />} />
           </Route>
         </Route>
       </Route>

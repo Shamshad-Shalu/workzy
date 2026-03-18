@@ -25,11 +25,10 @@ const slideVariants = {
 interface BookingModalProps {
   open: boolean;
   onClose: () => void;
-  onBookService: () => void;
   worker: WorkerListingInfo;
 }
 
-export default function BookingModal({ open, onClose, worker, onBookService }: BookingModalProps) {
+export default function BookingModal({ open, onClose, worker }: BookingModalProps) {
   const isPerUnit = worker.PricingMode === PRICING_MODE.PER_UNIT;
   const steps = useMemo<BookingStep[]>(
     () => [
@@ -61,11 +60,7 @@ export default function BookingModal({ open, onClose, worker, onBookService }: B
     handleReserve,
     handleConfirm,
     handleClose,
-  } = useBooking(worker, () => {
-    setStepIndex(0);
-    onBookService();
-    onClose();
-  });
+  } = useBooking(worker);
 
   const goTo = (idx: number) => {
     if (idx < 0 || idx >= steps.length) {
@@ -94,9 +89,13 @@ export default function BookingModal({ open, onClose, worker, onBookService }: B
   const handleContinue = async () => {
     if (step === BOOKING_STEPS.SLOTS) {
       const ok = await handleReserve();
-      if (!ok) {
-        return;
-      }
+      if (!ok) {return;}
+      goTo(stepIndex + 1);
+      return;
+    }
+    if (step === BOOKING_STEPS.REVIEW) {
+      await handleConfirm();
+      return;
     }
     goTo(stepIndex + 1);
   };

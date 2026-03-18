@@ -8,6 +8,6 @@ export interface IWorkerController {
   getMe: RequestHandler;
   reSubmitWorkerDocument: RequestHandler;
   listWorkers: RequestHandler;
-  // createConnectAccount: RequestHandler;
-  // getConnectStatus: RequestHandler;
+  connectStripe: RequestHandler;
+  getStripeStatus: RequestHandler;
 }

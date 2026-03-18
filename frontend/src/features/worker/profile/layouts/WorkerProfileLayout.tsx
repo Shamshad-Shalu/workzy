@@ -15,6 +15,7 @@ interface WorkerProfileLayoutProps {
 const TABS = [
   { name: 'About', path: '' },
   { name: 'Documents', path: 'documents' },
+  { name: 'Account', path: 'account' },
 ];
 
 export default function WorkerProfileLayout({

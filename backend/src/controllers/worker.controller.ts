@@ -77,4 +77,17 @@ export class WorkerController implements IWorkerController {
 
     res.status(HTTPSTATUS.OK).json({ total, workers });
   });
+  connectStripe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = req.user?.workerId;
+    if (!workerId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    const url = await this._workerService.connectStripe(workerId);
+    res.status(HTTPSTATUS.OK).json({ url });
+  });
+
+  getStripeStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = req.user?.workerId;
+    if (!workerId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    const { status, stripeAccountId } = await this._workerService.getStripeStatus(workerId);
+    res.status(HTTPSTATUS.OK).json({ status, stripeAccountId });
+  });
 }

@@ -206,14 +206,11 @@ export class SlotService implements ISlotService {
   async releaseSlot(slotId: string, userId: string): Promise<boolean> {
     const slot = await this._slotRepository.findById(slotId);
     if (!slot) return true;
-    const result = await this._slotRepository.findOneAndDelete({
+    await this._slotRepository.findOneAndDelete({
       _id: new Types.ObjectId(slotId),
       reservedBy: new Types.ObjectId(userId),
       status: SLOT_STATUS.RESERVED,
     });
-    if (!result) {
-      throw new CustomError(SLOT.RELEASE_ERROR, HTTPSTATUS.BAD_REQUEST);
-    }
     const lockKey = `slot:${slot.workerId}:${dayjs(slot.date).format("YYYY-MM-DD")}:${slot.startTime}`;
     await redisClient.del(lockKey);
     return true;

@@ -10,4 +10,7 @@ export const WORKER_API = {
   REAPPLICATION: (id: string) => worker(`/${id}/reApply`),
   LIST_BY_SERVICE: (serviceId: string) => worker(`/service/${serviceId}`),
   BY_ID: (id: string) => worker(`/${id}`),
+
+  STRIPE_CONNECT: worker('/stripe/connect'),
+  STRIPE_STATUS: worker('/stripe/status'),
 } as const;

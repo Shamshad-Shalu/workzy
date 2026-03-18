@@ -24,6 +24,7 @@ export default function SubscriptionPage() {
   } = useSubscriptions();
 
   const handleAddPlan = (plan: Plan, cycle: BillingCycle) => {
+    console.log({ plan, cycle });
     addSubscription.mutate({ planId: plan.id, billingCycle: cycle });
   };
 

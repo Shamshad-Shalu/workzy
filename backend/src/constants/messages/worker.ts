@@ -10,4 +10,6 @@ export const WORKER = {
   DOCUMENT_UPDATE_ERROR: "Error while updating document.",
   VERIFIED: "Worker verification updated successfully",
   VERIFY_ERROR: "Error while verifying  the worker",
+  NOT_AVAILABLE: "This worker is no longer available.",
+  STRIPE_NOT_ACTIVE: "Worker strip account is not active",
 };

@@ -13,8 +13,6 @@ const PaymentSchema: Schema<IPayment> = new Schema(
       required: true,
     },
     amount: { type: Number, required: true },
-    platformFee: { type: Number, default: 0 },
-    netAmount: { type: Number, default: 0 },
     currency: { type: String, default: "inr" },
     status: { type: String, enum: Object.values(PAYMENT_STATUS), default: PAYMENT_STATUS.PENDING },
     provider: {
@@ -22,11 +20,8 @@ const PaymentSchema: Schema<IPayment> = new Schema(
       enum: Object.values(PAYMENT_PROVIDER),
       default: PAYMENT_PROVIDER.STRIPE,
     },
-    paymentIntentId: { type: String, required: true, unique: true },
-    stripeCheckoutSessionId: {
-      type: String,
-      default: undefined,
-    },
+    paymentIntentId: { type: String, sparse: true, unique: true },
+    sessionId: { type: String, sparse: true, unique: true },
     failureReason: { type: String, default: undefined },
   },
   { timestamps: true }
@@ -35,10 +30,6 @@ const PaymentSchema: Schema<IPayment> = new Schema(
 PaymentSchema.index({ userId: 1, createdAt: -1 });
 PaymentSchema.index({ referenceId: 1 });
 PaymentSchema.index({ billType: 1, status: 1 });
-PaymentSchema.index(
-  { stripeCheckoutSessionId: 1 },
-  { unique: true, partialFilterExpression: { stripeCheckoutSessionId: { $exists: true } } }
-);
 
 const Payment = mongoose.model<IPayment>("Payment", PaymentSchema);
 export default Payment;
