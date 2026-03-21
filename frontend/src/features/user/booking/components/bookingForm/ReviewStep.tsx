@@ -4,9 +4,9 @@ import { CalendarDays, Clock, Percent, StickyNote, Zap } from 'lucide-react';
 import { PRICING_MODE } from '@/constants';
 import type { BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatTime12 } from '@/utils/time.utils';
+import { formatDuration, formatTime12 } from '@/utils/time.format';
 
-import type { BookingPricing } from '../hooks/useBooking';
+import type { BookingPricing } from '../../hooks/useBooking';
 
 export default function ReviewStep({
   worker,

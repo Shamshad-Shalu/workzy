@@ -7,11 +7,10 @@ import { useMemo } from 'react';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAvailableSlots } from '@/features/user/slot/hooks/useSlot';
 import type { AvailableSlot, BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatTime12 } from '@/utils/time.utils';
-
-import { useAvailableSlots } from '../../slot/hooks/useSlot';
+import { formatDuration, formatTime12 } from '@/utils/time.format';
 
 dayjs.extend(customParseFormat);
 

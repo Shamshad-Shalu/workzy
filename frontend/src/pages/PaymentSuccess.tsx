@@ -27,8 +27,12 @@ export default function PaymentSuccess() {
   const navigate = useNavigate();
   const sessionId = searchParams.get('session_id');
 
-  const { data: details,isPending,isError,} = useQuery({
-    queryKey: ["payment-details", sessionId],
+  const {
+    data: details,
+    isPending,
+    isError,
+  } = useQuery({
+    queryKey: ['payment-details', sessionId],
     queryFn: () => BookingService.verifyPayment(sessionId as string),
     enabled: !!sessionId,
     retry: false,

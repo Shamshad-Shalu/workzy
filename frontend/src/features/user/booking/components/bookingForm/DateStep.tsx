@@ -5,10 +5,9 @@ import { useMemo } from 'react';
 
 import ErrorState from '@/components/molecules/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAvailableDates } from '@/features/user/slot/hooks/useSlot';
 import type { BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-
-import { useAvailableDates } from '../../slot/hooks/useSlot';
 
 export default function DateStep({
   worker,

@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'blue' | 'green' | 'red';
+  variant?: 'primary' | 'secondary' | 'outline' | 'ghost' | 'blue' | 'green' | 'red' | 'warning';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'icon' | 'responsiveLg';
   fullWidth?: boolean;
   loading?: boolean;
@@ -23,8 +23,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const base =
-    'inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-all whitespace-nowrap';
-
+    'inline-flex items-center justify-center gap-2 rounded-lg font-medium whitespace-nowrap transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2';
   const variants = {
     primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
     secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
@@ -33,6 +32,7 @@ export default function Button({
     blue: 'bg-blue-600 text-white hover:bg-blue-700',
     green: 'bg-green-600 text-white hover:bg-green-700',
     red: 'bg-red-600 text-white hover:bg-red-700',
+    warning: 'bg-amber-400 text-white hover:bg-amber-500',
   };
 
   const sizes = {
@@ -50,14 +50,17 @@ export default function Button({
         base,
         sizes[size],
         variants[variant],
-        (loading || props.disabled) && 'opacity-60 cursor-not-allowed',
+        (loading || props.disabled) && 'opacity-60 cursor-not-allowed pointer-events-none',
         fullWidth && 'w-full',
         className
       )}
+      type={props.type ?? 'button'}
       disabled={loading || props.disabled}
       {...props}
     >
-      {loading && <span className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />}
+      {loading && (
+        <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+      )}
 
       {!loading && iconLeft}
 

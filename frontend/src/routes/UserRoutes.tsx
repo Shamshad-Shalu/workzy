@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
+import UserBookingsPages from '@/features/user/booking/pages/UserBookingsPages';
 import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
@@ -30,6 +31,8 @@ const WorkerProfilePage = lazy(() => import('@/features/user/worker/pages/Worker
 const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/WorkerServicesPage'));
 const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
 
+const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
+
 export default function UserRoutes() {
   return (
     <Suspense fallback={<Skeleton />}>
@@ -47,6 +50,8 @@ export default function UserRoutes() {
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/services" element={<ServicesPage />} />
           <Route path="/join-us" element={<JoinUsPage />} />
+          <Route path="/about" element={<UserBookingsPages />} />
+          <Route path="/bookings" element={<UserBookingsPage />} />
 
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />

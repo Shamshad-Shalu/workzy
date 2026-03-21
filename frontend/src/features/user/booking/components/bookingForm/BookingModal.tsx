@@ -7,14 +7,13 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { BOOKING_STEPS, PRICING_MODE, type BookingStep } from '@/constants';
 import type { WorkerListingInfo } from '@/types/worker';
 
-import { useBooking } from '../hooks/useBooking';
-
-import CountStep from './CountStep';
-import DateStep from './DateStep';
-import InstructionsStep from './InstructionsStep';
-import ReviewStep from './ReviewStep';
-import SlotsStep from './SlotsStep';
-import StepIndicator from './StepIndicator';
+import { useBooking } from '../../hooks/useBooking';
+import CountStep from '../bookingForm/CountStep';
+import DateStep from '../bookingForm/DateStep';
+import InstructionsStep from '../bookingForm/InstructionsStep';
+import ReviewStep from '../bookingForm/ReviewStep';
+import SlotsStep from '../bookingForm/SlotsStep';
+import StepIndicator from '../bookingForm/StepIndicator';
 
 const slideVariants = {
   enter: (dir: number) => ({ opacity: 0, x: dir > 0 ? 40 : -40 }),
@@ -89,7 +88,9 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
   const handleContinue = async () => {
     if (step === BOOKING_STEPS.SLOTS) {
       const ok = await handleReserve();
-      if (!ok) {return;}
+      if (!ok) {
+        return;
+      }
       goTo(stepIndex + 1);
       return;
     }

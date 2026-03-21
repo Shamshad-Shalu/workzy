@@ -166,7 +166,7 @@ export function useBooking(worker: WorkerListingInfo) {
     } catch (err) {
       console.error(handleApiError(err));
     }
-  }, [booking.slotId, releaseSlot,resetBooking]);
+  }, [booking.slotId, releaseSlot, resetBooking]);
 
   const handleConfirm = useCallback(async () => {
     if (booking.reservedUntil && new Date() > booking.reservedUntil) {

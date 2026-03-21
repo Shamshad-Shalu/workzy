@@ -228,6 +228,11 @@ export default function Header() {
                       My Profile
                     </DropdownMenuItem>
 
+                    <DropdownMenuItem onClick={() => navigate('/bookings')}>
+                      <Briefcase className="h-4 w-4 mr-2" />
+                      My Booking
+                    </DropdownMenuItem>
+
                     {user?.role === ROLE.WORKER && (
                       <DropdownMenuItem onClick={handleSwitchMode}>
                         <Users className="h-4 w-4 mr-2" />

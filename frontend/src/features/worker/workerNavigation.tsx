@@ -16,7 +16,7 @@ import type { MenuItem } from '@/types/navigation';
 
 export const workerMenuItems: MenuItem[] = [
   { icon: <LayoutDashboard />, label: 'Dashboard', to: '/worker/dashboard' },
-  { icon: <Briefcase />, label: 'My Jobs', to: '/worker/jobs' },
+  { icon: <Briefcase />, label: 'My Booking', to: '/worker/booking' },
   { icon: <ClipboardList />, label: 'My Services', to: '/worker/services' },
   { icon: <User2 />, label: 'Profile', to: '/worker/Profile' },
   { icon: <Wallet />, label: 'Wallet', to: '/worker/wallet' },

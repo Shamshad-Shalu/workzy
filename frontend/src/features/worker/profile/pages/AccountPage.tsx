@@ -5,7 +5,8 @@ import PageHeader from '@/components/molecules/PageHeader';
 import { useStripeConnect } from '../hooks/useStripConnect';
 
 export default function AccountPage() {
-  const { stripeAccountId, isConnected, isPending, isConnecting, connectStripe } = useStripeConnect();
+  const { stripeAccountId, isConnected, isPending, isConnecting, connectStripe } =
+    useStripeConnect();
   return (
     <main className="max-w-lg flex flex-col gap-6 py-6">
       <PageHeader title="Payout Settings" description="Manage how you receive earnings" />

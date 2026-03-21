@@ -12,7 +12,7 @@ import type { RootState } from '@/store/store';
 import type { CategoryLite } from '@/types/category';
 import type { WorkerListingInfo } from '@/types/worker';
 
-import BookingModal from '../../booking/components/BookingModal';
+import BookingModal from '../../booking/components/bookingForm/BookingModal';
 import CategoryShowcaseSection from '../../home/components/CategoryShowcaseSection';
 import { CarouselRowSkeleton } from '../../home/components/LoadingHome';
 import FilterSidebar from '../components/FilterSidebar';
@@ -280,9 +280,6 @@ export default function ServicesPage() {
           open={!!bookingWorker}
           onClose={() => setBookingWorker(null)}
           worker={bookingWorker}
-          // onBookService={() => {
-          //   setBookingWorker(null);
-          // }}
         />
       )}
     </main>

@@ -1,5 +1,5 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -29,6 +29,7 @@ interface AppModalProps {
   cancelText?: string;
   className?: string;
   isConfirmLoading?: boolean;
+  hideFooter?: boolean;
   footer?: React.ReactNode;
   canCloseOnOutsideClick?: boolean;
 }
@@ -41,6 +42,7 @@ export function AppModal({
   description = 'Please review the details and confirm the action.',
   isDescriptionHidden = true,
   isTitleHidden = false,
+  hideFooter = false,
   onConfirm,
   confirmText = 'Confirm',
   buttonVariant,
@@ -50,14 +52,6 @@ export function AppModal({
   canCloseOnOutsideClick = true,
   className = 'sm:max-w-lg',
 }: AppModalProps) {
-  const TitleComponent = isTitleHidden ? (
-    <VisuallyHidden>
-      <DialogTitle>{title}</DialogTitle>
-    </VisuallyHidden>
-  ) : (
-    <DialogTitle className="text-lg font-semibold tracking-tight">{title}</DialogTitle>
-  );
-
   const DefaultFooter = !footer && (
     <DialogFooter className="gap-2 pt-2">
       <Button variant="outline" onClick={onClose} disabled={isConfirmLoading} size="sm">
@@ -92,7 +86,6 @@ export function AppModal({
               'max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border border-border shadow-2xl',
               className
             )}
-            onAnimationStart={() => {}}
           >
             <motion.div
               initial={{ opacity: 0, scale: 0.96, y: 8 }}
@@ -105,13 +98,21 @@ export function AppModal({
                 <DialogHeader className="flex-shrink-0 px-6 pt-5 pb-4 border-b border-border">
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      {TitleComponent}
-                      {description && !isDescriptionHidden && (
+                      {isTitleHidden ? (
+                        <VisuallyHidden>
+                          <DialogTitle>{title}</DialogTitle>
+                        </VisuallyHidden>
+                      ) : (
+                        <DialogTitle className="text-lg font-semibold tracking-tight">
+                          {title}
+                        </DialogTitle>
+                      )}
+
+                      {description && !isDescriptionHidden ? (
                         <DialogDescription className="text-sm text-muted-foreground mt-0.5">
                           {description}
                         </DialogDescription>
-                      )}
-                      {isDescriptionHidden && (
+                      ) : (
                         <VisuallyHidden>
                           <DialogDescription>{description}</DialogDescription>
                         </VisuallyHidden>
@@ -125,7 +126,7 @@ export function AppModal({
                 {children}
               </div>
 
-              {(footer || DefaultFooter) && (
+              {!hideFooter && (footer || DefaultFooter) && (
                 <div className="flex-shrink-0 px-6 py-4 border-t border-border bg-muted/30">
                   {footer || DefaultFooter}
                 </div>

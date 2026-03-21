@@ -3,7 +3,7 @@ import { Minus, Percent, Plus } from 'lucide-react';
 
 import type { BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration } from '@/utils/time.utils';
+import { formatDuration } from '@/utils/time.format';
 
 function getBestDiscount(w: WorkerListingInfo, count: number) {
   if (!w.bulkDiscounts?.length) {
