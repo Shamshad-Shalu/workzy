@@ -1,6 +1,6 @@
 export const BOOKING_STATUS = {
-  PENDING: "pending",
-  CONFIRMED: "confirmed", // payment success, worker notified
+  PENDING: "pending", // payment success, worker notified
+  CONFIRMED: "confirmed", //worker accepted
   IN_PROGRESS: "in_progress", // worker started job
   COMPLETED: "completed", // job finished
   APPROVED: "approved", // user approved

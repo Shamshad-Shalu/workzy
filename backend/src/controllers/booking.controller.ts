@@ -7,6 +7,7 @@ import { IBookingController } from "@/core/interfaces/controllers/IBookingContro
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { TYPES } from "@/di/types";
 import { CreatebookingDTO } from "@/dtos/requests/booking.dto";
+import { BookingListParams, ListingStatus } from "@/types/booking";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -21,7 +22,34 @@ export class BookingController implements IBookingController {
     const { url } = await this._bookingService.createBooking(userId, data);
     res.status(HTTPSTATUS.OK).json({ url });
   });
-  // getBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    if (!userId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+
+    const query = this.parseQuery(req);
+    console.log({ query });
+    const result = await this._bookingService.getUserBookings(userId, query);
+    res.status(HTTPSTATUS.OK).json(result);
+  });
+
+  private parseQuery(req: Request): BookingListParams {
+    const status = (req.query.status as string) || "all";
+    const parsedLimit = parseInt(req.query.limit as string, 10);
+    const limit = Number.isNaN(parsedLimit) ? 10 : Math.min(Math.max(parsedLimit, 1), 10);
+    const rawCursor = (req.query.cursor as string | undefined) ?? null;
+    const sortOrder = (req.query.sort as string) === "asc" ? "asc" : "desc";
+    const cursor = rawCursor
+      ? JSON.parse(Buffer.from(rawCursor, "base64url").toString("utf8"))
+      : null;
+    const sort = status === "upcoming" ? "asc" : sortOrder;
+
+    return {
+      status: status as ListingStatus,
+      limit,
+      cursor,
+      sort,
+    };
+  }
   // getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
   // cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
   // startBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});

@@ -9,3 +9,4 @@ export * from "./plan";
 export * from "./subscription";
 export * from "./slot";
 export * from "./payment";
+export * from "./booking";

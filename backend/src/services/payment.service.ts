@@ -7,6 +7,7 @@ import {
   BILL_TYPE,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
+  BOOKING_STATUS_MESSAGES,
   CLIENT_URL,
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
@@ -217,10 +218,10 @@ export class PaymentService implements IPaymentService {
       }),
       this._bookingRepository.update(bookingId, {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
-        status: BOOKING_STATUS.CONFIRMED,
         statusHistory: [
           {
-            status: BOOKING_STATUS.CONFIRMED,
+            status: BOOKING_STATUS.PENDING,
+            reason: BOOKING_STATUS_MESSAGES.PENDING,
             changedBy: ROLE.USER,
             changedAt: new Date(),
           },

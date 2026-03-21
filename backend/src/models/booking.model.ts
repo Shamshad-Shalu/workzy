@@ -46,6 +46,24 @@ const ExtraChargeSchema = new Schema(
   { _id: false }
 );
 
+const EvidenceItemSchema = new Schema(
+  {
+    url: { type: String, required: true, trim: true },
+    type: { type: String, enum: ["image", "video"], required: true },
+    uploadedAt: { type: Date, required: true, default: Date.now },
+  },
+  { _id: false }
+);
+
+const EvidenceSchema = new Schema(
+  {
+    before: { type: [EvidenceItemSchema], default: [] },
+    after: { type: [EvidenceItemSchema], default: [] },
+    uploadedAt: { type: Date },
+  },
+  { _id: false }
+);
+
 const BookingStatusHistorySchema = new Schema(
   {
     status: {
@@ -188,6 +206,9 @@ const BookingSchema: Schema<IBooking> = new Schema(
       default: 0,
     },
     total: { type: Number, required: true, min: 0 },
+    extraCharge: { type: ExtraChargeSchema, default: null },
+    evidence: { type: EvidenceSchema, default: null },
+    isReviewed: { type: Boolean, default: false },
     paymentStatus: {
       type: String,
       enum: BOOKING_PAYMENT_STATUS_VALUES,
@@ -201,7 +222,6 @@ const BookingSchema: Schema<IBooking> = new Schema(
       required: true,
       default: BOOKING_STATUS.PENDING,
     },
-    extraCharge: { type: ExtraChargeSchema },
     statusHistory: {
       type: [BookingStatusHistorySchema],
       default: [],
@@ -210,28 +230,18 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: String,
       trim: true,
     },
-    cancelledBy: { type: String, enum: ROLE_VALUES },
-    cancelReason: {
-      type: String,
-      trim: true,
-      maxlength: 500,
-    },
-    cancelledAt: { type: Date },
-
-    rejectionReason: {
-      type: String,
-      trim: true,
-      maxlength: 500,
-    },
-    rejectedAt: { type: Date },
     completedAt: { type: Date },
   },
   { timestamps: true }
 );
 
-BookingSchema.index({ userId: 1, createdAt: -1 }); // user booking list: my bookings
-BookingSchema.index({ workerId: 1, createdAt: -1 }); // worker dashboard / jobs
-BookingSchema.index({ workerId: 1, status: 1, date: 1, startTime: 1 }); // worker upcoming jobs
+BookingSchema.index({ userId: 1, date: -1, startTime: -1, _id: -1 });
+BookingSchema.index({ userId: 1, status: 1, date: -1, startTime: -1, _id: -1 });
+BookingSchema.index({ userId: 1, status: 1, date: 1, startTime: 1, _id: 1 });
+
+BookingSchema.index({ workerId: 1, date: -1, startTime: -1, _id: -1 });
+BookingSchema.index({ workerId: 1, status: 1, date: -1, startTime: -1, _id: -1 });
+BookingSchema.index({ workerId: 1, status: 1, date: 1, startTime: 1, _id: 1 });
 
 const Booking = model<IBooking>("Booking", BookingSchema);
 export default Booking;

@@ -7,7 +7,10 @@ import { IService } from "./service";
 import { ILocation, IUser } from "./user";
 import { IWorker } from "./worker";
 
-interface IBookingLocation {
+export type ExtraChargeStatus = "pending" | "approved" | "rejected";
+export type ListingStatus = BookingStatus | "all" | "upcoming";
+
+export interface IBookingLocation {
   label: string;
   location: ILocation;
 }
@@ -15,17 +18,27 @@ interface IBookingLocation {
 export interface IExtraCharge {
   amount: number;
   reason: string;
-  evidenceUrl?: string; // receipt photo
-  status: "pending" | "approved" | "rejected";
+  evidenceUrl?: string;
+  status: ExtraChargeStatus;
   requestedAt: Date;
   respondedAt?: Date;
 }
 
-interface IBookingStatusHistory {
+export interface IBookingStatusHistory {
   status: BookingStatus;
   changedAt: Date;
   changedBy?: Role;
-  reason?: string; // rejection reason / cancel reason
+  reason?: string;
+}
+export interface IEvidenceItem {
+  url: string;
+  type: "image" | "video";
+  uploadedAt: Date;
+}
+export interface IEvidence {
+  before: IEvidenceItem[];
+  after: IEvidenceItem[];
+  uploadedAt?: Date;
 }
 
 export interface IBooking extends Document<string> {
@@ -51,20 +64,15 @@ export interface IBooking extends Document<string> {
   platformFeePercent: number; // snapshot from category at booking time
   platformFee: number; // chargeableAmount * platformFeePercent/100
   total: number; // chargeableAmount + travelCost (user pays this)
-
+  extraCharge?: IExtraCharge;
+  evidence?: IEvidence;
   paymentStatus: BookingPaymentStatus;
   status: BookingStatus;
   statusHistory: IBookingStatusHistory[];
-  extraCharge?: IExtraCharge;
-
+  isReviewed: boolean;
   userNote?: string;
-  cancelledBy?: Role;
-  cancelReason?: string;
-  cancelledAt?: Date;
-
-  rejectionReason?: string;
-  rejectedAt?: Date;
   completedAt?: Date;
+
   createdAt: Date;
   updatedAt: Date;
 }
@@ -84,4 +92,63 @@ export interface BookingContext {
   distanceKm: number;
   travelCost: number;
   workerStripeId: string;
+}
+
+export interface BookingCursor {
+  date: string;
+  startTime: string;
+  _id: string;
+}
+export interface BookingListParams {
+  status: ListingStatus;
+  limit: number;
+  cursor: BookingCursor | null;
+  sort: "asc" | "desc";
+}
+
+export interface UserBookingEntity {
+  _id: string;
+  bookingId: string;
+  userId: {
+    _id: string;
+    name: string;
+    profileImage?: string;
+  };
+  workerId: {
+    _id: string;
+    displayName: string;
+    tagline: string;
+    coverImage?: string;
+    averageRating: number;
+  };
+  categoryId: {
+    _id: string;
+    name: string;
+    iconUrl: string;
+  };
+
+  date: Date;
+  startTime: string;
+  endTime: string;
+  duration: number;
+
+  address: IBookingLocation | null;
+  total: number;
+  status: BookingStatus;
+  paymentStatus: BookingPaymentStatus;
+
+  extraCharge?: IExtraCharge;
+  evidence?: IEvidence;
+  isReviewed?: boolean;
+  statusHistory: IBookingStatusHistory[];
+  userNote?: string;
+
+  ccreatedAt?: Date;
+}
+
+export interface PaginatedBookingsEntity {
+  data: UserBookingEntity[];
+  cursor: string | null;
+  hasMore: boolean;
+  total?: number;
 }

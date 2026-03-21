@@ -19,9 +19,11 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CreatebookingDTO } from "@/dtos/requests/booking.dto";
-import { BookingContext } from "@/types/booking";
+import { PaginatedBookingsDTO } from "@/dtos/responses/booking.dto";
+import { BookingContext, BookingListParams, PaginatedBookingsEntity } from "@/types/booking";
 import { BulkDiscountType } from "@/types/service";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -36,7 +38,8 @@ export class BookingService implements IBookingService {
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.PaymentService) private _paymentService: IPaymentService
+    @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
   async createBooking(userId: string, data: CreatebookingDTO): Promise<{ url: string }> {
@@ -189,5 +192,10 @@ export class BookingService implements IBookingService {
       distanceKm,
       travelCost,
     };
+  }
+
+  async getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsDTO> {
+    const bookings = await this._bookingRepository.getUserBookings(userId, query);
+    return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
   }
 }

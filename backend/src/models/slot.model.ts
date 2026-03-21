@@ -29,6 +29,7 @@ const SlotSchema: Schema<ISlot> = new Schema(
 );
 
 SlotSchema.index({ workerId: 1, date: 1, status: 1 });
+SlotSchema.index({ status: 1, reservedUntil: 1 });
 SlotSchema.index({ workerId: 1, date: 1, startTime: 1 }, { unique: true });
 
 const SlotModel = mongoose.model<ISlot>("Slot", SlotSchema);

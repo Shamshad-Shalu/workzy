@@ -14,10 +14,13 @@ const controller = container.get<IBookingController>(TYPES.BookingController);
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.post("/", validateDto(CreatebookingDTO), controller.createBooking);
-// router.get("/", controller.getBookings);
-// router.get("/:id", controller.getBookingById);
+router.get("/", controller.getUserBookings);
+
+// router.patch("/:bookingId/cancel", controller.cancelBooking);
+
+// router.get("/:bookingId", controller.getBookingById);
+// router.patch("/:bookingId/start", controller.startBooking);
 // router.patch("/:id/cancel", controller.cancelBooking);
-// router.patch("/:id/start", controller.startBooking);
 // router.patch("/:id/complete", controller.completeBooking);
 
 export default router;
