@@ -37,7 +37,9 @@ function MediaContent({ item }: { item: MediaItem }) {
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    if (!videoRef.current) {return;}
+    if (!videoRef.current) {
+      return;
+    }
     videoRef.current.pause();
     videoRef.current.currentTime = 0;
     setPlaying(false);
@@ -60,7 +62,9 @@ function MediaContent({ item }: { item: MediaItem }) {
 
   const togglePlay = () => {
     const v = videoRef.current;
-    if (!v) {return;}
+    if (!v) {
+      return;
+    }
     if (playing) {
       v.pause();
       setPlaying(false);
@@ -74,7 +78,9 @@ function MediaContent({ item }: { item: MediaItem }) {
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     const v = videoRef.current;
-    if (!v) {return;}
+    if (!v) {
+      return;
+    }
     v.muted = !muted;
     setMuted(m => !m);
   };
@@ -82,7 +88,9 @@ function MediaContent({ item }: { item: MediaItem }) {
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     const v = videoRef.current;
-    if (!v || !duration) {return;}
+    if (!v || !duration) {
+      return;
+    }
     const rect = e.currentTarget.getBoundingClientRect();
     const ratio = (e.clientX - rect.left) / rect.width;
     v.currentTime = ratio * duration;
@@ -107,7 +115,9 @@ function MediaContent({ item }: { item: MediaItem }) {
         onLoadedMetadata={() => setDuration(videoRef.current?.duration ?? 0)}
         onTimeUpdate={() => {
           const v = videoRef.current;
-          if (!v || !v.duration) {return;}
+          if (!v || !v.duration) {
+            return;
+          }
           setCurrent(v.currentTime);
           setProgress((v.currentTime / v.duration) * 100);
         }}
@@ -178,9 +188,15 @@ export function MediaViewer({
 }: MediaViewerProps) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {onClose();}
-      if (e.key === 'ArrowRight' && hasNext) {onNext();}
-      if (e.key === 'ArrowLeft' && hasPrev) {onPrev();}
+      if (e.key === 'Escape') {
+        onClose();
+      }
+      if (e.key === 'ArrowRight' && hasNext) {
+        onNext();
+      }
+      if (e.key === 'ArrowLeft' && hasPrev) {
+        onPrev();
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);

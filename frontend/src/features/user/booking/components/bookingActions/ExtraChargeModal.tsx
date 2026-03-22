@@ -21,9 +21,13 @@ export default function ExtraChargeModal({
   booking,
   isSubmitting = false,
 }: CancelModalProps) {
-  if (!booking) {return null;}
+  if (!booking) {
+    return null;
+  }
   const { extraCharge } = booking;
-  if (!extraCharge) {return null;}
+  if (!extraCharge) {
+    return null;
+  }
   const { amount, reason, requestedAt, status, evidenceUrl } = extraCharge;
 
   const footer = (

@@ -10,6 +10,7 @@ export const PAYMENT_STATUS = {
   PENDING: "pending",
   SUCCEEDED: "succeeded",
   FAILED: "failed",
+  RELEASED: "released",
   REFUNDED: "refunded",
   CANCELLED: "cancelled",
 } as const;
@@ -27,11 +28,3 @@ export const STRIPE_ACCOUNT_STATUS = {
 } as const;
 export type StripeAccountStatus =
   (typeof STRIPE_ACCOUNT_STATUS)[keyof typeof STRIPE_ACCOUNT_STATUS];
-
-export const WALLET_STATUS = {
-  PENDING: "pending",
-  AVAILABLE: "available",
-  FROZEN: "frozen",
-} as const;
-
-export type WalletStatus = (typeof WALLET_STATUS)[keyof typeof WALLET_STATUS];

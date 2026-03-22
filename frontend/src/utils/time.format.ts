@@ -24,8 +24,12 @@ export function formatSmartDate(date: string | Date): string {
   const d = dayjs(date);
   const today = dayjs();
 
-  if (d.isSame(today, 'day')) {return 'Today';}
-  if (d.isSame(today.add(1, 'day'), 'day')) {return 'Tomorrow';}
+  if (d.isSame(today, 'day')) {
+    return 'Today';
+  }
+  if (d.isSame(today.add(1, 'day'), 'day')) {
+    return 'Tomorrow';
+  }
 
   return d.format('dddd, DD MMM');
 }

@@ -4,23 +4,53 @@ import { ROLE } from "@/constants";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { CancelBookingDTO, CreatebookingDTO } from "@/dtos/requests/booking.dto";
+import {
+  CancelBookingDTO,
+  CompleteBookingDTO,
+  CreatebookingDTO,
+  ExtraChargeDTO,
+  RejectBookingDTO,
+} from "@/dtos/requests/booking.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 const router = Router();
 const controller = container.get<IBookingController>(TYPES.BookingController);
+
 router.get("/:bookingId", controller.getBookingById);
 
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.post("/", validateDto(CreatebookingDTO), controller.createBooking);
-router.get("/", controller.getUserBookings);
+
+router.get("/user", controller.getUserBookings);
+router.get("/worker", controller.getWorkerBookings);
 
 router.patch("/:bookingId/cancel", validateDto(CancelBookingDTO), controller.cancelBooking);
+router.patch("/:bookingId/approve", controller.approveBooking);
+router.patch("/:bookingId/extra-charge/pay", controller.payExtraCharge);
+router.patch("/:bookingId/extra-charge/reject", controller.rejectExtraCharge);
 
-// router.patch("/:bookingId/start", controller.startBooking);
-// router.patch("/:id/cancel", controller.cancelBooking);
-// router.patch("/:id/complete", controller.completeBooking);
+router.patch("/:bookingId/accept", authenticate([ROLE.WORKER]), controller.acceptBooking);
+router.patch(
+  "/:bookingId/reject",
+  authenticate([ROLE.WORKER]),
+  validateDto(RejectBookingDTO),
+  controller.rejectBooking
+);
+router.patch("/:bookingId/start", authenticate([ROLE.WORKER]), controller.startJob);
+router.patch(
+  "/:bookingId/complete",
+  authenticate([ROLE.WORKER]),
+  validateDto(CompleteBookingDTO),
+  controller.completeJob
+);
+
+router.patch(
+  "/:bookingId/extra-charge",
+  authenticate([ROLE.WORKER]),
+  validateDto(ExtraChargeDTO),
+  controller.requestExtraCharge
+);
 
 export default router;

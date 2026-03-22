@@ -23,7 +23,7 @@ export function useUserBookings(status: BookingFilterStatus) {
   >({
     queryKey: bookingKeys.list(status),
     queryFn: ({ pageParam }: { pageParam: string | undefined }) =>
-      BookingService.getBookings({
+      BookingService.getUserBookings({
         status,
         limit: LIMIT,
         cursor: pageParam,

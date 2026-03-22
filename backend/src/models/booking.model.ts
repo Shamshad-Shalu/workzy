@@ -50,7 +50,6 @@ const EvidenceItemSchema = new Schema(
   {
     url: { type: String, required: true, trim: true },
     type: { type: String, enum: ["image", "video"], required: true },
-    uploadedAt: { type: Date, required: true, default: Date.now },
   },
   { _id: false }
 );
@@ -227,6 +226,10 @@ const BookingSchema: Schema<IBooking> = new Schema(
       default: [],
     },
     userNote: {
+      type: String,
+      trim: true,
+    },
+    adminNote: {
       type: String,
       trim: true,
     },

@@ -143,9 +143,13 @@ function EvidenceModalShell({
   children: React.ReactNode;
 }) {
   useEffect(() => {
-    if (!open) {return;}
+    if (!open) {
+      return;
+    }
     const fn = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {onClose();}
+      if (e.key === 'Escape') {
+        onClose();
+      }
     };
     window.addEventListener('keydown', fn);
     return () => window.removeEventListener('keydown', fn);

@@ -33,7 +33,6 @@ export interface IBookingStatusHistory {
 export interface IEvidenceItem {
   url: string;
   type: "image" | "video";
-  uploadedAt: Date;
 }
 export interface IEvidence {
   before: IEvidenceItem[];
@@ -72,6 +71,7 @@ export interface IBooking extends Document<string> {
   statusHistory: IBookingStatusHistory[];
   isReviewed: boolean;
   userNote?: string;
+  adminNote?: string;
   completedAt?: Date;
 
   createdAt: Date;
@@ -107,48 +107,46 @@ export interface BookingListParams {
   sort: "asc" | "desc";
 }
 
-export interface UserBookingEntity {
+export interface BookingCardEntity {
   _id: string;
   bookingId: string;
-  userId: {
+  user: {
     _id: string;
     name: string;
     profileImage?: string;
   };
-  workerId: {
+  worker: {
     _id: string;
     displayName: string;
     tagline: string;
     coverImage?: string;
+    profileImage?: string;
+    isPremium: boolean;
     averageRating: number;
   };
-  categoryId: {
+  category: {
     _id: string;
     name: string;
     iconUrl: string;
   };
-
   date: Date;
   startTime: string;
   endTime: string;
   duration: number;
-
   address: IBookingLocation | null;
   total: number;
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;
-
   extraCharge?: IExtraCharge;
   evidence?: IEvidence;
   isReviewed?: boolean;
   statusHistory: IBookingStatusHistory[];
   userNote?: string;
-
-  ccreatedAt?: Date;
+  createdAt?: Date;
 }
 
 export interface PaginatedBookingsEntity {
-  data: UserBookingEntity[];
+  data: BookingCardEntity[];
   cursor: string | null;
   hasMore: boolean;
   total?: number;

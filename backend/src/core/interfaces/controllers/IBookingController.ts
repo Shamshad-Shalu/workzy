@@ -2,9 +2,18 @@ import { RequestHandler } from "express";
 
 export interface IBookingController {
   createBooking: RequestHandler;
-  getUserBookings: RequestHandler;
   getBookingById: RequestHandler;
+  getUserBookings: RequestHandler;
+
   cancelBooking: RequestHandler;
-  // startBooking: RequestHandler;
-  // completeBooking: RequestHandler;
+  approveBooking: RequestHandler;
+  payExtraCharge: RequestHandler;
+  rejectExtraCharge: RequestHandler;
+
+  acceptBooking: RequestHandler;
+  rejectBooking: RequestHandler;
+  getWorkerBookings: RequestHandler;
+  startJob: RequestHandler;
+  completeJob: RequestHandler;
+  requestExtraCharge: RequestHandler;
 }

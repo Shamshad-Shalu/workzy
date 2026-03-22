@@ -36,7 +36,9 @@ export default function CancelModal({
     }
   }, [open]);
 
-  if (!booking) {return null;}
+  if (!booking) {
+    return null;
+  }
   const { category, date, startTime, endTime } = booking;
 
   const handleConfirm = async () => {

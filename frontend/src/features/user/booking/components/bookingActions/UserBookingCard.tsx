@@ -24,8 +24,6 @@ import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../../helper/bookingStatus.config';
 
-
-
 export interface BookingCardHandlers {
   onView: (id: string) => void;
   onCancel: (booking: BookingCard) => void;
@@ -40,7 +38,7 @@ interface Props {
   booking: BookingCard;
   handlers: BookingCardHandlers;
   index: number;
-};
+}
 
 export function StatusBadge({ status }: { status: BookingStatus }) {
   const c = BOOKING_STATUS_META[status];
@@ -58,7 +56,7 @@ export function StatusBadge({ status }: { status: BookingStatus }) {
   );
 }
 
-export default  function UserBookingCard({ booking: b, handlers, index }: Props) {
+export default function UserBookingCard({ booking: b, handlers, index }: Props) {
   const { onView, onApprove, onCancel, onDispute, onEvidence, onPayExtra, onReview } = handlers;
   const cfg = BOOKING_STATUS_META[b.status];
   const pc = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
@@ -68,7 +66,9 @@ export default  function UserBookingCard({ booking: b, handlers, index }: Props)
 
   const statusReasons = b.statusHistory.reduce<Partial<Record<BookingStatus, string>>>(
     (acc, item) => {
-      if (item.reason) {acc[item.status] = item.reason;}
+      if (item.reason) {
+        acc[item.status] = item.reason;
+      }
       return acc;
     },
     {}
@@ -85,7 +85,7 @@ export default  function UserBookingCard({ booking: b, handlers, index }: Props)
         cfg.accent
       )}
     >
-      {extraPending &&b.extraCharge?.amount && (
+      {extraPending && b.extraCharge?.amount && (
         <div className="bg-amber-50 dark:bg-amber-950/60 border-b border-amber-200 dark:border-amber-800 px-4 py-2.5 flex items-center gap-2">
           <AlertTriangle size={13} className="text-amber-500 flex-shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-300 font-medium flex-1">
@@ -115,7 +115,7 @@ export default  function UserBookingCard({ booking: b, handlers, index }: Props)
             </div>
 
             <p className="text-[13px] font-medium text-foreground mt-0.5 truncate">
-              {b.serviceName}
+              {b.category.name}
             </p>
 
             <div className="flex items-center gap-2 mt-1 flex-wrap">

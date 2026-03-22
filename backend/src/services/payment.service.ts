@@ -5,6 +5,7 @@ import Stripe from "stripe";
 import { stripe } from "@/config/stripe";
 import {
   BILL_TYPE,
+  BOOKING,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
@@ -17,6 +18,7 @@ import {
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
   SUBSCRIPTION_STATUS,
+  WORKER,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
@@ -26,11 +28,13 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
+import { IBooking } from "@/types/booking";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment";
 import { AddSubscriptionDto } from "@/types/subscription";
 import { IWorker } from "@/types/worker";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class PaymentService implements IPaymentService {
@@ -137,6 +141,86 @@ export class PaymentService implements IPaymentService {
     });
     return session.url!;
   }
+  async createExtraChargeCheckout(data: {
+    userId: string;
+    booking: IBooking;
+    amount: number;
+  }): Promise<string> {
+    const { userId, booking, amount } = data;
+
+    const worker = await getEntityOrThrow(
+      this._workerRepository,
+      booking.workerId.toString(),
+      WORKER.NOT_FOUND
+    );
+    const workerStripeId = worker.stripeAccountId;
+    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
+      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
+    }
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "inr",
+            product_data: { name: "Additional Service Charge" },
+            unit_amount: amount * 100,
+          },
+          quantity: 1,
+        },
+      ],
+      mode: "payment",
+      payment_intent_data: {
+        transfer_data: {
+          destination: workerStripeId,
+        },
+        metadata: {
+          type: "EXTRA_CHARGE",
+          bookingId: booking._id.toString(),
+          userId,
+        },
+      },
+      success_url: `${CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${CLIENT_URL}/payment/cancelled`,
+      metadata: {
+        type: "EXTRA_CHARGE",
+        bookingId: booking._id.toString(),
+        userId,
+      },
+    });
+    await this._paymentRepo.create({
+      transactionId: generateTxnCode("TXN"),
+      userId: new Types.ObjectId(userId),
+      billType: BILL_TYPE.EXTRA_CHARGE, //BOOKING,  here should use the this extra charge or keep  this booking
+      referenceId: new Types.ObjectId(booking._id.toString()),
+      amount,
+      currency: "inr",
+      provider: PAYMENT_PROVIDER.STRIPE,
+      status: PAYMENT_STATUS.PENDING,
+      sessionId: session.id,
+    });
+    return session.url!;
+  }
+
+  async releaseBookingPayment(booking: IBooking): Promise<void> {
+    const payment = await this._paymentRepo.findOne({
+      referenceId: new Types.ObjectId(booking._id.toString()),
+      billType: BILL_TYPE.BOOKING,
+      status: PAYMENT_STATUS.SUCCEEDED,
+    });
+
+    if (!payment) {
+      throw new CustomError(PAYMENT.PAYMENT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    if (!payment.paymentIntentId) {
+      throw new CustomError(PAYMENT.PAYMENT_INTENT_MISSING, HTTPSTATUS.BAD_REQUEST);
+    }
+    await stripe.paymentIntents.capture(payment.paymentIntentId);
+    await this._paymentRepo.findOneAndUpdate(
+      { _id: payment._id },
+      { status: PAYMENT_STATUS.RELEASED }
+    );
+  }
 
   async handleWebhookEvent(event: Stripe.Event): Promise<void> {
     switch (event.type) {
@@ -147,6 +231,8 @@ export class PaymentService implements IPaymentService {
           await this.handleSubscriptionPaid(session);
         } else if (type === "BOOKING") {
           await this.handleBookingPaid(session);
+        } else if (type === "EXTRA_CHARGE") {
+          await this.handleExtraChargePaid(session);
         }
         break;
       }
@@ -226,7 +312,26 @@ export class PaymentService implements IPaymentService {
       { status: PAYMENT_STATUS.REFUNDED }
     );
   }
- 
+
+  private async handleExtraChargePaid(session: Stripe.Checkout.Session): Promise<void> {
+    const { bookingId } = session.metadata as { bookingId: string };
+    const booking = await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
+    await Promise.all([
+      this._bookingRepository.update(bookingId, {
+        "extraCharge.status": "approved",
+        "extraCharge.respondedAt": new Date(),
+        $inc: { total: booking.extraCharge?.amount },
+      }),
+      this._paymentRepo.findOneAndUpdate(
+        { sessionId: session.id },
+        {
+          status: PAYMENT_STATUS.SUCCEEDED,
+          paymentIntentId: session.payment_intent as string,
+        }
+      ),
+    ]);
+  }
+
   private async handleBookingPaid(session: Stripe.Checkout.Session) {
     const metadata = session.metadata as {
       bookingId: string;

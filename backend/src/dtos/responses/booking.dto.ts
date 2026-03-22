@@ -6,13 +6,13 @@ import {
 } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import {
+  BookingCardEntity,
   BookingDetailsEntity,
   IBookingLocation,
   IBookingStatusHistory,
   IEvidence,
   IExtraCharge,
   PaginatedBookingsEntity,
-  UserBookingEntity,
 } from "@/types/booking";
 
 class WorkerInfoDTO {
@@ -22,15 +22,16 @@ class WorkerInfoDTO {
   coverImage!: string;
   profileImage!: string;
   averageRating!: number;
+  isPremium!: boolean;
 
   static async fromEntity(
-    entity: UserBookingEntity,
+    entity: BookingCardEntity,
     s3Service: IS3Service
   ): Promise<WorkerInfoDTO> {
     const dto = new WorkerInfoDTO();
 
-    const worker = entity.workerId;
-    const image = entity.userId.profileImage;
+    const worker = entity.worker;
+    const image = worker.profileImage;
     const profileImage =
       image && image.includes("private/user/profiles")
         ? await s3Service.generateSignedUrl(image)
@@ -42,43 +43,48 @@ class WorkerInfoDTO {
     dto.coverImage = worker.coverImage || DEFAULT_WORKER_COVER_IMAGE;
     dto.profileImage = profileImage;
     dto.averageRating = worker.averageRating;
+    dto.isPremium = worker.isPremium;
 
     return dto;
   }
 }
 
-export class UserBookingResponseDTO {
+export class BookingCardResponseDTO {
   id!: string;
   bookingId!: string;
   date!: Date;
   startTime!: string;
   endTime!: string;
   duration!: number;
-  addressLabel!: string;
+  addressLabel!: string | null;
 
   total!: number;
   status!: BookingStatus;
   paymentStatus!: BookingPaymentStatus;
+
   extraCharge?: IExtraCharge;
-
-  worker!: WorkerInfoDTO;
-
-  category!: {
-    id: string;
-    name: string;
-    iconUrl: string;
-  };
-
   evidence?: IEvidence;
   isReviewed!: boolean;
   statusHistory!: IBookingStatusHistory[];
   userNote?: string;
 
+  worker!: WorkerInfoDTO;
+  category!: {
+    id: string;
+    name: string;
+    iconUrl: string;
+  };
+  user!: {
+    id: string;
+    name: string;
+    profileImage: string;
+  };
+
   static async fromEntity(
-    entity: UserBookingEntity,
+    entity: BookingCardEntity,
     s3Service: IS3Service
-  ): Promise<UserBookingResponseDTO> {
-    const dto = new UserBookingResponseDTO();
+  ): Promise<BookingCardResponseDTO> {
+    const dto = new BookingCardResponseDTO();
 
     dto.id = entity._id;
     dto.bookingId = entity.bookingId;
@@ -86,42 +92,43 @@ export class UserBookingResponseDTO {
     dto.startTime = entity.startTime;
     dto.endTime = entity.endTime;
     dto.duration = entity.duration;
-    dto.addressLabel = entity.address?.label ?? "";
+    dto.addressLabel = entity.address?.label ?? null;
 
     dto.total = entity.total;
     dto.status = entity.status;
     dto.paymentStatus = entity.paymentStatus;
     dto.extraCharge = entity.extraCharge;
 
-    dto.worker = await WorkerInfoDTO.fromEntity(entity, s3Service);
-
     dto.evidence = entity.evidence;
     dto.isReviewed = entity.isReviewed ?? false;
     dto.statusHistory = entity.statusHistory;
     dto.userNote = entity.userNote;
 
-    const category = entity.categoryId;
-    dto.category = {
-      id: category._id.toString(),
-      name: category.name,
-      iconUrl: category.iconUrl,
+    dto.worker = await WorkerInfoDTO.fromEntity(entity, s3Service);
+    dto.user = {
+      ...entity.user,
+      id: entity.user._id.toString(),
+      profileImage: entity.user.profileImage?.includes("private/user/profiles")
+        ? await s3Service.generateSignedUrl(entity.user.profileImage)
+        : (entity.user.profileImage ?? DEFAULT_IMAGE_URL),
     };
-    dto.category.id = category?._id.toString();
-    dto.category.name = category.name;
-    dto.category.iconUrl = category.iconUrl;
+    dto.category = {
+      ...entity.category,
+      id: entity.category._id.toString(),
+    };
 
     return dto;
   }
   static async fromEntities(
-    entities: UserBookingEntity[],
+    entities: BookingCardEntity[],
     s3Service: IS3Service
-  ): Promise<UserBookingResponseDTO[]> {
+  ): Promise<BookingCardResponseDTO[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }
 
 export class PaginatedBookingsDTO {
-  data!: UserBookingResponseDTO[];
+  data!: BookingCardResponseDTO[];
   cursor!: string | null;
   hasMore!: boolean;
   total?: number;
@@ -132,7 +139,7 @@ export class PaginatedBookingsDTO {
   ): Promise<PaginatedBookingsDTO> {
     const dto = new PaginatedBookingsDTO();
 
-    dto.data = await UserBookingResponseDTO.fromEntities(result.data, s3Service);
+    dto.data = await BookingCardResponseDTO.fromEntities(result.data, s3Service);
     dto.cursor = result.cursor;
     dto.hasMore = result.hasMore;
     dto.total = result.total;

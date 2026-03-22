@@ -79,7 +79,6 @@ export interface Booking {
 
 export interface BookingCard {
   id: string;
-  serviceName: string;
   bookingId: string;
   date: Date;
   startTime: string;
@@ -87,19 +86,6 @@ export interface BookingCard {
   duration: number;
   addressLabel: string;
 
-  worker: {
-    id: string;
-    displayName: string;
-    tagline: string;
-    coverImage: string;
-    profileImage: string;
-    averageRating: number;
-  };
-  category: {
-    id: string;
-    name: string;
-    iconUrl: string;
-  };
   total: number;
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;
@@ -109,6 +95,26 @@ export interface BookingCard {
   isReviewed: boolean;
   statusHistory: BookingStatusHistory[];
   userNote?: string;
+
+  worker: {
+    id: string;
+    displayName: string;
+    tagline: string;
+    coverImage: string;
+    profileImage: string;
+    averageRating: number;
+    isPremium: boolean;
+  };
+  category: {
+    id: string;
+    name: string;
+    iconUrl: string;
+  };
+  user: {
+    id: string;
+    name: string;
+    profileImage: string;
+  };
 }
 
 export interface BookingResponse {

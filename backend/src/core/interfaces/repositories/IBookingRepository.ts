@@ -7,6 +7,8 @@ import {
 } from "@/types/booking";
 
 export interface IBookingRepository extends BaseRepository<IBooking> {
-  getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsEntity>;
   getBookingDetailById(bookingId: string): Promise<BookingDetailsEntity | null>;
+
+  getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsEntity>;
+  getWorkerBookings(workerId: string, query: BookingListParams): Promise<PaginatedBookingsEntity>;
 }

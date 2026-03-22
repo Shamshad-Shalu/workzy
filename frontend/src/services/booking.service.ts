@@ -12,12 +12,16 @@ const BookingService = {
     const res = await api.get(PAYMENT_API.VERIFY_BY_ID(sessionId));
     return res.data;
   },
-  getBookings: async (params: BookingListParams): Promise<BookingResponse> => {
-    const res = await api.get(BOOKING_API.ROOT, { params });
+  getUserBookings: async (params: BookingListParams): Promise<BookingResponse> => {
+    const res = await api.get(BOOKING_API.BY_USER, { params });
+    return res.data;
+  },
+  getWorkerBookings: async (params: BookingListParams): Promise<BookingResponse> => {
+    const res = await api.get(BOOKING_API.BY_WORKER, { params });
     return res.data;
   },
   cancelBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
-    const res = await api.patch(BOOKING_API.CANCEL(bookingId), {reason});
+    const res = await api.patch(BOOKING_API.CANCEL(bookingId), { reason });
     return res.data;
   },
 };

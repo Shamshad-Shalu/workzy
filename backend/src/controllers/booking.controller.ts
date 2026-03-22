@@ -2,11 +2,17 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { AUTH, HTTPSTATUS } from "@/constants";
+import { AUTH, BOOKING_STATUS_MESSAGES, HTTPSTATUS } from "@/constants";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { TYPES } from "@/di/types";
-import { CancelBookingDTO, CreatebookingDTO } from "@/dtos/requests/booking.dto";
+import {
+  CancelBookingDTO,
+  CompleteBookingDTO,
+  CreatebookingDTO,
+  ExtraChargeDTO,
+  RejectBookingDTO,
+} from "@/dtos/requests/booking.dto";
 import { BookingListParams, ListingStatus } from "@/types/booking";
 import CustomError from "@/utils/customError";
 
@@ -14,21 +20,23 @@ import CustomError from "@/utils/customError";
 export class BookingController implements IBookingController {
   constructor(@inject(TYPES.BookingService) private _bookingService: IBookingService) {}
   createBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
-    }
+    const userId = this.requireUserId(req);
     const data = req.body as CreatebookingDTO;
     const { url } = await this._bookingService.createBooking(userId, data);
     res.status(HTTPSTATUS.OK).json({ url });
   });
-  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?.id;
-    if (!userId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
 
+  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
-    console.log({ query });
     const result = await this._bookingService.getUserBookings(userId, query);
+    res.status(HTTPSTATUS.OK).json(result);
+  });
+
+  getWorkerBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const query = this.parseQuery(req);
+    const result = await this._bookingService.getWorkerBookings(workerId, query);
     res.status(HTTPSTATUS.OK).json(result);
   });
 
@@ -41,14 +49,72 @@ export class BookingController implements IBookingController {
   });
 
   cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?.id;
+    const userId = this.requireUserId(req);
     const { bookingId } = req.params;
     const { reason } = req.body as CancelBookingDTO;
-    if (!userId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
-    console.log("bookingId", bookingId, "reason:", reason);
     await this._bookingService.cancelBooking(bookingId, userId, reason);
 
-    res.status(HTTPSTATUS.OK).json({ message: "Booking cancelled successfully" });
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.CANCELLED });
+  });
+
+  acceptBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const workerId = this.requireWorkerId(req);
+    await this._bookingService.acceptBooking(bookingId, workerId);
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.CONFIRMED });
+  });
+
+  rejectBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    const { reason } = req.body as RejectBookingDTO;
+    await this._bookingService.rejectBooking({ bookingId, reason, workerId });
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.REJECTED });
+  });
+
+  startJob = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+
+    await this._bookingService.startJob(bookingId, workerId);
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.IN_PROGRESS });
+  });
+
+  approveBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const { bookingId } = req.params;
+
+    await this._bookingService.approveBooking(bookingId, userId);
+    res.status(HTTPSTATUS.OK).json({ message: "Job approved and payment released" });
+  });
+  payExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const { bookingId } = req.params;
+
+    const { url } = await this._bookingService.payExtraCharge(bookingId, userId);
+    res.status(HTTPSTATUS.OK).json({ url });
+  });
+  rejectExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = this.requireUserId(req);
+    const { bookingId } = req.params;
+    await this._bookingService.rejectExtraCharge(bookingId, userId);
+    res.status(HTTPSTATUS.OK).json({ message: "Extra charge rejected" });
+  });
+  completeJob = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+    const data = req.body as CompleteBookingDTO;
+
+    await this._bookingService.completeJob(bookingId, workerId, data);
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.COMPLETED });
+  });
+  requestExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { bookingId } = req.params;
+
+    const data = req.body as ExtraChargeDTO;
+    await this._bookingService.requestExtraCharge(bookingId, workerId, data);
+    res.status(HTTPSTATUS.OK).json({ message: "Extra charge request sent to client" });
   });
 
   private parseQuery(req: Request): BookingListParams {
@@ -69,6 +135,18 @@ export class BookingController implements IBookingController {
       sort,
     };
   }
-  // startBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  // completeBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+
+  private requireUserId(req: Request): string {
+    if (!req.user?.id) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+    }
+    return req.user.id;
+  }
+
+  private requireWorkerId(req: Request): string {
+    if (!req.user?.workerId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+    }
+    return req.user.workerId;
+  }
 }

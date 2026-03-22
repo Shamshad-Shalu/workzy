@@ -5,18 +5,13 @@ import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
 import {
+  BookingCardEntity,
+  BookingCursor,
   BookingDetailsEntity,
   BookingListParams,
   IBooking,
   PaginatedBookingsEntity,
-  UserBookingEntity,
 } from "@/types/booking";
-
-const BOOKING_POPULATE = [
-  { path: "workerId", select: "displayName tagline averageRating coverImage" },
-  { path: "userId", select: "name profileImage phone" },
-  { path: "categoryId", select: "name iconUrl" },
-];
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -127,48 +122,17 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const [result] = await this.model.aggregate<BookingDetailsEntity>(pipeline).exec();
     return result;
   }
-
-  getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsEntity> {
+  async getUserBookings(
+    userId: string,
+    query: BookingListParams
+  ): Promise<PaginatedBookingsEntity> {
     return this.paginatedQuery("userId", userId, query);
   }
-
-  private buildStatusFilter(
-    ownerField: "userId" | "workerId",
-    ownerId: string,
-    status: string
-  ): FilterQuery<IBooking> {
-    const base: FilterQuery<IBooking> = {
-      [ownerField]: new Types.ObjectId(ownerId),
-    };
-    if (status === "all" || !status) return base;
-    if (status === "upcoming") {
-      const todayStart = new Date();
-      todayStart.setHours(0, 0, 0, 0);
-      return {
-        ...base,
-        status: { $in: [BOOKING_STATUS.CONFIRMED, BOOKING_STATUS.PENDING] as BookingStatus[] },
-        date: { $gte: todayStart },
-      };
-    }
-    return { ...base, status: status as BookingStatus };
-  }
-
-  private buildCursorFilter(
-    cursor: BookingListParams["cursor"],
-    op: "$lt" | "$gt"
-  ): FilterQuery<IBooking> {
-    if (!cursor) return {};
-
-    const cursorDate = new Date(cursor.date);
-    const cursorId = new Types.ObjectId(cursor._id);
-
-    return {
-      $or: [
-        { date: { [op]: cursorDate } },
-        { date: cursorDate, startTime: { [op]: cursor.startTime } },
-        { date: cursorDate, startTime: cursor.startTime, _id: { [op]: cursorId } },
-      ],
-    };
+  async getWorkerBookings(
+    workerId: string,
+    query: BookingListParams
+  ): Promise<PaginatedBookingsEntity> {
+    return this.paginatedQuery("workerId", workerId, query);
   }
 
   private async paginatedQuery(
@@ -179,39 +143,210 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const { status, cursor, limit, sort } = query;
 
     const dir: 1 | -1 = sort === "asc" ? 1 : -1;
-    const op: "$lt" | "$gt" = sort === "asc" ? "$gt" : "$lt";
 
     const statusFilter = this.buildStatusFilter(ownerField, ownerId, status);
-    const cursorFilter = this.buildCursorFilter(cursor, op);
+    const cursorFilter = this.buildCursorFilter(cursor, sort);
 
     const finalFilter: FilterQuery<IBooking> = {
       ...statusFilter,
       ...(cursor ? cursorFilter : {}),
     };
 
-    const docs = await Booking.find(finalFilter)
-      .sort({ date: dir, startTime: dir, _id: dir })
-      .limit(limit + 1)
-      .populate(BOOKING_POPULATE)
-      .lean<UserBookingEntity[]>();
+    const pipeline: PipelineStage[] = [
+      { $match: finalFilter },
+      { $sort: { date: dir, startTime: dir, _id: dir } },
+      { $limit: limit + 1 },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "bookingUser",
+        },
+      },
+      {
+        $unwind: {
+          path: "$bookingUser",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "workers",
+          localField: "workerId",
+          foreignField: "_id",
+          as: "worker",
+        },
+      },
+      {
+        $unwind: {
+          path: "$worker",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
 
+      {
+        $lookup: {
+          from: "users",
+          localField: "worker.userId",
+          foreignField: "_id",
+          as: "workerUser",
+        },
+      },
+      {
+        $unwind: {
+          path: "$workerUser",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: {
+          path: "$category",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          bookingId: 1,
+
+          date: 1,
+          startTime: 1,
+          endTime: 1,
+          duration: 1,
+
+          address: 1,
+          total: 1,
+          status: 1,
+          paymentStatus: 1,
+
+          extraCharge: 1,
+          evidence: 1,
+          isReviewed: 1,
+          statusHistory: 1,
+          userNote: 1,
+          createdAt: 1,
+
+          user: {
+            _id: "$bookingUser._id",
+            name: "$bookingUser.name",
+            profileImage: "$bookingUser.profileImage",
+          },
+
+          worker: {
+            _id: "$worker._id",
+            displayName: "$worker.displayName",
+            tagline: "$worker.tagline",
+            coverImage: "$worker.coverImage",
+            profileImage: "$workerUser.profileImage",
+            isPremium: "$worker.isPremium",
+            averageRating: "$worker.averageRating",
+            reviewCount: "$worker.reviewCount",
+            worksCompleted: "$worker.worksCompleted",
+          },
+
+          category: {
+            _id: "$category._id",
+            name: "$category.name",
+            iconUrl: "$category.iconUrl",
+          },
+        },
+      },
+    ];
+
+    const docs = await this.model.aggregate<BookingCardEntity>(pipeline).exec();
     const hasMore = docs.length > limit;
     if (hasMore) docs.pop();
 
     let nextCursor: string | null = null;
+
     if (hasMore && docs.length > 0) {
       const last = docs[docs.length - 1];
-      const cursorPayload = {
-        date: (last.date as Date).toISOString(),
+      const payload: BookingCursor = {
+        date: new Date(last.date).toISOString(),
         startTime: last.startTime,
         _id: last._id.toString(),
       };
-      nextCursor = Buffer.from(JSON.stringify(cursorPayload)).toString("base64url");
+      nextCursor = Buffer.from(JSON.stringify(payload)).toString("base64url");
     }
     let total: number | undefined;
     if (!cursor) {
-      total = await Booking.countDocuments(statusFilter);
+      total = await this.model.countDocuments(statusFilter);
     }
-    return { data: docs, cursor: nextCursor, hasMore, total };
+    return {
+      data: docs,
+      cursor: nextCursor,
+      hasMore,
+      total,
+    };
+  }
+
+  private buildCursorFilter(
+    cursor: BookingCursor | null,
+    sort: "asc" | "desc"
+  ): FilterQuery<IBooking> {
+    if (!cursor) return {};
+    const cursorDate = new Date(cursor.date);
+    const cursorId = new Types.ObjectId(cursor._id);
+
+    if (sort === "asc") {
+      return {
+        $or: [
+          { date: { $gt: cursorDate } },
+          { date: cursorDate, startTime: { $gt: cursor.startTime } },
+          {
+            date: cursorDate,
+            startTime: cursor.startTime,
+            _id: { $gt: cursorId },
+          },
+        ],
+      };
+    }
+    return {
+      $or: [
+        { date: { $lt: cursorDate } },
+        { date: cursorDate, startTime: { $lt: cursor.startTime } },
+        {
+          date: cursorDate,
+          startTime: cursor.startTime,
+          _id: { $lt: cursorId },
+        },
+      ],
+    };
+  }
+
+  private buildStatusFilter(
+    ownerField: "userId" | "workerId",
+    ownerId: string,
+    status: string
+  ): FilterQuery<IBooking> {
+    const base: FilterQuery<IBooking> = {
+      [ownerField]: new Types.ObjectId(ownerId),
+    };
+    if (!status || status === "all") return base;
+    if (status === "upcoming") {
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      return {
+        ...base,
+        status: {
+          $in: [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED] as BookingStatus[],
+        },
+        date: { $gte: todayStart },
+      };
+    }
+    return {
+      ...base,
+      status: status as BookingStatus,
+    };
   }
 }

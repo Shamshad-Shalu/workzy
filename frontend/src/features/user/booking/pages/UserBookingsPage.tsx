@@ -14,7 +14,9 @@ import CancelModal from '../components/bookingActions/CancelModal';
 import DetailModal from '../components/bookingActions/DetailModal';
 import EvidenceModal from '../components/bookingActions/EvidenceModal';
 import ExtraChargeModal from '../components/bookingActions/ExtraChargeModal';
-import UserBookingCard, { type BookingCardHandlers } from '../components/bookingActions/UserBookingCard';
+import UserBookingCard, {
+  type BookingCardHandlers,
+} from '../components/bookingActions/UserBookingCard';
 import { useBookingMutations } from '../hooks/useBookingMutations';
 import { useUserBookings } from '../hooks/useUserBookings';
 
@@ -29,7 +31,7 @@ export default function UserBookingsPage() {
   const [disputeId, setDisputeId] = useState<string | null>(null);
   const [reviewB, setReviewB] = useState<string | null>(null);
 
-  console.log({ disputeId , reviewB })
+  console.log({ disputeId, reviewB });
   const {
     data,
     fetchNextPage,
@@ -65,7 +67,9 @@ export default function UserBookingsPage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = sentinelRef.current;
-    if (!el) {return;}
+    if (!el) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -81,7 +85,9 @@ export default function UserBookingsPage() {
   }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
   const cancelBooking = async (reason: string) => {
-    if (!cancelB?.id) {return;}
+    if (!cancelB?.id) {
+      return;
+    }
     await cancelBookingMutation.mutateAsync({ id: cancelB.id, reason });
     setCancelB(null);
   };
@@ -138,7 +144,7 @@ export default function UserBookingsPage() {
             {!isLoading && !isError && bookings.length > 0 && (
               <div className="space-y-3">
                 {bookings.map((booking, i) => (
-                  <UserBookingCard 
+                  <UserBookingCard
                     key={booking.id}
                     booking={booking}
                     handlers={handlers}
