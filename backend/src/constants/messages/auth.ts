@@ -33,6 +33,7 @@ export const AUTH = {
   WEAK_PASSWORD: "Please enter strong password",
 
   PHONE_BELONG_ANOTHER: "Phone number is belongs to another User",
+  ACCESS_DENIED: "Access denied",
 };
 export const EMAIL = {
   INVALID: "Invalid email ",

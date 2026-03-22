@@ -17,7 +17,7 @@ const BookingService = {
     return res.data;
   },
   cancelBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
-    const res = await api.patch(BOOKING_API.CANCEL(bookingId), reason);
+    const res = await api.patch(BOOKING_API.CANCEL(bookingId), {reason});
     return res.data;
   },
 };

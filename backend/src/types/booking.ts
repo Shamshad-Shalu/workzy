@@ -64,6 +64,7 @@ export interface IBooking extends Document<string> {
   platformFeePercent: number; // snapshot from category at booking time
   platformFee: number; // chargeableAmount * platformFeePercent/100
   total: number; // chargeableAmount + travelCost (user pays this)
+
   extraCharge?: IExtraCharge;
   evidence?: IEvidence;
   paymentStatus: BookingPaymentStatus;
@@ -152,3 +153,25 @@ export interface PaginatedBookingsEntity {
   hasMore: boolean;
   total?: number;
 }
+
+export type BookingDetailsEntity = Omit<
+  IBooking,
+  "userId" | "workerId" | "serviceId" | "categoryId"
+> & {
+  _id: Types.ObjectId;
+  user: Pick<IUser, "_id" | "name" | "profileImage">;
+  worker: Pick<
+    IWorker,
+    | "_id"
+    | "displayName"
+    | "tagline"
+    | "coverImage"
+    | "isPremium"
+    | "averageRating"
+    | "reviewCount"
+    | "worksCompleted"
+  > & {
+    profileImage?: string;
+  };
+  category: Pick<ICategory, "_id" | "name" | "iconUrl" | "imageUrl">;
+};

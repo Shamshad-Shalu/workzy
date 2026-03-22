@@ -6,6 +6,8 @@ import {
 } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import {
+  BookingDetailsEntity,
+  IBookingLocation,
   IBookingStatusHistory,
   IEvidence,
   IExtraCharge,
@@ -135,6 +137,117 @@ export class PaginatedBookingsDTO {
     dto.hasMore = result.hasMore;
     dto.total = result.total;
 
+    return dto;
+  }
+}
+
+export class BookingResponseDTO {
+  id!: string;
+  bookingId!: string;
+  date!: Date;
+  startTime!: string;
+  endTime!: string;
+  duration!: number;
+  address!: IBookingLocation | null;
+
+  rate!: number;
+  itemCount!: number;
+  subtotal!: number;
+  discountPercent!: number;
+  discountAmount!: number;
+  chargeableAmount!: number;
+  travelCost!: number;
+  platformFeePercent!: number;
+  platformFee!: number;
+  total!: number;
+
+  extraCharge?: IExtraCharge;
+  evidence?: IEvidence;
+  status!: BookingStatus;
+  paymentStatus!: BookingPaymentStatus;
+  statusHistory!: IBookingStatusHistory[];
+  isReviewed!: boolean;
+  userNote?: string;
+  completedAt?: Date;
+
+  category!: {
+    id: string;
+    name: string;
+    iconUrl: string;
+    imageUrl: string;
+  };
+
+  worker!: {
+    id: string;
+    displayName: string;
+    tagline: string;
+    profileImage: string;
+    coverImage: string;
+    isPremium: boolean;
+    averageRating: number;
+    reviewCount: number;
+    worksCompleted: number;
+  };
+
+  user!: {
+    id: string;
+    name: string;
+    profileImage?: string;
+  };
+  static async fromEntity(
+    entity: BookingDetailsEntity,
+    s3Service: IS3Service
+  ): Promise<BookingResponseDTO> {
+    const dto = new BookingResponseDTO();
+
+    dto.id = entity._id.toString();
+    dto.bookingId = entity.bookingId;
+    dto.date = entity.date;
+    dto.startTime = entity.startTime;
+    dto.endTime = entity.endTime;
+    dto.duration = entity.duration;
+    dto.address = entity.address;
+
+    dto.rate = entity.rate;
+    dto.itemCount = entity.itemCount;
+    dto.subtotal = entity.subtotal;
+    dto.discountPercent = entity.discountPercent;
+    dto.discountAmount = entity.discountAmount;
+    dto.chargeableAmount = entity.chargeableAmount;
+    dto.travelCost = entity.travelCost;
+    dto.platformFeePercent = entity.platformFeePercent;
+    dto.platformFee = entity.platformFee;
+    dto.total = entity.total;
+
+    dto.extraCharge = entity.extraCharge;
+    dto.evidence = entity.evidence;
+    dto.paymentStatus = entity.paymentStatus;
+    dto.status = entity.status;
+    dto.statusHistory = entity.statusHistory;
+    dto.isReviewed = entity.isReviewed;
+    dto.userNote = entity.userNote;
+    dto.completedAt = entity.completedAt;
+
+    dto.user = {
+      ...entity.user,
+      id: entity.user._id.toString(),
+      profileImage: entity.user.profileImage?.includes("private/user/profiles")
+        ? await s3Service.generateSignedUrl(entity.user.profileImage)
+        : (entity.user.profileImage ?? DEFAULT_IMAGE_URL),
+    };
+    dto.worker = {
+      ...entity.worker,
+      id: entity.worker._id.toString(),
+      profileImage: entity.worker.profileImage?.includes("private/user/profiles")
+        ? await s3Service.generateSignedUrl(entity.worker.profileImage)
+        : (entity.worker.profileImage ?? DEFAULT_IMAGE_URL),
+      coverImage: entity.worker.coverImage ?? DEFAULT_WORKER_COVER_IMAGE,
+    };
+
+    dto.category = {
+      ...entity.category,
+      id: entity.category._id.toString(),
+    };
     return dto;
   }
 }

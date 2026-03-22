@@ -10,5 +10,6 @@ export interface IPaymentService {
   verifySession(sessionId: string): Promise<VerifySessionType>;
   createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string>;
   createStripeConnectLink(worker: IWorker): Promise<string>;
+  refundBookingPayment(bookingId: string): Promise<void>;
   //   releaseBookingPayment(bookingId: string): Promise<{ success: boolean }>;
 }

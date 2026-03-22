@@ -1,10 +1,11 @@
-import { FilterQuery, Types } from "mongoose";
+import { FilterQuery, PipelineStage, Types } from "mongoose";
 
 import { BOOKING_STATUS, BookingStatus } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
 import {
+  BookingDetailsEntity,
   BookingListParams,
   IBooking,
   PaginatedBookingsEntity,
@@ -20,6 +21,111 @@ const BOOKING_POPULATE = [
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
     super(Booking);
+  }
+
+  async getBookingDetailById(bookingId: string): Promise<BookingDetailsEntity | null> {
+    if (!Types.ObjectId.isValid(bookingId)) {
+      return null;
+    }
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          _id: new Types.ObjectId(bookingId),
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "bookingUser",
+        },
+      },
+      { $unwind: { path: "$bookingUser", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "workers",
+          localField: "workerId",
+          foreignField: "_id",
+          as: "worker",
+        },
+      },
+      { $unwind: { path: "$worker", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "worker.userId",
+          foreignField: "_id",
+          as: "workerUser",
+        },
+      },
+      { $unwind: { path: "$workerUser", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          bookingId: 1,
+          date: 1,
+          startTime: 1,
+          endTime: 1,
+          duration: 1,
+          address: 1,
+
+          rate: 1,
+          itemCount: 1,
+          subtotal: 1,
+          discountPercent: 1,
+          discountAmount: 1,
+          chargeableAmount: 1,
+          travelCost: 1,
+          platformFeePercent: 1,
+          platformFee: 1,
+          total: 1,
+
+          extraCharge: 1,
+          evidence: 1,
+          paymentStatus: 1,
+          status: 1,
+          statusHistory: 1,
+          isReviewed: 1,
+          userNote: 1,
+          completedAt: 1,
+          user: {
+            _id: "$bookingUser._id",
+            name: "$bookingUser.name",
+            profileImage: "$bookingUser.profileImage",
+          },
+          worker: {
+            _id: "$worker._id",
+            displayName: "$worker.displayName",
+            tagline: "$worker.tagline",
+            coverImage: "$worker.coverImage",
+            averageRating: "$worker.averageRating",
+            isPremium: "$worker.isPremium",
+            reviewCount: "$worker.reviewCount",
+            worksCompleted: "$worker.worksCompleted",
+            profileImage: "$workerUser.profileImage",
+          },
+          category: {
+            _id: "$category._id",
+            name: "$category.name",
+            iconUrl: "$category.iconUrl",
+            imageUrl: "$category.imageUrl",
+          },
+        },
+      },
+    ];
+
+    const [result] = await this.model.aggregate<BookingDetailsEntity>(pipeline).exec();
+    return result;
   }
 
   getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsEntity> {
@@ -46,6 +152,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     }
     return { ...base, status: status as BookingStatus };
   }
+
   private buildCursorFilter(
     cursor: BookingListParams["cursor"],
     op: "$lt" | "$gt"

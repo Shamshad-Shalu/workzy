@@ -2,12 +2,20 @@ import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
 import {
+  AUTH,
+  BOOKING,
+  BOOKING_PAYMENT_STATUS,
+  BOOKING_STATUS,
+  BookingStatus,
   CATEGORY,
   HTTPSTATUS,
   PricingMode,
+  Role,
+  ROLE,
   SERVICE,
   SERVICE_TYPE,
   SLOT,
+  SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
   WORKER,
 } from "@/constants";
@@ -22,12 +30,13 @@ import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CreatebookingDTO } from "@/dtos/requests/booking.dto";
-import { PaginatedBookingsDTO } from "@/dtos/responses/booking.dto";
-import { BookingContext, BookingListParams, PaginatedBookingsEntity } from "@/types/booking";
+import { BookingResponseDTO, PaginatedBookingsDTO } from "@/dtos/responses/booking.dto";
+import { BookingContext, BookingListParams, IBooking } from "@/types/booking";
 import { BulkDiscountType } from "@/types/service";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 import { calculateDistanceKm } from "@/utils/geo";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -197,5 +206,60 @@ export class BookingService implements IBookingService {
   async getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsDTO> {
     const bookings = await this._bookingRepository.getUserBookings(userId, query);
     return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
+  }
+
+  async cancelBooking(bookingId: string, userId: string, reason: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+
+    if (booking.userId.toString() !== userId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    const cancellableStatuses = [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED];
+    if (!cancellableStatuses.includes(booking.status as (typeof cancellableStatuses)[number])) {
+      throw new CustomError(BOOKING.CANNOT_CANCEL(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
+      await this._paymentService.refundBookingPayment(bookingId);
+    }
+    const paymentStatus =
+      booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+        ? BOOKING_PAYMENT_STATUS.REFUNDED
+        : booking.paymentStatus;
+
+    await this._bookingRepository.update(bookingId, {
+      $set: {
+        status: BOOKING_STATUS.CANCELLED,
+        paymentStatus,
+      },
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
+      },
+    });
+    await this._slotRepository.findOneAndDelete({
+      bookingId: new Types.ObjectId(bookingId),
+      reservedBy: new Types.ObjectId(userId),
+      status: SLOT_STATUS.BOOKED,
+    });
+  }
+
+  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
+    return {
+      status,
+      changedBy,
+      reason: reason ?? null,
+      changedAt: new Date(),
+    };
+  }
+
+  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
+    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
+  }
+
+  async getBookingDetails(bookingId: string): Promise<BookingResponseDTO> {
+    const booking = await this._bookingRepository.getBookingDetailById(bookingId);
+    if (!booking) {
+      throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    return BookingResponseDTO.fromEntity(booking, this._s3Service);
   }
 }

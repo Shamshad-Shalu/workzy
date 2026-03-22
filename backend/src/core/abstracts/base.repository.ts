@@ -30,7 +30,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
     return document.save();
   }
 
-  async update(id: Types.ObjectId | string, data: Partial<T>): Promise<T | null> {
+  async update(id: Types.ObjectId | string, data: UpdateQuery<T>): Promise<T | null> {
     return this.model.findByIdAndUpdate(id, data, { new: true });
   }
 

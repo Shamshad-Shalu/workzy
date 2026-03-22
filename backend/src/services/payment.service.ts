@@ -9,6 +9,8 @@ import {
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
   CLIENT_URL,
+  HTTPSTATUS,
+  PAYMENT,
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
   ROLE,
@@ -27,6 +29,7 @@ import { TYPES } from "@/di/types";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment";
 import { AddSubscriptionDto } from "@/types/subscription";
 import { IWorker } from "@/types/worker";
+import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 
 @injectable()
@@ -141,9 +144,9 @@ export class PaymentService implements IPaymentService {
         const session = event.data.object as Stripe.Checkout.Session;
         const type = session.metadata?.type;
         if (type === "SUBSCRIPTION") {
-          await this._handleSubscriptionPaid(session);
+          await this.handleSubscriptionPaid(session);
         } else if (type === "BOOKING") {
-          await this._handleBookingPaid(session);
+          await this.handleBookingPaid(session);
         }
         break;
       }
@@ -204,7 +207,27 @@ export class PaymentService implements IPaymentService {
     return link.url;
   }
 
-  private async _handleBookingPaid(session: Stripe.Checkout.Session) {
+  async refundBookingPayment(bookingId: string): Promise<void> {
+    const payment = await this._paymentRepo.findOne({
+      referenceId: new Types.ObjectId(bookingId),
+      billType: BILL_TYPE.BOOKING,
+      status: PAYMENT_STATUS.SUCCEEDED,
+    });
+    if (!payment) {
+      throw new CustomError(PAYMENT.PAYMENT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    if (!payment?.paymentIntentId) {
+      throw new CustomError(PAYMENT.PAYMENT_INTENT_MISSING, HTTPSTATUS.BAD_REQUEST);
+    }
+    await stripe.paymentIntents.cancel(payment?.paymentIntentId);
+
+    await this._paymentRepo.findOneAndUpdate(
+      { _id: payment._id },
+      { status: PAYMENT_STATUS.REFUNDED }
+    );
+  }
+ 
+  private async handleBookingPaid(session: Stripe.Checkout.Session) {
     const metadata = session.metadata as {
       bookingId: string;
       slotId: string;
@@ -238,7 +261,7 @@ export class PaymentService implements IPaymentService {
     console.log("webhook updated::", { booking, payment, slot });
   }
 
-  private async _handleSubscriptionPaid(session: Stripe.Checkout.Session) {
+  private async handleSubscriptionPaid(session: Stripe.Checkout.Session) {
     const metadata = session.metadata as {
       workerId: string;
       subscriptionId: string;

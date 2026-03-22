@@ -25,6 +25,8 @@ import { IService } from "@/types/service";
 import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO } from "@/types/slot";
 import { Day, IWorker } from "@/types/worker";
 import CustomError from "@/utils/customError";
+import { calculateDistanceKm } from "@/utils/geo";
+import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
 
@@ -253,11 +255,13 @@ export class SlotService implements ISlotService {
       input;
 
     const totalBlock = serviceDuration + bufferTime;
-    const dayStart = this.toMin(availability.start);
-    const dayEnd = this.toMin(availability.end);
+    const dayStart = timeToMinutes(availability.start);
+    const dayEnd = timeToMinutes(availability.end);
     const INCREMENT = 30;
 
-    const jobs = [...bookedSlots].sort((a, b) => this.toMin(a.startTime) - this.toMin(b.startTime));
+    const jobs = [...bookedSlots].sort(
+      (a, b) => timeToMinutes(a.startTime) - timeToMinutes(b.startTime)
+    );
 
     type Window = {
       windowStart: number;
@@ -270,15 +274,15 @@ export class SlotService implements ISlotService {
 
     windows.push({
       windowStart: dayStart,
-      windowEnd: jobs.length > 0 ? this.toMin(jobs[0].startTime) : dayEnd,
+      windowEnd: jobs.length > 0 ? timeToMinutes(jobs[0].startTime) : dayEnd,
       prevLoc: null,
       nextLoc: jobs.length > 0 ? jobs[0].location : null,
     });
 
     for (let i = 0; i < jobs.length - 1; i++) {
       windows.push({
-        windowStart: this.toMin(jobs[i].endTime),
-        windowEnd: this.toMin(jobs[i + 1].startTime),
+        windowStart: timeToMinutes(jobs[i].endTime),
+        windowEnd: timeToMinutes(jobs[i + 1].startTime),
         prevLoc: jobs[i].location,
         nextLoc: jobs[i + 1].location,
       });
@@ -286,7 +290,7 @@ export class SlotService implements ISlotService {
 
     if (jobs.length > 0) {
       windows.push({
-        windowStart: this.toMin(jobs[jobs.length - 1].endTime),
+        windowStart: timeToMinutes(jobs[jobs.length - 1].endTime),
         windowEnd: dayEnd,
         prevLoc: jobs[jobs.length - 1].location,
         nextLoc: null,
@@ -305,8 +309,8 @@ export class SlotService implements ISlotService {
 
       while (cursor <= latest) {
         result.push({
-          startTime: this.fromMin(cursor),
-          endTime: this.fromMin(cursor + totalBlock),
+          startTime: minutesToTime(cursor),
+          endTime: minutesToTime(cursor + totalBlock),
           travelFromPrev: tIn,
         });
         cursor += INCREMENT;
@@ -333,33 +337,12 @@ export class SlotService implements ISlotService {
     }
     return baseDuration;
   }
-
-  private toMin(t: string): number {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  }
-  private fromMin(n: number): string {
-    return `${String(Math.floor(n / 60)).padStart(2, "0")}:${String(n % 60).padStart(2, "0")}`;
-  }
-
-  private haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }): number {
-    const R = 6371;
-    const dLat = ((b.lat - a.lat) * Math.PI) / 180;
-    const dLng = ((b.lng - a.lng) * Math.PI) / 180;
-    const x =
-      Math.sin(dLat / 2) ** 2 +
-      Math.cos((a.lat * Math.PI) / 180) *
-        Math.cos((b.lat * Math.PI) / 180) *
-        Math.sin(dLng / 2) ** 2;
-    return R * 2 * Math.asin(Math.sqrt(x));
-  }
-
   private travelMin(
     from: { lat: number; lng: number } | null,
     to: { lat: number; lng: number } | null
   ): number {
     if (!from || !to) return 0;
-    const km = this.haversineKm(from, to);
+    const km = calculateDistanceKm(from, to);
     const raw = km * 3;
     return Math.ceil(raw / 10) * 10;
   }

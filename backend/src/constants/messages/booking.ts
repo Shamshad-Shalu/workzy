@@ -8,3 +8,7 @@ export const BOOKING_STATUS_MESSAGES = {
   REJECTED: "Booking rejected by worker",
   DISPUTED: "Booking is under dispute",
 };
+export const BOOKING = {
+  NOT_FOUND: "Booking is not found",
+  CANNOT_CANCEL: (status: string) => `Cannot cancel a booking that is ${status}`,
+};

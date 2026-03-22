@@ -6,7 +6,7 @@ import { AUTH, HTTPSTATUS } from "@/constants";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { TYPES } from "@/di/types";
-import { CreatebookingDTO } from "@/dtos/requests/booking.dto";
+import { CancelBookingDTO, CreatebookingDTO } from "@/dtos/requests/booking.dto";
 import { BookingListParams, ListingStatus } from "@/types/booking";
 import CustomError from "@/utils/customError";
 
@@ -32,6 +32,25 @@ export class BookingController implements IBookingController {
     res.status(HTTPSTATUS.OK).json(result);
   });
 
+  getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+
+    console.log("bookingId", bookingId);
+    const result = await this._bookingService.getBookingDetails(bookingId);
+    res.status(HTTPSTATUS.OK).json({ data: result });
+  });
+
+  cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    const { bookingId } = req.params;
+    const { reason } = req.body as CancelBookingDTO;
+    if (!userId) throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+    console.log("bookingId", bookingId, "reason:", reason);
+    await this._bookingService.cancelBooking(bookingId, userId, reason);
+
+    res.status(HTTPSTATUS.OK).json({ message: "Booking cancelled successfully" });
+  });
+
   private parseQuery(req: Request): BookingListParams {
     const status = (req.query.status as string) || "all";
     const parsedLimit = parseInt(req.query.limit as string, 10);
@@ -50,8 +69,6 @@ export class BookingController implements IBookingController {
       sort,
     };
   }
-  // getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  // cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
   // startBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
   // completeBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
 }

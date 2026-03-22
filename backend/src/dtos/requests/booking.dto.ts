@@ -6,7 +6,9 @@ import {
   IsOptional,
   IsString,
   Matches,
+  MaxLength,
   Min,
+  MinLength,
   ValidateNested,
 } from "class-validator";
 
@@ -57,4 +59,11 @@ export class CreatebookingDTO {
   @IsOptional()
   @IsString()
   userNote?: string;
+}
+
+export class CancelBookingDTO {
+  @IsString()
+  @MinLength(10, { message: "Please provide a reason (min 10 chars)" })
+  @MaxLength(500)
+  reason!: string;
 }

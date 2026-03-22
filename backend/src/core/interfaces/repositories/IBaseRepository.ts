@@ -3,7 +3,7 @@ import { DeleteResult, FilterQuery, Types, UpdateQuery, UpdateWriteOpResult } fr
 export interface IBaseRepository<T> {
   findAll(): Promise<T[]>;
   create(data: Partial<T>): Promise<T>;
-  update(id: Types.ObjectId | string, data: Partial<T>): Promise<T | null>;
+  update(id: Types.ObjectId | string, data: UpdateQuery<T>): Promise<T | null>;
   delete(id: Types.ObjectId | string): Promise<T | null>;
   find(filter: FilterQuery<T>): Promise<T[]>;
   findOne(filter: FilterQuery<T>): Promise<T | null>;
