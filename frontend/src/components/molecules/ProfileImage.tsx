@@ -12,6 +12,7 @@ interface Props {
   onChange?: (file: File) => Promise<void>;
   onClickImage?: () => void;
   loading?: boolean;
+  progress?: number;
   fallbackImage?: string;
 }
 export default function ProfileImage({
@@ -21,6 +22,7 @@ export default function ProfileImage({
   onChange,
   onClickImage,
   loading = false,
+  progress = 0,
   fallbackImage,
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -57,8 +59,18 @@ export default function ProfileImage({
         alt="Profile"
       />
       {loading && (
-        <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center">
-          <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+        <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center gap-1.5 p-2">
+          <div className="relative flex items-center justify-center h-8 w-8">
+            <div className="absolute inset-0 border-2 border-white/20 rounded-full" />
+            <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <span className="text-[8px] text-white font-bold">{progress}%</span>
+          </div>
+          <div className="w-full h-1 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-white transition-all duration-300"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
         </div>
       )}
 

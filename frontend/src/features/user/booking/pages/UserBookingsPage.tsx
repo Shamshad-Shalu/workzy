@@ -12,6 +12,7 @@ import BookingCardSkeletonList from '../components/bookingActions/BookingCardSke
 import { BookingStatusTabs } from '../components/bookingActions/BookingStatusTabs';
 import CancelModal from '../components/bookingActions/CancelModal';
 import DetailModal from '../components/bookingActions/DetailModal';
+import DisputeModal from '../components/bookingActions/DisputeModal';
 import EvidenceModal from '../components/bookingActions/EvidenceModal';
 import ExtraChargeModal from '../components/bookingActions/ExtraChargeModal';
 import UserBookingCard, {
@@ -28,10 +29,10 @@ export default function UserBookingsPage() {
   const [evidenceB, setEvidenceB] = useState<BookingCard | null>(null);
   const [payExtraB, setPayExtraB] = useState<BookingCard | null>(null);
   const [approveB, setApproveB] = useState<BookingCard | null>(null);
-  const [disputeId, setDisputeId] = useState<string | null>(null);
+  const [disputeB, setDisputeB] = useState<BookingCard | null>(null);
   const [reviewB, setReviewB] = useState<string | null>(null);
 
-  console.log({ disputeId, reviewB });
+  console.log({ reviewB });
   const {
     data,
     fetchNextPage,
@@ -43,7 +44,13 @@ export default function UserBookingsPage() {
     error,
   } = useUserBookings(activeTab);
 
-  const { cancelBookingMutation } = useBookingMutations();
+  const {
+    cancelBookingMutation,
+    disputeBookingMutation,
+    approveBookingMutation,
+    payExtraChargeMutation,
+    rejectExtraChargeMutation,
+  } = useBookingMutations();
 
   const bookings = data?.pages.flatMap(p => p.data) ?? [];
   const total = data?.pages[0].total;
@@ -56,7 +63,7 @@ export default function UserBookingsPage() {
     onPayExtra: booking => setPayExtraB(booking),
     onApprove: booking => setApproveB(booking),
     onEvidence: booking => setEvidenceB(booking),
-    onDispute: id => setDisputeId(id),
+    onDispute: booking => setDisputeB(booking),
     onReview: id => setReviewB(id),
   };
 
@@ -93,12 +100,25 @@ export default function UserBookingsPage() {
   };
 
   const apporveBooking = async (id: string) => {
-    console.log('id::', id);
+    await approveBookingMutation.mutateAsync(id);
     setApproveB(null);
   };
 
   const onExtraPayment = async (id: string) => {
-    console.log('id::', id);
+    await payExtraChargeMutation.mutateAsync(id);
+  };
+
+  const onExtraReject = async (id: string) => {
+    await rejectExtraChargeMutation.mutateAsync(id);
+    setPayExtraB(null);
+  };
+
+  const onDisputeSubmit = async (reason: string) => {
+    if (!disputeB) {
+      return;
+    }
+    await disputeBookingMutation.mutateAsync({ id: disputeB.id, reason });
+    setDisputeB(null);
   };
 
   return (
@@ -177,7 +197,9 @@ export default function UserBookingsPage() {
         open={!!payExtraB}
         booking={payExtraB}
         onPayAmount={onExtraPayment}
+        onReject={onExtraReject}
         onClose={() => setPayExtraB(null)}
+        isSubmitting={payExtraChargeMutation.isPending || rejectExtraChargeMutation.isPending}
       />
       <EvidenceModal open={!!evidenceB} booking={evidenceB} onClose={() => setEvidenceB(null)} />
       <DetailModal open={!!detailId} onClose={() => setDetailId(null)} bookingId={detailId} />
@@ -186,13 +208,15 @@ export default function UserBookingsPage() {
         onClose={() => setApproveB(null)}
         booking={approveB}
         onSubmit={apporveBooking}
+        isSubmitting={approveBookingMutation.isPending}
       />
-
-      {/* 
-
-      <DisputeModal     id={disputeId}  open={!!disputeId}  onClose={() => setDisputeId(null)} />
-      <ReviewModal      booking={reviewB}  open={!!reviewB}    onClose={() => setReviewB(null)} />
-      */}
+      <DisputeModal
+        open={!!disputeB}
+        booking={disputeB}
+        onClose={() => setDisputeB(null)}
+        onSubmit={onDisputeSubmit}
+        isSubmitting={disputeBookingMutation.isPending}
+      />
     </div>
   );
 }

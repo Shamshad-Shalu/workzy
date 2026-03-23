@@ -18,6 +18,12 @@ const TYPE_CONFIG = {
     buttonLabel: 'View Bookings',
     buttonPath: '/bookings',
   },
+  EXTRA_CHARGE: {
+    title: 'Extra Charge Request',
+    description: 'Extra Charge Request',
+    buttonLabel: 'View Extra Charge',
+    buttonPath: '/bookings',
+  },
 } as const;
 
 type PaymentType = keyof typeof TYPE_CONFIG;
@@ -37,6 +43,8 @@ export default function PaymentSuccess() {
     enabled: !!sessionId,
     retry: false,
   });
+
+  console.log(details);
 
   if (!sessionId || isError) {
     return (

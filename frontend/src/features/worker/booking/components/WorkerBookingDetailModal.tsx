@@ -1,26 +1,27 @@
-import { Calendar, MapPin, User, FileText, IndianRupee } from 'lucide-react';
+import { Calendar, MapPin, User, FileText, IndianRupee, Info } from 'lucide-react';
 
 import { AppModal } from '@/components/molecules/AppModal';
 import { Skeleton } from '@/components/ui/skeleton';
+import { StatusBadge } from '@/features/user/booking/components/bookingActions/UserBookingCard';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { formatCurrency } from '@/utils/currency';
 import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
-import { StatusBadge } from './UserBookingCard';
-
-interface DetailModalProps {
+export default function WorkerBookingDetailModal({
+  open,
+  onClose,
+  bookingIdByCard,
+}: {
   open: boolean;
   onClose: () => void;
-  bookingId: string | null;
-}
-
-export default function DetailModal({ open, onClose, bookingId }: DetailModalProps) {
-  const { data: booking, isLoading } = useBookingDetails(bookingId);
+  bookingIdByCard: string | null;
+}) {
+  const { data: booking, isLoading } = useBookingDetails(bookingIdByCard);
 
   return (
-    <AppModal open={open} onClose={onClose} title="Booking Details" className="max-w-xl" hideFooter>
+    <AppModal open={open} onClose={onClose} title="Booking Details" className="max-w-xl">
       {isLoading ? (
-        <div className="space-y-4 p-4">
+        <div className="space-y-4">
           <Skeleton className="h-24 w-full rounded-xl" />
           <Skeleton className="h-40 w-full rounded-xl" />
           <Skeleton className="h-32 w-full rounded-xl" />
@@ -75,28 +76,27 @@ export default function DetailModal({ open, onClose, bookingId }: DetailModalPro
                 </div>
               </div>
             </div>
+
             <div className="p-4 rounded-xl border bg-muted/30 space-y-3">
               <h4 className="text-sm font-semibold flex items-center gap-2">
                 <User size={16} className="text-primary" />
-                Professional
+                Client
               </h4>
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden border">
-                  {booking.worker.profileImage ? (
+                <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden">
+                  {booking.user.profileImage ? (
                     <img
-                      src={booking.worker.profileImage}
-                      alt={booking.worker.displayName}
+                      src={booking.user.profileImage}
+                      alt={booking.user.name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
-                    <span className="font-bold text-lg">{booking.worker.displayName[0]}</span>
+                    <span className="font-bold text-lg">{booking.user.name[0]}</span>
                   )}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold">{booking.worker.displayName}</p>
-                  <p className="text-xs text-muted-foreground truncate max-w-[150px]">
-                    {booking.worker.tagline}
-                  </p>
+                  <p className="text-sm font-semibold">{booking.user.name}</p>
+                  <p className="text-xs text-muted-foreground">Verified Client</p>
                 </div>
               </div>
             </div>
@@ -107,41 +107,64 @@ export default function DetailModal({ open, onClose, bookingId }: DetailModalPro
               <MapPin size={16} className="text-primary" />
               Service Location
             </h4>
-            <p className="text-sm leading-relaxed text-foreground">
+            <p className="text-sm leading-relaxed">
               {booking.address?.label || 'Location not provided'}
             </p>
           </div>
 
+          {booking.userNote && (
+            <div className="p-4 rounded-xl border bg-blue-50/50 border-blue-100 space-y-2">
+              <h4 className="text-sm font-semibold flex items-center gap-2 text-blue-800">
+                <FileText size={16} />
+                Client Note
+              </h4>
+              <p className="text-sm italic text-blue-700">"{booking.userNote}"</p>
+            </div>
+          )}
+
           <div className="p-4 rounded-xl border border-primary/20 bg-primary/5 space-y-4">
             <h4 className="text-sm font-semibold flex items-center gap-2 text-primary">
               <IndianRupee size={16} />
-              Payment Summary
+              Payment Breakdown
             </h4>
 
             <div className="space-y-2">
-              <div className="flex justify-between text-sm font-medium">
-                <span className="text-muted-foreground text-xs">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">
                   Service Subtotal ({booking.itemCount} units)
                 </span>
                 <span>{formatCurrency(booking.subtotal)}</span>
               </div>
 
               {booking.discountAmount > 0 && (
-                <div className="flex justify-between text-sm text-green-600 font-medium">
-                  <span className="text-xs">Bulk Discount ({booking.discountPercent}%)</span>
+                <div className="flex justify-between text-sm text-green-600">
+                  <span>Bulk Discount ({booking.discountPercent}%)</span>
                   <span>-{formatCurrency(booking.discountAmount)}</span>
                 </div>
               )}
 
-              <div className="flex justify-between text-sm font-medium">
-                <span className="text-muted-foreground text-xs">Travel & Convenience</span>
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Travel Cost</span>
                 <span>{formatCurrency(booking.travelCost)}</span>
               </div>
 
+              <div className="pt-2 border-t border-primary/10 flex justify-between items-center">
+                <span className="font-medium">Client Total Paid</span>
+                <span className="font-bold">{formatCurrency(booking.total)}</span>
+              </div>
+
+              <div className="flex justify-between text-sm text-red-500 pt-1">
+                <span className="flex items-center gap-1">
+                  Platform Fee ({booking.platformFeePercent}%)
+                  <Info size={12} className="cursor-help" />
+                </span>
+                <span>-{formatCurrency(booking.platformFee)}</span>
+              </div>
+
               <div className="pt-3 border-t-2 border-dashed border-primary/20 flex justify-between items-center">
-                <span className="text-lg font-bold text-primary">Total Amount</span>
-                <span className="text-2xl font-black text-foreground">
-                  {formatCurrency(booking.total)}
+                <span className="text-lg font-extrabold text-primary">Your Net Earnings</span>
+                <span className="text-2xl font-black text-green-600">
+                  {formatCurrency(booking.total - booking.platformFee)}
                 </span>
               </div>
             </div>

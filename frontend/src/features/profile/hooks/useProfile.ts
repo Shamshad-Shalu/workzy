@@ -11,6 +11,7 @@ import { compressAndConvertToWebP, validateImage } from '@/utils/imageCompressio
 export function useProfile() {
   const [loading, setLoading] = useState(false);
   const [imageLoading, setImageLoading] = useState(false);
+  const [imageProgress, setImageProgress] = useState(0);
 
   const getUserProfilePage = useCallback(async () => {
     setLoading(true);
@@ -86,6 +87,7 @@ export function useProfile() {
 
   const uploadImage = useCallback(async (file: File) => {
     setImageLoading(true);
+    setImageProgress(0);
     try {
       const error = validateImage(file, 10);
       if (error) {
@@ -93,13 +95,20 @@ export function useProfile() {
       }
 
       const compressedFile = await compressAndConvertToWebP(file);
-      const url = await uploadToS3({ file: compressedFile, purpose: UploadPurposes.PROFILE_IMAGE });
-      return await profileApi.uploadProfileImage(url);
+      const url = await uploadToS3({
+        file: compressedFile,
+        purpose: UploadPurposes.PROFILE_IMAGE,
+        onProgress: p => setImageProgress(p),
+      });
+      const res = await profileApi.uploadProfileImage(url);
+      setImageProgress(100);
+      return res;
     } catch (err) {
       toast.error(handleApiError(err));
       throw err;
     } finally {
       setImageLoading(false);
+      setTimeout(() => setImageProgress(0), 1000);
     }
   }, []);
 
@@ -136,6 +145,7 @@ export function useProfile() {
     changePassword,
     uploadImage,
     imageLoading,
+    imageProgress,
     verifyOtp,
     resendOtp,
   };

@@ -6,10 +6,11 @@ import type { BookingCard } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatSmartDate } from '@/utils/time.format';
 
-interface CancelModalProps {
+interface ExtraChargeModalProps {
   open: boolean;
   onClose: () => void;
   onPayAmount: (id: string) => Promise<void>;
+  onReject: (id: string) => Promise<void>;
   booking: BookingCard | null;
   isSubmitting?: boolean;
 }
@@ -18,9 +19,10 @@ export default function ExtraChargeModal({
   open,
   onClose,
   onPayAmount,
+  onReject,
   booking,
   isSubmitting = false,
-}: CancelModalProps) {
+}: ExtraChargeModalProps) {
   if (!booking) {
     return null;
   }
@@ -32,7 +34,7 @@ export default function ExtraChargeModal({
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" disabled={isSubmitting} onClick={onClose}>
+      <Button variant="outline" disabled={isSubmitting} onClick={() => onReject(booking.id)}>
         Decline
       </Button>
       <Button
@@ -52,7 +54,7 @@ export default function ExtraChargeModal({
     <AppModal
       open={open}
       onClose={onClose}
-      title="Cancel Booking"
+      title="Extra Charge Request"
       canCloseOnOutsideClick={!isSubmitting}
       className="max-w-lg"
       footer={footer}

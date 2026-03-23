@@ -116,7 +116,7 @@ export class CompleteBookingDTO {
 
 export class ExtraChargeDTO {
   @IsNumber()
-  @Min(1)
+  @Min(60, { message: "Minimum extra charge amount is ₹60" })
   amount!: number;
 
   @IsString()

@@ -1,7 +1,9 @@
 import { BOOKING_API, PAYMENT_API } from '@/constants/apiRoutes/booking.routes';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
+import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
+import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
-import type { BookingListParams, BookingResponse, PaymentDetails } from '@/types/booking';
+import type { BookingDetails, BookingListParams, BookingResponse, PaymentDetails } from '@/types/booking';
 
 const BookingService = {
   createBooking: async (data: bookingFormData): Promise<{ url: string }> => {
@@ -22,6 +24,49 @@ const BookingService = {
   },
   cancelBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
     const res = await api.patch(BOOKING_API.CANCEL(bookingId), { reason });
+    return res.data;
+  },
+  acceptBooking: async (bookingId: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.ACCEPT(bookingId));
+    return res.data;
+  },
+  rejectBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.REJECT(bookingId), { reason });
+    return res.data;
+  },
+  startJob: async (bookingId: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.START(bookingId));
+    return res.data;
+  },
+  completeJob: async (
+    bookingId: string,
+    data: BookigCompleteForm
+  ): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.COMPLETE(bookingId), data);
+    return res.data;
+  },
+  approveBooking: async (bookingId: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.APPROVE(bookingId));
+    return res.data;
+  },
+  payExtraCharge: async (bookingId: string): Promise<{ url: string }> => {
+    const res = await api.patch(BOOKING_API.EXTRA_CHARGE_PAY(bookingId));
+    return res.data;
+  },
+  rejectExtraCharge: async (bookingId: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.EXTRA_CHARGE_REJECT(bookingId));
+    return res.data;
+  },
+  requestExtraCharge: async (bookingId: string, data: ExtraChargeFormType): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.EXTRA_CHARGE(bookingId), data);
+    return res.data;
+  },
+  disputeBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.DISPUTE(bookingId), { reason });
+    return res.data;
+  },
+  getBookingDetails: async (bookingId: string): Promise<{ data: BookingDetails }> => {
+    const res = await api.get(BOOKING_API.BY_ID(bookingId));
     return res.data;
   },
 };

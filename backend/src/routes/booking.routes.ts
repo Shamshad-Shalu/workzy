@@ -17,14 +17,13 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const controller = container.get<IBookingController>(TYPES.BookingController);
 
-router.get("/:bookingId", controller.getBookingById);
-
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.post("/", validateDto(CreatebookingDTO), controller.createBooking);
 
 router.get("/user", controller.getUserBookings);
 router.get("/worker", controller.getWorkerBookings);
+router.get("/:bookingId", controller.getBookingById);
 
 router.patch("/:bookingId/cancel", validateDto(CancelBookingDTO), controller.cancelBooking);
 router.patch("/:bookingId/approve", controller.approveBooking);

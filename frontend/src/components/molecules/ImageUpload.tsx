@@ -34,6 +34,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [preview, setPreview] = useState<string | null>(value ?? null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,6 +56,7 @@ export function ImageUpload({
 
     try {
       setIsUploading(true);
+      setUploadProgress(0);
       onUploadingChange?.(true);
 
       let uploadFile = file;
@@ -64,6 +66,7 @@ export function ImageUpload({
       const url = await uploadToS3({
         file: uploadFile,
         purpose,
+        onProgress: p => setUploadProgress(p),
       });
 
       setPreview(url);
@@ -74,6 +77,7 @@ export function ImageUpload({
       onChange?.('');
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
       onUploadingChange?.(false);
     }
   };
@@ -112,8 +116,18 @@ export function ImageUpload({
         )}
 
         {isUploading && (
-          <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <div className="h-6 w-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+          <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center gap-2">
+            <div className="h-10 w-10 relative flex items-center justify-center">
+              <div className="absolute inset-0 border-2 border-white/20 rounded-full" />
+              <div className="absolute inset-0 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              <span className="text-[10px] text-white font-bold">{uploadProgress}%</span>
+            </div>
+            <div className="w-24 h-1 bg-white/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-white transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
           </div>
         )}
 

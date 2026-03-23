@@ -24,4 +24,6 @@ export const BOOKING_API = {
   EVIDENCE: (id: string) => booking(`/${id}/evidence`),
 
   EXTRA_CHARGE: (id: string) => booking(`/${id}/extra-charge`),
+  EXTRA_CHARGE_PAY: (id: string) => booking(`/${id}/extra-charge/pay`),
+  EXTRA_CHARGE_REJECT: (id: string) => booking(`/${id}/extra-charge/reject`),
 } as const;

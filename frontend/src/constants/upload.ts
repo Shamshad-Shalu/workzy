@@ -11,6 +11,7 @@ export const UploadPurposes = {
   HOME_WHY_CHOOSE_IMAGE: 'HOME_WHY_CHOOSE_IMAGE',
   HOME_TESTIMONIAL_IMAGE: 'HOME_TESTIMONIAL_IMAGE',
   HOME_BANNER_IMAGE: 'HOME_BANNER_IMAGE',
+  SERVICE_EVIDENCE: 'SERVICE_EVIDENCE',
 } as const;
 
 export type UploadPurpose = (typeof UploadPurposes)[keyof typeof UploadPurposes];

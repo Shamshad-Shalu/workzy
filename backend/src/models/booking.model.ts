@@ -229,6 +229,10 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: String,
       trim: true,
     },
+    workerNote: {
+      type: String,
+      trim: true,
+    },
     adminNote: {
       type: String,
       trim: true,

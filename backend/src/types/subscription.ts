@@ -36,3 +36,25 @@ export interface AddSubscriptionDto {
   subscriptionId: string;
   amount: number;
 }
+
+export interface AdminSubscriptionListEntity {
+  _id: string;
+  worker: {
+    _id: string;
+    displayName: string;
+    profileImage?: string;
+    email: string;
+  };
+  plan: {
+    _id: string;
+    name: string;
+    isSpecialOffer: boolean;
+  };
+  billingCycle: BillingCycle;
+  amountPaid: number;
+  status: SubscriptionStatus;
+  startDate: Date;
+  expiryDate: Date;
+  cancelledAt?: Date;
+  createdAt: Date;
+}

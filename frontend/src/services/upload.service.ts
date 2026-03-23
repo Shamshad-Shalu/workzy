@@ -11,22 +11,41 @@ interface UploadProps {
   purpose: UploadPurpose;
 }
 
-export async function uploadToS3({ file, purpose }: UploadProps): Promise<string> {
+export async function uploadToS3({
+  file,
+  purpose,
+  onProgress,
+}: UploadProps & { onProgress?: (p: number) => void }): Promise<string> {
   const { data } = await api.post<UploadUrlResponse>(UPLOAD_API.REQUEST_URL, {
     fileName: file.name,
     fileType: file.type,
     fileSize: file.size,
     purpose,
   });
-  const res = await fetch(data.uploadUrl, {
-    method: 'PUT',
-    body: file,
-    headers: { 'Content-Type': file.type },
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', data.uploadUrl);
+    xhr.setRequestHeader('Content-Type', file.type);
+
+    if (onProgress) {
+      xhr.upload.onprogress = e => {
+        if (e.lengthComputable) {
+          const percent = Math.round((e.loaded / e.total) * 100);
+          onProgress(percent);
+        }
+      };
+    }
+
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve(data.publicUrl);
+      } else {
+        reject(new Error('S3 upload failed'));
+      }
+    };
+
+    xhr.onerror = () => reject(new Error('S3 upload network error'));
+    xhr.send(file);
   });
-
-  if (!res.ok) {
-    throw new Error('S3 upload failed');
-  }
-
-  return data.publicUrl;
 }

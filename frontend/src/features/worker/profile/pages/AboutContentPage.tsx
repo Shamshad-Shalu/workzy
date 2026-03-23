@@ -48,7 +48,6 @@ export default function WorkeAboutContentPage() {
         dispatch(updateUser(userInfo));
       }
     }
-
     loadProfile();
   }, []);
 

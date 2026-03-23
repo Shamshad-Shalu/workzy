@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import {
   AlertTriangle,
   Calendar,
+  CheckCircle2,
   Clock,
   CreditCard,
   Download,
@@ -30,7 +31,7 @@ export interface BookingCardHandlers {
   onPayExtra: (booking: BookingCard) => void;
   onApprove: (booking: BookingCard) => void;
   onEvidence: (booking: BookingCard) => void;
-  onDispute: (id: string) => void;
+  onDispute: (booking: BookingCard) => void;
   onReview: (id: string) => void;
 }
 
@@ -186,9 +187,12 @@ export default function UserBookingCard({ booking: b, handlers, index }: Props) 
           </div>
         )}
         {extraApproved && b.extraCharge?.amount && (
-          <div className="mt-3 text-xs text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-950/40 rounded-lg px-3 py-2 border border-green-200 dark:border-green-800">
-            Extra charge of <strong>{formatCurrency(b.extraCharge?.amount)}</strong> approved and
-            added to total
+          <div className="mt-3 text-xs font-medium text-muted-foreground bg-muted rounded-lg px-3 py-2 border border-green-200/50 dark:border-green-800/50 flex items-center gap-2">
+            <CheckCircle2 size={12} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+            <span>
+              Extra charge of <strong>{formatCurrency(b.extraCharge?.amount)}</strong> approved and
+              added to total
+            </span>
           </div>
         )}
         <div className="mt-4 flex items-center justify-between gap-2 flex-wrap">
@@ -274,7 +278,7 @@ export default function UserBookingCard({ booking: b, handlers, index }: Props) 
               <Button
                 iconLeft={<ShieldAlert size={12} />}
                 variant="red"
-                onClick={() => onDispute(b.id)}
+                onClick={() => onDispute(b)}
                 size="sm"
               >
                 {' '}
@@ -285,7 +289,7 @@ export default function UserBookingCard({ booking: b, handlers, index }: Props) 
               <Button
                 iconLeft={<ShieldAlert size={12} />}
                 variant="warning"
-                onClick={() => onDispute(b.id)}
+                onClick={() => onDispute(b)}
                 size="sm"
               >
                 {' '}

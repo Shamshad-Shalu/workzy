@@ -71,6 +71,8 @@ export interface Booking {
 
   isReviewed: boolean;
   userNote?: string;
+  workerNote?: string;
+  adminNote?: string;
   completedAt?: Date;
 
   createdAt: Date;
@@ -95,6 +97,8 @@ export interface BookingCard {
   isReviewed: boolean;
   statusHistory: BookingStatusHistory[];
   userNote?: string;
+  workerNote?: string;
+  adminNote?: string;
 
   worker: {
     id: string;
@@ -129,4 +133,35 @@ export interface BookingListParams {
   limit?: number;
   cursor?: string;
   sort?: 'asc' | 'desc';
+}
+export interface BookingDetails extends Booking {
+  worker: {
+    id: string;
+    displayName: string;
+    tagline: string;
+    coverImage: string;
+    profileImage: string;
+    averageRating: number;
+    reviewCount: number;
+    worksCompleted: number;
+    isPremium: boolean;
+  };
+  category: {
+    id: string;
+    name: string;
+    iconUrl: string;
+    imageUrl: string;
+  };
+  user: {
+    id: string;
+    name: string;
+    profileImage: string;
+  };
+  address: {
+    label: string;
+    location: {
+      type: 'Point';
+      coordinates: [number, number];
+    };
+  } | null;
 }

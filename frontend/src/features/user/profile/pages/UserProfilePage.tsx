@@ -28,6 +28,7 @@ export default function ProfilePage() {
     getUserProfilePage,
     uploadImage,
     imageLoading,
+    imageProgress,
   } = useProfile();
   const dispatch = useAppDispatch();
 
@@ -73,6 +74,7 @@ export default function ProfilePage() {
               src={user?.profileImage}
               editable
               loading={imageLoading}
+              progress={imageProgress}
               onClickImage={() => setOpenImage(true)}
               onChange={handleImageUpload}
             />

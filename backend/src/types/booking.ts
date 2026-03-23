@@ -71,6 +71,7 @@ export interface IBooking extends Document<string> {
   statusHistory: IBookingStatusHistory[];
   isReviewed: boolean;
   userNote?: string;
+  workerNote?: string;
   adminNote?: string;
   completedAt?: Date;
 
@@ -142,6 +143,8 @@ export interface BookingCardEntity {
   isReviewed?: boolean;
   statusHistory: IBookingStatusHistory[];
   userNote?: string;
+  workerNote?: string;
+  adminNote?: string;
   createdAt?: Date;
 }
 

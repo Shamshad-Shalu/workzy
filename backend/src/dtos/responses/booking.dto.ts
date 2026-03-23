@@ -67,6 +67,8 @@ export class BookingCardResponseDTO {
   isReviewed!: boolean;
   statusHistory!: IBookingStatusHistory[];
   userNote?: string;
+  workerNote?: string;
+  adminNote?: string;
 
   worker!: WorkerInfoDTO;
   category!: {
@@ -103,6 +105,8 @@ export class BookingCardResponseDTO {
     dto.isReviewed = entity.isReviewed ?? false;
     dto.statusHistory = entity.statusHistory;
     dto.userNote = entity.userNote;
+    dto.workerNote = entity.workerNote;
+    dto.adminNote = entity.adminNote;
 
     dto.worker = await WorkerInfoDTO.fromEntity(entity, s3Service);
     dto.user = {
