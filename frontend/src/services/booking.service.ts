@@ -3,7 +3,12 @@ import type { bookingFormData } from '@/features/user/booking/validation/booking
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
-import type { BookingDetails, BookingListParams, BookingResponse, PaymentDetails } from '@/types/booking';
+import type {
+  BookingDetails,
+  BookingListParams,
+  BookingResponse,
+  PaymentDetails,
+} from '@/types/booking';
 
 const BookingService = {
   createBooking: async (data: bookingFormData): Promise<{ url: string }> => {
@@ -57,7 +62,10 @@ const BookingService = {
     const res = await api.patch(BOOKING_API.EXTRA_CHARGE_REJECT(bookingId));
     return res.data;
   },
-  requestExtraCharge: async (bookingId: string, data: ExtraChargeFormType): Promise<{ message: string }> => {
+  requestExtraCharge: async (
+    bookingId: string,
+    data: ExtraChargeFormType
+  ): Promise<{ message: string }> => {
     const res = await api.patch(BOOKING_API.EXTRA_CHARGE(bookingId), data);
     return res.data;
   },

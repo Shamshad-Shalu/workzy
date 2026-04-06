@@ -69,6 +69,9 @@ const TYPES = {
   BookingController: Symbol.for("BookingController"),
   BookingService: Symbol.for("BookingService"),
   BookingRepository: Symbol.for("BookingRepository"),
+
+  AdminBookingController: Symbol.for("AdminBookingController"),
+  AdminBookingService: Symbol.for("AdminBookingService"),
 };
 
 export { TYPES };

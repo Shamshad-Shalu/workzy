@@ -116,6 +116,7 @@ export class BookingService implements IBookingService {
       address: isRemote ? null : address,
       userNote,
     });
+    console.log("booking::", booking);
     const url = await this._paymentService.createBookingPaymentCheckout({
       bookingId: booking._id.toString(),
       serviceName: category.name,
@@ -219,6 +220,7 @@ export class BookingService implements IBookingService {
     query: BookingListParams
   ): Promise<PaginatedBookingsDTO> {
     const bookings = await this._bookingRepository.getWorkerBookings(workerId, query);
+    console.log("booking::", bookings);
     return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
   }
 
@@ -232,7 +234,6 @@ export class BookingService implements IBookingService {
     if (!cancellableStatuses.includes(booking.status as (typeof cancellableStatuses)[number])) {
       throw new CustomError(BOOKING.CANNOT_CANCEL(booking.status), HTTPSTATUS.BAD_REQUEST);
     }
-    console.log("bookingDetails from service:", booking);
     if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
       await this._paymentService.refundBookingPayment(bookingId);
     }
@@ -274,7 +275,7 @@ export class BookingService implements IBookingService {
       $push: {
         statusHistory: this.createStatusHistoryEntry(
           BOOKING_STATUS.CONFIRMED,
-          ROLE.WORKER,
+          ROLE.USER,
           BOOKING_STATUS_MESSAGES.CONFIRMED
         ),
       },
@@ -358,7 +359,7 @@ export class BookingService implements IBookingService {
       this._bookingRepository.update(bookingId, {
         status: BOOKING_STATUS.COMPLETED,
         evidence: bookingEvidence,
-        workerNote: note,
+        adminNote: note,
         completedAt: new Date(),
         $push: {
           statusHistory: this.createStatusHistoryEntry(

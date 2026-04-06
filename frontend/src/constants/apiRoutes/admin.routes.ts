@@ -16,4 +16,7 @@ export const ADMIN_API = {
     WORKERS: admin(`/workers/all`),
     WORKER_VERIFICATION: (id: string) => admin(`/workers/verify/${id}`),
   },
+  BOOKING: {
+    ROOT: admin('/booking/'),
+  },
 } as const;

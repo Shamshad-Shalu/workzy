@@ -128,12 +128,14 @@ export interface BookingResponse {
   total?: number;
 }
 
-export interface BookingListParams {
-  status?: BookingFilterStatus;
-  limit?: number;
-  cursor?: string;
-  sort?: 'asc' | 'desc';
+export interface AdminBookingListParams {
+  status: BookingFilterStatus;
+  paymentStatus: BookingPaymentStatus | 'all';
+  limit: number;
+  page: number;
+  search: string;
 }
+
 export interface BookingDetails extends Booking {
   worker: {
     id: string;

@@ -11,6 +11,7 @@ import { TYPES } from "@/di/types";
 import { AddSubscriptionRequestDTO } from "@/dtos/requests/subscription.dto";
 import { SubscriptionStatusResponseDTO } from "@/dtos/responses/subscription.dto";
 import CustomError from "@/utils/customError";
+import { generateTxnCode } from "@/utils/generateTxnCode";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
@@ -54,6 +55,7 @@ export class SubscriptionService implements ISubscriptionService {
     const expiryDate = this._calcExpiry(startDate, billingCycle);
 
     const subscription = await this._subscriptionRepository.create({
+      subscriptionId: generateTxnCode("SUB"),
       workerId: new Types.ObjectId(workerId),
       planId: new Types.ObjectId(planId),
       billingCycle,

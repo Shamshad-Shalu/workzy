@@ -39,7 +39,6 @@ export class BookingController implements IBookingController {
     const result = await this._bookingService.getWorkerBookings(workerId, query);
     res.status(HTTPSTATUS.OK).json(result);
   });
-
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
 
@@ -134,7 +133,6 @@ export class BookingController implements IBookingController {
       sort,
     };
   }
-
   private requireUserId(req: Request): string {
     if (!req.user?.id) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);

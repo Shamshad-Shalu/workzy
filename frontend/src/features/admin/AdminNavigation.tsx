@@ -17,7 +17,7 @@ export const adminMenuItems: MenuItem[] = [
   { icon: <Users />, label: 'Users', to: '/admin/users' },
   { icon: <UserCircle />, label: 'Workers', to: '/admin/workers' },
   { icon: <Briefcase />, label: 'Categories', to: '/admin/categories' },
-  { icon: <Briefcase />, label: 'Jobs', to: '/admin/jobs' },
+  { icon: <Briefcase />, label: 'Bookings', to: '/admin/bookings' },
   { icon: <MessageSquare />, label: 'Messages', to: '/admin/messages' },
   { icon: <FileText />, label: 'Subscription', to: '/admin/subscriptions' },
   { icon: <CreditCard />, label: 'Transactions', to: '/admin/transactions' },

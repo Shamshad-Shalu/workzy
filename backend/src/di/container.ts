@@ -1,5 +1,6 @@
 import { Container } from "inversify";
 
+import { AdminBookingController } from "@/controllers/admin/admin-booking.controller";
 import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
 import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
@@ -14,6 +15,7 @@ import { SlotController } from "@/controllers/slot.controller";
 import { SubscriptionController } from "@/controllers/subscription.controller";
 import { UploadController } from "@/controllers/upload.controller";
 import { WorkerController } from "@/controllers/worker.controller";
+import { IAdminBookingController } from "@/core/interfaces/controllers/admin/IAdminBookingController";
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
@@ -39,6 +41,7 @@ import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository"
 import { ISubscriptionRepository } from "@/core/interfaces/repositories/ISubscriptionRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBookingService";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
@@ -69,6 +72,7 @@ import { SlotRepository } from "@/repositories/slot.repository";
 import { SubscriptionRepository } from "@/repositories/subscription.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { WorkerRepository } from "@/repositories/worker.repository";
+import { AdminBookingService } from "@/services/admin/booking.service";
 import { CategoryManagementService } from "@/services/admin/category-management.service";
 import { HomeLayoutService } from "@/services/admin/home-layout.service";
 import { HomeSectionService } from "@/services/admin/home-section.service";
@@ -154,5 +158,8 @@ container.bind<ISlotRepository>(TYPES.SlotRepository).to(SlotRepository);
 container.bind<IBookingController>(TYPES.BookingController).to(BookingController);
 container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container.bind<IBookingRepository>(TYPES.BookingRepository).to(BookingRepository);
+
+container.bind<IAdminBookingController>(TYPES.AdminBookingController).to(AdminBookingController);
+container.bind<IAdminBookingService>(TYPES.AdminBookingService).to(AdminBookingService);
 
 export { container };

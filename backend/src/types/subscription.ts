@@ -5,6 +5,7 @@ import { BillingCycle, SubscriptionStatus } from "@/constants";
 import { IPlan } from "./plan";
 
 export interface ISubscription extends Document<string> {
+  subscriptionId: string;
   workerId: Types.ObjectId;
   planId: Types.ObjectId;
   billingCycle: BillingCycle;

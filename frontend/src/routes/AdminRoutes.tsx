@@ -25,6 +25,7 @@ const SubscriptionLayout = lazy(
 );
 const SubscriptionPage = lazy(() => import('@/features/admin/subcription/pages/SubscriptionPage'));
 const PlanManagementPage = lazy(() => import('@/features/admin/subcription/pages/PlanManagement'));
+const AdminBookingPage = lazy(() => import('@/features/admin/booking/pages/AdminBookingPage'));
 
 export default function AdminRoutes() {
   return (
@@ -39,6 +40,7 @@ export default function AdminRoutes() {
             <Route path="workers" element={<WorkerManagementPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
+            <Route path="bookings" element={<AdminBookingPage />} />
 
             <Route path="subscriptions" element={<SubscriptionLayout />}>
               <Route index element={<PlanManagementPage />} />

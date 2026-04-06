@@ -1,10 +1,11 @@
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
-import { BOOKING_STATUS, BookingStatus } from "@/constants";
+import { BOOKING_STATUS, BookingPaymentStatus, BookingStatus } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
 import {
+  AdminBookingListParams,
   BookingCardEntity,
   BookingCursor,
   BookingDetailsEntity,
@@ -122,6 +123,126 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const [result] = await this.model.aggregate<BookingDetailsEntity>(pipeline).exec();
     return result;
   }
+
+  async getAllBookings(
+    query: AdminBookingListParams
+  ): Promise<{ bookings: BookingCardEntity[]; total: number }> {
+    const { search, limit, page, paymentStatus, status } = query;
+    const skip = (page - 1) * limit;
+
+    const matchFilter: FilterQuery<IBooking> = {};
+    if (search?.trim()) {
+      matchFilter.bookingId = { $regex: search.trim(), $options: "i" };
+    }
+    if (status && status !== "all") {
+      if (status === "upcoming") {
+        const todayStart = new Date();
+        todayStart.setHours(0, 0, 0, 0);
+        matchFilter.status = {
+          $in: [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED] as BookingStatus[],
+        };
+        matchFilter.date = { $gte: todayStart };
+      } else {
+        matchFilter.status = status as BookingStatus;
+      }
+    }
+    if (paymentStatus && paymentStatus !== "all") {
+      matchFilter.paymentStatus = paymentStatus as BookingPaymentStatus;
+    }
+    const pipeline: PipelineStage[] = [
+      { $match: matchFilter },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
+      {
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "bookingUser",
+        },
+      },
+      { $unwind: { path: "$bookingUser", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "workers",
+          localField: "workerId",
+          foreignField: "_id",
+          as: "worker",
+        },
+      },
+      { $unwind: { path: "$worker", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "users",
+          localField: "worker.userId",
+          foreignField: "_id",
+          as: "workerUser",
+        },
+      },
+      { $unwind: { path: "$workerUser", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      { $unwind: { path: "$category", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          _id: 1,
+          bookingId: 1,
+          date: 1,
+          startTime: 1,
+          endTime: 1,
+          duration: 1,
+          address: 1,
+          total: 1,
+          status: 1,
+          paymentStatus: 1,
+          extraCharge: 1,
+          evidence: 1,
+          isReviewed: 1,
+          statusHistory: 1,
+          userNote: 1,
+          adminNote: 1,
+          workerNote: 1,
+          createdAt: 1,
+          user: {
+            _id: "$bookingUser._id",
+            name: "$bookingUser.name",
+            profileImage: "$bookingUser.profileImage",
+          },
+          worker: {
+            _id: "$worker._id",
+            displayName: "$worker.displayName",
+            tagline: "$worker.tagline",
+            coverImage: "$worker.coverImage",
+            profileImage: "$workerUser.profileImage",
+            isPremium: "$worker.isPremium",
+            averageRating: "$worker.averageRating",
+            reviewCount: "$worker.reviewCount",
+            worksCompleted: "$worker.worksCompleted",
+          },
+          category: {
+            _id: "$category._id",
+            name: "$category.name",
+            iconUrl: "$category.iconUrl",
+          },
+        },
+      },
+    ];
+
+    const [bookings, total] = await Promise.all([
+      this.model.aggregate<BookingCardEntity>(pipeline).exec(),
+      this.model.countDocuments(matchFilter),
+    ]);
+
+    return { bookings, total };
+  }
+
   async getUserBookings(
     userId: string,
     query: BookingListParams

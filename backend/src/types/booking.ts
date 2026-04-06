@@ -107,6 +107,13 @@ export interface BookingListParams {
   cursor: BookingCursor | null;
   sort: "asc" | "desc";
 }
+export interface AdminBookingListParams {
+  status: ListingStatus;
+  paymentStatus: BookingPaymentStatus | "all";
+  limit: number;
+  page: number;
+  search: string;
+}
 
 export interface BookingCardEntity {
   _id: string;
