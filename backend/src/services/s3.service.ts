@@ -7,6 +7,7 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { injectable } from "inversify";
 
+import logger from "@/config/logger";
 import { s3 } from "@/config/s3";
 import { AWS_REGION, AWS_S3_BUCKET, AWS_S3_EXPIRY, PURPOSE_POLICY } from "@/constants";
 import { IS3Service, UploadUrlResponse } from "@/core/interfaces/services/IS3Service";
@@ -73,13 +74,18 @@ export class S3Service implements IS3Service {
     const key = extractKeyFromUrl(fileUrl);
     if (!key) return false;
 
-    await this.s3.send(
-      new DeleteObjectCommand({
-        Bucket: this.config.bucket,
-        Key: key,
-      })
-    );
-    return true;
+    try {
+      await this.s3.send(
+        new DeleteObjectCommand({
+          Bucket: this.config.bucket,
+          Key: key,
+        })
+      );
+      return true;
+    } catch (error) {
+      logger.error("Error deleting file from S3:", error);
+      return false;
+    }
   }
 
   async generateSignedUrl(

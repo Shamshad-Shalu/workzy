@@ -1,13 +1,40 @@
-import { useQueries, useQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueries, useQuery, type InfiniteData } from '@tanstack/react-query';
 
 import CategoryService from '@/services/category.service';
 import { homeService } from '@/services/home.service';
 import ServiceManagement from '@/services/service.service';
-import type { CategoryLite } from '@/types/category';
+import type { Category, CategoryLite } from '@/types/category';
 import type { CategoryShowcaseContent } from '@/types/home/home.sectionContent';
 
 import type { WorkerListParams } from '../components/WorkerList';
 
+type PublicServicesResponse = {
+  categories: Category[];
+  nextCursor: string | null;
+};
+
+export const usePublicServices = (filters: {
+  categoryId?: string;
+  sortBy?: string;
+  limit?: number;
+}) => {
+  return useInfiniteQuery<
+    PublicServicesResponse,
+    Error,
+    InfiniteData<PublicServicesResponse>,
+    [string, typeof filters],
+    string | undefined
+  >({
+    queryKey: ['public-services', filters],
+    queryFn: ({ pageParam }) =>
+      CategoryService.getPublicCategories({
+        ...filters,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined,
+    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
+  });
+};
 export const useCategorySuggestions = (search: string, searchEnabled?: boolean) => {
   return useQuery({
     queryKey: ['category-suggestions', search],

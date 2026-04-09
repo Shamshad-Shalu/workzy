@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
 import { ArrowRight, TrendingUp } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { homeService } from '@/services/home.service';
@@ -71,31 +72,44 @@ export default function TopServiceSection({ section }: TopServiceSectionProps) {
 
 export function TopService({ service }: { service: TopServiceItem }) {
   return (
-    <motion.div
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
-      whileTap={{ scale: 0.98 }}
-      className="w-full flex-shrink-0 bg-card rounded-xl overflow-hidden border border-border shadow-sm hover:shadow-lg transition-shadow cursor-pointer group"
-    >
-      <div className="relative h-40 overflow-hidden">
-        <img
-          src={service.imageUrl}
-          alt={service.name}
-          loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-        <div className="absolute top-3 right-3 px-2 py-0.5 bg-white/90 backdrop-blur-sm rounded-full text-xs font-bold text-indigo-600">
-          {service.bookings}
+    <Link to={`/services/${service.categoryId}`} className="block h-full">
+      <motion.div
+        whileHover={{ y: -6, transition: { duration: 0.3 } }}
+        className="w-full flex-shrink-0 bg-card rounded-[2rem] overflow-hidden border border-border/50 shadow-sm hover:shadow-xl transition-all cursor-pointer group"
+      >
+        <div className="relative h-44 overflow-hidden">
+          <img
+            src={service.imageUrl}
+            alt={service.name}
+            loading="lazy"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+
+          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60 group-hover:opacity-80 transition-opacity" />
+
+          {service.bookings && (
+            <div className="absolute top-4 right-4 px-3 py-1 bg-card/90 backdrop-blur-md rounded-full text-[10px] font-black text-primary shadow-sm">
+              {service.bookings} BOOKINGS
+            </div>
+          )}
+
+          <div className="absolute bottom-4 left-4 right-4">
+            <h4 className="font-black text-white text-lg leading-tight group-hover:translate-x-1 transition-transform duration-300">
+              {service.name}
+            </h4>
+          </div>
         </div>
-      </div>
-      <div className="p-4 flex items-center justify-between">
-        <h4 className="font-bold text-sm text-foreground group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
-          {service.name}
-        </h4>
-        <div className="p-1.5 rounded-full bg-indigo-50 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-all">
-          <ArrowRight className="w-3.5 h-3.5" />
+
+        <div className="p-4 flex items-center justify-between bg-muted/30 border-t border-border/50">
+          <span className="text-[10px] font-black text-primary uppercase tracking-widest">
+            Explore Service
+          </span>
+
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground group-hover:rotate-[-45deg] transition-all duration-500">
+            <ArrowRight size={14} />
+          </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }

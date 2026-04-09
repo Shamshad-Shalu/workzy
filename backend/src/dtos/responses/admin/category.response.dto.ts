@@ -15,7 +15,7 @@ export class CategoryResponseDTO {
   level!: number;
   isAvailable!: boolean;
   baseRate!: number;
-  rateDeviationPercent?: number;
+  priceVarianceLimit?: number;
   estimatedDuration?: number;
   bufferTime?: number;
   travelRatePerKM?: number;
@@ -39,7 +39,7 @@ export class CategoryResponseDTO {
     dto.isAvailable = entity.isAvailable;
     dto.createdAt = entity.createdAt;
     dto.baseRate = entity.baseRate;
-    dto.rateDeviationPercent = entity.rateDeviationPercent;
+    dto.priceVarianceLimit = entity.priceVarianceLimit;
     dto.estimatedDuration = entity.estimatedDuration;
     dto.bufferTime = entity.bufferTime;
     dto.travelRatePerKM = entity.travelRatePerKM;

@@ -3,7 +3,8 @@ import { buildRoute } from './routeBuilder';
 const category = buildRoute('/categories');
 
 export const CATEGORY_API = {
-  ROOT: category(`/`),
+  ROOT: category('/'),
+  DISCOVERY: category('/public'),
   BY_ID: (id: string) => category(`/${id}`),
   TOP_SERVICES: category(`/top-services`),
   SERVICE_SUGGESTIONS: (id: string) => category(`${id}/services`),

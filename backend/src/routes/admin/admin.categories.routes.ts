@@ -3,7 +3,7 @@ import { Router } from "express";
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { CategoryRequestDTO, CategoryUpdateRequestDTO } from "@/dtos/requests/category.dto";
+import { CategoryRequestDTO } from "@/dtos/requests/category.dto";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 const router = Router();
@@ -18,7 +18,7 @@ router.post("/add", validateDto(CategoryRequestDTO), adminCategoryController.cre
 
 router.patch(
   "/edit/:categoryId",
-  validateDto(CategoryUpdateRequestDTO, { skipMissingProperties: true }),
+  validateDto(CategoryRequestDTO, { skipMissingProperties: true }),
   adminCategoryController.updateCategory
 );
 

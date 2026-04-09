@@ -1,85 +1,57 @@
 import { ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-import type { ServiceItem } from '@/types/home/home';
+import { cn } from '@/lib/utils';
+import type { Category } from '@/types/category';
+
+type ServiceItem = Pick<Category, 'id' | 'name' | 'description' | 'imageUrl' | 'baseRate'>;
 
 interface ServiceCardProps {
   service: ServiceItem;
-  onServiceClick?: (categoryId: string) => void;
-  onSubServiceClick?: (categoryId: string, serviceId: string) => void;
+  className?: string;
 }
-
-export const ServiceCard = ({ service, onServiceClick, onSubServiceClick }: ServiceCardProps) => {
+export function ServiceCard({ service, className }: ServiceCardProps) {
   return (
-    <div
-      onClick={() => onServiceClick?.(service.id)}
-      className="
-          w-full  h-full
-          bg-popover rounded-2xl overflow-hidden
-          border border-muted-foreground/10
-          shadow-lg hover:shadow-lg
-          transition-all duration-300
-          cursor-pointer group
-          hover:-translate-y-1
-        "
-    >
-      <div className="relative h-48 overflow-hidden">
-        <img
-          src={service.imageUrl}
-          alt={service.name}
-          loading="lazy"
-          decoding="async"
-          className="
-            w-full h-full object-cover
-            transition-transform duration-500
-            group-hover:scale-110
-          "
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-        <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="text-xl font-bold text-white mb-1">{service.name}</h3>
+    <Link to={`/services/${service.id}`} className="block h-full">
+      <article
+        className={cn(
+          'group relative flex flex-col h-full w-full bg-card text-card-foreground rounded-2xl border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden cursor-pointer',
+          className
+        )}
+      >
+        <div className="relative w-full h-32 sm:h-40 md:h-44 bg-muted overflow-hidden">
+          <img
+            src={service.imageUrl || '/assets/service-placeholder.png'}
+            alt={service.name}
+            className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+          />
         </div>
-      </div>
 
-      <div className="p-5">
-        <p className="text-foreground leading-relaxed text-sm mb-4 line-clamp-2">
-          {service.description}
-        </p>
+        <div className="flex flex-col flex-grow p-4 md:p-5">
+          <h4 className="text-sm md:text-base font-bold text-foreground line-clamp-1 group-hover:text-primary transition-colors">
+            {service.name}
+          </h4>
 
-        <div className="mb-4">
-          <div className="flex flex-wrap gap-2">
-            {service.subServices.slice(0, 3).map(sub => (
-              <button
-                key={sub.id}
-                onClick={e => {
-                  e.stopPropagation();
-                  onSubServiceClick?.(service.id, sub.id);
-                }}
-                className="px-2 py-1 bg-secondary text-muted-foreground text-xs rounded-full hover:bg-secondary/80 transition cursor-pointer"
-              >
-                {sub.name}
-              </button>
-            ))}
-            {service.subServices.length > 3 && (
-              <span className="px-2 py-1 rounded-full text-xs font-medium transition-colors bg-indigo-500/20 text-indigo-200  dark:text-indigo-400">
-                +{service.subServices.length - 3} more
+          <p className="text-[12px] md:text-sm text-muted-foreground line-clamp-2 mt-2 leading-relaxed min-h-[40px]">
+            {service.description || 'Professional service for your needs.'}
+          </p>
+          <div className="mt-4 mb-3 h-[1px] w-full bg-gradient-to-r from-transparent via-border to-transparent" />
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <span className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                Starts at
               </span>
-            )}
+              <span className="text-base md:text-lg font-black text-primary">
+                ₹{service.baseRate}
+              </span>
+            </div>
+
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all">
+              <ArrowRight size={16} />
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-center pt-4 border-t border-muted-secondary">
-          <button
-            className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-semibold text-sm group-hover:gap-3 transition-all"
-            onClick={e => {
-              e.stopPropagation();
-              onServiceClick?.(service.id);
-            }}
-          >
-            View Details
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </div>
-      </div>
-    </div>
+      </article>
+    </Link>
   );
-};
+}

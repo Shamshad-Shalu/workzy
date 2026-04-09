@@ -54,6 +54,7 @@ import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IPlanService } from "@/core/interfaces/services/IPlanService";
 import { IProfileService } from "@/core/interfaces/services/IProfileService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
@@ -86,6 +87,7 @@ import { HomeService } from "@/services/home.service";
 import { PaymentService } from "@/services/payment.service";
 import { PlanService } from "@/services/plan.service";
 import { ProfileService } from "@/services/profile.service";
+import { RedisService } from "@/services/redis.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
@@ -127,6 +129,8 @@ container
 
 container.bind<IS3Service>(TYPES.S3Service).to(S3Service);
 container.bind<IUploadController>(TYPES.UploadController).to(UploadController);
+
+container.bind<IRedisService>(TYPES.RedisService).to(RedisService);
 
 container.bind<IServiceController>(TYPES.ServiceController).to(ServiceController);
 container.bind<IServiceManagement>(TYPES.ServiceManagement).to(ServiceManagement);

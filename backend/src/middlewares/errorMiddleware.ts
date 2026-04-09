@@ -20,7 +20,11 @@ const errorMiddleware = (
   const statusCode = err instanceof CustomError ? err.statusCode : 500;
   const message = err.message || SERVER.ERROR;
 
-  const response: { message: string; errors?: unknown } = { message };
+  const response: {
+    success: false;
+    message: string;
+    errors?: unknown;
+  } = { success: false, message };
 
   if ((err as CustomErrorWithValidation).validationErrors) {
     response.errors = (err as CustomErrorWithValidation).validationErrors;

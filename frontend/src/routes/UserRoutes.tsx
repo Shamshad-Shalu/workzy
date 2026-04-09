@@ -21,7 +21,8 @@ const RoleBasedRoot = lazy(() => import('./RoleBasedRoot'));
 const JoinUsPage = lazy(() => import('@/pages/JoinUsPage'));
 const UserLayout = lazy(() => import('@/layouts/user/UserLayout'));
 
-const ServicesPage = lazy(() => import('@/features/user/services/pages/ServicePage'));
+const ServicePage = lazy(() => import('@/features/user/services/pages/ServicePage'));
+const WorkerListingPage = lazy(() => import('@/features/user/services/pages/WorkerListingPage'));
 
 const WorkerProfileRouteLayout = lazy(
   () => import('@/features/user/worker/WorkerProfileRouteLayout')
@@ -47,7 +48,8 @@ export default function UserRoutes() {
 
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
-          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/services" element={<ServicePage />} />
+          <Route path="/services/:serviceId" element={<WorkerListingPage />} />
           <Route path="/join-us" element={<JoinUsPage />} />
           <Route path="/bookings" element={<UserBookingsPage />} />
 

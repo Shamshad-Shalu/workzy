@@ -116,18 +116,10 @@ export default function Header() {
 
   const handleServiceSelect = (service: CategorySuggestion) => {
     setSearchQuery('');
-    if (service.level === 2) {
-      navigate(
-        `/services?category=${encodeURIComponent(service.id)}&location=${encodeURIComponent(city)}`
-      );
-    } else if (service.level === 3) {
-      if (!service.parentId) {
-        console.warn('Selected level-3 service missing parentId:', service);
-        return;
-      }
-      navigate(
-        `/services?category=${encodeURIComponent(service.parentId)}&service=${encodeURIComponent(service.id)}&location=${encodeURIComponent(city)}`
-      );
+    if (service.level === 1) {
+      navigate(`/services?category=${service.id}`);
+    } else if (service.level === 2) {
+      navigate(`/services/${service.id}`);
     }
     setServiceModalOpen(false);
     setMobileMenuOpen(false);

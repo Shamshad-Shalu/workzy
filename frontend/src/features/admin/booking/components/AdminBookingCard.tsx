@@ -64,7 +64,6 @@ export function AdminBookingCard({
   onDispute,
   onApprove,
   onPayExtra,
-  onReview,
 }: Props) {
   const accent = STATUS_ACCENT[b.status] ?? STATUS_ACCENT.default;
   const pc = PAYMENT_CONFIG[b.paymentStatus] ?? {

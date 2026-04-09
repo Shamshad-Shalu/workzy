@@ -14,7 +14,6 @@ import {
   Role,
   ROLE,
   SERVICE,
-  SERVICE_TYPE,
   SLOT,
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
@@ -177,12 +176,12 @@ export class BookingService implements IBookingService {
     const platformFeePercent = category.platformFee ?? 0;
     const travelRatePerKM = category.travelRatePerKM ?? 0;
     const pricingMode = category.pricingMode as PricingMode;
-    const isRemote = category.serviceType === SERVICE_TYPE.REMOTE;
+    // const isRemote = category.serviceType === SERVICE_TYPE.REMOTE;
 
     let distanceKm = 0;
     let travelCost = 0;
 
-    if (!isRemote && lat !== undefined && lng !== undefined) {
+    if (lat !== undefined && lng !== undefined) {
       distanceKm = calculateDistanceKm(
         { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
         { lat, lng }
@@ -197,7 +196,7 @@ export class BookingService implements IBookingService {
       user,
       service,
       category,
-      isRemote,
+      isRemote: false,
       pricingMode,
       rate,
       workerStripeId,
@@ -212,6 +211,7 @@ export class BookingService implements IBookingService {
 
   async getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsDTO> {
     const bookings = await this._bookingRepository.getUserBookings(userId, query);
+    console.log(bookings);
     return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
   }
 
@@ -220,7 +220,6 @@ export class BookingService implements IBookingService {
     query: BookingListParams
   ): Promise<PaginatedBookingsDTO> {
     const bookings = await this._bookingRepository.getWorkerBookings(workerId, query);
-    console.log("booking::", bookings);
     return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
   }
 

@@ -20,7 +20,7 @@
 
     /* Node.js Specific Options */
     "moduleResolution": "node",
-     "ignoreDeprecations": "6.0",              // Use Node.js module resolution
+    "ignoreDeprecations": "6.0",              // Use Node.js module resolution
     "allowSyntheticDefaultImports": true,    // Allow default imports from modules with no default export
     "types": ["node"],                        // Include Node.js type definitions
     "typeRoots": ["./src/core/types", "./node_modules/@types"],

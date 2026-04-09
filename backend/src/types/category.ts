@@ -13,7 +13,7 @@ export interface ICategory extends Document<string> {
   isAvailable: boolean;
 
   baseRate: number;
-  rateDeviationPercent: number;
+  priceVarianceLimit: number;
   estimatedDuration: number;
   bufferTime?: number;
   travelRatePerKM?: number;
@@ -29,21 +29,33 @@ export interface CategoryOption {
   name: string;
 }
 
-export type CategoryAncestorEntity = Pick<ICategory, "_id" | "name" | "level" | "parentId">;
-export type CategoryLevelsEntity = Pick<ICategory, "_id" | "name" | "level" | "iconUrl">;
+export type CategoryAncestorEntity = Pick<ICategory, "_id" | "name" | "parentId" | "level">;
+export type CategoryLevelsEntity = Pick<ICategory, "_id" | "name" | "iconUrl" | "level">;
 export type CategorySuggestionEntity = Pick<
   ICategory,
-  "_id" | "name" | "level" | "iconUrl" | "parentId"
+  "_id" | "name" | "iconUrl" | "parentId" | "level"
 >;
 export type CategoryTrendingEntity = Pick<
   ICategory,
-  "_id" | "name" | "level" | "iconUrl" | "parentId"
+  "_id" | "name" | "iconUrl" | "parentId" | "level"
 >;
 
 export type SubServiceEntity = Pick<ICategory, "_id" | "name">;
 export type ServiceItemEntity = Pick<
   ICategory,
-  "_id" | "name" | "description" | "iconUrl" | "imageUrl"
+  "_id" | "name" | "description" | "iconUrl" | "imageUrl" | "baseRate"
 > & {
   subServices: SubServiceEntity[];
+};
+
+export type ServiceSort = "price_asc" | "price_desc" | "newest" | "popular";
+export type CategoryListEntity = Pick<
+  ICategory,
+  "_id" | "name" | "description" | "iconUrl" | "imageUrl" | "baseRate" | "parentId" | "createdAt"
+>;
+export type PublicCategoriesParams = {
+  categoryId?: string;
+  sortBy?: ServiceSort;
+  limit: number;
+  cursor?: string;
 };

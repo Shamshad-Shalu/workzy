@@ -12,7 +12,7 @@ export interface Category {
   parentId?: null | string;
 
   baseRate: number;
-  rateDeviationPercent?: number;
+  priceVarianceLimit?: number;
   estimatedDuration: number;
   bufferTime: number;
   travelRatePerKM?: number;

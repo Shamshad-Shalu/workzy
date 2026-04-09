@@ -8,4 +8,5 @@ export interface ICategoryController {
   getCategorySuggestions: RequestHandler;
   getTrendingCategories: RequestHandler;
   getServicesByCategory: RequestHandler;
+  getPublicCategories: RequestHandler;
 }

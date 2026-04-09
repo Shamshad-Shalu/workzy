@@ -2,17 +2,15 @@ import Autoplay from 'embla-carousel-autoplay';
 import useEmblaCarousel from 'embla-carousel-react';
 import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 
 import type { HeroContent } from '@/types/home/home.sectionContent';
-
-import Button from '../atoms/Button';
 
 import type { EmblaCarouselType, EmblaOptionsType } from 'embla-carousel';
 
 interface HeroCarouselProps {
   data: HeroContent;
   stats: Record<string, string>;
-  onCategoryClick?: (categoryId: string) => void;
 }
 
 function CoreCarousel({
@@ -46,7 +44,7 @@ function CoreCarousel({
   );
 }
 
-export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps) {
+export function HeroCarousel({ data, stats }: HeroCarouselProps) {
   const [api, setApi] = useState<EmblaCarouselType | null>(null);
   const [current, setCurrent] = useState(0);
 
@@ -140,14 +138,13 @@ export function HeroCarousel({ data, stats, onCategoryClick }: HeroCarouselProps
                   {slide.description}
                 </p>
                 <div className="mt-4">
-                  <Button
-                    iconRight={<ArrowRight className="w-4 h-4" />}
-                    variant="secondary"
-                    onClick={() => onCategoryClick?.(slide.categoryId)}
-                    className="px-6 py-6 font-semibold"
+                  <Link
+                    to={slide.categoryId ? `/services?category=${slide.categoryId}` : '/services'}
+                    className="bg-white text-gray-700 px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-all inline-flex items-center gap-2 shadow-xl"
                   >
                     Explore Services
-                  </Button>
+                    <ArrowRight className="w-5 h-5" />
+                  </Link>
                 </div>
               </div>
             ))}

@@ -8,9 +8,12 @@ import Category from "@/models/category.model";
 import {
   CategoryAncestorEntity,
   CategoryLevelsEntity,
+  CategoryListEntity,
   CategorySuggestionEntity,
   ICategory,
+  PublicCategoriesParams,
   ServiceItemEntity,
+  ServiceSort,
 } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/filters/buildCategoryFilter";
 
@@ -91,7 +94,6 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
     const filter: FilterQuery<ICategory> = {
       name: { $regex: search, $options: "i" },
       isAvailable: true,
-      level: { $ne: 1 },
     };
 
     type SuggestionDoc = CategorySuggestionEntity & {
@@ -135,6 +137,52 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       });
     }
     return Array.from(uniqueMap.values());
+  }
+
+  async findPublicCategories(
+    filters: PublicCategoriesParams
+  ): Promise<{ data: CategoryListEntity[]; nextCursor: string | null }> {
+    const { categoryId, sortBy = "newest", limit, cursor } = filters;
+
+    let lastValue: string | undefined;
+    let lastId: string | undefined;
+    if (cursor) {
+      try {
+        const [v, id] = Buffer.from(cursor, "base64").toString("utf-8").split("|");
+        lastValue = v;
+        lastId = id;
+      } catch {
+        console.error("error");
+      }
+    }
+    const query: FilterQuery<ICategory> = {
+      level: 2,
+      isAvailable: true,
+    };
+
+    if (categoryId) {
+      query.parentId = new Types.ObjectId(categoryId);
+    }
+    const { sort, field } = this.getSortConfig(sortBy);
+    const cursorFilter = this.getCursorFilter(sortBy, lastValue, lastId);
+
+    const docs = await this.model
+      .find({ ...query, ...cursorFilter })
+      .select("name description iconUrl imageUrl baseRate parentId createdAt _id")
+      .sort(sort)
+      .limit(limit + 1)
+      .lean<CategoryListEntity[]>()
+      .exec();
+    const hasMore = docs.length > limit;
+    if (hasMore) docs.pop();
+
+    const nextCursor = hasMore
+      ? Buffer.from(
+          `${field === "baseRate" ? docs[docs.length - 1].baseRate : docs[docs.length - 1].createdAt.toISOString()}|${docs[docs.length - 1]._id.toString()}`
+        ).toString("base64")
+      : null;
+
+    return { data: docs, nextCursor };
   }
 
   async findServicesByCategory(categoryId: string, limit: number): Promise<ServiceItemEntity[]> {
@@ -186,6 +234,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
                 description: 1,
                 imageUrl: 1,
                 iconUrl: 1,
+                baseRate: 1,
                 subServices: 1,
               },
             },
@@ -209,5 +258,55 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
       .exec();
 
     return result[0]?.services || [];
+  }
+
+  private getSortConfig(sortBy: ServiceSort) {
+    const sortMap: Record<
+      ServiceSort,
+      { sort: Record<string, 1 | -1>; field: "baseRate" | "createdAt" }
+    > = {
+      price_asc: { sort: { baseRate: 1, _id: 1 }, field: "baseRate" },
+      price_desc: { sort: { baseRate: -1, _id: -1 }, field: "baseRate" },
+      newest: { sort: { createdAt: -1, _id: -1 }, field: "createdAt" },
+      popular: { sort: { createdAt: 1, _id: 1 }, field: "createdAt" },
+    };
+    return sortMap[sortBy] ?? sortMap.newest;
+  }
+  private getCursorFilter(
+    sortBy: ServiceSort,
+    lastValue?: string,
+    lastId?: string
+  ): FilterQuery<ICategory> {
+    if (!lastValue || !lastId) return {};
+    const oid = new Types.ObjectId(lastId);
+    if (sortBy === "price_asc") {
+      return {
+        $or: [
+          { baseRate: { $gt: Number(lastValue) } },
+          { baseRate: Number(lastValue), _id: { $gt: oid } },
+        ],
+      };
+    } else if (sortBy === "price_desc") {
+      return {
+        $or: [
+          { baseRate: { $lt: Number(lastValue) } },
+          { baseRate: Number(lastValue), _id: { $lt: oid } },
+        ],
+      };
+    } else if (sortBy === "popular") {
+      return {
+        $or: [
+          { createdAt: { $gt: new Date(lastValue) } },
+          { createdAt: new Date(lastValue), _id: { $gt: oid } },
+        ],
+      }; // 👈 ascending
+    } else {
+      return {
+        $or: [
+          { createdAt: { $lt: new Date(lastValue) } },
+          { createdAt: new Date(lastValue), _id: { $lt: oid } },
+        ],
+      };
+    }
   }
 }

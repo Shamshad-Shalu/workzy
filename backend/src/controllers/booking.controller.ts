@@ -30,6 +30,7 @@ export class BookingController implements IBookingController {
     const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
     const result = await this._bookingService.getUserBookings(userId, query);
+    console.log(result);
     res.status(HTTPSTATUS.OK).json(result);
   });
 
@@ -37,6 +38,7 @@ export class BookingController implements IBookingController {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
     const result = await this._bookingService.getWorkerBookings(workerId, query);
+    console.log(result);
     res.status(HTTPSTATUS.OK).json(result);
   });
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {

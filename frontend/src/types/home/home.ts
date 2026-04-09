@@ -26,8 +26,7 @@ export interface ServiceItem {
   name: string;
   description: string;
   imageUrl: string;
-  // bookings?: string;
-  subServices: { name: string; id: string }[];
+  baseRate: number;
 }
 
 export interface ServiceSuggestionApiResponse {

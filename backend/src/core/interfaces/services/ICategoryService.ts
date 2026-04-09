@@ -5,7 +5,9 @@ import {
   CategoryServicesResponseDTO,
   CategorySuggestionResponseDTO,
   CategoryTrendingResponseDTO,
+  PublicCategoryResponseDTO,
 } from "@/dtos/responses/category.dto";
+import { PublicCategoriesParams } from "@/types/category";
 
 export interface ICategoryService {
   getCategories(
@@ -21,4 +23,7 @@ export interface ICategoryService {
   getCategorySuggestions(search: string, limit: number): Promise<CategorySuggestionResponseDTO[]>;
   getTrendingCategories(limit: number): Promise<CategoryTrendingResponseDTO[]>;
   getServicesByCategory(categoryId: string, limit: number): Promise<CategoryServicesResponseDTO[]>;
+  getPublicCategories(
+    filters: PublicCategoriesParams
+  ): Promise<{ categories: PublicCategoryResponseDTO[]; nextCursor: string | null }>;
 }

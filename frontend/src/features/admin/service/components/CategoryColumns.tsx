@@ -33,7 +33,7 @@ const categoryColumns = (
       showInMobileHeader: true,
       mobileOrder: 1,
       mobileLabel: '',
-      minWidth: currentLevel === 3 ? 100 : 180,
+      minWidth: currentLevel === 2 ? 100 : 180,
     },
     {
       id: 'icon',
@@ -123,7 +123,7 @@ const categoryColumns = (
       header: 'Actions',
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
-          {row.original.level !== 3 && (
+          {row.original.level === 1 && (
             <Button size="sm" variant="blue" onClick={() => onViewChild(row.original.id)}>
               <Eye size={17} />
             </Button>
@@ -144,7 +144,7 @@ const categoryColumns = (
       minWidth: 180,
     },
   ];
-  if (currentLevel === 3) {
+  if (currentLevel === 2) {
     const actionCoums = baseColumns.pop();
 
     baseColumns.push(
@@ -152,7 +152,11 @@ const categoryColumns = (
         id: 'serviceType',
         header: 'Service Type',
         accessorKey: 'serviceType',
-        cell: ({ row }) => <span>{row.original.serviceType ?? '-'}</span>,
+        cell: ({ row }) => (
+          <span className="text-xs font-semibold px-2 py-1 bg-accent rounded-full">
+            {row.original.serviceType ?? '-'}
+          </span>
+        ),
         hideOnSmall: true,
         mobileOrder: 10,
         mobileLabel: 'Service Type',

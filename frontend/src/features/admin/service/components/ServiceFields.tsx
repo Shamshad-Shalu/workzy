@@ -1,3 +1,5 @@
+import { type FieldErrors, type UseFormReturn } from 'react-hook-form';
+
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
@@ -5,22 +7,21 @@ import SlotTimeInput from '@/components/molecules/SlotTimeInput';
 import { PRICING_MODE, SERVICE_TYPE, type ServiceType } from '@/constants';
 
 import type { CategoryFormData } from '../validation/categorySchema';
-import type { FieldErrors, UseFormReturn } from 'react-hook-form';
 
-interface Level3ServiceFieldsProps {
+interface ServiceFieldsProps {
   form: UseFormReturn<CategoryFormData>;
   serviceType: ServiceType | undefined;
   estimatedDuration: number;
   bufferTime: number;
 }
-type Level3Errors = FieldErrors<Extract<CategoryFormData, { level: 3 }>>;
+type ServiceErrors = FieldErrors<Extract<CategoryFormData, { level: 2 }>>;
 
-export function Level3ServiceFields({
+export function ServiceFields({
   form,
   bufferTime,
   estimatedDuration,
   serviceType,
-}: Level3ServiceFieldsProps) {
+}: ServiceFieldsProps) {
   const {
     register,
     setValue,
@@ -28,7 +29,11 @@ export function Level3ServiceFields({
     formState: { errors },
   } = form;
 
-  const level3Errors = errors as Level3Errors;
+  const serviceErrors = errors as ServiceErrors;
+  const pricingMode = watch('pricingMode');
+
+  const isPricingModeDisabled =
+    serviceType === SERVICE_TYPE.CONSULTATION || serviceType === SERVICE_TYPE.INSPECTION;
 
   return (
     <>
@@ -40,7 +45,7 @@ export function Level3ServiceFields({
             options={Object.values(SERVICE_TYPE).map(s => ({ label: s, value: s }))}
             value={watch('serviceType')}
             onChange={v => setValue('serviceType', v, { shouldValidate: true })}
-            error={level3Errors.serviceType?.message}
+            error={serviceErrors.serviceType?.message}
           />
         </div>
         <div>
@@ -50,7 +55,8 @@ export function Level3ServiceFields({
             options={Object.values(PRICING_MODE).map(s => ({ label: s, value: s }))}
             value={watch('pricingMode')}
             onChange={v => setValue('pricingMode', v, { shouldValidate: true })}
-            error={level3Errors.pricingMode?.message}
+            disabled={isPricingModeDisabled}
+            error={serviceErrors.pricingMode?.message}
           />
         </div>
       </div>
@@ -62,18 +68,18 @@ export function Level3ServiceFields({
             type="number"
             className="px-4"
             {...register('travelRatePerKM', { valueAsNumber: true })}
-            error={level3Errors.travelRatePerKM?.message}
+            error={serviceErrors.travelRatePerKM?.message}
           />
         </div>
         <div>
-          <Label>Min/Max Offer</Label>
+          <Label>Price Variance Limit</Label>
           <Input
-            placeholder="Enter the rateDeviationPercent (in %)"
+            placeholder="Enter the priceVarianceLimit (in %)"
             min={0}
             type="number"
             className="px-4"
-            {...register('rateDeviationPercent', { valueAsNumber: true })}
-            error={level3Errors.rateDeviationPercent?.message}
+            {...register('priceVarianceLimit', { valueAsNumber: true })}
+            error={serviceErrors.priceVarianceLimit?.message}
           />
         </div>
       </div>
@@ -83,18 +89,19 @@ export function Level3ServiceFields({
           label="Estimated Duration *"
           valueInMinutes={estimatedDuration}
           onChange={v => setValue('estimatedDuration', v, { shouldValidate: true })}
-          error={level3Errors?.estimatedDuration?.message}
+          error={serviceErrors?.estimatedDuration?.message}
         />
         <SlotTimeInput
           label="Buffer Time"
           valueInMinutes={bufferTime}
           onChange={v => setValue('bufferTime', v, { shouldValidate: true })}
-          error={level3Errors?.bufferTime?.message}
+          error={serviceErrors?.bufferTime?.message}
           isBuffer
         />
       </div>
-      {(serviceType === SERVICE_TYPE.REMOTE || serviceType === SERVICE_TYPE.SMALL_TASK) && (
-        <div className="mt-6 grid grid-cols-2 gap-4">
+
+      <div className="mt-6 grid grid-cols-2 gap-4">
+        {serviceType === SERVICE_TYPE.SMALL_TASK && pricingMode !== PRICING_MODE.FIXED && (
           <div>
             <Label>Allow Bulk Offers</Label>
             <input
@@ -102,11 +109,12 @@ export function Level3ServiceFields({
               {...register('allowBulkOffers')}
               className="h-5 w-5 text-indigo-600"
             />
-            {level3Errors.allowBulkOffers && (
-              <p className="text-red-500 text-sm -mt-2">{level3Errors.allowBulkOffers.message}</p>
+            {serviceErrors.allowBulkOffers && (
+              <p className="text-red-500 text-sm -mt-2">{serviceErrors.allowBulkOffers.message}</p>
             )}
           </div>
-
+        )}
+        {(serviceType === SERVICE_TYPE.SMALL_TASK || serviceType === SERVICE_TYPE.INSPECTION) && (
           <div>
             <Label>Allow Sudden Booking</Label>
             <input
@@ -114,14 +122,14 @@ export function Level3ServiceFields({
               {...register('allowSuddenBooking')}
               className="h-5 w-5 text-indigo-600"
             />
-            {level3Errors.allowSuddenBooking && (
+            {serviceErrors.allowSuddenBooking && (
               <p className="text-red-500 text-sm -mt-2">
-                {level3Errors.allowSuddenBooking.message}
+                {serviceErrors.allowSuddenBooking.message}
               </p>
             )}
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </>
   );
 }

@@ -42,6 +42,18 @@ const CategoryService = {
     const res = await api.get(CATEGORY_API.TRENDING);
     return res.data.results;
   },
+
+  getPublicCategories: async (filters: {
+    categoryId?: string;
+    sortBy?: string;
+    limit?: number;
+    cursor?: string;
+  }): Promise<{ categories: Category[]; nextCursor: string | null }> => {
+    const res = await api.get(CATEGORY_API.DISCOVERY, {
+      params: filters,
+    });
+    return res.data;
+  },
 };
 
 export default CategoryService;

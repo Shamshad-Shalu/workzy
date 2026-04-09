@@ -6,6 +6,7 @@ import { HTTPSTATUS } from "@/constants";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
+import { ServiceSort } from "@/types/category";
 
 @injectable()
 export class CategoryController implements ICategoryController {
@@ -74,5 +75,19 @@ export class CategoryController implements ICategoryController {
     const limit = parseInt(req.query.limit as string) || 10;
     const services = await this._categoryService.getServicesByCategory(categoryId, limit);
     res.status(200).json({ services });
+  });
+  getPublicCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const categoryId = (req.query.categoryId as string) || undefined;
+    const sortBy = (req.query.sortBy as ServiceSort) || "newest";
+    const limit = parseInt(req.query.limit as string) || 12;
+    const cursor = (req.query.cursor as string) || undefined;
+
+    const { categories, nextCursor } = await this._categoryService.getPublicCategories({
+      categoryId,
+      sortBy,
+      limit,
+      cursor,
+    });
+    res.status(HTTPSTATUS.OK).json({ categories, nextCursor });
   });
 }

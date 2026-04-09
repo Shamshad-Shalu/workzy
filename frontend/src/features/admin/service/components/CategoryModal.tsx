@@ -9,7 +9,7 @@ import { type CategoryFormData } from '../validation/categorySchema';
 
 import { CategoryBasicFields } from './CategoryBasicFields';
 import { CategoryImageFields } from './CategoryImageFields';
-import { Level3ServiceFields } from './Level3ServiceFields';
+import { ServiceFields } from './ServiceFields';
 
 interface CategoryModalProps {
   open: boolean;
@@ -26,7 +26,7 @@ export function CategoryModal({
   category,
   parentCategory,
 }: CategoryModalProps) {
-  const { form, isLevel3, serviceType, bufferTime, estimatedDuration } = useCategoryForm({
+  const { form, isLevel2, serviceType, bufferTime, estimatedDuration } = useCategoryForm({
     category,
     parentCategory,
   });
@@ -59,8 +59,8 @@ export function CategoryModal({
     >
       <form onSubmit={handleSubmit(onSubmitForm)} className="space-y-4 w-full">
         <CategoryBasicFields form={form} />
-        {isLevel3 && (
-          <Level3ServiceFields
+        {isLevel2 && (
+          <ServiceFields
             form={form}
             bufferTime={bufferTime}
             estimatedDuration={estimatedDuration}

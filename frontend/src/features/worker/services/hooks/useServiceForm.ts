@@ -46,7 +46,7 @@ export function useServiceForm(service?: Service | null, category?: Category | n
         estimatedDuration: category.estimatedDuration ?? 0,
         bufferTime: category.bufferTime ?? 0,
         _baseRate: category.baseRate,
-        _deviation: (category.baseRate * (category.rateDeviationPercent || 0)) / 100,
+        _deviation: (category.baseRate * (category.priceVarianceLimit || 0)) / 100,
         _baseBuffer: category.bufferTime,
         _baseDuration: category.estimatedDuration,
       });
@@ -67,7 +67,7 @@ export function useServiceForm(service?: Service | null, category?: Category | n
         isAvailable: service.isAvailable ?? true,
         bulkDiscounts: service.bulkDiscounts ?? [],
         _baseRate: category?.baseRate,
-        _deviation: category ? (category.baseRate * (category.rateDeviationPercent || 0)) / 100 : 0,
+        _deviation: category ? (category.baseRate * (category.priceVarianceLimit || 0)) / 100 : 0,
         _setTravelCost: !!service.maxTravelCost,
         _baseBuffer: category?.bufferTime,
         _baseDuration: category?.estimatedDuration,

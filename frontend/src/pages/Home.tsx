@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 
 import { HeroCarousel } from '@/components/organisms/HeroCarousel';
 import { HOME_SECTION_TYPE } from '@/constants';
@@ -37,7 +37,6 @@ function SectionReveal({ children }: { children: React.ReactNode }) {
 }
 
 export default function HomePage() {
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const categoryShowcaseRef = useRef<HTMLDivElement | null>(null);
   const { homeData, isLoading, error } = useHomeSections();
 
@@ -49,14 +48,6 @@ export default function HomePage() {
   }
 
   const sections = [...homeData.sections].sort((a, b) => a.order - b.order);
-
-  const handleHeroCategoryClick = (categoryId: string) => {
-    setSelectedCategoryId(categoryId);
-    requestAnimationFrame(() => {
-      categoryShowcaseRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    });
-  };
-  console.log('Selected category:', selectedCategoryId);
 
   return (
     <main>
@@ -70,11 +61,7 @@ export default function HomePage() {
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6 }}
               >
-                <HeroCarousel
-                  data={section}
-                  stats={appStats}
-                  onCategoryClick={handleHeroCategoryClick}
-                />
+                <HeroCarousel data={section} stats={appStats} />
               </motion.div>
             );
 

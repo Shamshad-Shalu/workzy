@@ -19,8 +19,14 @@ export class AdminBookingController implements IAdminBookingController {
     res.status(HTTPSTATUS.OK).json(result);
   });
 
-  getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
-  getWorkerBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {});
+  getUserBookings = asyncHandler(async (req: Request, _res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    console.log(userId);
+  });
+  getWorkerBookings = asyncHandler(async (req: Request, _res: Response): Promise<void> => {
+    const workerId = req.user?.workerId;
+    console.log(workerId);
+  });
 
   private parseAdminQuery(req: Request): AdminBookingListParams {
     const status = (req.query.status as string) || "all";

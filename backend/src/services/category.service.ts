@@ -1,10 +1,10 @@
 import { inject, injectable } from "inversify";
 import mongoose from "mongoose";
 
-import redisClient from "@/config/redisClient";
-import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS } from "@/constants";
+import { CATEGORY, HTTPSTATUS } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { TYPES } from "@/di/types";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
 import {
@@ -13,15 +13,19 @@ import {
   CategoryServicesResponseDTO,
   CategorySuggestionResponseDTO,
   CategoryTrendingResponseDTO,
+  PublicCategoryResponseDTO,
 } from "@/dtos/responses/category.dto";
-import { ICategory } from "@/types/category";
+import { ICategory, PublicCategoriesParams } from "@/types/category";
 import { buildCategoryFilter } from "@/utils/admin/filters/buildCategoryFilter";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
 @injectable()
 export class CategoryService implements ICategoryService {
-  constructor(@inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository) {}
+  constructor(
+    @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
+  ) {}
 
   async getCategories(
     page: number,
@@ -32,7 +36,7 @@ export class CategoryService implements ICategoryService {
   ): Promise<{ categories: CategoryResponseDTO[]; total: number }> {
     const cacheKey = `categories:list:${parentId || "root"}:${status}:${page}:${limit}:${search || "all"}`;
 
-    const cachedData = await redisClient.get(cacheKey);
+    const cachedData = await this._redisService.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
@@ -51,7 +55,7 @@ export class CategoryService implements ICategoryService {
 
     const categories = CategoryResponseDTO.fromEntities(categoriesRow as ICategory[]);
     const response = { categories, total };
-    await redisClient.set(cacheKey, JSON.stringify(response), { EX: REFRESH_TOKEN_TTL_SECONDS });
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
 
     return response;
   }
@@ -100,26 +104,37 @@ export class CategoryService implements ICategoryService {
   async getTrendingCategories(limit: number): Promise<CategoryTrendingResponseDTO[]> {
     const cacheKey = `categories:trending:${limit}`;
 
-    const cachedData = await redisClient.get(cacheKey);
+    const cachedData = await this._redisService.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    // const categories = await this._categoryRepository.findTrending(limit);
-    // dummy data
-    const dummyNames = [
-      "696a8451292e6a0a607ba18d",
-      "69773bbaf6cf9efa2c8c4f8b",
-      "696a84b8292e6a0a607ba19e",
-      "69773b23f6cf9efa2c8c4f69",
-      "696a8799292e6a0a607ba1ac",
-    ];
-    const categoriesRaw = await Promise.all(
-      dummyNames.map((id) => this._categoryRepository.findOne({ _id: id }))
-    );
-    const categoriesFiltered = categoriesRaw.filter((c): c is NonNullable<typeof c> => Boolean(c));
-    const response = CategoryTrendingResponseDTO.fromEntities(categoriesFiltered);
+    const categoriesFiltered = await this._categoryRepository.findCategoriesByLevel(1, null);
+    const response = CategoryTrendingResponseDTO.fromEntities(categoriesFiltered.slice(0, limit));
 
-    await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 * 10 }); // 10 minutes
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response), 600);
+    return response;
+  }
+
+  async getPublicCategories(
+    filters: PublicCategoriesParams
+  ): Promise<{ categories: PublicCategoryResponseDTO[]; nextCursor: string | null }> {
+    const { categoryId, sortBy, limit, cursor } = filters;
+
+    const cacheKey = `public:services:${categoryId || "all"}:${limit}:${sortBy || "newest"}:${cursor || "none"}`;
+    const cachedData = await this._redisService.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
+    console.log(filters);
+
+    const { data, nextCursor } = await this._categoryRepository.findPublicCategories(filters);
+
+    console.log({ data, nextCursor });
+    const categories = PublicCategoryResponseDTO.fromEntities(data);
+    const response = { categories, nextCursor };
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    // await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 * 5 }); // 5 minutes cache
+
     return response;
   }
 

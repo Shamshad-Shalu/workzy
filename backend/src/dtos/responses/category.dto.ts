@@ -3,6 +3,7 @@ import { Expose } from "class-transformer";
 import {
   CategoryAncestorEntity,
   CategoryLevelsEntity,
+  CategoryListEntity,
   CategorySuggestionEntity,
   CategoryTrendingEntity,
   ServiceItemEntity,
@@ -25,11 +26,11 @@ type BaseCategoryDTOConstructor<T> = {
 };
 
 abstract class BaseCategoryDTO {
-  @Expose() id!: string;
-  @Expose() name!: string;
-  @Expose() iconUrl!: string;
-  @Expose() level!: number;
-  @Expose() parentId!: string | null;
+  id!: string;
+  name!: string;
+  iconUrl!: string;
+  level!: number;
+  parentId!: string | null;
 
   static mapEntity<T extends BaseCategoryDTO>(
     this: BaseCategoryDTOConstructor<T>,
@@ -120,7 +121,7 @@ export class CategoryServicesResponseDTO {
   @Expose() description!: string;
   @Expose() imageUrl!: string;
   @Expose() iconUrl!: string;
-  @Expose() subServices!: { id: string; name: string }[];
+  @Expose() baseRate!: number;
 
   static fromEntity(entity: ServiceItemEntity): CategoryServicesResponseDTO {
     const dto = new CategoryServicesResponseDTO();
@@ -130,15 +131,38 @@ export class CategoryServicesResponseDTO {
     dto.description = entity.description;
     dto.imageUrl = entity.imageUrl;
     dto.iconUrl = entity.iconUrl;
-    dto.subServices = entity.subServices.map((subService) => ({
-      id: subService._id.toString(),
-      name: subService.name,
-    }));
+    dto.baseRate = entity.baseRate;
 
     return dto;
   }
 
   static fromEntities(entities: ServiceItemEntity[]): CategoryServicesResponseDTO[] {
     return entities.map((entity) => CategoryServicesResponseDTO.fromEntity(entity));
+  }
+}
+
+export class PublicCategoryResponseDTO {
+  id!: string;
+  name!: string;
+  description!: string;
+  imageUrl!: string;
+  iconUrl!: string;
+  baseRate!: number;
+  parentId!: string | null;
+
+  static fromEntity(entity: CategoryListEntity): PublicCategoryResponseDTO {
+    const dto = new PublicCategoryResponseDTO();
+    dto.id = entity._id.toString();
+    dto.name = entity.name;
+    dto.description = entity.description;
+    dto.imageUrl = entity.imageUrl;
+    dto.iconUrl = entity.iconUrl;
+    dto.baseRate = entity.baseRate;
+    dto.parentId = entity.parentId ? entity.parentId.toString() : null;
+    return dto;
+  }
+
+  static fromEntities(entities: CategoryListEntity[]): PublicCategoryResponseDTO[] {
+    return entities.map((e) => this.fromEntity(e));
   }
 }

@@ -9,6 +9,7 @@ const router = Router();
 const categoryController = container.get<ICategoryController>(TYPES.CategoryController);
 
 router.get("/", categoryController.getCategories);
+router.get("/public", categoryController.getPublicCategories);
 router.get("/levels", categoryController.getCategoryLevels);
 router.get("/suggestions", categoryController.getCategorySuggestions);
 router.get("/trending", categoryController.getTrendingCategories);

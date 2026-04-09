@@ -159,6 +159,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
     ];
     return this.model.aggregate(pipeline).exec();
   }
+
   async listWorkers(
     serviceId: string,
     filters: WorkerListingFilters

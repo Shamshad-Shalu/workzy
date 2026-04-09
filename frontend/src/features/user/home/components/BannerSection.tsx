@@ -1,16 +1,12 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-import { useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
 import type { BannerContent } from '@/types/home/home.sectionContent';
 
 interface Props {
   section: BannerContent;
 }
 export default function BannerSection({ section }: Props) {
-  const { city } = useAppSelector((s: RootState) => s.location);
-
   const { imageUrl, title, description, ctaText = 'Explore now', categoryId } = section;
   return (
     <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -26,8 +22,8 @@ export default function BannerSection({ section }: Props) {
             <h3 className="text-3xl md:text-4xl font-bold text-white mb-3">{title}</h3>
             <p className="text-lg text-white/90 mb-6">{description}</p>
             <Link
-              to={`/services?category=${encodeURIComponent(categoryId)}&location=${encodeURIComponent(city)}`}
-              className="bg-white text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-gray-100 transition-all inline-flex items-center gap-2 shadow-xl"
+              to={categoryId ? `/services?category=${categoryId}` : '/services'}
+              className="bg-white text-gray-900 px-8 py-3 rounded-full font-bold hover:bg-primary hover:text-white transition-all inline-flex items-center gap-2 shadow-xl"
             >
               {ctaText}
               <ArrowRight className="w-5 h-5" />

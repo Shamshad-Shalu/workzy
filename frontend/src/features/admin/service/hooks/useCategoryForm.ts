@@ -14,48 +14,83 @@ type UseCategoryFormProps = {
 
 export function useCategoryForm({ category, parentCategory }: UseCategoryFormProps) {
   const level = useMemo(
-    () => (category?.level ?? (parentCategory ? parentCategory.level + 1 : 1)) as 1 | 2 | 3,
+    () => (category?.level ?? (parentCategory ? parentCategory.level + 1 : 1)) as 1 | 2,
     [category, parentCategory]
   );
+
+  const defaultValues = useMemo(() => {
+    const base = {
+      name: category?.name ?? '',
+      description: category?.description ?? '',
+      iconUrl: category?.iconUrl ?? '',
+      imageUrl: category?.imageUrl ?? '',
+      platformFee: category?.platformFee ?? parentCategory?.platformFee ?? 1,
+      baseRate: category?.baseRate ?? parentCategory?.baseRate ?? 0,
+      isAvailable: category?.isAvailable ?? true,
+    };
+
+    if (level === 2) {
+      return {
+        ...base,
+        level: 2 as const,
+        parentId: category?.parentId ?? parentCategory?.id ?? '',
+        serviceType: category?.serviceType ?? SERVICE_TYPE.SMALL_TASK,
+        pricingMode: category?.pricingMode ?? PRICING_MODE.FIXED,
+        priceVarianceLimit: category?.priceVarianceLimit ?? 50,
+        estimatedDuration: category?.estimatedDuration ?? 60,
+        bufferTime: category?.bufferTime ?? 30,
+        travelRatePerKM: category?.travelRatePerKM ?? parentCategory?.travelRatePerKM ?? 8,
+        allowBulkOffers: category?.allowBulkOffers ?? false,
+        allowSuddenBooking: category?.allowSuddenBooking ?? false,
+      };
+    }
+
+    return {
+      ...base,
+      level: 1 as const,
+      parentId: null,
+    };
+  }, [category, level, parentCategory]);
+
   const form = useForm<CategoryFormData>({
     resolver: zodResolver(categorySchema),
     mode: 'onChange',
     reValidateMode: 'onChange',
-    defaultValues: {
-      name: '',
-      description: '',
-      iconUrl: '',
-      imageUrl: '',
-      level,
-      parentId: parentCategory?.id ?? null,
-      platformFee: parentCategory?.platformFee ?? 1,
-      baseRate: parentCategory?.baseRate ?? 0,
-      isAvailable: true,
-      ...(level === 3 && {
-        serviceType: SERVICE_TYPE.SMALL_TASK,
-        pricingMode: PRICING_MODE.FIXED,
-        rateDeviationPercent: 50,
-        estimatedDuration: 60,
-        bufferTime: 30,
-        travelRatePerKM: parentCategory?.travelRatePerKM ?? 8,
-        allowBulkOffers: false,
-        allowSuddenBooking: false,
-      }),
-    },
+    defaultValues: defaultValues,
   });
 
   const { reset, watch, unregister } = form;
 
   const serviceType = watch('serviceType');
+  const pricingMode = watch('pricingMode');
   const estimatedDuration = watch('estimatedDuration') ?? 0;
   const bufferTime = watch('bufferTime') ?? 0;
 
   useEffect(() => {
-    if (level !== 3) {
+    if (level === 2 && serviceType) {
+      if (serviceType !== SERVICE_TYPE.SMALL_TASK) {
+        form.setValue('allowBulkOffers', false);
+      }
+      if (serviceType === SERVICE_TYPE.MAJOR_PROJECT) {
+        form.setValue('allowSuddenBooking', false);
+      }
+
+      if (serviceType === SERVICE_TYPE.CONSULTATION || serviceType === SERVICE_TYPE.INSPECTION) {
+        form.setValue('pricingMode', PRICING_MODE.FIXED);
+      }
+
+      if (pricingMode === PRICING_MODE.FIXED) {
+        form.setValue('allowBulkOffers', false);
+      }
+    }
+  }, [serviceType, pricingMode, level, form]);
+
+  useEffect(() => {
+    if (level !== 2) {
       unregister([
         'serviceType',
         'pricingMode',
-        'rateDeviationPercent',
+        'priceVarianceLimit',
         'estimatedDuration',
         'bufferTime',
         'travelRatePerKM',
@@ -66,42 +101,13 @@ export function useCategoryForm({ category, parentCategory }: UseCategoryFormPro
   }, [level, unregister]);
 
   useEffect(() => {
-    const baseValues = {
-      name: category?.name ?? '',
-      description: category?.description ?? '',
-      iconUrl: category?.iconUrl ?? '',
-      imageUrl: category?.imageUrl ?? '',
-      parentId: category?.parentId ?? parentCategory?.id ?? null,
-      platformFee: category?.platformFee ?? parentCategory?.platformFee ?? 1,
-      baseRate: category?.baseRate ?? parentCategory?.baseRate ?? 0,
-      isAvailable: category?.isAvailable ?? true,
-    };
-
-    if (level === 3) {
-      reset({
-        ...baseValues,
-        level: 3,
-        serviceType: category?.serviceType ?? SERVICE_TYPE.SMALL_TASK,
-        pricingMode: category?.pricingMode ?? PRICING_MODE.FIXED,
-        rateDeviationPercent: category?.rateDeviationPercent ?? 50,
-        estimatedDuration: category?.estimatedDuration ?? 60,
-        bufferTime: category?.bufferTime ?? 30,
-        travelRatePerKM: category?.travelRatePerKM ?? parentCategory?.travelRatePerKM ?? 8,
-        allowBulkOffers: category?.allowBulkOffers ?? false,
-        allowSuddenBooking: category?.allowSuddenBooking ?? false,
-      });
-    } else {
-      reset({
-        ...baseValues,
-        level: level as 1 | 2,
-      });
-    }
-  }, [category, level, parentCategory, reset]);
+    reset(defaultValues);
+  }, [defaultValues, reset]);
 
   return {
     form,
     level,
-    isLevel3: level === 3,
+    isLevel2: level === 2,
     serviceType,
     estimatedDuration,
     bufferTime,
