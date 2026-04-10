@@ -2,7 +2,14 @@ import { inject } from "inversify";
 import { Types } from "mongoose";
 
 import redisClient from "@/config/redisClient";
-import { CATEGORY, HTTPSTATUS, REFRESH_TOKEN_TTL_SECONDS, SERVICE, WORKER } from "@/constants";
+import {
+  CATEGORY,
+  HTTPSTATUS,
+  REFRESH_TOKEN_TTL_SECONDS,
+  SERVICE,
+  SERVICE_TYPE,
+  WORKER,
+} from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -15,6 +22,7 @@ import { WorkerServicesAggregationResult } from "@/types/service-aggregation.typ
 import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { formatDuration } from "@/utils/time.convert";
 
 export class ServiceManagement implements IServiceManagement {
   constructor(
@@ -37,6 +45,7 @@ export class ServiceManagement implements IServiceManagement {
       CATEGORY.NOT_FOUND
     );
     await this.validateServiceRate(category, data.rate);
+    this.validateServiceTiming(category, data);
     const service = await this._serviceRepository.create({
       ...data,
       workerId: new Types.ObjectId(workerId),
@@ -62,6 +71,7 @@ export class ServiceManagement implements IServiceManagement {
       CATEGORY.NOT_FOUND
     );
     await this.validateServiceRate(category, data.rate);
+    this.validateServiceTiming(category, data);
 
     const updatedService = await this._serviceRepository.findByIdAndUpdate(serviceId, data);
 
@@ -90,12 +100,40 @@ export class ServiceManagement implements IServiceManagement {
   }
 
   private async validateServiceRate(category: ICategory, rate: number): Promise<void> {
-    const { baseRate, rateDeviationPercent } = category;
-    const deviation = (baseRate * rateDeviationPercent) / 100;
+    const { baseRate, priceVarianceLimit } = category;
+    const deviation = (baseRate * priceVarianceLimit) / 100;
     const minPrice = baseRate - deviation;
     const maxPrice = baseRate + deviation;
     if (rate < minPrice || rate > maxPrice) {
       throw new CustomError(SERVICE.PRICE_OUT_OF_RANGE, HTTPSTATUS.BAD_REQUEST);
+    }
+  }
+
+  private validateServiceTiming(category: ICategory, data: ServiceRequestDTO): void {
+    const { estimatedDuration, bufferTime } = data;
+
+    const baseDuration = category.estimatedDuration ?? 60;
+    const minDuration = Math.ceil(baseDuration * 0.7);
+    const maxDuration = Math.floor(baseDuration * 1.5);
+
+    if (estimatedDuration < minDuration || estimatedDuration > maxDuration) {
+      throw new CustomError(
+        SERVICE.DURATION_OUT_OF_RANGE(formatDuration(minDuration), formatDuration(maxDuration)),
+        HTTPSTATUS.BAD_REQUEST
+      );
+    }
+    if (category.serviceType === SERVICE_TYPE.INSPECTION && bufferTime < 15) {
+      throw new CustomError(SERVICE.INSPECTION_MIN_BUFFER(15), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (bufferTime > estimatedDuration) {
+      throw new CustomError(SERVICE.BUFFER_EXCEEDS_DURATION, HTTPSTATUS.BAD_REQUEST);
+    }
+    const categoryBuffer = category.bufferTime;
+    if (categoryBuffer && categoryBuffer > 0 && bufferTime > categoryBuffer * 2) {
+      throw new CustomError(
+        SERVICE.BUFFER_EXCEEDS_CATEGORY_DEFAULT(formatDuration(categoryBuffer * 2)),
+        HTTPSTATUS.BAD_REQUEST
+      );
     }
   }
 

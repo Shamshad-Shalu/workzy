@@ -6,10 +6,10 @@ import CategoryService from '@/services/category.service';
 export const useCategoryLevels = (categoryId?: string) => {
   const [level1Id, setLevel1Id] = useState<string>('');
   const [level2Id, setLevel2Id] = useState<string>('');
-  const [level3Id, setLevel3Id] = useState<string>(categoryId ?? '');
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>(categoryId ?? '');
 
   useEffect(() => {
-    setLevel3Id(categoryId ?? '');
+    setSelectedCategoryId(categoryId ?? '');
   }, [categoryId]);
 
   const { data: l1Options = [] } = useQuery({
@@ -25,35 +25,34 @@ export const useCategoryLevels = (categoryId?: string) => {
     select: data => data.map(c => ({ label: c.name, value: c.id })),
   });
 
-  const { data: l3Options = [], isFetching: isL3Loading } = useQuery({
-    queryKey: ['categories', level2Id],
-    queryFn: () => CategoryService.getCategoryLevels(3, level2Id),
-    enabled: !!level2Id,
-    select: data => data.map(c => ({ label: c.name, value: c.id })),
-  });
-
   const { data: category, isFetching: isDetailsLoading } = useQuery({
-    queryKey: ['category-details', level3Id],
-    queryFn: () => CategoryService.getCategory(level3Id),
-    enabled: !!level3Id,
+    queryKey: ['category-details', selectedCategoryId],
+    queryFn: () => CategoryService.getCategory(selectedCategoryId),
+    enabled: !!selectedCategoryId,
   });
 
   const handleL1Change = (val: string) => {
     setLevel1Id(val);
     setLevel2Id('');
-    setLevel3Id('');
+    setSelectedCategoryId('');
   };
 
   const handleL2Change = (val: string) => {
     setLevel2Id(val);
-    setLevel3Id('');
+    setSelectedCategoryId(val);
+  };
+
+  const resetLevels = () => {
+    setLevel1Id('');
+    setLevel2Id('');
+    setSelectedCategoryId(categoryId ?? '');
   };
 
   return {
-    state: { level1Id, level2Id, level3Id },
-    handlers: { handleL1Change, handleL2Change, setLevel3Id },
-    options: { l1Options, l2Options, l3Options },
-    loading: { isL2Loading, isL3Loading, isDetailsLoading },
+    state: { level1Id, level2Id },
+    handlers: { handleL1Change, handleL2Change, resetLevels },
+    options: { l1Options, l2Options },
+    loading: { isL2Loading, isDetailsLoading },
     category,
   };
 };

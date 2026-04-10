@@ -15,7 +15,6 @@ interface CategoryShowcaseBlockProps {
 }
 
 export default function CategoryShowcaseSection({ section }: CategoryShowcaseBlockProps) {
-
   const { title, subTitle, limit } = section;
   const categoryId = section.categoryId;
 

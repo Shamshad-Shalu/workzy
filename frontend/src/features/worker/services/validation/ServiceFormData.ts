@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { BULK_DISCOUNT } from '@/constants';
 import { DESCRIPTION_REGEX } from '@/lib/validation/rules';
+import { formatDuration } from '@/utils/time.format';
 
 const bulkDiscountSchema = z.object({
   count: z.preprocess(
@@ -87,6 +88,7 @@ export const serviceSchema = z
     _deviation: z.number().optional(),
     _baseBuffer: z.number().optional(),
     _baseDuration: z.number().optional(),
+    _serviceType: z.string().optional(),
     _setTravelCost: z.boolean().optional(),
   })
   .superRefine((data, ctx) => {
@@ -118,23 +120,33 @@ export const serviceSchema = z
         path: ['bufferTime'],
       });
     }
-
     if (data._baseDuration) {
-      const durationDur = Math.floor(data?._baseDuration * 0.5);
-      if (
-        data.estimatedDuration > data._baseDuration + durationDur ||
-        data.estimatedDuration < data._baseDuration - durationDur
-      ) {
-        const message =
-          data.bufferTime > data._baseDuration + durationDur
-            ? `estimatedDuration cannot exceed than service duration (${data._baseDuration + durationDur} min)`
-            : `estimatedDuration cannot be less than service duration (${data._baseDuration - durationDur} min)`;
+      const minDuration = Math.ceil(data._baseDuration * 0.7);
+      const maxDuration = Math.floor(data._baseDuration * 1.5);
+      if (data.estimatedDuration > maxDuration || data.estimatedDuration < minDuration) {
         ctx.addIssue({
           code: z.ZodIssueCode.custom,
-          message: message,
+          message: `Estimated duration must be between ${formatDuration(minDuration)} and ${formatDuration(maxDuration)} min`,
           path: ['estimatedDuration'],
         });
       }
+    }
+
+    const categoryBuffer = data._baseBuffer;
+    if (categoryBuffer && categoryBuffer > 0 && data.bufferTime > categoryBuffer * 2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Buffer time cannot exceed category default (${formatDuration(categoryBuffer * 2)})`,
+        path: ['bufferTime'],
+      });
+    }
+
+    if (data._serviceType === 'Inspection' && data.bufferTime < 15) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Inspection services require minimum 15 minutes buffer',
+        path: ['bufferTime'],
+      });
     }
   });
 

@@ -11,13 +11,24 @@ import { useServiceForm } from '../hooks/useServiceForm';
 
 import BulkDiscountSection from './BulkDiscountSection';
 
-type ServiceFormHook = ReturnType<typeof useServiceForm>;
+// const formatMinutes = (totalMinutes: number) => {
+//   const safe = Number.isFinite(totalMinutes) ? Math.max(0, totalMinutes) : 0;
+//   const h = Math.floor(safe / 60);
+//   const m = safe % 60;
+//   if (h === 0) {
+//     return `${m} min`;
+//   }
+//   if (m === 0) {
+//     return `${h} hour${h > 1 ? 's' : ''}`;
+//   }
+//   return `${h} hour ${m} min`;
+// };
 
 export default function ServiceFormSection({
   form,
   category,
 }: {
-  form: ServiceFormHook;
+  form: ReturnType<typeof useServiceForm>;
   category: Category;
 }) {
   const {
@@ -26,6 +37,8 @@ export default function ServiceFormSection({
     watch,
     formState: { errors },
   } = form;
+  const duration = Number(watch('estimatedDuration') ?? 0);
+  const buffer = Number(watch('bufferTime') ?? 0);
 
   const showMaxTravel = !!watch('_setTravelCost');
   useEffect(() => {
@@ -67,7 +80,7 @@ export default function ServiceFormSection({
         </div>
         <SlotTimeInput
           label="Duration *"
-          valueInMinutes={Number(watch('estimatedDuration') ?? 0)}
+          valueInMinutes={duration}
           onChange={v =>
             setValue('estimatedDuration', v, {
               shouldDirty: true,
@@ -80,7 +93,7 @@ export default function ServiceFormSection({
 
         <SlotTimeInput
           label="Buffer Time"
-          valueInMinutes={Number(watch('bufferTime') ?? 0)}
+          valueInMinutes={buffer}
           onChange={v =>
             setValue('bufferTime', v, {
               shouldDirty: true,

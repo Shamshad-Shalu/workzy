@@ -21,13 +21,24 @@ interface WorkerServiceModalProps {
 export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerServiceModalProps) {
   const { category, ...rest } = useCategoryLevels(service?.categoryId);
   const form = useServiceForm(service, category);
+  const handleClose = () => {
+    form.reset();
+    rest.handlers.resetLevels();
+    onClose();
+  };
 
   const handleSubmit = async (data: ServiceFormType) => {
-    const { _baseRate, _deviation, _setTravelCost, _baseBuffer, _baseDuration, ...submitData } =
-      data;
+    const {
+      _baseRate,
+      _deviation,
+      _setTravelCost,
+      _baseBuffer,
+      _baseDuration,
+      _serviceType,
+      ...submitData
+    } = data;
     await onSubmit(submitData);
-    onClose();
-    form.reset();
+    handleClose();
   };
 
   return (
@@ -44,7 +55,7 @@ export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerS
             <CategorySection categoryInfo={{ category, ...rest }} service={service} />
             {category ? (
               <ServiceFormSection form={form} category={category} />
-            ) : (
+            ) : (   
               <div className="p-6 text-sm text-muted-foreground text-center">
                 Select a category to configure service details
               </div>

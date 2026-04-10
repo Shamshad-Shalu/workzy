@@ -25,7 +25,7 @@ export class BulkDiscountDTO {
 
   @IsInt()
   @Min(BULK_DISCOUNT.MIN_PERCENT)
-  @Max(BULK_DISCOUNT.MIN_PERCENT)
+  @Max(BULK_DISCOUNT.MAX_PERCENT)
   percent!: number;
 }
 
@@ -63,15 +63,13 @@ export class ServiceRequestDTO {
   @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
   description?: string;
 
-  @IsOptional()
   @IsInt()
   @IsPositive()
-  estimatedDuration?: number;
+  estimatedDuration!: number;
 
-  @IsOptional()
   @IsInt()
   @Min(0)
-  bufferTime?: number;
+  bufferTime!: number;
 
   @IsNumber()
   @Min(0)
@@ -89,6 +87,7 @@ export class ServiceRequestDTO {
   isAvailable: boolean = true;
 
   @IsNumber()
+  @IsOptional()
   @Min(0)
   experience?: number;
 

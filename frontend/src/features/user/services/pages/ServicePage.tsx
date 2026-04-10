@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Search, Filter } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
 import { cn } from '@/lib/utils';
@@ -12,6 +13,8 @@ import { usePublicServices } from '../hooks/useServices';
 
 export default function ServiceDiscoveryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const categoryScrollRef = useRef<HTMLDivElement>(null);
+  const [showCategoryArrows, setShowCategoryArrows] = useState(false);
 
   const activeCategoryId = searchParams.get('category') || '';
   const sortBy = searchParams.get('sortBy') || 'popular';
@@ -37,6 +40,25 @@ export default function ServiceDiscoveryPage() {
     setSearchParams({});
   };
 
+  const scrollCategories = (delta: number) => {
+    categoryScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      const el = categoryScrollRef.current;
+      if (!el) {
+        setShowCategoryArrows(false);
+        return;
+      }
+      setShowCategoryArrows(el.scrollWidth > el.clientWidth + 2);
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [categories, loadingCategories]);
+
   const {
     data,
     isLoading: isInitialLoading,
@@ -52,8 +74,8 @@ export default function ServiceDiscoveryPage() {
   const services = data?.pages.flatMap(page => page.categories) ?? [];
 
   return (
-    <div className="min-h-screen flex flex-col pt-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10">
+    <div className="min-h-screen flex flex-col pt-8 overflow-x-hidden">
+      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10 overflow-x-hidden">
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div />
@@ -82,43 +104,69 @@ export default function ServiceDiscoveryPage() {
               )}
             </div>
           </div>
-          <div className="w-full overflow-hidden border-b border-border/60 pb-1">
-            <div className="flex gap-2 overflow-x-auto pb-3 pt-1 no-scrollbar snap-x scroll-pl-1">
-              <button
-                onClick={() => updateParam('category', '')}
-                className={cn(
-                  'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 snap-start select-none border',
+          <div className="w-full border-b border-border/60 pb-1">
+            {showCategoryArrows && (
+              <div className="mb-2 flex items-center justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => scrollCategories(-180)}
+                  className="p-1.5 rounded-md border border-border bg-card text-muted-foreground"
+                  aria-label="Scroll categories left"
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollCategories(180)}
+                  className="p-1.5 rounded-md border border-border bg-card text-muted-foreground"
+                  aria-label="Scroll categories right"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+            <div
+              ref={categoryScrollRef}
+              className="-mx-4 px-4 sm:mx-0 sm:px-0 overflow-x-auto overflow-y-hidden no-scrollbar overscroll-x-contain"
+              style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
+            >
+              <div className="flex w-max min-w-full gap-2 pb-3 pt-1 pr-2 snap-x scroll-pl-4 sm:scroll-pl-1">
+                <button
+                  onClick={() => updateParam('category', '')}
+                  className={cn(
+                    'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 snap-start select-none border',
 
-                  !activeCategoryId
-                    ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                    : 'bg-card text-muted-foreground border-border hover:border-border/80 hover:bg-muted hover:text-foreground'
+                    !activeCategoryId
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                      : 'bg-card text-muted-foreground border-border hover:border-border/80 hover:bg-muted hover:text-foreground'
+                  )}
+                >
+                  All Services
+                </button>
+                {loadingCategories ? (
+                  <div className="flex gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="h-8 w-24 bg-muted rounded-full animate-pulse" />
+                    ))}
+                  </div>
+                ) : (
+                  categories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => updateParam('category', cat.id)}
+                      className={cn(
+                        'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 snap-start select-none border',
+
+                        activeCategoryId === cat.id
+                          ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                          : 'bg-card text-muted-foreground border-border hover:border-border/80 hover:bg-muted hover:text-foreground'
+                      )}
+                    >
+                      {cat.name}
+                    </button>
+                  ))
                 )}
-              >
-                All Services
-              </button>
-              {loadingCategories ? (
-                <div className="flex gap-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={i} className="h-8 w-24 bg-muted rounded-full animate-pulse" />
-                  ))}
-                </div>
-              ) : (
-                categories.map(cat => (
-                  <button
-                    key={cat.id}
-                    onClick={() => updateParam('category', cat.id)}
-                    className={cn(
-                      'whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 snap-start select-none border',
-
-                      activeCategoryId === cat.id
-                        ? 'bg-primary text-primary-foreground border-primary shadow-sm'
-                        : 'bg-card text-muted-foreground border-border hover:border-border/80 hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    {cat.name}
-                  </button>
-                ))
-              )}
+              </div>
             </div>
           </div>
         </div>
@@ -147,7 +195,7 @@ export default function ServiceDiscoveryPage() {
             </motion.div>
           ) : (
             <div className="space-y-12">
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-6 min-w-0">
                 {services.map((service, i) => (
                   <motion.div
                     key={service.id}
@@ -164,11 +212,11 @@ export default function ServiceDiscoveryPage() {
                 ))}
               </div>
               {hasNextPage && !loadingMore && (
-                <div className="flex justify-center pb-8">
+                <div className="flex justify-center pb-8 px-1">
                   <button
                     onClick={() => fetchNextPage()}
                     disabled={loadingMore}
-                    className="group flex items-center gap-2 bg-card border border-border text-foreground px-8 py-3 rounded-full font-semibold shadow-sm hover:shadow-md hover:border-primary/20 hover:text-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                    className="group flex w-full sm:w-auto justify-center items-center gap-2 bg-card border border-border text-foreground px-6 sm:px-8 py-3 rounded-full font-semibold shadow-sm hover:shadow-md hover:border-primary/20 hover:text-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
                   >
                     {' '}
                     Show More Services

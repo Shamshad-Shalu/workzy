@@ -30,8 +30,8 @@ export default function WorkerListingPage() {
   const [availableNow, setAvailableNow] = useState<boolean>(false);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
-  const [bookingWorker, setBookingWorker] = useState<WorkerListingInfo | null >(null);
-  console.log("bookingWorker" , bookingWorker)
+  const [bookingWorker, setBookingWorker] = useState<WorkerListingInfo | null>(null);
+  console.log('bookingWorker', bookingWorker);
 
   const { data: selectedService } = useServiceDetails(serviceId);
   useEffect(() => {
@@ -214,7 +214,7 @@ export default function WorkerListingPage() {
           </div>
         )}
       </AnimatePresence>
-      { bookingWorker && (
+      {bookingWorker && (
         <BookingModal
           open={!!bookingWorker}
           onClose={() => setBookingWorker(null)}

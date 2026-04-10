@@ -3,6 +3,7 @@ import { Award, Clock, MapPin } from 'lucide-react';
 import { StatusBadge } from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
 import type { Service } from '@/types/service';
+import { formatDuration } from '@/utils/time.format';
 
 interface ServiceCardTypes {
   service: Service;
@@ -79,7 +80,9 @@ export default function WorkerServiceCard({
               <Clock className="w-3.5 h-3.5" />
             </div>
             <p className="text-xs text-muted-foreground">Duration</p>
-            <p className="text-sm font-semibold text-foreground">{service.estimatedDuration}m</p>
+            <p className="text-sm font-semibold text-foreground">
+              {formatDuration(service.estimatedDuration)}
+            </p>
           </div>
           <div className="text-center">
             <div className="flex items-center justify-center gap-1 text-muted-foreground mb-1">

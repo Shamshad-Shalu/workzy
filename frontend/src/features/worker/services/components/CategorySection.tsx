@@ -13,21 +13,18 @@ interface CategoryLevelsHook {
   state: {
     level1Id: string;
     level2Id: string;
-    level3Id: string;
   };
   handlers: {
     handleL1Change: (val: string) => void;
     handleL2Change: (val: string) => void;
-    setLevel3Id: (val: string) => void;
+    resetLevels: () => void;
   };
   options: {
     l1Options: OptionType[];
     l2Options: OptionType[];
-    l3Options: OptionType[];
   };
   loading: {
     isL2Loading: boolean;
-    isL3Loading: boolean;
     isDetailsLoading: boolean;
   };
   category: Category | undefined;
@@ -38,10 +35,10 @@ interface CategorySectionProps {
 }
 
 export function CategorySection({ categoryInfo, service }: CategorySectionProps) {
-  const { level1Id, level2Id, level3Id } = categoryInfo.state;
-  const { handleL1Change, handleL2Change, setLevel3Id } = categoryInfo.handlers;
-  const { isL2Loading, isL3Loading, isDetailsLoading } = categoryInfo.loading;
-  const { l1Options, l2Options, l3Options } = categoryInfo.options;
+  const { level1Id, level2Id } = categoryInfo.state;
+  const { handleL1Change, handleL2Change } = categoryInfo.handlers;
+  const { isL2Loading, isDetailsLoading } = categoryInfo.loading;
+  const { l1Options, l2Options } = categoryInfo.options;
   const { category } = categoryInfo;
 
   return (
@@ -53,7 +50,7 @@ export function CategorySection({ categoryInfo, service }: CategorySectionProps)
             Select Service Category
           </h3>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <div>
               <Label>Main Category</Label>
               <Select
@@ -63,10 +60,10 @@ export function CategorySection({ categoryInfo, service }: CategorySectionProps)
                 placeholder="Select Level 1"
               />
             </div>
-
+         
             <div>
               <Label className="flex justify-between">
-                Sub Category {isL2Loading && <Loader2 className="w-3 h-3 animate-spin" />}
+                Service {isL2Loading && <Loader2 className="w-3 h-3 animate-spin" />}
               </Label>
               <Select
                 value={level2Id}
@@ -74,19 +71,6 @@ export function CategorySection({ categoryInfo, service }: CategorySectionProps)
                 options={l2Options}
                 disabled={!level1Id || l2Options.length === 0}
                 placeholder={level1Id ? 'Select Level 2' : 'Select Main first'}
-              />
-            </div>
-
-            <div>
-              <Label className="flex justify-between">
-                Service Type {isL3Loading && <Loader2 className="w-3 h-3 animate-spin" />}
-              </Label>
-              <Select
-                value={level3Id}
-                onChange={setLevel3Id}
-                options={l3Options}
-                disabled={!level2Id || l3Options.length === 0}
-                placeholder={level2Id ? 'Select Level 3' : 'Select Sub first'}
               />
             </div>
           </div>

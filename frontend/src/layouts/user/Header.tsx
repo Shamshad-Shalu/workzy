@@ -103,6 +103,15 @@ export default function Header() {
     return location.pathname === path;
   };
 
+  const handleNavClick = (path: string, closeMobile = false) => {
+    if (closeMobile) {
+      setMobileMenuOpen(false);
+    }
+    if (location.pathname === path) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    }
+  };
+
   const handleLocationSelect = (location: SelectedLocation) => {
     dispatch(
       setLocation({
@@ -137,6 +146,7 @@ export default function Header() {
             {/* Logo */}
             <Link
               to="/"
+              onClick={() => handleNavClick('/')}
               className="text-xl lg:text-2xl font-bold bg-gradient-to-r from-primary via-purple-600 to-pink-600 bg-clip-text text-transparent flex-shrink-0"
             >
               Workzy
@@ -146,6 +156,7 @@ export default function Header() {
                 <Link
                   key={link.path}
                   to={link.path}
+                  onClick={() => handleNavClick(link.path)}
                   className={`px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     isActiveRoute(link.path)
                       ? 'text-primary bg-primary/10'
@@ -322,7 +333,7 @@ export default function Header() {
                           <Link
                             key={link.path}
                             to={link.path}
-                            onClick={() => setMobileMenuOpen(false)}
+                            onClick={() => handleNavClick(link.path, true)}
                             className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-colors ${
                               isActiveRoute(link.path)
                                 ? 'bg-primary/10 text-primary'

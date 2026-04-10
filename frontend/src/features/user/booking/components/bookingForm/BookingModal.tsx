@@ -28,11 +28,11 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ open, onClose, worker }: BookingModalProps) {
-  console.log("worker::",worker)
+  console.log('worker::', worker);
   const isPerUnit = worker.PricingMode === PRICING_MODE.PER_UNIT;
   const [stepIndex, setStepIndex] = useState(0);
   const [direction, setDirection] = useState(1);
-  
+
   const steps = useMemo<BookingStep[]>(
     () => [
       ...(isPerUnit ? [BOOKING_STEPS.COUNT] : []),

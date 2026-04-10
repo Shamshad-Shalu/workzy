@@ -5,10 +5,8 @@ import Label from '@/components/atoms/Label';
 
 import { useServiceForm } from '../hooks/useServiceForm';
 
-type ServiceFormHook = ReturnType<typeof useServiceForm>;
-
 interface BulkDiscountSectionProps {
-  form: ServiceFormHook;
+  form: ReturnType<typeof useServiceForm>;
 }
 
 export default function BulkDiscountSection({ form }: BulkDiscountSectionProps) {

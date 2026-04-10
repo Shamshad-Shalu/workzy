@@ -64,6 +64,7 @@ export function useServiceMutations(workerId: string, filters: ServiceFilters) {
     onSuccess: res => {
       toast.success(res.message);
       queryClient.invalidateQueries({ queryKey: ['worker-services'] });
+      queryClient.invalidateQueries({ queryKey: ['worker-service-categories'] });
     },
   });
 

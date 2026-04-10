@@ -27,7 +27,7 @@ export const MINUTE_OPTIONS = ['0', '15', '30', '45'].map(m => ({
 }));
 
 export const BUFFER_OPTIONS = ['0', '1', '2'].map(m => ({
-  label: `${m} min`,
+  label: `${m} hr`,
   value: m,
 }));
 export const BULK_DISCOUNT = {
