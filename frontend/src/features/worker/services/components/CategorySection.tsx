@@ -60,7 +60,7 @@ export function CategorySection({ categoryInfo, service }: CategorySectionProps)
                 placeholder="Select Level 1"
               />
             </div>
-         
+
             <div>
               <Label className="flex justify-between">
                 Service {isL2Loading && <Loader2 className="w-3 h-3 animate-spin" />}

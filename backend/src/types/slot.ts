@@ -8,15 +8,15 @@ export interface ISlot extends Document<string> {
   workerId: Types.ObjectId;
   serviceId: Types.ObjectId;
   date: Date;
-  startTime: string; // "09:00"
-  endTime: string; // "10:30"
+  startTime: string;
+  endTime: string;
+  isFullDay: boolean;
+  duration: number; // total = serviceDuration + bufferTime
   status: SlotStatus;
-  location: ILocation | null; // null for remote
-  travelFromPrev: number; // minutes (0 if first job)
-  serviceDuration: number; // minutes (without buffer)
-  bufferTime: number;
-  itemCount: number; // minutes
+  location: ILocation;
+  travelFromPrev: number;
   bookingId?: Types.ObjectId;
+  quoteId?: Types.ObjectId;
   reservedBy?: Types.ObjectId;
   reservedUntil?: Date;
   createdAt?: Date;
@@ -31,8 +31,8 @@ export interface GetSlotsDTO {
   workerId: string;
   serviceId: string;
   date: Date;
-  lat?: number;
-  lng?: number;
+  lat: number;
+  lng: number;
   itemCount?: number;
 }
 

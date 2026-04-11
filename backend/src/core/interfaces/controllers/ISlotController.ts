@@ -5,4 +5,5 @@ export interface ISlotController {
   reserveSlot: RequestHandler;
   releaseSlot: RequestHandler;
   getAvailableDates: RequestHandler;
+  reserveQuoteSlots: RequestHandler;
 }

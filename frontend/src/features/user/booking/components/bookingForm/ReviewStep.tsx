@@ -1,10 +1,9 @@
-import dayjs from 'dayjs';
 import { CalendarDays, Clock, Percent, StickyNote, Zap } from 'lucide-react';
 
 import { PRICING_MODE } from '@/constants';
 import type { BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatTime12 } from '@/utils/time.format';
+import { formatDuration, formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 import type { BookingPricing } from '../../hooks/useBooking';
 
@@ -24,7 +23,7 @@ export default function ReviewStep({
       icon: <CalendarDays className="w-4 h-4" />,
       label: 'Date & Time',
       value: booking.slot
-        ? `${dayjs(booking.date).format('ddd, D MMM YYYY')} · ${formatTime12(booking.slot.startTime)}`
+        ? `${formatSmartDate(booking.date)} · ${formatTime12(booking.slot.startTime)}`
         : '—',
     },
     ...(worker.estimatedDuration

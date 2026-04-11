@@ -34,6 +34,7 @@ import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepos
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
+import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IPlanRepository } from "@/core/interfaces/repositories/IPlanRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
@@ -66,6 +67,7 @@ import { BookingRepository } from "@/repositories/booking.repository";
 import { CategoryRepository } from "@/repositories/category.repository";
 import { HomeLayoutRepository } from "@/repositories/homeLayout..repository";
 import { HomeSectionRepository } from "@/repositories/homeSection.repository";
+import { LeaveRepository } from "@/repositories/leave.repository";
 import { PaymentRepository } from "@/repositories/payment.repository";
 import { PlanRepository } from "@/repositories/plan.repository";
 import { ServiceRepository } from "@/repositories/service.repository";
@@ -158,6 +160,8 @@ container.bind<IPaymentService>(TYPES.PaymentService).to(PaymentService);
 container.bind<ISlotController>(TYPES.SlotController).to(SlotController);
 container.bind<ISlotService>(TYPES.SlotService).to(SlotService);
 container.bind<ISlotRepository>(TYPES.SlotRepository).to(SlotRepository);
+
+container.bind<ILeaveRepository>(TYPES.LeaveRepository).to(LeaveRepository);
 
 container.bind<IBookingController>(TYPES.BookingController).to(BookingController);
 container.bind<IBookingService>(TYPES.BookingService).to(BookingService);

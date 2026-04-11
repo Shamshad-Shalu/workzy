@@ -5,7 +5,7 @@ import {
   IWorker,
   NearbyWorkerEntity,
   WorkerListingEntity,
-  WorkerListingFiltersDist,
+  WorkerListingFilters,
   WorkerSummaryEntity,
 } from "@/types/worker";
 
@@ -24,6 +24,6 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
   ): Promise<NearbyWorkerEntity[]>;
   listWorkers(
     serviceId: string,
-    params: WorkerListingFiltersDist
+    params: WorkerListingFilters
   ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }>;
 }

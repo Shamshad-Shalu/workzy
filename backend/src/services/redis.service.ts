@@ -60,4 +60,14 @@ export class RedisService implements IRedisService {
       logger.error(`Redis CLEAR PATTERN error for ${prefix}:`, error);
     }
   }
+  async deleteMany(keys: string[]): Promise<void> {
+    try {
+      if (keys.length === 0) return;
+      const pipeline = redisClient.multi();
+      for (const key of keys) pipeline.del(key);
+      await pipeline.exec();
+    } catch (error) {
+      logger.error(`Redis DELETE MANY error:`, error);
+    }
+  }
 }

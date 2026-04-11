@@ -3,7 +3,6 @@ export const SERVICE_TYPE = {
   INSPECTION: "Inspection",
   MAJOR_PROJECT: "Major Project",
   CONSULTATION: "Consultation",
-  // REMOTE: "Remote",
 } as const;
 
 export type ServiceType = (typeof SERVICE_TYPE)[keyof typeof SERVICE_TYPE];
@@ -12,7 +11,6 @@ export const SERVICE_TYPE_VALUES = Object.values(SERVICE_TYPE);
 export const PRICING_MODE = {
   FIXED: "fixed",
   PER_UNIT: "per_unit",
-  // PER_DAY: "per_day",
 } as const;
 
 export type PricingMode = (typeof PRICING_MODE)[keyof typeof PRICING_MODE];

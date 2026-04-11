@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { SearchX } from 'lucide-react';
 
+import Button from '@/components/atoms/Button';
 import EmptyState from '@/components/molecules/EmptyState';
+import ErrorState from '@/components/molecules/ErrorState';
 import Pagination from '@/components/molecules/Pagination';
 import type { WorkerListingInfo } from '@/types/worker';
 
@@ -12,6 +14,10 @@ type WorkerListProps = {
   workers: WorkerListingInfo[];
   isLoading: boolean;
   total: number;
+  error: null | Error;
+  hasActiveFilters: boolean;
+  onClearFilters: () => void;
+  onRetry: () => void;
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
@@ -21,9 +27,9 @@ type WorkerListProps = {
 export interface WorkerListParams {
   page: number;
   limit: number;
-  lat?: number;
-  lng?: number;
-  radiusKm?: number;
+  lat: number;
+  lng: number;
+  radiusKm: number;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
@@ -32,9 +38,13 @@ export interface WorkerListParams {
 
 export function WorkerList({
   workers,
+  error,
+  onRetry,
   isLoading,
   limit,
   onPageChange,
+  hasActiveFilters,
+  onClearFilters,
   page,
   total,
   onBook,
@@ -56,6 +66,8 @@ export function WorkerList({
               <WorkerCardSkeleton key={i} />
             ))}
           </motion.div>
+        ) : error ? (
+          <ErrorState description={error.message} onRetry={onRetry} />
         ) : workers.length === 0 ? (
           <motion.div
             key="empty"
@@ -66,7 +78,18 @@ export function WorkerList({
             <EmptyState
               icon={<SearchX className="w-6 h-6" />}
               title="No professionals found"
-              description="Try adjusting your filters or expanding your search radius."
+              description={
+                hasActiveFilters
+                  ? 'No results match your current filters.'
+                  : 'Try adjusting your search radius.'
+              }
+              action={
+                hasActiveFilters ? (
+                  <Button variant="red" onClick={onClearFilters}>
+                    Clear Filters
+                  </Button>
+                ) : undefined
+              }
               className="py-12"
             />
           </motion.div>

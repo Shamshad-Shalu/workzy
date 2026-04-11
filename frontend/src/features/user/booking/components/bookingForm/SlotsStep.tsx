@@ -1,5 +1,3 @@
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { useMemo } from 'react';
@@ -10,9 +8,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAvailableSlots } from '@/features/user/slot/hooks/useSlot';
 import type { AvailableSlot, BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatTime12 } from '@/utils/time.format';
-
-dayjs.extend(customParseFormat);
+import {
+  calculateEndTime,
+  formatDuration,
+  formatSmartDate,
+  formatTime12,
+} from '@/utils/time.format';
 
 export default function SlotsStep({
   worker,
@@ -50,7 +51,7 @@ export default function SlotsStep({
       }
     }
     const g: Record<string, AvailableSlot[]> = { Morning: [], Afternoon: [], Evening: [] };
-    data.slots.forEach(s => {
+    slots.forEach(s => {
       const h = parseInt(s.startTime.split(':')[0], 10);
       if (h < 12) {
         g['Morning'].push(s);
@@ -69,7 +70,7 @@ export default function SlotsStep({
         <p className="text-sm font-semibold flex items-center gap-2">
           <Clock className="w-4 h-4" /> Select Time
         </p>
-        <p className="text-xs text-muted-foreground">{dayjs(booking.date).format('ddd, D MMM')}</p>
+        <p className="text-xs text-muted-foreground">{formatSmartDate(booking.date)}</p>
       </div>
 
       {isLoading ? (
@@ -145,7 +146,7 @@ export default function SlotsStep({
         >
           <p className="text-xs font-semibold text-emerald-700">
             ✓ {formatTime12(booking.slot.startTime)} →
-            {dayjs(booking.slot?.startTime, 'HH:mm').add(totalMinutes, 'minutes').format('h:mm A')}
+            {calculateEndTime(booking.slot?.startTime, totalMinutes)}
           </p>
           {}
         </motion.div>

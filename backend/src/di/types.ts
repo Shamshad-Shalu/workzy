@@ -67,6 +67,10 @@ const TYPES = {
   SlotRepository: Symbol.for("SlotRepository"),
   SlotService: Symbol.for("SlotService"),
 
+  LeaveController: Symbol.for("LeaveController"),
+  LeaveRepository: Symbol.for("LeaveRepository"),
+  LeaveService: Symbol.for("LeaveService"),
+
   BookingController: Symbol.for("BookingController"),
   BookingService: Symbol.for("BookingService"),
   BookingRepository: Symbol.for("BookingRepository"),

@@ -7,3 +7,10 @@ export function getTodayKey() {
 export function getCurrentTime() {
   return dayjs().format("HH:mm");
 }
+export function getTodayStart(): Date {
+  return dayjs().startOf("day").toDate();
+}
+
+export function getTodayEnd(): Date {
+  return dayjs().endOf("day").toDate();
+}

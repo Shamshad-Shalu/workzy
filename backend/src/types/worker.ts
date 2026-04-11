@@ -93,9 +93,9 @@ export type NearbyWorkerEntity = {
 };
 
 export interface WorkerListingFilters {
-  lat?: number;
-  lng?: number;
-  radiusKm?: number;
+  lat: number;
+  lng: number;
+  radiusKm: number;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
@@ -103,13 +103,6 @@ export interface WorkerListingFilters {
   page: number;
   limit: number;
 }
-
-export type WorkerListingFiltersDist = Omit<WorkerListingFilters, "lat" | "lng" | "radiusKm"> & {
-  lat: number;
-  lng: number;
-  radiusKm: number;
-};
-
 export interface WorkerListingEntity {
   serviceId: string;
   workerId: string;

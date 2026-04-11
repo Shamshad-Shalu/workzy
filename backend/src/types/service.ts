@@ -10,8 +10,8 @@ export interface IService extends Document<string> {
   categoryId: Types.ObjectId;
   rate: number;
   description?: string;
-  estimatedDuration?: number;
-  bufferTime?: number;
+  estimatedDuration: number;
+  bufferTime: number;
   maxTravelRadius: number;
   bulkDiscounts?: BulkDiscountType[];
   allowSuddenBooking?: boolean;

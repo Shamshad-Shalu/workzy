@@ -55,7 +55,7 @@ export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerS
             <CategorySection categoryInfo={{ category, ...rest }} service={service} />
             {category ? (
               <ServiceFormSection form={form} category={category} />
-            ) : (   
+            ) : (
               <div className="p-6 text-sm text-muted-foreground text-center">
                 Select a category to configure service details
               </div>

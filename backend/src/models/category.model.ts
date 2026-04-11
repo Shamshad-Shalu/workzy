@@ -20,8 +20,8 @@ const CategorySchema: Schema<ICategory> = new Schema(
     baseRate: { type: Number, required: true, min: 50 },
     priceVarianceLimit: { type: Number, min: 0, max: 100 },
 
-    estimatedDuration: { type: Number },
-    bufferTime: { type: Number },
+    estimatedDuration: { type: Number, default: 60 },
+    bufferTime: { type: Number, default: 0 },
     travelRatePerKM: { type: Number, min: 0 },
     serviceType: {
       type: String,

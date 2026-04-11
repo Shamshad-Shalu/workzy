@@ -1,7 +1,7 @@
 import { injectable } from "inversify";
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
-import { ROLE, WORKER_STATUS } from "@/constants";
+import { ROLE, SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import User from "@/models/user.model";
@@ -10,10 +10,11 @@ import {
   IWorker,
   NearbyWorkerEntity,
   WorkerListingEntity,
-  WorkerListingFiltersDist,
+  WorkerListingFilters,
   WorkerSummaryEntity,
 } from "@/types/worker";
-import { getCurrentTime, getTodayKey } from "@/utils/time.utils";
+import { timeToMinutes } from "@/utils/time.convert";
+import { getCurrentTime, getTodayKey, getTodayStart, getTodayEnd } from "@/utils/time.utils";
 
 @injectable()
 export class WorkerRepository extends BaseRepository<IWorker> implements IWorkerRepository {
@@ -142,9 +143,22 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
 
   async listWorkers(
     serviceId: string,
-    params: WorkerListingFiltersDist
+    params: WorkerListingFilters
   ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }> {
-    const { lng, lat, limit, page, availableNow, maxPrice, minPrice, minRating, radiusKm } = params;
+    const {
+      lng,
+      lat,
+      limit,
+      page,
+      availableNow = false,
+      maxPrice,
+      minPrice,
+      minRating,
+      radiusKm,
+    } = params;
+
+    const nowMinutes = timeToMinutes(getCurrentTime());
+    const PREP_BUFFER = 15;
 
     const skip = (page - 1) * limit;
     const pipeline: PipelineStage[] = [
@@ -157,6 +171,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           spherical: true,
           query: {
             status: WORKER_STATUS.VERIFIED,
+            stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
             ...(minRating !== undefined && { averageRating: { $gte: minRating } }),
           },
         },
@@ -246,11 +261,24 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                       $size: {
                         $filter: {
                           input: { $ifNull: [`$availability.${getTodayKey()}`, []] },
-                          as: "slot",
+                          as: "win",
                           cond: {
                             $and: [
-                              { $lte: ["$$slot.startTime", getCurrentTime()] },
-                              { $gte: ["$$slot.endTime", getCurrentTime()] },
+                              { $lte: [this.toMinutes("$$win.startTime"), nowMinutes] },
+                              {
+                                $gte: [
+                                  this.toMinutes("$$win.endTime"),
+                                  {
+                                    $add: [
+                                      nowMinutes,
+                                      { $multiply: ["$distanceKm", 3] },
+                                      PREP_BUFFER,
+                                      "$services.estimatedDuration",
+                                      "$services.bufferTime",
+                                    ],
+                                  },
+                                ],
+                              },
                             ],
                           },
                         },
@@ -260,7 +288,79 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                   ],
                 },
               },
+            } as PipelineStage,
+            {
+              $lookup: {
+                from: "leaves",
+                let: { wId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$workerId", "$$wId"] },
+                          { $lte: ["$startDate", getTodayEnd()] },
+                          { $gte: ["$endDate", getTodayStart()] },
+                        ],
+                      },
+                    },
+                  },
+                  { $limit: 1 },
+                ],
+                as: "todayLeaves",
+              },
             },
+            { $match: { todayLeaves: { $size: 0 } } } as PipelineStage,
+            {
+              $lookup: {
+                from: "slots",
+                let: { wId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$workerId", "$$wId"] },
+                          { $gte: ["$date", getTodayStart()] },
+                          { $lte: ["$date", getTodayEnd()] },
+                          { $eq: ["$isFullDay", true] },
+                          { $in: ["$status", [SLOT_STATUS.RESERVED, SLOT_STATUS.BOOKED]] },
+                        ],
+                      },
+                    },
+                  },
+                  { $limit: 1 },
+                ],
+                as: "fullDaySlots",
+              },
+            } as PipelineStage,
+            { $match: { fullDaySlots: { $size: 0 } } } as PipelineStage,
+            {
+              $lookup: {
+                from: "slots",
+                let: { wId: "$_id" },
+                pipeline: [
+                  {
+                    $match: {
+                      $expr: {
+                        $and: [
+                          { $eq: ["$workerId", "$$wId"] },
+                          { $gte: ["$date", getTodayStart()] },
+                          { $lte: ["$date", getTodayEnd()] },
+                          { $eq: ["$isFullDay", false] },
+                          { $in: ["$status", [SLOT_STATUS.RESERVED, SLOT_STATUS.BOOKED]] },
+                          { $lt: ["$startTime", getCurrentTime()] },
+                          { $gt: ["$endTime", getCurrentTime()] },
+                        ],
+                      },
+                    },
+                  },
+                  { $limit: 1 },
+                ],
+                as: "activeSlots",
+              },
+            } as PipelineStage,
+            { $match: { activeSlots: { $size: 0 } } } as PipelineStage,
           ]
         : []),
       {
@@ -318,4 +418,11 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     const total = res[0]?.total?.[0]?.count ?? 0;
     return { workersRaw, total };
   }
+
+  private toMinutes = (timeField: string) => ({
+    $add: [
+      { $multiply: [{ $toInt: { $substr: [timeField, 0, 2] } }, 60] },
+      { $toInt: { $substr: [timeField, 3, 2] } },
+    ],
+  });
 }

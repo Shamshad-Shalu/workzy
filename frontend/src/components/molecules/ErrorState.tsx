@@ -21,11 +21,8 @@ export default function ErrorState({
       <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4 text-destructive">
         <AlertCircle className="w-5 h-5" />
       </div>
-
       <h3 className="font-semibold text-sm mb-1">{title}</h3>
-
       <p className="text-xs text-muted-foreground max-w-xs">{description}</p>
-
       {onRetry && (
         <button
           onClick={onRetry}

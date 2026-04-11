@@ -1,5 +1,14 @@
 import { Type } from "class-transformer";
-import { IsDate, IsInt, IsMongoId, IsNumber, IsOptional, IsString, Min } from "class-validator";
+import {
+  IsArray,
+  IsDate,
+  IsInt,
+  IsMongoId,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
+} from "class-validator";
 
 export class CreateSlotDTO {
   @IsMongoId()
@@ -20,11 +29,25 @@ export class CreateSlotDTO {
   @Min(1)
   itemCount?: number;
 
-  @IsOptional()
   @IsNumber()
-  lat?: number;
+  lat!: number;
 
-  @IsOptional()
   @IsNumber()
-  lng?: number;
+  lng!: number;
+}
+
+export class CreateQuoteSlotsDTO {
+  @IsMongoId()
+  serviceId!: string;
+
+  @IsArray()
+  @Type(() => Date)
+  @IsDate({ message: "each date must be a valid date" })
+  dates!: Date[];
+
+  @IsNumber()
+  lat!: number;
+
+  @IsNumber()
+  lng!: number;
 }

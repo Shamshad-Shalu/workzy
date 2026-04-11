@@ -6,7 +6,6 @@ import {
   HTTPSTATUS,
   ROLE,
   SERVER,
-  SERVICE,
   StripeAccountStatus,
   WORKER,
   WORKER_STATUS,
@@ -26,7 +25,7 @@ import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
 import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
 import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker, WorkerListingEntity, WorkerListingFilters } from "@/types/worker";
+import { IWorker, WorkerListingFilters } from "@/types/worker";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -225,23 +224,7 @@ export class WorkerService implements IWorkerService {
     serviceId: string,
     data: WorkerListingFilters
   ): Promise<{ total: number; workers: WorkerListingResponseDto[] }> {
-    if (!serviceId) {
-      throw new CustomError(SERVICE.REQUIRED, HTTPSTATUS.BAD_REQUEST);
-    }
-    const { lat, lng, radiusKm, ...rest } = data;
-    let workersRaw: WorkerListingEntity[];
-    let total: number;
-
-    if (lat && lng && radiusKm) {
-      ({ workersRaw, total } = await this._workerRepository.listWorkers(serviceId, {
-        lat,
-        lng,
-        radiusKm,
-        ...rest,
-      }));
-    } else {
-      ({ workersRaw, total } = await this._serviceRepository.listWorkers(serviceId, data));
-    }
+    const { workersRaw, total } = await this._workerRepository.listWorkers(serviceId, data);
     const workers = await WorkerListingResponseDto.fromEntities(workersRaw, this._s3Service);
     return { total, workers };
   }

@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 dayjs.extend(duration);
+
 export function formatTime12(time: string): string {
   return dayjs(`2000-01-01 ${time}`).format('h:mm A');
 }
@@ -23,13 +24,16 @@ export function formatDuration(minutes: number): string {
 export function formatSmartDate(date: string | Date): string {
   const d = dayjs(date);
   const today = dayjs();
+  const tomorrow = today.add(1, 'day');
+  const yesterday = today.subtract(1, 'day');
 
-  if (d.isSame(today, 'day')) {
-    return 'Today';
-  }
-  if (d.isSame(today.add(1, 'day'), 'day')) {
-    return 'Tomorrow';
-  }
+  if (d.isSame(today, 'day')) {return 'Today';}
+  if (d.isSame(tomorrow, 'day')) {return 'Tomorrow';}
+  if (d.isSame(yesterday, 'day')) {return 'Yesterday';}
 
   return d.format('dddd, DD MMM');
+}
+
+export function calculateEndTime(startTime: string, durationMins: number): string {
+  return dayjs(startTime, 'HH:mm').add(durationMins, 'minutes').format('h:mm A');
 }

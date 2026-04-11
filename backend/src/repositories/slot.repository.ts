@@ -1,4 +1,5 @@
 import { injectable } from "inversify";
+import { Types } from "mongoose";
 
 import { SLOT_STATUS } from "@/constants/booking";
 import { BaseRepository } from "@/core/abstracts/base.repository";
@@ -25,5 +26,17 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
       reservedUntil: { $lt: new Date() },
     });
     return result.deletedCount;
+  }
+
+  findManyByIds(ids: string[]): Promise<ISlot[]> {
+    return this.model.find({
+      _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
+    });
+  }
+
+  async deleteManyByIds(ids: string[]): Promise<void> {
+    await this.model.deleteMany({
+      _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
+    });
   }
 }

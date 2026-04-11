@@ -33,3 +33,14 @@ export const SLOT_STATUS = {
 export const SLOT_STATUS_VALUES = Object.values(SLOT_STATUS);
 
 export type SlotStatus = (typeof SLOT_STATUS)[keyof typeof SLOT_STATUS];
+
+export const QUOTE_STATUS = {
+  PENDING: "pending",
+  REJECTED: "rejected",
+  ACCEPETED: "accepted",
+  EXPIRED: "expired",
+} as const;
+
+export const QUOTE_STATUS_VALUES = Object.values(QUOTE_STATUS);
+
+export type QuoteStatus = (typeof QUOTE_STATUS)[keyof typeof QUOTE_STATUS];

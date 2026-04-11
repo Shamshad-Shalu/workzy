@@ -16,8 +16,8 @@ const ServiceSchema: Schema<IService> = new Schema(
     },
     rate: { type: Number, required: true },
     description: { type: String },
-    estimatedDuration: { type: Number },
-    bufferTime: { type: Number },
+    estimatedDuration: { type: Number, default: 60 },
+    bufferTime: { type: Number, default: 0 },
     maxTravelRadius: { type: Number, default: 20 },
     bulkDiscounts: {
       type: [
