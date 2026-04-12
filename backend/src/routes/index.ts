@@ -5,6 +5,7 @@ import authRoute from "./auth.routes";
 import bookingRoutes from "./booking.routes";
 import categoryRoutes from "./category.routes";
 import homeRoutes from "./home.routes";
+import leaveRoutes from "./leave.routes";
 import paymentRoutes from "./payment.routes";
 import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
@@ -29,5 +30,6 @@ router.use("/subscription", subscriptionRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/slots", slotRoutes);
 router.use("/booking", bookingRoutes);
+router.use("/leave", leaveRoutes);
 
 export default router;

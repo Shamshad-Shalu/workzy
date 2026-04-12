@@ -27,9 +27,15 @@ export function formatSmartDate(date: string | Date): string {
   const tomorrow = today.add(1, 'day');
   const yesterday = today.subtract(1, 'day');
 
-  if (d.isSame(today, 'day')) {return 'Today';}
-  if (d.isSame(tomorrow, 'day')) {return 'Tomorrow';}
-  if (d.isSame(yesterday, 'day')) {return 'Yesterday';}
+  if (d.isSame(today, 'day')) {
+    return 'Today';
+  }
+  if (d.isSame(tomorrow, 'day')) {
+    return 'Tomorrow';
+  }
+  if (d.isSame(yesterday, 'day')) {
+    return 'Yesterday';
+  }
 
   return d.format('dddd, DD MMM');
 }

@@ -14,3 +14,11 @@ export function getTodayStart(): Date {
 export function getTodayEnd(): Date {
   return dayjs().endOf("day").toDate();
 }
+
+export function getMonthRange(date?: Date) {
+  const base = date ? dayjs(date) : dayjs();
+  return {
+    start: base.startOf("month").toDate(),
+    end: base.endOf("month").toDate(),
+  };
+}

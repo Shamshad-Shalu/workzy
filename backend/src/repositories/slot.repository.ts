@@ -39,4 +39,12 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
       _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
     });
   }
+  async hasBookedSlotsInRange(workerId: string, from: Date, to: Date): Promise<boolean> {
+    const count = await this.model.countDocuments({
+      workerId: new Types.ObjectId(workerId),
+      date: { $gte: from, $lte: to },
+      status: { $in: [SLOT_STATUS.BOOKED, SLOT_STATUS.RESERVED] },
+    });
+    return count > 0;
+  }
 }

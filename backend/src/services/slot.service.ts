@@ -1,5 +1,5 @@
 import dayjs from "dayjs";
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
 import { CATEGORY, HTTPSTATUS, PRICING_MODE, SERVICE, SLOT, WORKER } from "@/constants";
@@ -23,7 +23,7 @@ import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
 const QUOTE_TTL_SECONDS = 24 * 60 * 60;
-
+@injectable()
 export class SlotService implements ISlotService {
   constructor(
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
