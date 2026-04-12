@@ -16,6 +16,7 @@ const TABS = [
   { name: 'About', path: '' },
   { name: 'Documents', path: 'documents' },
   { name: 'Account', path: 'account' },
+  { name: 'Leaves', path: 'leaves' },
 ];
 
 export default function WorkerProfileLayout({

@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
 import WorkerBookingsPage from '@/features/worker/booking/pages/WorkerBookingsPage';
+import WorkerLeaveManagement from '@/features/worker/profile/pages/WorkerLeaveManagement ';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -38,6 +39,7 @@ export default function WorkerRoutes() {
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
             <Route path="account" element={<AccountPage />} />
+            <Route path="leaves" element={<WorkerLeaveManagement />} />
           </Route>
         </Route>
       </Route>

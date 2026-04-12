@@ -1,15 +1,17 @@
+import type { BookingFilterStatus } from '@/constants';
 import { BOOKING_API, PAYMENT_API } from '@/constants/apiRoutes/booking.routes';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
-import type {
-  BookingDetails,
-  BookingListParams,
-  BookingResponse,
-  PaymentDetails,
-} from '@/types/booking';
+import type { BookingDetails, BookingResponse, PaymentDetails } from '@/types/booking';
 
+interface BookingListParams {
+  status: BookingFilterStatus;
+  limit: number;
+  cursor?: string;
+  sort: string;
+}
 const BookingService = {
   createBooking: async (data: bookingFormData): Promise<{ url: string }> => {
     const res = await api.post(BOOKING_API.ROOT, data);

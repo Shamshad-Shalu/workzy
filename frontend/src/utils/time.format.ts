@@ -43,3 +43,10 @@ export function formatSmartDate(date: string | Date): string {
 export function calculateEndTime(startTime: string, durationMins: number): string {
   return dayjs(startTime, 'HH:mm').add(durationMins, 'minutes').format('h:mm A');
 }
+export function formatDateRangeDuration(start: string | Date, end: string | Date): string {
+  const startDate = dayjs(start).startOf('day');
+  const endDate = dayjs(end).startOf('day');
+  const days = endDate.diff(startDate, 'day') + 1;
+
+  return days === 1 ? '1 day' : `${days} days`;
+}

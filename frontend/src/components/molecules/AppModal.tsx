@@ -18,7 +18,7 @@ import type React from 'react';
 interface AppModalProps {
   open: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   title?: string;
   description?: string;
   isDescriptionHidden?: boolean;

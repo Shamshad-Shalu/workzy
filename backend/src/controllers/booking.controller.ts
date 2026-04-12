@@ -119,8 +119,8 @@ export class BookingController implements IBookingController {
 
   private parseQuery(req: Request): BookingListParams {
     const status = (req.query.status as string) || "all";
-    const parsedLimit = parseInt(req.query.limit as string, 10);
-    const limit = Number.isNaN(parsedLimit) ? 10 : Math.min(Math.max(parsedLimit, 1), 10);
+    const parsedLimit = parseInt(req.query.limit as string);
+    const limit = Math.min(isNaN(parsedLimit) ? 10 : parsedLimit, 20);
     const rawCursor = (req.query.cursor as string | undefined) ?? null;
     const sortOrder = (req.query.sort as string) === "asc" ? "asc" : "desc";
     const cursor = rawCursor
