@@ -159,12 +159,16 @@ export class BookingService implements IBookingService {
 
     const url = await this._paymentService.createBookingPaymentCheckout({
       bookingId: booking._id.toString(),
+      workerAmount: booking.total - booking.platformFee,
+      workerId: booking.workerId.toString(),
       serviceName: category.name,
       slotId,
       amount: booking.total,
       userId,
       platformFee,
       workerStripeId,
+      userName: user.name,
+      workerName: booking.snapshot.worker.name,
     });
     return { url };
   }

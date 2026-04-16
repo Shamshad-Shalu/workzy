@@ -36,6 +36,7 @@ export interface AddSubscriptionDto {
   userId: string;
   subscriptionId: string;
   amount: number;
+  userName: string;
 }
 
 export interface AdminSubscriptionListEntity {

@@ -71,6 +71,7 @@ export class SubscriptionService implements ISubscriptionService {
       subscriptionId: subscription._id.toString(),
       amount,
       name,
+      userName: worker.displayName,
     });
     return {
       url,

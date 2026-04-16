@@ -1,7 +1,8 @@
 import Stripe from "stripe";
 
+import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking";
-import { BookingCheckoutParams, VerifySessionType } from "@/types/payment";
+import { BookingCheckoutParams, PaymentListQueryInput, VerifySessionType } from "@/types/payment";
 import { AddSubscriptionDto } from "@/types/subscription";
 import { IWorker } from "@/types/worker";
 
@@ -18,4 +19,16 @@ export interface IPaymentService {
     amount: number;
   }): Promise<string>;
   releaseBookingPayment(booking: IBooking): Promise<void>;
+
+  getPayments(
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentAdminDTO[]; nextCursor: string | null }>;
+  getUserPayments(
+    userId: string,
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentUserDTO[]; nextCursor: string | null }>;
+  getWorkerPayments(
+    workerId: string,
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentWorkerDTO[]; nextCursor: string | null }>;
 }

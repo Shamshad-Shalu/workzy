@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 import Stripe from "stripe";
@@ -28,8 +29,14 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
+import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking";
-import { BookingCheckoutParams, VerifySessionType } from "@/types/payment";
+import {
+  BookingCheckoutParams,
+  PaymentListQuery,
+  PaymentListQueryInput,
+  VerifySessionType,
+} from "@/types/payment";
 import { AddSubscriptionDto } from "@/types/subscription";
 import { IWorker } from "@/types/worker";
 import CustomError from "@/utils/customError";
@@ -48,7 +55,7 @@ export class PaymentService implements IPaymentService {
   ) {}
 
   async createSubscriptionCheckout(data: AddSubscriptionDto): Promise<string> {
-    const { name, workerId, subscriptionId, amount, userId } = data;
+    const { name, workerId, subscriptionId, amount, userId, userName } = data;
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -79,20 +86,36 @@ export class PaymentService implements IPaymentService {
     });
     await this._paymentRepo.create({
       transactionId: generateTxnCode("TXN"),
+      title: name,
       userId: new Types.ObjectId(userId),
+      workerId: new Types.ObjectId(workerId),
       billType: BILL_TYPE.SUBSCRIPTION,
       referenceId: new Types.ObjectId(subscriptionId),
       amount,
       currency: "inr",
       provider: PAYMENT_PROVIDER.STRIPE,
       status: PAYMENT_STATUS.PENDING,
+      userName,
       sessionId: session.id,
     });
     return session.url!;
   }
 
   async createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string> {
-    const { userId, bookingId, amount, slotId, serviceName, platformFee, workerStripeId } = data;
+    const {
+      userId,
+      bookingId,
+      userName,
+      workerName,
+      amount,
+      slotId,
+      serviceName,
+      platformFee,
+      workerId,
+      workerAmount,
+      workerStripeId,
+    } = data;
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [
@@ -128,16 +151,23 @@ export class PaymentService implements IPaymentService {
         userId,
       },
     });
+
     await this._paymentRepo.create({
       transactionId: generateTxnCode("TXN"),
+      title: serviceName,
       userId: new Types.ObjectId(userId),
+      workerId: new Types.ObjectId(workerId),
+      workerAmount,
+      platformFee,
       billType: BILL_TYPE.BOOKING,
       referenceId: new Types.ObjectId(bookingId),
-      status: BOOKING_PAYMENT_STATUS.PENDING,
+      status: PAYMENT_STATUS.PENDING,
       amount,
       currency: "inr",
       provider: PAYMENT_PROVIDER.STRIPE,
       sessionId: session.id,
+      workerName,
+      userName,
     });
     return session.url!;
   }
@@ -191,14 +221,18 @@ export class PaymentService implements IPaymentService {
     });
     await this._paymentRepo.create({
       transactionId: generateTxnCode("TXN"),
+      title: booking.snapshot.category.name + " - Extra Charge",
       userId: new Types.ObjectId(userId),
-      billType: BILL_TYPE.EXTRA_CHARGE, //BOOKING,  here should use the this extra charge or keep  this booking
+      workerId: new Types.ObjectId(booking.workerId),
+      billType: BILL_TYPE.EXTRA_CHARGE,
       referenceId: new Types.ObjectId(booking._id.toString()),
       amount,
       currency: "inr",
       provider: PAYMENT_PROVIDER.STRIPE,
       status: PAYMENT_STATUS.PENDING,
       sessionId: session.id,
+      userName: booking.snapshot.user.name,
+      workerName: booking.snapshot.worker.name,
     });
     return session.url!;
   }
@@ -473,5 +507,51 @@ export class PaymentService implements IPaymentService {
       ),
       ...(slotId && userId ? [this._slotService.releaseSlot(slotId, userId)] : []),
     ]);
+  }
+
+  async getPayments(
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentAdminDTO[]; nextCursor: string | null }> {
+    const query = this.mapToPaymentDTO(input);
+    const { payments, nextCursor } = await this._paymentRepo.getPayments(query);
+    return {
+      payments: PaymentAdminDTO.fromEntities(payments),
+      nextCursor,
+    };
+  }
+
+  async getUserPayments(
+    userId: string,
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentUserDTO[]; nextCursor: string | null }> {
+    const query = this.mapToPaymentDTO(input);
+    const { payments, nextCursor } = await this._paymentRepo.getPayments({ userId, ...query });
+    return { payments: PaymentUserDTO.fromEntities(payments), nextCursor };
+  }
+
+  async getWorkerPayments(
+    workerId: string,
+    input: PaymentListQueryInput
+  ): Promise<{ payments: PaymentWorkerDTO[]; nextCursor: string | null }> {
+    const query = this.mapToPaymentDTO(input);
+    const { payments, nextCursor } = await this._paymentRepo.getPayments({ workerId, ...query });
+    return { payments: PaymentWorkerDTO.fromEntities(payments), nextCursor };
+  }
+
+  private mapToPaymentDTO(input: PaymentListQueryInput): PaymentListQuery {
+    const { cursor, fromDate, toDate, ...rest } = input;
+    const fromDateTime = fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined;
+    const toDateTime = toDate ? dayjs(toDate).endOf("day").toDate() : undefined;
+    return {
+      ...rest,
+      cursor: cursor
+        ? {
+            createdAt: new Date(cursor.createdAt),
+            _id: cursor.id,
+          }
+        : undefined,
+      fromDate: fromDateTime,
+      toDate: toDateTime,
+    };
   }
 }
