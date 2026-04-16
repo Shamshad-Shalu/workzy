@@ -1,7 +1,7 @@
 import { AnimatePresence, motion, type MotionProps } from 'framer-motion';
 import { ChevronLeft, SlidersHorizontal, MapPin } from 'lucide-react';
 import { useMemo, useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -23,7 +23,9 @@ const fadeUp = (delay = 0): MotionProps => ({
 
 export default function WorkerListingPage() {
   const { serviceId } = useParams();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { isAuthenticated } = useAppSelector(s => s.auth);
   const { radius, latitude, longitude, city } = useAppSelector((s: RootState) => s.location);
 
   const [bookingWorker, setBookingWorker] = useState<WorkerListingInfo | null>(null);
@@ -35,6 +37,14 @@ export default function WorkerListingPage() {
   const limit = 10;
   const { data: selectedService } = useServiceDetails(serviceId);
   const filterConfig = useMemo(() => getFilterConfig(selectedService ?? null), [selectedService]);
+
+  const handleBook = (worker: WorkerListingInfo) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
+    setBookingWorker(worker);
+  };
 
   const filterParams = useMemo(
     () => ({
@@ -162,7 +172,7 @@ export default function WorkerListingPage() {
                   onPageChange={setPage}
                   hasActiveFilters={hasActiveFilters}
                   onClearFilters={resetFilters}
-                  onBook={worker => setBookingWorker(worker)}
+                  onBook={handleBook}
                 />
               </motion.div>
             )}

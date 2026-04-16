@@ -1,17 +1,26 @@
-import { PlayCircle, Info } from 'lucide-react';
+import { PlayCircle, Info, Eye } from 'lucide-react';
+import { useState } from 'react';
 
 import Button from '@/components/atoms/Button';
+import Input from '@/components/atoms/Input';
+import Label from '@/components/atoms/Label';
 import { AppModal } from '@/components/molecules/AppModal';
-import type { BookingCard } from '@/types/booking';
+import type { BookingListItem } from '@/types/booking';
 import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 interface WorkerStartJobModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit: (id: string) => Promise<void>;
-  booking: BookingCard | null;
+  onSubmit: (id: string, otp: string) => Promise<void>;
+  booking: BookingListItem | null;
   isSubmitting?: boolean;
 }
+const validateOtp = (value: string) => {
+  if (!value) {return 'OTP is required';}
+  if (!/^\d+$/.test(value)) {return 'OTP must contain only numbers';}
+  if (value.length !== 6) {return 'OTP must be exactly 6 digits';}
+  return '';
+};
 
 export default function WorkerStartJobModal({
   open,
@@ -20,11 +29,23 @@ export default function WorkerStartJobModal({
   booking,
   isSubmitting = false,
 }: WorkerStartJobModalProps) {
+  const [otp, setOtp] = useState('');
+  const [error, setError] = useState('');
+
   if (!booking) {
     return null;
   }
-
   const { category, date, startTime } = booking;
+
+  const handleSubmit = async () => {
+    const validationError = validateOtp(otp);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setError('');
+    await onSubmit(booking.id, otp);
+  };
 
   return (
     <AppModal
@@ -40,7 +61,7 @@ export default function WorkerStartJobModal({
           </Button>
           <Button
             variant="blue"
-            onClick={() => onSubmit(booking.id)}
+            onClick={handleSubmit}
             loading={isSubmitting}
             iconLeft={<PlayCircle size={16} />}
           >
@@ -50,7 +71,7 @@ export default function WorkerStartJobModal({
       }
     >
       <div className="flex flex-col gap-4">
-        <div className="flex gap-3 p-3 rounded-xl border bg-blue-50 text-blue-700 border-blue-200">
+        <div className="flex gap-3 p-3 rounded-xl border bg-blue-500/15 text-blue-400 border-blue-500/30">
           <Info size={18} className="flex-shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             Starting the job will notify the client that you have arrived and work is commencing.
@@ -77,6 +98,23 @@ export default function WorkerStartJobModal({
               {booking.addressLabel}
             </span>
           </div>
+        </div>
+        <div>
+          <Label>Enter OTP from Client</Label>
+          <Input
+            error={error}
+            value={otp}
+            leftIcon={<Eye size={16} />}
+            onChange={e => {
+              const value = e.target.value.replace(/\D/g, '');
+              if (value.length <= 6) {
+                setOtp(value);
+                setError('');
+              }
+            }}
+            placeholder="Enter 6-digit OTP"
+            disabled={isSubmitting}
+          />
         </div>
       </div>
     </AppModal>

@@ -100,6 +100,7 @@ export interface WorkerListingFilters {
   maxPrice?: number;
   minRating?: number;
   availableNow?: boolean;
+  workerId?: string;
   page: number;
   limit: number;
 }
@@ -115,7 +116,8 @@ export interface WorkerListingEntity {
   experience: number;
   serviceRate: number;
   bulkDiscounts: BulkDiscountType[] | null;
-  estimatedDuration: number | null;
+  estimatedDuration: number;
+  bufferTime: number;
   pricingMode: PricingMode;
   serviceType: ServiceType;
   averageRating: number;

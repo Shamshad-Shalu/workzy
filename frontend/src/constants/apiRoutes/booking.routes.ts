@@ -17,6 +17,8 @@ export const BOOKING_API = {
   ACCEPT: (id: string) => booking(`/${id}/accept`),
   REJECT: (id: string) => booking(`/${id}/reject`),
   START: (id: string) => booking(`/${id}/start`),
+  EN_ROUTE: (id: string) => booking(`/${id}/en-route`),
+  MARK_REACHED: (id: string) => booking(`/${id}/reached`),
   COMPLETE: (id: string) => booking(`/${id}/complete`),
   APPROVE: (id: string) => booking(`/${id}/approve`),
 

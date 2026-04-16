@@ -52,7 +52,6 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
     pricing,
     lat,
     lng,
-    isRemote,
     isReleasing,
     isReserving,
     isBooking,
@@ -174,8 +173,8 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
             <DateStep
               worker={worker}
               booking={booking}
-              lat={isRemote ? undefined : lat}
-              lng={isRemote ? undefined : lng}
+              lat={lat}
+              lng={lng}
               onDateSelect={handleDateSelect}
             />
           )}
@@ -183,8 +182,8 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
             <SlotsStep
               worker={worker}
               booking={booking}
-              lat={isRemote ? undefined : lat}
-              lng={isRemote ? undefined : lng}
+              lat={lat}
+              lng={lng}
               onSelectSlot={handleSlotSelect}
             />
           )}

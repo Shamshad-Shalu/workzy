@@ -155,6 +155,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       minPrice,
       minRating,
       radiusKm,
+      workerId,
     } = params;
 
     const nowMinutes = timeToMinutes(getCurrentTime());
@@ -173,6 +174,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
             status: WORKER_STATUS.VERIFIED,
             stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
             ...(minRating !== undefined && { averageRating: { $gte: minRating } }),
+            ...(workerId && { _id: { $ne: new Types.ObjectId(workerId) } }),
           },
         },
       },
@@ -386,6 +388,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                 averageRating: "$averageRating",
                 serviceRate: "$services.rate",
                 estimatedDuration: "$services.estimatedDuration",
+                bufferTime: "$services.bufferTime",
                 categoryName: "$category.name",
                 pricingMode: "$category.pricingMode",
                 serviceType: "$category.serviceType",

@@ -18,6 +18,8 @@ export const STEP_LABELS: Record<BookingStep, string> = {
 export const BOOKING_STATUS = {
   PENDING: 'pending',
   CONFIRMED: 'confirmed',
+  EN_ROUTE: 'en_route',
+  REACHED: 'reached',
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
   APPROVED: 'approved',
@@ -58,6 +60,14 @@ export const BOOKING_EMPTY_MESSAGES: Record<BookingFilterStatus, { title: string
     sub: 'Bookings accepted by workers appear here.',
   },
   in_progress: {
+    title: 'Nothing in progress',
+    sub: 'Active jobs will be listed here.',
+  },
+  en_route: {
+    title: 'Nothing in progress',
+    sub: 'Active jobs will be listed here.',
+  },
+  reached: {
     title: 'Nothing in progress',
     sub: 'Active jobs will be listed here.',
   },

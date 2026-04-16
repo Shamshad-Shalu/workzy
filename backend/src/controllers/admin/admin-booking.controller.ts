@@ -2,47 +2,48 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { BookingPaymentStatus, HTTPSTATUS } from "@/constants";
+import { HTTPSTATUS } from "@/constants";
 import { IAdminBookingController } from "@/core/interfaces/controllers/admin/IAdminBookingController";
 import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBookingService";
 import { TYPES } from "@/di/types";
-import { AdminBookingListParams, ListingStatus } from "@/types/booking";
+import {
+  AdminCancelDTO,
+  AdminNoteDTO,
+  AdminRefundDTO,
+  ResolveDisputeDTO,
+} from "@/dtos/requests/admin/booking.dto";
 
 @injectable()
 export class AdminBookingController implements IAdminBookingController {
   constructor(
     @inject(TYPES.AdminBookingService) private _adminBookingService: IAdminBookingService
   ) {}
-  getAllBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const query = this.parseAdminQuery(req);
-    const result = await this._adminBookingService.getAllBookings(query);
-    res.status(HTTPSTATUS.OK).json(result);
+
+  resolveDispute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as ResolveDisputeDTO;
+    const { message } = await this._adminBookingService.resolveDispute(bookingId, data);
+    res.status(HTTPSTATUS.OK).json({ message });
   });
 
-  getUserBookings = asyncHandler(async (req: Request, _res: Response): Promise<void> => {
-    const userId = req.user?.id;
-    console.log(userId);
-  });
-  getWorkerBookings = asyncHandler(async (req: Request, _res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
-    console.log(workerId);
+  cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as AdminCancelDTO;
+    await this._adminBookingService.adminCancelBooking(bookingId, data);
+    res.status(HTTPSTATUS.OK).json({ message: "Booking cancelled by admin." });
   });
 
-  private parseAdminQuery(req: Request): AdminBookingListParams {
-    const status = (req.query.status as string) || "all";
-    const paymentStatus = (req.query.paymentStatus as string) || "all";
-    const search = (req.query.search as string) || "";
-    const parsedLimit = parseInt(req.query.limit as string, 10);
-    const limit = Number.isNaN(parsedLimit) ? 10 : Math.min(Math.max(parsedLimit, 1), 100);
-    const parsedPage = parseInt(req.query.page as string, 10);
-    const page = Number.isNaN(parsedPage) ? 1 : Math.max(parsedPage, 1);
+  addNote = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as AdminNoteDTO;
+    await this._adminBookingService.addAdminNote(bookingId, data);
+    res.status(HTTPSTATUS.OK).json({ message: "Admin note updated." });
+  });
 
-    return {
-      status: status as ListingStatus,
-      paymentStatus: paymentStatus as BookingPaymentStatus | "all",
-      limit,
-      page,
-      search,
-    };
-  }
+  refund = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as AdminRefundDTO;
+    await this._adminBookingService.adminRefund(bookingId, data);
+    res.status(HTTPSTATUS.OK).json({ message: "Refund processed successfully." });
+  });
 }

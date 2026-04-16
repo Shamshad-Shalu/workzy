@@ -3,14 +3,13 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
-  IsDate,
   IsIn,
   IsInt,
   IsMongoId,
   IsNumber,
   IsOptional,
   IsString,
-  Matches,
+  Length,
   MaxLength,
   Min,
   MinLength,
@@ -27,6 +26,19 @@ class BookingLocationDTO {
   @Type(() => LocationDTO)
   location!: LocationDTO;
 }
+
+// class BookingScheduleEntryDTO {
+//   @Type(() => Date)
+//   @IsDate()
+//   date!: Date;
+
+//   @Matches(/^\d{2}:\d{2}$/)
+//   startTime!: string;
+
+//   @Matches(/^\d{2}:\d{2}$/)
+//   endTime!: string;
+// }
+
 export class CreatebookingDTO {
   @IsMongoId()
   workerId!: string;
@@ -37,29 +49,14 @@ export class CreatebookingDTO {
   @IsMongoId()
   slotId!: string;
 
-  @Type(() => Date)
-  @IsDate({ message: "date must be a valid date" })
-  date!: Date;
-
-  @Matches(/^\d{2}:\d{2}$/)
-  startTime!: string;
-
-  @Matches(/^\d{2}:\d{2}$/)
-  endTime!: string;
-
   @IsOptional()
   @IsInt()
   @Min(1)
   itemCount?: number;
 
-  @IsInt()
-  @Min(10)
-  duration!: number;
-
-  @IsOptional()
   @ValidateNested()
   @Type(() => BookingLocationDTO)
-  address!: BookingLocationDTO | null;
+  address!: BookingLocationDTO;
 
   @IsOptional()
   @IsString()
@@ -78,6 +75,12 @@ export class RejectBookingDTO {
   @MinLength(10)
   @MaxLength(500)
   reason!: string;
+}
+
+export class VerifyOtpDTO {
+  @IsString()
+  @Length(6, 6, { message: "OTP must be exactly 4 digits" })
+  otp!: string;
 }
 
 export class EvidenceItemDTO {

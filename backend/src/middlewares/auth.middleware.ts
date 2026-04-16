@@ -45,3 +45,20 @@ export const authenticate = (roles: Array<Role>) => {
     }
   };
 };
+
+export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return next();
+    }
+    const decoded = verifyAccessToken(token);
+    req.user = decoded;
+
+    return next();
+  } catch (error) {
+    logger.warn("Optional auth failed:", error);
+    return next();
+  }
+};

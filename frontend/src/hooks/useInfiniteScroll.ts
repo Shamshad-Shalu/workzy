@@ -8,8 +8,9 @@ export const useInfiniteScroll = (
   const observerRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
     const el = observerRef.current;
-    if (!el) {return;}
-
+    if (!el) {
+      return;
+    }
     const observer = new IntersectionObserver(
       entries => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {

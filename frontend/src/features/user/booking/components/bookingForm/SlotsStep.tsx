@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import { Clock } from 'lucide-react';
 import { useMemo } from 'react';
@@ -8,12 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAvailableSlots } from '@/features/user/slot/hooks/useSlot';
 import type { AvailableSlot, BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import {
-  calculateEndTime,
-  formatDuration,
-  formatSmartDate,
-  formatTime12,
-} from '@/utils/time.format';
+import { formatDuration, formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 export default function SlotsStep({
   worker,
@@ -146,9 +142,13 @@ export default function SlotsStep({
         >
           <p className="text-xs font-semibold text-emerald-700">
             ✓ {formatTime12(booking.slot.startTime)} →
-            {calculateEndTime(booking.slot?.startTime, totalMinutes)}
+            {formatTime12(
+              dayjs(`2000-01-01 ${booking.slot.endTime}`)
+                .subtract(worker.bufferTime, 'minute')
+                .format('HH:mm')
+            )}
           </p>
-          {}
+          <p className="text-[10px] text-muted-foreground">Includes setup & travel time</p>
         </motion.div>
       )}
 

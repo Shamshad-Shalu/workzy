@@ -1,0 +1,179 @@
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { toast } from 'sonner';
+
+import type { BookingFilterStatus } from '@/constants';
+import { bookingKeys, useAcceptBooking } from '@/features/booking/hooks/useBooking';
+import BookingService from '@/services/booking.service';
+import type { BookingListingResponse, BookingListItem } from '@/types/booking';
+
+import type { BookigCompleteForm } from '../components/WorkerCompleteModal';
+import type { ExtraChargeFormType } from '../validation/extraChargeSchema';
+
+const LIMIT = 5;
+
+export function useWorkerBooking(status: BookingFilterStatus) {
+  return useInfiniteQuery<
+    BookingListingResponse,
+    Error,
+    { pages: BookingListingResponse[]; pageParams: (string | undefined)[] },
+    ReturnType<typeof bookingKeys.worker>,
+    string | undefined
+  >({
+    queryKey: bookingKeys.worker(status),
+    queryFn: ({ pageParam }) =>
+      BookingService.getWorkerBookings({
+        status,
+        limit: LIMIT,
+        cursor: pageParam ? JSON.parse(pageParam) : null,
+      }),
+    initialPageParam: undefined,
+    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
+  });
+}
+
+export function useMarkEnRoute() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, string>({
+    mutationFn: (id: string) => BookingService.markEnRoute(id),
+    onSuccess: res => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      toast.success(res.message);
+    },
+  });
+}
+
+export function useMarkReached() {
+  const qc = useQueryClient();
+  return useMutation<{ message: string }, Error, string>({
+    mutationFn: (id: string) => BookingService.markReached(id),
+    onSuccess: res => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      toast.success(res.message);
+    },
+  });
+}
+export function useStartJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, otp }: { id: string; otp: string }) =>
+      BookingService.startJob({ bookingId: id, otp }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+  });
+}
+export function useRejectBooking() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: string; reason: string }) =>
+      BookingService.rejectBooking(id, reason),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+  });
+}
+
+export function useFinishJob() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: BookigCompleteForm }) =>
+      BookingService.completeJob(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+  });
+}
+export function useExtraCharge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: ExtraChargeFormType }) =>
+      BookingService.requestExtraCharge(id, data),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+  });
+}
+
+export function useWorkerBookingHandler() {
+  const { mutateAsync: accept, isPending: isAccepting } = useAcceptBooking();
+  const { mutateAsync: startJobMutate, isPending: isStarting } = useStartJob();
+  const { mutateAsync: rejectBookingMutate, isPending: isRejecting } = useRejectBooking();
+  const { mutateAsync: finishJobMutate, isPending: isCompleting } = useFinishJob();
+  const { mutateAsync: requestExtraChargeMutate, isPending: isRequestingExtraCharge } =
+    useExtraCharge();
+
+  const [acceptBId, setAcceptBId] = useState<string | null>(null);
+  const [rejectBId, setRejectBId] = useState<string | null>(null);
+  const [finishBId, setFinishBId] = useState<string | null>(null);
+  const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
+  const [startB, setStartB] = useState<BookingListItem | null>(null);
+
+  async function acceptBooking(id: string) {
+    const res = await accept(id);
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setAcceptBId(null);
+  }
+
+  async function startJob(id: string, otp: string) {
+    const res = await startJobMutate({ id, otp });
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setStartB(null);
+  }
+
+  async function rejectBooking(reason: string) {
+    const res = await rejectBookingMutate({ id: rejectBId!, reason });
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setRejectBId(null);
+  }
+
+  async function finishJob(data: BookigCompleteForm) {
+    const res = await finishJobMutate({ id: finishBId!, data });
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setFinishBId(null);
+  }
+
+  async function requestExtraCharge(data: ExtraChargeFormType) {
+    if (!extraChargeBId) {return;}
+    const res = await requestExtraChargeMutate({ id: extraChargeBId, data });
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setExtraChargeBId(null);
+  }
+
+  return {
+    accept: {
+      acceptBId,
+      setAcceptBId,
+      acceptBooking,
+      isAccepting,
+    },
+    start: {
+      startB,
+      setStartB,
+      startJob,
+      isStarting,
+    },
+    reject: {
+      rejectBId,
+      setRejectBId,
+      rejectBooking,
+      isRejecting,
+    },
+    finish: {
+      finishBId,
+      setFinishBId,
+      finishJob,
+      isCompleting,
+    },
+    extraCharge: {
+      extraChargeBId,
+      setExtraChargeBId,
+      requestExtraCharge,
+      isRequestingExtraCharge,
+    },
+  };
+}

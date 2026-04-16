@@ -4,17 +4,25 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
-import type { BookingCard } from '@/types/booking';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 
 interface EvidenceModalProps {
   open: boolean;
   onClose: () => void;
-  booking: BookingCard | null;
+  bookingId: string | null;
 }
-export default function EvidenceModal({ open, onClose, booking }: EvidenceModalProps) {
+export default function EvidenceModal({ open, onClose, bookingId }: EvidenceModalProps) {
   const [tab, setTab] = useState<'before' | 'after'>('before');
   const [lbIdx, setLbIdx] = useState<number | null>(null);
 
+  const { booking, isLoading, error } = useBookingDetails(bookingId);
+  if (isLoading) {
+    return <Skeleton className="h-40 w-full" />;
+  }
+  if (error || !booking) {
+    return null;
+  }
   const evidence = booking?.evidence;
   const items: MediaItem[] = (evidence?.[tab] ?? []).map(i => ({
     url: i.url,

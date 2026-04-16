@@ -7,4 +7,5 @@ export const SLOT = {
   RELEASE_ERROR: "Slot not found or cannot be released",
   RELEASED: "Slot released successfully",
   NOT_AVAILABLE: "This slot is no longer available",
+  UNAUTHORIZED: "Unauthorized user for this slot",
 };

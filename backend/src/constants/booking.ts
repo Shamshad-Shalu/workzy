@@ -1,12 +1,15 @@
 export const BOOKING_STATUS = {
   PENDING: "pending", // payment success, worker notified
   CONFIRMED: "confirmed", //worker accepted
+  EN_ROUTE: "en_route", // worker heading to location ✦ from friend
+  REACHED: "reached", // worker arrived
   IN_PROGRESS: "in_progress", // worker started job
   COMPLETED: "completed", // job finished
   APPROVED: "approved", // user approved
   CANCELLED: "cancelled", // cancelled before start
   REJECTED: "rejected", // worker rejected
   DISPUTED: "disputed", // user raised dispute
+  // EXPIRED: "expired"
 } as const;
 
 export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);

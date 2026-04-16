@@ -6,7 +6,7 @@ import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
-import { authenticate } from "@/middlewares/auth.middleware";
+import { authenticate, optionalAuth } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
 const router = Router();
@@ -21,7 +21,7 @@ router.patch(
   authenticate([ROLE.WORKER, ROLE.USER]),
   workerController.reSubmitWorkerDocument
 );
-router.get("/service/:serviceId", workerController.listWorkers);
+router.get("/service/:serviceId", optionalAuth, workerController.listWorkers);
 router.get("/:workerId", workerController.getWorkerSummary);
 
 router.use(authenticate([ROLE.WORKER]));

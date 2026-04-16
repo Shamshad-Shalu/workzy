@@ -89,7 +89,8 @@ export interface WorkerListingInfo {
   profileImage: string;
   experience: number;
   serviceRate: number;
-  estimatedDuration: number | null;
+  estimatedDuration: number;
+  bufferTime: number;
   isAvailable: boolean;
   averageRating: number;
   completionRate: number | null;

@@ -32,6 +32,9 @@ const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/Worke
 const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
 
 const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
+const UserBookingDetailsPage = lazy(
+  () => import('@/features/user/booking/pages/UserBookingDetailsPage')
+);
 
 export default function UserRoutes() {
   return (
@@ -48,21 +51,21 @@ export default function UserRoutes() {
 
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
+          <Route path="/join-us" element={<JoinUsPage />} />
           <Route path="/services" element={<ServicePage />} />
           <Route path="/services/:serviceId" element={<WorkerListingPage />} />
-          <Route path="/join-us" element={<JoinUsPage />} />
-          <Route path="/bookings" element={<UserBookingsPage />} />
-
+          <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
+            <Route path="/bookings" element={<UserBookingsPage />} />
+            <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
+            <Route path="/profile" element={<UserProfilePage />} />
+          </Route>
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />
             <Route path="services" element={<WorkerServicesPage />} />
             <Route path="reviews" element={<WorkerReviewsPage />} />
           </Route>
-          <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
-            <Route path="/profile" element={<UserProfilePage />} />
-          </Route>
+          <Route path="*" element={<NotFound />} />
         </Route>
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>
   );

@@ -50,7 +50,7 @@ export function BookingStatusTabs({ active, onChange, counts }: Props) {
     <div
       ref={scrollRef}
       className={cn(
-        'flex w-full gap-2 overflow-x-auto pb-1 no-scrollbar',
+        'flex w-full gap-2 overflow-x-auto pb-1 no-scrollbar mb-5 ',
         '-mx-4 px-4 sm:mx-0 sm:px-0',
         'snap-x snap-mandatory'
       )}

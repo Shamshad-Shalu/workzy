@@ -6,14 +6,14 @@ import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
 import { createDescriptionRule } from '@/lib/validation/rules';
-import type { BookingCard } from '@/types/booking';
+import type { BookingListItem } from '@/types/booking';
 import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 interface CancelModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (note: string) => Promise<void>;
-  booking: BookingCard | null;
+  booking: BookingListItem | null;
   isSubmitting?: boolean;
 }
 
@@ -39,7 +39,8 @@ export default function CancelModal({
   if (!booking) {
     return null;
   }
-  const { category, date, startTime, endTime } = booking;
+  const { category, date, startTime, endTime, totalDays, endDate } = booking;
+  const isMultiday = totalDays > 1;
 
   const handleConfirm = async () => {
     const result = cancelReasonSchema.safeParse(reason);
@@ -86,11 +87,7 @@ export default function CancelModal({
       footer={footer}
     >
       <div className="flex flex-col gap-4">
-        <div
-          className="flex gap-3 p-3 rounded-xl border          
-                         bg-amber-500/15 text-amber-500 border-amber-500/30
-                        "
-        >
+        <div className="flex gap-3 p-3 rounded-xl border bg-amber-500/15 text-amber-500 border-amber-500/30 ">
           <AlertTriangle size={15} className="flex-shrink-0 mt-0.5" />
           <p className="text-sm leading-relaxed">
             Cancelling may incur a fee depending on timing. Payment will be refunded as per our
@@ -100,8 +97,10 @@ export default function CancelModal({
         <div className="bg-muted/60 border border-border rounded-xl p-3 flex flex-col gap-0.5">
           <p className="text-xs text-muted-foreground">Booking</p>
           <p className="text-sm font-medium text-foreground">
-            {category.name} — {formatSmartDate(date)} — {formatTime12(startTime)} —{' '}
-            {formatTime12(endTime)}
+            {category.name} — {formatSmartDate(date)} —
+            {isMultiday
+              ? `${formatSmartDate(endDate)} ${totalDays}Days`
+              : `${formatTime12(startTime)} — ${formatTime12(endTime)}`}
           </p>
         </div>
         <div className="flex flex-col gap-1.5">

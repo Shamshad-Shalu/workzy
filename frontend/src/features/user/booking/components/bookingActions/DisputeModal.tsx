@@ -8,15 +8,16 @@ import Button from '@/components/atoms/Button';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { createDescriptionRule } from '@/lib/validation/rules';
-import type { BookingCard } from '@/types/booking';
 import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
 interface DisputeModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (reason: string) => Promise<void>;
-  booking: BookingCard | null;
+  bookingId: string | null;
   isSubmitting?: boolean;
 }
 
@@ -30,9 +31,11 @@ export default function DisputeModal({
   open,
   onClose,
   onSubmit,
-  booking,
+  bookingId,
   isSubmitting = false,
 }: DisputeModalProps) {
+  const { booking, error, isLoading } = useBookingDetails(bookingId);
+  
   const form = useForm<DisputeFormType>({
     resolver: zodResolver(disputeSchema),
     mode: 'onChange',
@@ -40,23 +43,27 @@ export default function DisputeModal({
       reason: '',
     },
   });
-
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = form;
-
+  
   useEffect(() => {
     if (!open) {
       reset({ reason: '' });
     }
   }, [open, reset]);
 
-  if (!booking) {
+  if (isLoading) {
+    return <Skeleton className="h-40 w-full" />;
+  }
+  if (error || !booking) {
     return null;
   }
+  
+
 
   const onFormSubmit = async (data: DisputeFormType) => {
     await onSubmit(data.reason as string);
@@ -103,7 +110,7 @@ export default function DisputeModal({
             {formatTime12(booking.startTime)}
           </p>
           <p className="text-xs text-muted-foreground italic">
-            Professional: {booking.worker.displayName}
+            Professional: {booking.worker.name}
           </p>
         </div>
 

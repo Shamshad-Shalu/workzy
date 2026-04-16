@@ -4,8 +4,7 @@ import { BookingPaymentStatus, BookingStatus, PricingMode, Role } from "@/consta
 
 import { ICategory } from "./category";
 import { IService } from "./service";
-import { ILocation, IUser } from "./user";
-import { IWorker } from "./worker";
+import { ILocation } from "./user";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";
 export type ListingStatus = BookingStatus | "all" | "upcoming";
@@ -13,6 +12,29 @@ export type ListingStatus = BookingStatus | "all" | "upcoming";
 export interface IBookingLocation {
   label: string;
   location: ILocation;
+}
+export interface IBookingSlot {
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
+
+export interface IBookingSnapshot {
+  user: {
+    name: string;
+    phone?: string;
+    profileImage?: string;
+  };
+  worker: {
+    name: string;
+    phone?: string;
+    profileImage?: string;
+    rating: number;
+  };
+  category: {
+    name: string;
+    iconUrl: string;
+  };
 }
 
 export interface IExtraCharge {
@@ -46,12 +68,12 @@ export interface IBooking extends Document<string> {
   workerId: Types.ObjectId;
   serviceId: Types.ObjectId;
   categoryId: Types.ObjectId;
+  quoteId?: Types.ObjectId;
+
   // Schedule
-  date: Date;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  address: IBookingLocation | null;
+  dates: IBookingSlot[];
+  duration: number; //0 for full day
+  address: IBookingLocation;
 
   rate: number; // worker rate per unit
   itemCount: number;
@@ -66,25 +88,57 @@ export interface IBooking extends Document<string> {
 
   extraCharge?: IExtraCharge;
   evidence?: IEvidence;
+
+  otp?: string;
+  chatId?: string;
+
+  snapshot: IBookingSnapshot;
+
   paymentStatus: BookingPaymentStatus;
   status: BookingStatus;
   statusHistory: IBookingStatusHistory[];
+
   isReviewed: boolean;
   userNote?: string;
   workerNote?: string;
   adminNote?: string;
   completedAt?: Date;
-
   createdAt: Date;
   updatedAt: Date;
 }
 
+export type BookingListItem = Pick<
+  IBooking,
+  | "_id"
+  | "bookingId"
+  | "dates"
+  | "duration"
+  | "itemCount"
+  | "userNote"
+  | "isReviewed"
+  | "snapshot"
+  | "address"
+  | "total"
+  | "status"
+  | "paymentStatus"
+  | "createdAt"
+  | "workerId"
+  | "categoryId"
+  | "serviceId"
+  | "userId"
+  | "quoteId"
+  | "extraCharge"
+>;
+
 export interface BookingContext {
-  worker: IWorker;
-  user: IUser;
+  worker: {
+    name: string;
+    phone?: string;
+    profileImage?: string;
+    rating: number;
+  };
   service: IService;
   category: ICategory;
-  isRemote: boolean;
   pricingMode: PricingMode;
   rate: number;
   estimatedDuration: number;
@@ -96,90 +150,21 @@ export interface BookingContext {
   workerStripeId: string;
 }
 
-export interface BookingCursor {
-  date: string;
-  startTime: string;
+export interface Cursor {
+  createdAt: string;
   _id: string;
 }
-export interface BookingListParams {
-  status: ListingStatus;
-  limit: number;
-  cursor: BookingCursor | null;
-  sort: "asc" | "desc";
-}
-export interface AdminBookingListParams {
+
+export interface BookingListQuery {
   status: ListingStatus;
   paymentStatus: BookingPaymentStatus | "all";
+  userId?: string;
+  workerId?: string;
+  search?: string;
+  fromDate?: string;
+  toDate?: string;
   limit: number;
-  page: number;
-  search: string;
+  cursor?: Cursor | null;
 }
 
-export interface BookingCardEntity {
-  _id: string;
-  bookingId: string;
-  user: {
-    _id: string;
-    name: string;
-    profileImage?: string;
-  };
-  worker: {
-    _id: string;
-    displayName: string;
-    tagline: string;
-    coverImage?: string;
-    profileImage?: string;
-    isPremium: boolean;
-    averageRating: number;
-  };
-  category: {
-    _id: string;
-    name: string;
-    iconUrl: string;
-  };
-  date: Date;
-  startTime: string;
-  endTime: string;
-  duration: number;
-  address: IBookingLocation | null;
-  total: number;
-  status: BookingStatus;
-  paymentStatus: BookingPaymentStatus;
-  extraCharge?: IExtraCharge;
-  evidence?: IEvidence;
-  isReviewed?: boolean;
-  statusHistory: IBookingStatusHistory[];
-  userNote?: string;
-  workerNote?: string;
-  adminNote?: string;
-  createdAt?: Date;
-}
-
-export interface PaginatedBookingsEntity {
-  data: BookingCardEntity[];
-  cursor: string | null;
-  hasMore: boolean;
-  total?: number;
-}
-
-export type BookingDetailsEntity = Omit<
-  IBooking,
-  "userId" | "workerId" | "serviceId" | "categoryId"
-> & {
-  _id: Types.ObjectId;
-  user: Pick<IUser, "_id" | "name" | "profileImage">;
-  worker: Pick<
-    IWorker,
-    | "_id"
-    | "displayName"
-    | "tagline"
-    | "coverImage"
-    | "isPremium"
-    | "averageRating"
-    | "reviewCount"
-    | "worksCompleted"
-  > & {
-    profileImage?: string;
-  };
-  category: Pick<ICategory, "_id" | "name" | "iconUrl" | "imageUrl">;
-};
+export type BookingDetails = Omit<IBooking, "otp">;

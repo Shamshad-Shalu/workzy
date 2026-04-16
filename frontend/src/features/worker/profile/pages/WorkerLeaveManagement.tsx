@@ -16,9 +16,6 @@ import { LeaveCard } from '../components/LeaveCard';
 import { LeaveListSkeleton, LeaveStatsSkeleton } from '../components/Leavecardskeleton';
 import { useCancelLeave, useCreateLeave, useLeaveStats, useWorkerLeaves } from '../hooks/useLeave';
 
-
-
-
 const FILTERS: { label: string; value: LeaveFilter }[] = [
   { label: 'All', value: 'all' },
   { label: 'Upcoming', value: 'upcoming' },
@@ -44,7 +41,9 @@ export default function WorkerLeaveManagement() {
   const leaves = data?.pages.flatMap(p => p.leaves) ?? [];
 
   const handleCancel = () => {
-    if (!cancelId) {return;}
+    if (!cancelId) {
+      return;
+    }
     cancelLeave(cancelId, { onSuccess: () => setCancelId(null) });
   };
 

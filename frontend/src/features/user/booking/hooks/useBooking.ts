@@ -1,7 +1,6 @@
 import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
-import { PRICING_MODE, SERVICE_TYPE } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import type { BulkDiscountType } from '@/types/service';
@@ -24,6 +23,7 @@ export interface BookingPricing {
   travelCost: number;
   total: number;
 }
+
 function getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
   if (!discounts?.length) {
     return null;
@@ -91,18 +91,15 @@ export function useBooking(worker: WorkerListingInfo) {
         serviceId: worker.serviceId,
         workerId: worker.workerId,
         slotId: state.slotId,
-        date: state.date,
-        startTime: state.slot.startTime,
-        endTime: state.slot.endTime,
-        duration: (worker.estimatedDuration ?? 0) * state.itemCount,
+        // date: state.date,
+        // startTime: state.slot.startTime,
+        // endTime: state.slot.endTime,
+        // duration: (worker.estimatedDuration ?? 0) * state.itemCount,
         itemCount: state.itemCount,
-        address:
-          worker.serviceType === SERVICE_TYPE.REMOTE
-            ? null
-            : {
-                label: userAddress ?? '',
-                location: { type: 'Point', coordinates: [lng ?? 0, lat ?? 0] },
-              },
+        address: {
+          label: userAddress ?? '',
+          location: { type: 'Point', coordinates: [lng ?? 0, lat ?? 0] },
+        },
         userNote: state.note?.trim() || '',
       };
     },
@@ -196,7 +193,5 @@ export function useBooking(worker: WorkerListingInfo) {
     handleReserve,
     handleConfirm,
     handleClose,
-    isRemote: worker.serviceType === SERVICE_TYPE.REMOTE,
-    isDaily: worker.PricingMode === PRICING_MODE.PER_DAY,
   };
 }

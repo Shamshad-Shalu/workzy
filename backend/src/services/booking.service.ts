@@ -1,6 +1,8 @@
+import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
+import logger from "@/config/logger";
 import {
   AUTH,
   BOOKING,
@@ -17,6 +19,7 @@ import {
   SLOT,
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
+  USER,
   WORKER,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -26,14 +29,16 @@ import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository"
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
+import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
-import { BookingResponseDTO, PaginatedBookingsDTO } from "@/dtos/responses/booking.dto";
+import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
 import {
   BookingContext,
-  BookingListParams,
+  BookingListQuery,
   IBooking,
   IEvidence,
   IExtraCharge,
@@ -54,36 +59,61 @@ export class BookingService implements IBookingService {
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.OTPService) private _otpService: IOTPService,
+    @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
-  async createBooking(userId: string, data: CreatebookingDTO): Promise<{ url: string }> {
-    const {
-      workerId,
-      serviceId,
-      date,
-      slotId,
-      startTime,
-      address,
-      duration,
-      endTime,
-      itemCount = 1,
-      userNote,
-    } = data;
+  async getBookings(
+    input: BookingListQuery
+  ): Promise<{ bookings: BookingListItemDTO[]; nextCursor: string | null }> {
+    const { bookings, nextCursor } = await this._bookingRepository.getBookings(input);
+    return {
+      bookings: await BookingListItemDTO.fromEntities(bookings, this._s3Service),
+      nextCursor,
+    };
+  }
 
-    const slot = await this._slotRepository.findById(slotId);
-    if (!slot) {
-      throw new CustomError(SLOT.NOT_AVAILABLE);
+  async getBookingDetails(bookingId: string): Promise<BookingResponseDTO> {
+    const booking = await this._bookingRepository.findById(bookingId);
+    if (!booking) {
+      throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    const { category, workerStripeId, service, isRemote, platformFeePercent, rate, travelCost } =
+    return await BookingResponseDTO.fromEntity(booking, this._s3Service);
+  }
+
+  async createBooking(userId: string, data: CreatebookingDTO): Promise<{ url: string }> {
+    const { workerId, serviceId, slotId, address, itemCount = 1, userNote } = data;
+
+    const [slot, user] = await Promise.all([
+      this._slotRepository.findById(slotId),
+      this._userRepository.findById(userId),
+    ]);
+    if (!slot) {
+      throw new CustomError(SLOT.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    const { date, startTime, endTime, reservedBy, duration } = slot;
+
+    if (reservedBy?.toString() !== userId) {
+      throw new CustomError(SLOT.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const { category, worker, workerStripeId, service, platformFeePercent, rate, travelCost } =
       await this.getBookingContext(
         workerId,
         serviceId,
-        address?.location.coordinates[1],
-        address?.location.coordinates[0]
+        address.location.coordinates[1],
+        address.location.coordinates[0]
       );
 
     const subtotal = rate * itemCount;
+
+    const finalEndTime = dayjs(`2000-01-01 ${endTime}`)
+      .subtract(service.bufferTime, "minute")
+      .format("HH:mm");
+
     const discountPercent =
       this.getBestDiscount(service?.bulkDiscounts ?? null, itemCount)?.percent ?? 0;
     const discountAmount = Math.round((subtotal * discountPercent) / 100);
@@ -96,11 +126,8 @@ export class BookingService implements IBookingService {
       workerId: new Types.ObjectId(workerId),
       serviceId: new Types.ObjectId(serviceId),
       categoryId: new Types.ObjectId(category._id),
-
-      date,
-      startTime,
-      endTime,
-      duration,
+      dates: [{ date, startTime, endTime: finalEndTime }],
+      duration: duration - service.bufferTime,
 
       rate,
       itemCount,
@@ -112,10 +139,24 @@ export class BookingService implements IBookingService {
       platformFeePercent,
       platformFee,
       total: chargeableAmount + travelCost,
-      address: isRemote ? null : address,
+
+      address: address,
       userNote,
+      snapshot: {
+        user: {
+          name: user.name,
+          phone: user.phone,
+          profileImage: user.profileImage,
+        },
+        worker,
+        category: {
+          name: category.name,
+          iconUrl: category.iconUrl,
+        },
+      },
     });
     console.log("booking::", booking);
+
     const url = await this._paymentService.createBookingPaymentCheckout({
       bookingId: booking._id.toString(),
       serviceName: category.name,
@@ -142,8 +183,8 @@ export class BookingService implements IBookingService {
   private async getBookingContext(
     workerId: string,
     serviceId: string,
-    lat?: number,
-    lng?: number
+    lat: number,
+    lng: number
   ): Promise<BookingContext> {
     const [service, worker] = await Promise.all([
       this._serviceRepository.findById(serviceId),
@@ -176,27 +217,25 @@ export class BookingService implements IBookingService {
     const platformFeePercent = category.platformFee ?? 0;
     const travelRatePerKM = category.travelRatePerKM ?? 0;
     const pricingMode = category.pricingMode as PricingMode;
-    // const isRemote = category.serviceType === SERVICE_TYPE.REMOTE;
 
-    let distanceKm = 0;
-    let travelCost = 0;
+    const distanceKm = calculateDistanceKm(
+      { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
+      { lat, lng }
+    );
+    const travelCost = Math.min(
+      Math.round(distanceKm * (travelRatePerKM ?? 0)),
+      service.maxTravelCost ?? Infinity
+    );
 
-    if (lat !== undefined && lng !== undefined) {
-      distanceKm = calculateDistanceKm(
-        { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
-        { lat, lng }
-      );
-      travelCost = Math.min(
-        Math.round(distanceKm * (travelRatePerKM ?? 0)),
-        service.maxTravelCost ?? Infinity
-      );
-    }
     return {
-      worker,
-      user,
+      worker: {
+        name: worker.displayName,
+        rating: worker.averageRating,
+        phone: user.phone,
+        profileImage: user.profileImage,
+      },
       service,
       category,
-      isRemote: false,
       pricingMode,
       rate,
       workerStripeId,
@@ -207,20 +246,6 @@ export class BookingService implements IBookingService {
       distanceKm,
       travelCost,
     };
-  }
-
-  async getUserBookings(userId: string, query: BookingListParams): Promise<PaginatedBookingsDTO> {
-    const bookings = await this._bookingRepository.getUserBookings(userId, query);
-    console.log(bookings);
-    return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
-  }
-
-  async getWorkerBookings(
-    workerId: string,
-    query: BookingListParams
-  ): Promise<PaginatedBookingsDTO> {
-    const bookings = await this._bookingRepository.getWorkerBookings(workerId, query);
-    return PaginatedBookingsDTO.fromResult(bookings, this._s3Service);
   }
 
   async cancelBooking(bookingId: string, userId: string, reason: string): Promise<void> {
@@ -274,7 +299,7 @@ export class BookingService implements IBookingService {
       $push: {
         statusHistory: this.createStatusHistoryEntry(
           BOOKING_STATUS.CONFIRMED,
-          ROLE.USER,
+          ROLE.WORKER,
           BOOKING_STATUS_MESSAGES.CONFIRMED
         ),
       },
@@ -287,11 +312,7 @@ export class BookingService implements IBookingService {
     reason: string;
   }): Promise<void> {
     const { bookingId, workerId, reason } = data;
-
-    const [booking] = await Promise.all([
-      this.getBookingOrThrow(bookingId),
-      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
-    ]);
+    const booking = await this.getBookingOrThrow(bookingId);
     this.assertWorkerOwnership(booking, workerId);
     if (booking.status !== BOOKING_STATUS.PENDING) {
       throw new CustomError(BOOKING.CANNOT_REJECT(booking.status), HTTPSTATUS.BAD_REQUEST);
@@ -318,17 +339,63 @@ export class BookingService implements IBookingService {
     });
   }
 
-  async startJob(bookingId: string, workerId: string): Promise<void> {
-    const [booking] = await Promise.all([
-      this.getBookingOrThrow(bookingId),
-      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
-    ]);
+  async markEnRoute(bookingId: string, workerId: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
     this.assertWorkerOwnership(booking, workerId);
+
     if (booking.status !== BOOKING_STATUS.CONFIRMED) {
+      throw new CustomError(BOOKING.CANNOT_EN_ROUTE(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.EN_ROUTE,
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.EN_ROUTE,
+          ROLE.WORKER,
+          BOOKING_STATUS_MESSAGES.EN_ROUTE
+        ),
+      },
+    });
+  }
+
+  async markReached(bookingId: string, workerId: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+    const user = await this._userRepository.findById(booking.userId);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    this.assertWorkerOwnership(booking, workerId);
+    if (booking.status !== BOOKING_STATUS.EN_ROUTE) {
+      throw new CustomError(BOOKING.CANNOT_REACH(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    const otp = this._otpService.generateOTP();
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.REACHED,
+      otp,
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.REACHED,
+          ROLE.WORKER,
+          BOOKING_STATUS_MESSAGES.REACHED
+        ),
+      },
+    });
+    logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
+    await this._emailService.sendEmail(user.email, otp);
+  }
+
+  async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+    this.assertWorkerOwnership(booking, workerId);
+    if (booking.status !== BOOKING_STATUS.REACHED) {
       throw new CustomError(BOOKING.CANNOT_START(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!booking.otp || booking.otp !== otp) {
+      throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.IN_PROGRESS,
+      $unset: { otp: "" },
       $push: {
         statusHistory: this.createStatusHistoryEntry(
           BOOKING_STATUS.IN_PROGRESS,
@@ -489,13 +556,5 @@ export class BookingService implements IBookingService {
 
   private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
     return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  async getBookingDetails(bookingId: string): Promise<BookingResponseDTO> {
-    const booking = await this._bookingRepository.getBookingDetailById(bookingId);
-    if (!booking) {
-      throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-    }
-    return BookingResponseDTO.fromEntity(booking, this._s3Service);
   }
 }

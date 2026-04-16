@@ -9,9 +9,9 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
 import { uploadToS3 } from '@/services/upload.service';
-import type { BookingCard } from '@/types/booking';
 
 import { ExtraChargeSchema, type ExtraChargeFormType } from '../validation/extraChargeSchema';
 
@@ -19,7 +19,7 @@ interface WorkerExtraChargeModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ExtraChargeFormType) => Promise<void>;
-  booking: BookingCard | null;
+  bookingId: string | null;
   isSubmitting?: boolean;
 }
 
@@ -27,7 +27,7 @@ export default function WorkerExtraChargeModal({
   open,
   onClose,
   onSubmit,
-  booking,
+  bookingId,
   isSubmitting = false,
 }: WorkerExtraChargeModalProps) {
   const form = useForm<ExtraChargeFormType>({
@@ -49,6 +49,7 @@ export default function WorkerExtraChargeModal({
 
   const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const { booking } = useBookingDetails(bookingId);
 
   const isViewOnly = !!booking?.extraCharge;
 

@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 import { Eye } from 'lucide-react';
 
-import { StatusBadge } from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
+import { Badge } from '@/components/ui/badge';
 import type { WorkerRow } from '@/types/admin/worker';
 import type { TableColumnDef } from '@/types/table.types';
 
@@ -54,22 +54,21 @@ const workerColumns = (
     mobileLabel: 'Phone',
     width: 150,
   },
-  {
-    id: 'premium',
-    header: 'Premium',
-    accessorKey: 'isPremium',
-    cell: ({ row }) => (
-      <StatusBadge
-        label={row.original.isPremium ? 'Premium' : 'Free'}
-        status={row.original.isPremium ? 'info' : 'neutral'}
-      />
-    ),
-    hideOnSmall: true,
-    showInMobileHeader: false,
-    mobileOrder: 4,
-    mobileLabel: 'Account Type',
-    width: 100,
-  },
+  // {
+  //   id: 'premium',
+  //   header: 'Premium',
+  //   accessorKey: 'isPremium',
+  //   cell: ({ row }) => (
+  //     <Badge  variant={row.original.isPremium ? 'amber' : 'blue'}>
+  //       {row.original.isPremium ? 'Premium' : 'Free'}
+  //     </Badge>
+  //   ),
+  //   hideOnSmall: true,
+  //   showInMobileHeader: false,
+  //   mobileOrder: 4,
+  //   mobileLabel: 'Account Type',
+  //   width: 100,
+  // },
   {
     id: 'workerStatus',
     header: 'Status',
@@ -77,24 +76,24 @@ const workerColumns = (
     cell: ({ row }) => {
       const status = row.original.status;
       const statusLabel = status;
-      let statusType: 'success' | 'warning' | 'error' | 'info' | 'neutral' = 'neutral';
+      let statusType: 'green' | 'amber' | 'red' | 'blue' | 'slate' = 'slate';
 
       switch (status) {
         case 'verified':
-          statusType = 'success';
+          statusType = 'green';
           break;
         case 'pending':
-          statusType = 'warning';
+          statusType = 'amber';
           break;
         case 'rejected':
-          statusType = 'error';
+          statusType = 'red';
           break;
         case 'needs_revision':
-          statusType = 'info';
+          statusType = 'blue';
           break;
       }
 
-      return <StatusBadge label={statusLabel || ''} status={statusType} />;
+      return <Badge variant={statusType}>{statusLabel || ''}</Badge>;
     },
     showInMobileHeader: true,
     mobileOrder: 2,
@@ -106,10 +105,9 @@ const workerColumns = (
     header: 'W.Status',
     accessorKey: 'isBlocked',
     cell: ({ row }) => (
-      <StatusBadge
-        label={row.original.isBlocked ? 'Blocked' : 'Active'}
-        status={row.original.isBlocked ? 'error' : 'success'}
-      />
+      <Badge variant={row.original.isBlocked ? 'red' : 'green'}>
+        {row.original.isBlocked ? 'Blocked' : 'Active'}
+      </Badge>
     ),
     hideOnSmall: true,
     showInMobileHeader: false,
@@ -144,7 +142,11 @@ const workerColumns = (
         >
           View
         </Button>
-        <Button size="sm" variant="secondary" onClick={() => onToggleStatus(row.original)}>
+        <Button
+          size="sm"
+          variant={row.original.isBlocked ? 'green' : 'red'}
+          onClick={() => onToggleStatus(row.original)}
+        >
           {row.original.isBlocked ? 'Unblock' : 'Block'}
         </Button>
         {row.original.status === 'pending' && (

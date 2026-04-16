@@ -8,7 +8,6 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { createDescriptionRule } from '@/lib/validation/rules';
-import type { BookingCard } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatSmartDate, formatTime12 } from '@/utils/time.format';
 
@@ -16,17 +15,15 @@ interface WorkerRejectModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (note: string) => Promise<void>;
-  booking: BookingCard | null;
+  bookingId: string | null;
   isSubmitting?: boolean;
 }
-
 const rejectReasonSchema = createDescriptionRule('Reason');
-
 export default function WorkerRejectModal({
   open,
   onClose,
   onSubmit,
-  booking,
+  bookingId,
   isSubmitting = false,
 }: WorkerRejectModalProps) {
   const [reason, setReason] = useState('');
@@ -39,12 +36,12 @@ export default function WorkerRejectModal({
     }
   }, [open]);
 
-  const { data: bookingDetails, isLoading } = useBookingDetails(booking?.id || null);
+  const { booking: bookingDetails, isLoading } = useBookingDetails(bookingId || null);
 
-  if (!booking) {
+  if (!bookingDetails) {
     return null;
   }
-  const { category, date, startTime } = booking;
+  const { category, date, startTime } = bookingDetails;
 
   const handleConfirm = async () => {
     const result = rejectReasonSchema.safeParse(reason);

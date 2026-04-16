@@ -19,7 +19,8 @@ export class WorkerListingResponseDto {
   profileImage!: string;
   experience!: number;
   serviceRate!: number;
-  estimatedDuration!: number | null;
+  estimatedDuration!: number;
+  bufferTime!: number;
   averageRating!: number;
   worksCompleted!: number;
   reviewCount!: number;
@@ -56,7 +57,8 @@ export class WorkerListingResponseDto {
     dto.experience = entity.experience;
     dto.serviceRate = entity.serviceRate;
     dto.worksCompleted = entity.worksCompleted;
-    dto.estimatedDuration = entity.estimatedDuration ?? null;
+    dto.estimatedDuration = entity.estimatedDuration;
+    dto.bufferTime = entity.bufferTime;
     dto.averageRating = entity.averageRating;
     dto.bulkDiscounts = entity.bulkDiscounts;
     dto.reviewCount = entity.reviewCount;

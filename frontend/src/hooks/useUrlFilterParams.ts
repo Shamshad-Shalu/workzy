@@ -52,10 +52,6 @@ export const useUrlFilterParams = <
         prev => {
           const newParams = new URLSearchParams(prev);
 
-          const filterKeys = Object.keys(updates).filter(
-            k => !['page', 'pageIndex', 'pageSize'].includes(k)
-          );
-
           Object.entries(updates).forEach(([key, value]) => {
             const paramKey = key === 'pageSize' ? 'limit' : key === 'pageIndex' ? 'page' : key;
 
@@ -65,7 +61,11 @@ export const useUrlFilterParams = <
             }
 
             if (paramKey === 'page') {
-              newParams.set('page', String(Number(value) + 1));
+              if (Number(value) === 0) {
+                newParams.delete(paramKey);
+              } else {
+                newParams.set('page', String(Number(value) + 1));
+              }
             } else {
               newParams.set(paramKey, String(value));
             }
@@ -73,13 +73,13 @@ export const useUrlFilterParams = <
 
           const isPageUpdatedManually =
             updates.page !== undefined || updates.pageIndex !== undefined;
-
-          const shouldResetPage = filterKeys.length > 0 || updates.pageSize !== undefined;
+          const shouldResetPage = Object.keys(updates).some(
+            k => !['page', 'pageIndex', 'pageSize'].includes(k)
+          );
 
           if (shouldResetPage && !isPageUpdatedManually) {
-            newParams.set('page', '0');
+            newParams.delete('page');
           }
-
           return newParams;
         },
         { replace: true }

@@ -1,7 +1,8 @@
 import { RequestHandler } from "express";
 
 export interface IAdminBookingController {
-  getUserBookings: RequestHandler;
-  getWorkerBookings: RequestHandler;
-  getAllBookings: RequestHandler;
+  addNote: RequestHandler;
+  cancelBooking: RequestHandler;
+  refund: RequestHandler;
+  resolveDispute: RequestHandler;
 }

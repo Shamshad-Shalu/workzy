@@ -2,15 +2,16 @@ import { CheckCircle2, Star, ThumbsUp } from 'lucide-react';
 
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
-import type { BookingCard } from '@/types/booking';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { formatCurrency } from '@/utils/currency';
 
 interface ApproveModalProps {
   open: boolean;
   onClose: () => void;
+  bookingId: string | null;
   onSubmit: (id: string) => Promise<void>;
   isSubmitting?: boolean;
-  booking: BookingCard | null;
 }
 
 export default function ApproveModal({
@@ -18,9 +19,19 @@ export default function ApproveModal({
   onClose,
   onSubmit,
   isSubmitting = false,
-  booking,
+  bookingId,
 }: ApproveModalProps) {
-  if (!booking) {
+  const { booking, error, isLoading } = useBookingDetails(bookingId);
+
+  if (isLoading) {
+    return (
+      <AppModal open={open} onClose={onClose} title="Accept Booking">
+        <Skeleton className="h-40 w-full" />
+      </AppModal>
+    );
+  }
+
+  if (error || !booking) {
     return null;
   }
 

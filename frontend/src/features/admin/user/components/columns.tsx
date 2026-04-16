@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 import { Eye } from 'lucide-react';
 
-import { StatusBadge } from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
+import { Badge } from '@/components/ui/badge';
 import type { UserRow } from '@/types/admin/user';
 import type { TableColumnDef } from '@/types/table.types';
 
@@ -54,30 +54,13 @@ const userColumns = (
     width: 150,
   },
   {
-    id: 'premium',
-    header: 'Premium',
-    accessorKey: 'isPremium',
-    cell: ({ row }) => (
-      <StatusBadge
-        label={row.original.isPremium ? 'Premium' : 'Free'}
-        status={row.original.isPremium ? 'info' : 'neutral'}
-      />
-    ),
-    hideOnSmall: true,
-    showInMobileHeader: false,
-    mobileOrder: 4,
-    mobileLabel: 'Account Type',
-    width: 120,
-  },
-  {
     id: 'status',
     header: 'Status',
     accessorKey: 'isBlocked',
     cell: ({ row }) => (
-      <StatusBadge
-        label={row.original.isBlocked ? 'Blocked' : 'Active'}
-        status={row.original.isBlocked ? 'error' : 'success'}
-      />
+      <Badge variant={row.original.isBlocked ? 'red' : 'green'}>
+        {row.original.isBlocked ? 'Blocked' : 'Active'}
+      </Badge>
     ),
     showInMobileHeader: true,
     mobileOrder: 2,

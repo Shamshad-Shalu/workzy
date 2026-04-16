@@ -23,6 +23,7 @@ import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
 const QUOTE_TTL_SECONDS = 24 * 60 * 60;
+
 @injectable()
 export class SlotService implements ISlotService {
   constructor(
@@ -375,15 +376,18 @@ export class SlotService implements ISlotService {
     const result: AvailableSlot[] = [];
 
     for (const win of windows) {
-      const tIn = this.travelMin(win.prevLoc, userLocation);
+      let tIn = this.travelMin(win.prevLoc, userLocation);
+      if (isToday) {
+        const travelFromWorkerNow = this.travelMin(workerLocation, userLocation);
+        tIn = Math.max(tIn, travelFromWorkerNow);
+      }
       const tOut = this.travelMin(userLocation, win.nextLoc);
       const earliest = win.windowStart + tIn;
       const latest = win.windowEnd - duration - tOut;
 
       const effectiveEarliest = isToday
-        ? Math.max(earliest, timeToMinutes(dayjs().format("HH:mm")) + PREP_BUFFER + tIn)
+        ? Math.max(win.windowStart, timeToMinutes(dayjs().format("HH:mm")) + PREP_BUFFER + tIn)
         : earliest;
-
       let cursor = Math.ceil(effectiveEarliest / INCREMENT) * INCREMENT;
 
       while (cursor <= latest) {

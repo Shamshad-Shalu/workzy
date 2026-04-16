@@ -1,5 +1,9 @@
 import type { BookingFilterStatus, BookingPaymentStatus, BookingStatus, Role } from '@/constants';
 
+import type { Location } from './user';
+
+export type ExtraChargeStatus = 'pending' | 'approved' | 'rejected';
+
 export interface PaymentDetails {
   success: boolean;
   type: string;
@@ -11,11 +15,41 @@ export interface PaymentDetails {
   receiptUrl?: string;
 }
 
+export interface BookingSlot {
+  date: Date;
+  startTime: string;
+  endTime: string;
+}
+
+interface UserSnapshot {
+  name: string;
+  phone: string;
+  profileImage: string;
+}
+
+interface WorkerSnapshot {
+  name: string;
+  phone: string;
+  profileImage: string;
+  rating: number;
+}
+
+interface CategorySnapshot {
+  name: string;
+  iconUrl: string;
+}
+
+export interface BookingSnapshot {
+  user: UserSnapshot;
+  worker: WorkerSnapshot;
+  category: CategorySnapshot;
+}
+
 export interface ExtraCharge {
   amount: number;
   reason: string;
   evidenceUrl?: string; // receipt photo
-  status: 'pending' | 'approved' | 'rejected';
+  status: ExtraChargeStatus;
   requestedAt: Date;
   respondedAt?: Date;
 }
@@ -24,13 +58,12 @@ interface BookingStatusHistory {
   status: BookingStatus;
   changedAt: Date;
   changedBy?: Role;
-  reason?: string; // rejection reason / cancel reason
+  reason?: string;
 }
 
 export interface EvidenceItem {
   url: string;
   type: 'image' | 'video';
-  uploadedAt: Date;
 }
 
 export interface Evidence {
@@ -39,31 +72,41 @@ export interface Evidence {
   uploadedAt?: Date;
 }
 
+export interface BookingAddress {
+  label: string;
+  location: Location;
+}
+
 export interface Booking {
+  id: string;
   bookingId: string;
   userId: string;
   workerId: string;
   serviceId: string;
   categoryId: string;
+  quoteId?: string;
+
   // Schedule
-  date: Date;
-  startTime: string;
-  endTime: string;
+  dates: BookingSlot[];
   duration: number;
+  address: BookingAddress;
 
-  rate: number; // worker rate per unit
+  rate: number;
   itemCount: number;
-  subtotal: number; // rate * itemCount
-  discountPercent: number; // 0 if no discount
-  discountAmount: number; // subtotal * discountPercent/100
-  chargeableAmount: number; // subtotal - discountAmount  ← platform fee based on THIS
-  travelCost: number; // no platform fee on this
-  platformFeePercent: number; // snapshot from category at booking time
-  platformFee: number; // chargeableAmount * platformFeePercent/100
-  total: number; // chargeableAmount + travelCost (user pays this)
-  extraCharge?: ExtraCharge;
+  subtotal: number;
+  discountPercent: number;
+  discountAmount: number;
+  chargeableAmount: number;
+  travelCost: number;
+  platformFeePercent: number;
+  platformFee: number;
+  total: number;
 
+  extraCharge?: ExtraCharge;
   evidence?: Evidence;
+
+  chatId?: string;
+  snapshot: BookingSnapshot;
 
   paymentStatus: BookingPaymentStatus;
   status: BookingStatus;
@@ -79,91 +122,63 @@ export interface Booking {
   updatedAt: Date;
 }
 
-export interface BookingCard {
+export type BookingListItem = {
   id: string;
   bookingId: string;
+  serviceId: string;
+  quoteId?: string;
+  user: UserSnapshot;
+  worker: WorkerSnapshot;
+  category: CategorySnapshot;
+  addressLabel: string;
   date: Date;
+  endDate: Date;
   startTime: string;
   endTime: string;
   duration: number;
-  addressLabel: string;
+  itemCount: number;
 
-  total: number;
+  totalDays: number;
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;
-  extraCharge?: ExtraCharge;
-
-  evidence?: Evidence;
-  isReviewed: boolean;
-  statusHistory: BookingStatusHistory[];
   userNote?: string;
-  workerNote?: string;
-  adminNote?: string;
+  isReviewed: boolean;
+  total: number;
+  extraCharge?: {
+    amount: number;
+    status: ExtraChargeStatus;
+  };
+  createdAt: Date;
+};
 
-  worker: {
-    id: string;
-    displayName: string;
-    tagline: string;
-    coverImage: string;
-    profileImage: string;
-    averageRating: number;
-    isPremium: boolean;
-  };
-  category: {
-    id: string;
-    name: string;
-    iconUrl: string;
-  };
-  user: {
-    id: string;
-    name: string;
-    profileImage: string;
-  };
+export interface BookingListingResponse {
+  bookings: BookingListItem[];
+  nextCursor: string | null;
 }
 
-export interface BookingResponse {
-  data: BookingCard[];
-  cursor: string | null;
-  hasMore: boolean;
-  total?: number;
-}
-
-export interface AdminBookingListParams {
+export interface BookingListQuery {
   status: BookingFilterStatus;
-  paymentStatus: BookingPaymentStatus | 'all';
+  search?: string;
   limit: number;
-  page: number;
-  search: string;
+  cursor?: string | null;
+}
+
+export interface AdminBookingListQuery extends BookingListQuery {
+  userId?: string;
+  paymentStatus: BookingPaymentStatus | 'all';
+  workerId?: string;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export interface BookingDetails extends Booking {
-  worker: {
-    id: string;
-    displayName: string;
-    tagline: string;
-    coverImage: string;
-    profileImage: string;
-    averageRating: number;
-    reviewCount: number;
-    worksCompleted: number;
-    isPremium: boolean;
-  };
-  category: {
-    id: string;
-    name: string;
-    iconUrl: string;
-    imageUrl: string;
-  };
-  user: {
-    id: string;
-    name: string;
-    profileImage: string;
-  };
-  address: {
-    label: string;
-    location: {
-      type: 'Point';
-      coordinates: [number, number];
-    };
-  } | null;
+  user: UserSnapshot;
+  worker: WorkerSnapshot;
+  category: CategorySnapshot;
+  date: Date;
+  endDate: Date;
+  startTime: string;
+  endTime: string;
+  totalDays: number;
+  addressLabel: string;
 }

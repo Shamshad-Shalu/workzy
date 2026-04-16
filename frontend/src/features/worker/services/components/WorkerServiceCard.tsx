@@ -1,7 +1,7 @@
 import { Award, Clock, MapPin } from 'lucide-react';
 
-import { StatusBadge } from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
+import { Badge } from '@/components/ui/badge';
 import type { Service } from '@/types/service';
 import { formatDuration } from '@/utils/time.format';
 
@@ -32,10 +32,9 @@ export default function WorkerServiceCard({
 
         {!isBooking && (
           <div className="absolute top-3 left-3">
-            <StatusBadge
-              label={service.isAvailable ? 'Active' : 'Inactive'}
-              status={service.isAvailable ? 'success' : 'error'}
-            />
+            <Badge variant={service.isAvailable ? 'green' : 'red'}>
+              {service.isAvailable ? 'Active' : 'Inactive'}
+            </Badge>
           </div>
         )}
 
@@ -45,16 +44,14 @@ export default function WorkerServiceCard({
             {service.serviceType}
           </span>
           {service.allowSuddenBooking && (
-            <StatusBadge label="Instant" className="bg-orange-500/90 text-white " />
+            <Badge className="bg-orange-500/90 text-white">Instant</Badge>
           )}
           {service.bulkDiscounts && service?.bulkDiscounts?.length > 0 && (
             <>
               {service.bulkDiscounts.map((discount, i) => (
-                <StatusBadge
-                  key={i}
-                  label={`${discount.percent} % on ${discount.count}`}
-                  className="bg-blue-500 text-white"
-                />
+                <Badge key={i} variant="blue">
+                  {`${discount.percent} % on ${discount.count}`}
+                </Badge>
               ))}
             </>
           )}
@@ -93,7 +90,6 @@ export default function WorkerServiceCard({
           </div>
         </div>
 
-        {/* Rate */}
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-bold text-foreground">₹{service.rate}</p>

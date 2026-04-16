@@ -7,7 +7,7 @@ import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
 import { MultiUpload } from '@/components/molecules/MultiUpload';
-import type { BookingCard, EvidenceItem } from '@/types/booking';
+import type { EvidenceItem } from '@/types/booking';
 
 type EvidenceItemForm = Pick<EvidenceItem, 'type' | 'url'>;
 export interface BookigCompleteForm {
@@ -22,7 +22,7 @@ interface WorkerCompleteModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: BookigCompleteForm) => Promise<void>;
-  booking: BookingCard | null;
+  bookingId: string | null;
   isSubmitting?: boolean;
 }
 
@@ -30,7 +30,7 @@ export default function WorkerCompleteModal({
   open,
   onClose,
   onSubmit,
-  booking,
+  bookingId,
   isSubmitting = false,
 }: WorkerCompleteModalProps) {
   const [note, setNote] = useState('');
@@ -45,7 +45,7 @@ export default function WorkerCompleteModal({
     }
   }, [open]);
 
-  if (!booking) {
+  if (!bookingId) {
     return null;
   }
 

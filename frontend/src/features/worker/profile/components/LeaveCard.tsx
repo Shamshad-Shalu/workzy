@@ -10,8 +10,12 @@ import { formatDateRangeDuration, formatSmartDate } from '@/utils/time.format';
 
 function getLeaveStatus(leave: Leave): 'active' | 'upcoming' | 'past' {
   const now = dayjs();
-  if (now.isAfter(dayjs(leave.endDate))) {return 'past';}
-  if (now.isBefore(dayjs(leave.startDate))) {return 'upcoming';}
+  if (now.isAfter(dayjs(leave.endDate))) {
+    return 'past';
+  }
+  if (now.isBefore(dayjs(leave.startDate))) {
+    return 'upcoming';
+  }
   return 'active';
 }
 

@@ -2,7 +2,8 @@ import { CreditCard } from 'lucide-react';
 
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
-import type { BookingCard } from '@/types/booking';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { formatCurrency } from '@/utils/currency';
 import { formatSmartDate } from '@/utils/time.format';
 
@@ -11,7 +12,7 @@ interface ExtraChargeModalProps {
   onClose: () => void;
   onPayAmount: (id: string) => Promise<void>;
   onReject: (id: string) => Promise<void>;
-  booking: BookingCard | null;
+  bookingId: string | null;
   isSubmitting?: boolean;
 }
 
@@ -20,10 +21,14 @@ export default function ExtraChargeModal({
   onClose,
   onPayAmount,
   onReject,
-  booking,
+  bookingId,
   isSubmitting = false,
 }: ExtraChargeModalProps) {
-  if (!booking) {
+  const { booking, isLoading, error } = useBookingDetails(bookingId);
+  if (isLoading) {
+    return <Skeleton className="h-40 w-full" />;
+  }
+  if (error || !booking) {
     return null;
   }
   const { extraCharge } = booking;

@@ -63,7 +63,7 @@ export class WorkerController implements IWorkerController {
 
   listWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { serviceId } = req.params;
-
+    const workerId = req.user?.workerId;
     if (!req.query.lat || !req.query.lng) {
       throw new CustomError("lat and lng query parameters are required", HTTPSTATUS.BAD_REQUEST);
     }
@@ -72,6 +72,7 @@ export class WorkerController implements IWorkerController {
       lat: parseFloat(req.query.lat as string),
       lng: parseFloat(req.query.lng as string),
       radiusKm: parseFloat(req.query.radiusKm as string) || 30,
+      workerId: workerId,
       minPrice: req.query.minPrice ? parseFloat(req.query.minPrice as string) : undefined,
       maxPrice: req.query.maxPrice ? parseFloat(req.query.maxPrice as string) : undefined,
       minRating: req.query.minRating ? parseFloat(req.query.minRating as string) : undefined,

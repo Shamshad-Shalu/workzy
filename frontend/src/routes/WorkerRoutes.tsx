@@ -2,8 +2,6 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
-import WorkerBookingsPage from '@/features/worker/booking/pages/WorkerBookingsPage';
-import WorkerLeaveManagement from '@/features/worker/profile/pages/WorkerLeaveManagement ';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -25,6 +23,13 @@ const AccountPage = lazy(() => import('@/features/worker/profile/pages/AccountPa
 const SubscriptionPage = lazy(
   () => import('@/features/worker/subscription/pages/SubscriptionPage')
 );
+const WorkerBookingDetailsPage = lazy(
+  () => import('@/features/worker/booking/pages/WorkerBookingDetailsPage')
+);
+const WorkerBookingsPage = lazy(() => import('@/features/worker/booking/pages/WorkerBookingsPage'));
+const WorkerLeaveManagement = lazy(
+  () => import('@/features/worker/profile/pages/WorkerLeaveManagement')
+);
 
 export default function WorkerRoutes() {
   return (
@@ -34,7 +39,8 @@ export default function WorkerRoutes() {
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="services" element={<WorkerServicesPage />} />
           <Route path="subscriptions" element={<SubscriptionPage />} />
-          <Route path="booking" element={<WorkerBookingsPage />} />
+          <Route path="bookings" element={<WorkerBookingsPage />} />
+          <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />

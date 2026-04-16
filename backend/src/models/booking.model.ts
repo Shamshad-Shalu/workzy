@@ -7,11 +7,26 @@ import {
   BOOKING_STATUS_VALUES,
   ROLE_VALUES,
 } from "@/constants";
-import { IBooking } from "@/types/booking";
+import {
+  IBooking,
+  IBookingSnapshot,
+  IBookingStatusHistory,
+  IEvidence,
+  IExtraCharge,
+} from "@/types/booking";
 
 import { LocationSchema } from "./user.model";
 
-const ExtraChargeSchema = new Schema(
+const BookingScheduleSchema = new Schema(
+  {
+    date: { type: Date, required: true },
+    startTime: { type: String, required: true, match: /^\d{2}:\d{2}$/ },
+    endTime: { type: String, required: true, match: /^\d{2}:\d{2}$/ },
+  },
+  { _id: false }
+);
+
+const ExtraChargeSchema = new Schema<IExtraCharge>(
   {
     amount: {
       type: Number,
@@ -54,7 +69,7 @@ const EvidenceItemSchema = new Schema(
   { _id: false }
 );
 
-const EvidenceSchema = new Schema(
+const EvidenceSchema = new Schema<IEvidence>(
   {
     before: { type: [EvidenceItemSchema], default: [] },
     after: { type: [EvidenceItemSchema], default: [] },
@@ -63,7 +78,7 @@ const EvidenceSchema = new Schema(
   { _id: false }
 );
 
-const BookingStatusHistorySchema = new Schema(
+const BookingStatusHistorySchema = new Schema<IBookingStatusHistory>(
   {
     status: {
       type: String,
@@ -100,6 +115,27 @@ const BookingLocationSchema = new Schema(
   { _id: false }
 );
 
+const BookingSnapshotSchema = new Schema<IBookingSnapshot>(
+  {
+    user: {
+      name: { type: String, required: true },
+      phone: String,
+      profileImage: String,
+    },
+    worker: {
+      name: { type: String, required: true },
+      phone: String,
+      profileImage: String,
+      rating: Number,
+    },
+    category: {
+      name: { type: String, required: true },
+      iconUrl: String,
+    },
+  },
+  { _id: false }
+);
+
 const BookingSchema: Schema<IBooking> = new Schema(
   {
     bookingId: {
@@ -129,20 +165,17 @@ const BookingSchema: Schema<IBooking> = new Schema(
       ref: "Service",
       required: true,
     },
-    date: {
-      type: Date,
-      required: true,
-      index: true,
+    quoteId: {
+      type: Schema.Types.ObjectId,
+      ref: "Quote",
     },
-    startTime: {
-      type: String,
+    snapshot: {
+      type: BookingSnapshotSchema,
       required: true,
-      match: /^\d{2}:\d{2}$/,
     },
-    endTime: {
-      type: String,
+    dates: {
+      type: [BookingScheduleSchema],
       required: true,
-      match: /^\d{2}:\d{2}$/,
     },
     duration: {
       type: Number,
@@ -205,6 +238,12 @@ const BookingSchema: Schema<IBooking> = new Schema(
       default: 0,
     },
     total: { type: Number, required: true, min: 0 },
+    otp: {
+      type: String,
+    },
+    chatId: {
+      type: String,
+    },
     extraCharge: { type: ExtraChargeSchema, default: null },
     evidence: { type: EvidenceSchema, default: null },
     isReviewed: { type: Boolean, default: false },
