@@ -27,7 +27,7 @@ router.use("/services", serviceRoutes);
 router.use("/home", homeRoutes);
 router.use("/plans", planRoutes);
 router.use("/subscription", subscriptionRoutes);
-router.use("/payment", paymentRoutes);
+router.use("/payments", paymentRoutes);
 router.use("/slots", slotRoutes);
 router.use("/booking", bookingRoutes);
 router.use("/leave", leaveRoutes);

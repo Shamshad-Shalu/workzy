@@ -82,7 +82,7 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
     const docs = await this.model
       .find(query)
       .select(
-        "transactionId title amount status billType failureReason createdAt userId workerId userName workerName platformFee workerAmount"
+        "transactionId title amount status billType failureReason createdAt referenceId userId workerId userName workerName platformFee workerAmount"
       )
       .sort({ createdAt: -1, _id: -1 })
       .limit(limit + 1)

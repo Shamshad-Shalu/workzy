@@ -1,4 +1,4 @@
-import { BOOKING_API, PAYMENT_API } from '@/constants/apiRoutes/booking.routes';
+import { BOOKING_API } from '@/constants/apiRoutes/booking.routes';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
@@ -8,7 +8,6 @@ import type {
   BookingDetails,
   BookingListingResponse,
   BookingListQuery,
-  PaymentDetails,
 } from '@/types/booking';
 
 const BookingService = {
@@ -35,10 +34,6 @@ const BookingService = {
   },
   acceptBooking: async (bookingId: string): Promise<{ message: string }> => {
     const res = await api.patch(BOOKING_API.ACCEPT(bookingId));
-    return res.data;
-  },
-  verifyPayment: async (sessionId: string): Promise<PaymentDetails> => {
-    const res = await api.get(PAYMENT_API.VERIFY_BY_ID(sessionId));
     return res.data;
   },
   cancelBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {

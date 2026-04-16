@@ -17,7 +17,7 @@ export const useInfiniteScroll = (
           fetchNextPage();
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1, rootMargin: '200px' }
     );
 
     observer.observe(el);

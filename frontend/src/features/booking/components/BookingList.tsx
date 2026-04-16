@@ -55,7 +55,6 @@ export function BookingList({
   detailBasePath = '/bookings',
 }: BookingListProps) {
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
-
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">

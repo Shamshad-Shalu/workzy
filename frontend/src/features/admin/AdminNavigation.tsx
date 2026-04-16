@@ -20,7 +20,7 @@ export const adminMenuItems: MenuItem[] = [
   { icon: <Briefcase />, label: 'Bookings', to: '/admin/bookings' },
   { icon: <MessageSquare />, label: 'Messages', to: '/admin/messages' },
   { icon: <FileText />, label: 'Subscription', to: '/admin/subscriptions' },
-  { icon: <CreditCard />, label: 'Transactions', to: '/admin/transactions' },
+  { icon: <CreditCard />, label: 'Transactions', to: '/admin/payments' },
   { icon: <PanelsTopLeft />, label: 'Home Sections', to: '/admin/home' },
 ];
 

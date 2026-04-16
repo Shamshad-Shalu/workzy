@@ -67,6 +67,7 @@ export interface PaymentListQueryInput {
   maxAmount?: number;
   search?: string;
 }
+
 export interface PaymentListQuery
   extends Omit<PaymentListQueryInput, "cursor" | "fromDate" | "toDate"> {
   cursor?: {

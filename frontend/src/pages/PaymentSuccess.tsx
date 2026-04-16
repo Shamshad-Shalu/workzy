@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import { ArrowRight, CheckCircle2, Loader2, XCircle } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
-import BookingService from '@/services/booking.service';
+import PaymentService from '@/services/payment.service';
 
 const TYPE_CONFIG = {
   SUBSCRIPTION: {
@@ -39,7 +39,7 @@ export default function PaymentSuccess() {
     isError,
   } = useQuery({
     queryKey: ['payment-details', sessionId],
-    queryFn: () => BookingService.verifyPayment(sessionId as string),
+    queryFn: () => PaymentService.verifyPayment(sessionId as string),
     enabled: !!sessionId,
     retry: false,
   });

@@ -7,3 +7,4 @@ export * from './admin.routes';
 export * from './worker.routes';
 export * from './upload.routes';
 export * from './leave.routes';
+export * from './payment.routes';

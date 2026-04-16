@@ -13,6 +13,7 @@ import {
   LogOut,
   ChevronRight,
   ChevronDown,
+  CreditCard,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -234,6 +235,10 @@ export default function Header() {
                     <DropdownMenuItem onClick={() => navigate('/bookings')}>
                       <Briefcase className="h-4 w-4 mr-2" />
                       My Booking
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/payments')}>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      My Payments
                     </DropdownMenuItem>
 
                     {user?.role === ROLE.WORKER && (

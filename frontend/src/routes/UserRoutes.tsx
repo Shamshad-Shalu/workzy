@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
+import UserPaymentsPage from '@/features/user/payments/pages/UserPaymentsPage';
 import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
@@ -58,6 +59,8 @@ export default function UserRoutes() {
             <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
+
+            <Route path="/payments" element={<UserPaymentsPage />} />
           </Route>
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />

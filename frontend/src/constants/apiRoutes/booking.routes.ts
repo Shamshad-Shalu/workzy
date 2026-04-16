@@ -1,10 +1,4 @@
 import { buildRoute } from './routeBuilder';
-const payment = buildRoute('/payment');
-export const PAYMENT_API = {
-  ROOT: payment(`/`),
-  VERIFY_BY_ID: (id: string) => payment(`/verify/${id}`),
-} as const;
-
 const booking = buildRoute('/booking');
 
 export const BOOKING_API = {

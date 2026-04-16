@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
+import WorkerPaymentsPage from '@/features/worker/payments/pages/WorkerPaymentsPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -39,6 +40,7 @@ export default function WorkerRoutes() {
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="services" element={<WorkerServicesPage />} />
           <Route path="subscriptions" element={<SubscriptionPage />} />
+          <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>

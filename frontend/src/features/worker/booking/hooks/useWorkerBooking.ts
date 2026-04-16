@@ -25,7 +25,7 @@ export function useWorkerBooking(status: BookingFilterStatus) {
       BookingService.getWorkerBookings({
         status,
         limit: LIMIT,
-        cursor: pageParam ? JSON.parse(pageParam) : null,
+        cursor: pageParam ? pageParam : null,
       }),
     initialPageParam: undefined,
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
