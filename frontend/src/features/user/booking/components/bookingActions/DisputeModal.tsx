@@ -35,7 +35,7 @@ export default function DisputeModal({
   isSubmitting = false,
 }: DisputeModalProps) {
   const { booking, error, isLoading } = useBookingDetails(bookingId);
-  
+
   const form = useForm<DisputeFormType>({
     resolver: zodResolver(disputeSchema),
     mode: 'onChange',
@@ -49,7 +49,7 @@ export default function DisputeModal({
     reset,
     formState: { errors },
   } = form;
-  
+
   useEffect(() => {
     if (!open) {
       reset({ reason: '' });
@@ -62,8 +62,6 @@ export default function DisputeModal({
   if (error || !booking) {
     return null;
   }
-  
-
 
   const onFormSubmit = async (data: DisputeFormType) => {
     await onSubmit(data.reason as string);

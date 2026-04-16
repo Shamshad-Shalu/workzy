@@ -34,6 +34,7 @@ export interface BookingCardHandlers {
   onEnRoute?: (id: string) => void;
   onComplete?: (id: string) => void;
   onReqExtra?: (id: string) => void;
+  onPayExtra?: (id: string) => void;
   onApprove?: (id: string) => void;
   onDispute?: (id: string) => void;
 }
@@ -237,6 +238,16 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                 Details
               </Button>
             </Link>
+            {/* {b.status === BOOKING_STATUS.CONFIRMED && (
+              <Button
+                variant="blue"
+                size="sm"
+                iconLeft={<Phone size={12} />}
+                onClick={() => handlers?.onEvide?.(b.id)}
+              >
+                Evidence
+              </Button>
+            )} */}
             {role === ROLE.USER && (
               <>
                 {(b.status === BOOKING_STATUS.PENDING || b.status === BOOKING_STATUS.CONFIRMED) && (
@@ -259,6 +270,21 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     Approve
                   </Button>
                 )}
+                {b.status === BOOKING_STATUS.COMPLETED &&
+                  b.extraCharge?.amount &&
+                  b.extraCharge.status === 'pending' && (
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      iconLeft={<CheckCircle size={12} />}
+                      onClick={() => {
+                        console.log('hello::', b.id);
+                        handlers?.onPayExtra?.(b.id);
+                      }}
+                    >
+                      Pay Extra
+                    </Button>
+                  )}
                 {(BOOKING_STATUS.IN_PROGRESS === b.status ||
                   BOOKING_STATUS.DISPUTED === b.status ||
                   BOOKING_STATUS.COMPLETED === b.status) && (
@@ -268,8 +294,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     onClick={() => handlers?.onDispute?.(b.id)}
                     size="sm"
                   >
-                    {' '}
-                    Dispute{' '}
+                    Dispute
                   </Button>
                 )}
               </>

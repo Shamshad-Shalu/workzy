@@ -42,3 +42,11 @@ export function useApproveBooking() {
     onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
   });
 }
+
+export function usePayExtraCharge() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => BookingService.payExtraCharge(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+  });
+}

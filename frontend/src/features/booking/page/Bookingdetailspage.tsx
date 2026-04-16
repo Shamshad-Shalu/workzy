@@ -33,6 +33,7 @@ import {
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
+import Button from '@/components/atoms/Button';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -404,14 +405,10 @@ export default function BookingDetailsPage({
             </GlassCard>
           </motion.div>
 
-          {/* Side column: Actions + Extra Charge + Evidence */}
           <motion.div variants={fadeUp} className="flex flex-col gap-5">
-            {/* Role-aware action panel */}
             <GlassCard title="Actions" icon={Zap}>
               <ActionPanel booking={b} role={role} handlers={handlers} />
             </GlassCard>
-
-            {/* Extra Charge */}
             <GlassCard title="Extra Charge" icon={Receipt}>
               {b.extraCharge ? (
                 <div className="space-y-3">
@@ -427,6 +424,20 @@ export default function BookingDetailsPage({
                   <p className="text-[11px] text-muted-foreground/60">
                     Requested {dayjs(b.extraCharge.requestedAt).format('DD MMM YYYY, HH:mm')}
                   </p>
+                  {b.extraCharge.status === 'pending' && (
+                    <div className="py-2">
+                      <Button
+                        variant="blue"
+                        fullWidth
+                        onClick={() => {
+                          console.log('pay extra clicked .', b.id);
+                          handlers?.onPayExtra?.(b.id);
+                        }}
+                      >
+                        Pay Now
+                      </Button>
+                    </div>
+                  )}
                   {b.extraCharge.respondedAt && (
                     <p className="text-[11px] text-muted-foreground/60">
                       Responded {dayjs(b.extraCharge.respondedAt).format('DD MMM YYYY, HH:mm')}
@@ -694,7 +705,7 @@ function GlassCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+    <div className="flex h-full flex-col rounded-2xl border border-border bg-card shadow-sm">
       <div className="flex items-center gap-2.5 border-b border-border px-5 py-3.5">
         <div className="rounded-lg border border-border bg-muted p-1.5">
           <Icon className="h-4 w-4 text-muted-foreground" />

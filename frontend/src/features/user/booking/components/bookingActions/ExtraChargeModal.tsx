@@ -11,7 +11,7 @@ interface ExtraChargeModalProps {
   open: boolean;
   onClose: () => void;
   onPayAmount: (id: string) => Promise<void>;
-  onReject: (id: string) => Promise<void>;
+  onReject?: (id: string) => Promise<void>;
   bookingId: string | null;
   isSubmitting?: boolean;
 }
@@ -39,7 +39,7 @@ export default function ExtraChargeModal({
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" disabled={isSubmitting} onClick={() => onReject(booking.id)}>
+      <Button variant="outline" disabled={isSubmitting} onClick={() => onReject?.(booking.id)}>
         Decline
       </Button>
       <Button
@@ -49,7 +49,6 @@ export default function ExtraChargeModal({
         loading={isSubmitting}
         iconLeft={<CreditCard size={14} />}
       >
-        {' '}
         Pay {formatCurrency(amount)}
       </Button>
     </div>

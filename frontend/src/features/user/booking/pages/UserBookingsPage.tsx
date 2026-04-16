@@ -209,6 +209,7 @@ import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTa
 
 import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
+import ExtraChargeModal from '../components/bookingActions/ExtraChargeModal';
 import { useUserBookingHandler, useUserBookings } from '../hooks/useUserBooking';
 
 export default function UserBookingsPage() {
@@ -216,8 +217,9 @@ export default function UserBookingsPage() {
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useUserBookings(status);
-  const { cancel, approve } = useUserBookingHandler();
+  const { cancel, approve, payExtra } = useUserBookingHandler();
   const { cancelB, cancelPending, setCancelB, submitCancel } = cancel;
+  const { payExtraBId, setPayExtraBId, payExtraPending, submitPayExtra } = payExtra;
   const { approveBId, setApproveBId, approvePending, submitApprove } = approve;
 
   const bookings = data?.pages.flatMap(p => p.bookings) ?? [];
@@ -239,6 +241,7 @@ export default function UserBookingsPage() {
         role={ROLE.USER}
         onCancel={booking => setCancelB(booking)}
         onApprove={id => setApproveBId(id)}
+        onPayExtra={id => setPayExtraBId(id)}
         detailBasePath="/bookings"
       />
       <CancelModal
@@ -254,6 +257,13 @@ export default function UserBookingsPage() {
         bookingId={approveBId}
         onSubmit={submitApprove}
         isSubmitting={approvePending}
+      />
+      <ExtraChargeModal
+        open={!!payExtraBId}
+        bookingId={payExtraBId}
+        onClose={() => setPayExtraBId(null)}
+        onPayAmount={submitPayExtra}
+        isSubmitting={payExtraPending}
       />
     </div>
   );

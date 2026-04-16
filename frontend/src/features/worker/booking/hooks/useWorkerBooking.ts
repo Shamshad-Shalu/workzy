@@ -136,7 +136,9 @@ export function useWorkerBookingHandler() {
   }
 
   async function requestExtraCharge(data: ExtraChargeFormType) {
-    if (!extraChargeBId) {return;}
+    if (!extraChargeBId) {
+      return;
+    }
     const res = await requestExtraChargeMutate({ id: extraChargeBId, data });
     if (res?.message) {
       toast.success(res.message);

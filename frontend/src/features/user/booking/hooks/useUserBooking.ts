@@ -7,6 +7,7 @@ import {
   bookingKeys,
   useApproveBooking,
   useCancelBooking,
+  usePayExtraCharge,
 } from '@/features/booking/hooks/useBooking';
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
@@ -38,24 +39,43 @@ export function useUserBookings(status: BookingFilterStatus) {
 export function useUserBookingHandler() {
   const [cancelB, setCancelB] = useState<BookingListItem | null>(null);
   const [approveBId, setApproveBId] = useState<string | null>(null);
+  const [evidenceBId, setEvidenceBId] = useState<string | null>(null);
+  const [payExtraBId, setPayExtraBId] = useState<string | null>(null);
 
   const { mutateAsync: cancel, isPending: cancelPending } = useCancelBooking();
   const { mutateAsync: approve, isPending: approvePending } = useApproveBooking();
+  const { mutateAsync: payExtra, isPending: payExtraPending } = usePayExtraCharge();
 
   const submitCancel = async (reason: string) => {
-    if (!cancelB?.id) {return;}
+    if (!cancelB?.id) {
+      return;
+    }
     await cancel({ id: cancelB.id, reason });
     setCancelB(null);
   };
 
   const submitApprove = async () => {
-    if (!approveBId) {return;}
+    if (!approveBId) {
+      return;
+    }
     const res = await approve(approveBId);
     if (res.message) {
       toast.success(res.message);
     }
     setApproveBId(null);
   };
+  const submitPayExtra = async () => {
+    if (!payExtraBId) {
+      return;
+    }
+    const res = await payExtra(payExtraBId);
+    if (res.url) {
+      window.location.href = res.url;
+    }
+    setPayExtraBId(null);
+  };
+
+  console.log('extra', { payExtraBId, payExtraPending });
 
   return {
     cancel: {
@@ -69,6 +89,16 @@ export function useUserBookingHandler() {
       setApproveBId,
       submitApprove,
       approvePending,
+    },
+    payExtra: {
+      payExtraBId,
+      setPayExtraBId,
+      submitPayExtra,
+      payExtraPending,
+    },
+    evidence: {
+      evidenceBId,
+      setEvidenceBId,
     },
   };
 }

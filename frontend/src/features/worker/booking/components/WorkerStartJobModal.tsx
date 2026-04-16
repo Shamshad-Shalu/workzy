@@ -16,9 +16,15 @@ interface WorkerStartJobModalProps {
   isSubmitting?: boolean;
 }
 const validateOtp = (value: string) => {
-  if (!value) {return 'OTP is required';}
-  if (!/^\d+$/.test(value)) {return 'OTP must contain only numbers';}
-  if (value.length !== 6) {return 'OTP must be exactly 6 digits';}
+  if (!value) {
+    return 'OTP is required';
+  }
+  if (!/^\d+$/.test(value)) {
+    return 'OTP must contain only numbers';
+  }
+  if (value.length !== 6) {
+    return 'OTP must be exactly 6 digits';
+  }
   return '';
 };
 
