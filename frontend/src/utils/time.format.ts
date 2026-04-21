@@ -36,8 +36,27 @@ export function formatSmartDate(date: string | Date): string {
   if (d.isSame(yesterday, 'day')) {
     return 'Yesterday';
   }
-
   return d.format('dddd, DD MMM');
+}
+
+export function formatSmartDateTime(date: string | Date): string {
+  const d = dayjs(date);
+  const time = d.format('h:mm A');
+  const today = dayjs();
+  const yesterday = today.subtract(1, 'day');
+  const tomorrow = today.add(1, 'day');
+
+  if (d.isSame(today, 'day')) {
+    return `Today · ${time}`;
+  }
+  if (d.isSame(yesterday, 'day')) {
+    return `Yesterday · ${time}`;
+  }
+  if (d.isSame(tomorrow, 'day')) {
+    return `Tomorrow · ${time}`;
+  }
+
+  return `${d.format('dddd, DD MMM')} · ${time}`;
 }
 
 export function calculateEndTime(startTime: string, durationMins: number): string {

@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import {
   AlertTriangle,
@@ -29,6 +30,7 @@ export interface BookingCardHandlers {
   onAccept?: (id: string) => void;
   onStart?: (booking: BookingListItem) => void;
   onCancel?: (booking: BookingListItem) => void;
+  onReview?: (data: { id: string; reviewId?: string }) => void;
   onReject?: (id: string) => void;
   onReached?: (id: string) => void;
   onEnRoute?: (id: string) => void;
@@ -82,8 +84,18 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
   const cfg = BOOKING_STATUS_META[b.status];
   const pc = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
   const isAdmin = role === ROLE.ADMIN;
+  const isExtraCharge = !!b.extraCharge;
   const extraPending = b.extraCharge?.status === 'pending';
   const extraApproved = b.extraCharge?.status === 'approved';
+
+  const isReviewExpired = b.completedAt
+    ? dayjs().isAfter(dayjs(b.completedAt).add(48, 'hour'))
+    : false;
+
+  const isCompletedOrApproved =
+    b.status === BOOKING_STATUS.COMPLETED || b.status === BOOKING_STATUS.APPROVED;
+  const hasVisibleReview = !!b.reviewId && b.hasVisibleReview;
+  const canAddReview = !hasVisibleReview && !isReviewExpired;
 
   const otherAvatar = role === ROLE.WORKER ? b.user.profileImage : b.worker.profileImage;
   const otherName = role === ROLE.WORKER ? b.user.name : b.worker.name;
@@ -217,7 +229,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
           </span>
         </div>
         {extraApproved && b.extraCharge?.amount && (
-          <div className="mt-3 text-xs font-medium text-muted-foreground bg-muted/60 rounded-xl px-3 py-2 border border-green-200/60 dark:border-green-800/40 flex items-center gap-2">
+          <div className="mt-3 text-xs font-medium text-muted-foreground bg-emerald-500/15  border-emerald-500/30 rounded-xl px-3 py-2 flex items-center gap-2">
             <CheckCheck size={12} className="text-green-600 dark:text-green-400 flex-shrink-0" />
             Extra charge of <strong>{formatCurrency(b.extraCharge.amount)}</strong> approved and
             added to total
@@ -270,6 +282,19 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     Approve
                   </Button>
                 )}
+                {isCompletedOrApproved && (hasVisibleReview || canAddReview) && (
+                  <Button
+                    variant="blue"
+                    size="sm"
+                    iconLeft={<CheckCircle size={12} />}
+                    onClick={() => {
+                      console.log('hello');
+                      handlers?.onReview?.({ id: b.id, reviewId: b.reviewId });
+                    }}
+                  >
+                    {hasVisibleReview ? 'Show Review' : 'Add Review'}
+                  </Button>
+                )}
                 {b.status === BOOKING_STATUS.COMPLETED &&
                   b.extraCharge?.amount &&
                   b.extraCharge.status === 'pending' && (
@@ -278,7 +303,6 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                       size="sm"
                       iconLeft={<CheckCircle size={12} />}
                       onClick={() => {
-                        console.log('hello::', b.id);
                         handlers?.onPayExtra?.(b.id);
                       }}
                     >
@@ -298,16 +322,6 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                   </Button>
                 )}
               </>
-            )}
-            {BOOKING_STATUS.DISPUTED === b.status && (
-              <Button
-                iconLeft={<ShieldAlert size={12} />}
-                variant="red"
-                onClick={() => handlers?.onDispute?.(b.id)}
-                size="sm"
-              >
-                Dispute
-              </Button>
             )}
             {role === ROLE.WORKER && (
               <>
@@ -351,14 +365,14 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     I've Arrived
                   </Button>
                 )}
-                {b.status === BOOKING_STATUS.IN_PROGRESS && (
+                {(b.status === BOOKING_STATUS.IN_PROGRESS || isExtraCharge) && (
                   <Button
                     variant="warning"
                     size="sm"
                     iconLeft={<AlertTriangle size={12} />}
                     onClick={() => handlers?.onReqExtra?.(b.id)}
                   >
-                    Request Extra Charge
+                    {isExtraCharge ? 'Preview Extra Charge' : 'Request Extra Charge'}
                   </Button>
                 )}
                 {b.status === BOOKING_STATUS.REACHED && (
@@ -379,6 +393,34 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     onClick={() => handlers?.onComplete?.(b.id)}
                   >
                     Finish Job
+                  </Button>
+                )}
+                {b.reviewId && b.hasVisibleReview && (
+                  <Button
+                    variant="blue"
+                    size="sm"
+                    iconLeft={<CheckCircle size={12} />}
+                    onClick={() => {
+                      handlers?.onReview?.({ id: b.id, reviewId: b.reviewId });
+                    }}
+                  >
+                    Show Review
+                  </Button>
+                )}
+              </>
+            )}
+            {isAdmin && (
+              <>
+                {b.reviewId && (
+                  <Button
+                    variant="blue"
+                    size="sm"
+                    iconLeft={<CheckCircle size={12} />}
+                    onClick={() => {
+                      handlers?.onReview?.({ id: b.id, reviewId: b.reviewId });
+                    }}
+                  >
+                    Show Review
                   </Button>
                 )}
               </>

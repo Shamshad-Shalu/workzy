@@ -35,6 +35,7 @@ export default function WorkerCompleteModal({
 }: WorkerCompleteModalProps) {
   const [note, setNote] = useState('');
   const [beforeEvidence, setBeforeEvidence] = useState<EvidenceItemForm[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [afterEvidence, setAfterEvidence] = useState<EvidenceItemForm[]>([]);
 
   useEffect(() => {
@@ -71,17 +72,19 @@ export default function WorkerCompleteModal({
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" disabled={isSubmitting} onClick={onClose}>
+      <Button variant="outline" disabled={isSubmitting || isUploading} onClick={onClose}>
         Cancel
       </Button>
       <Button
         variant="green"
-        disabled={beforeEvidence.length === 0 || afterEvidence.length === 0 || isSubmitting}
+        disabled={
+          beforeEvidence.length === 0 || afterEvidence.length === 0 || isSubmitting || isUploading
+        }
         onClick={handleConfirm}
         loading={isSubmitting}
         iconLeft={<CheckCircle2 size={14} />}
       >
-        Complete Job
+        {isUploading ? 'Waiting for uploads...' : 'Complete Job'}
       </Button>
     </div>
   );
@@ -103,7 +106,8 @@ export default function WorkerCompleteModal({
             onChange={setBeforeEvidence}
             purpose="SERVICE_EVIDENCE"
             maxFiles={4}
-            autoCompress={true}
+            autoCompress
+            onUploadingChange={setIsUploading}
           />
         </div>
 
@@ -113,8 +117,9 @@ export default function WorkerCompleteModal({
             value={afterEvidence}
             onChange={setAfterEvidence}
             purpose="SERVICE_EVIDENCE"
+            onUploadingChange={setIsUploading}
             maxFiles={4}
-            autoCompress={true}
+            autoCompress
           />
         </div>
 

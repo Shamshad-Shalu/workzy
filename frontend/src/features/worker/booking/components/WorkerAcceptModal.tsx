@@ -100,13 +100,11 @@ export default function WorkerAcceptModal({
               <span>Platform Fee ({platformFeePercent}%)</span>
               <span>-{formatCurrency(platformFee)}</span>
             </div>
-
             <div className="flex justify-between items-center pt-1">
               <span className="text-sm font-medium text-primary flex items-center gap-1">
                 <IndianRupee size={12} />
                 Your Net Earnings
               </span>
-
               <span className="text-lg font-bold text-green-600">
                 {formatCurrency(total - platformFee)}
               </span>

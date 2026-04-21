@@ -27,6 +27,5 @@ export const PLAN_BENEFITS = [
   'Verified Premium Badge',
   'Detailed Analytics Dashboard',
   'Priority Support from Admin',
-  'First Priority for Cancelled Job Reassignment',
   'Early Access to New Features',
 ] as const;

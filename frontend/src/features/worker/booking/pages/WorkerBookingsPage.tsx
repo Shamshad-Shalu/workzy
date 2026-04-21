@@ -9,6 +9,7 @@ import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
 import WorkerExtraChargeModal from '../components/WorkerExtraChargeModal';
 import WorkerRejectModal from '../components/WorkerRejectModal';
+import WorkerReviewReplyModal from '../components/WorkerReviewModal';
 import WorkerStartJobModal from '../components/WorkerStartJobModal';
 import {
   useMarkEnRoute,
@@ -22,13 +23,14 @@ export default function WorkerBookingsPage() {
   const { mutateAsync: markEnRoute } = useMarkEnRoute();
   const { mutateAsync: markReached } = useMarkReached();
 
-  const { accept, start, reject, finish, extraCharge } = useWorkerBookingHandler();
-  const { extraChargeBId, setExtraChargeBId, requestExtraCharge, isRequestingExtraCharge } =
+  const { accept, start, reject, finish, extraCharge, review } = useWorkerBookingHandler();
+  const { extraChargeBId, setExtraChargeBId, handleExtraCharge, isRequestingExtraCharge } =
     extraCharge;
-  const { setFinishBId, finishBId, isCompleting, finishJob } = finish;
-  const { setAcceptBId, acceptBId, isAccepting, acceptBooking } = accept;
-  const { rejectBId, setRejectBId, rejectBooking, isRejecting } = reject;
-  const { setStartB, startB, isStarting, startJob } = start;
+  const { setFinishBId, finishBId, isCompleting, handleFinishJob } = finish;
+  const { setAcceptBId, acceptBId, isAccepting, handleAcceptBooking } = accept;
+  const { rejectBId, setRejectBId, handleRejectBooking, isRejecting } = reject;
+  const { setStartB, startB, isStarting, handleStartJob } = start;
+  const { reviewData, isReplying, setReviewData, handleReviewReply } = review;
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useWorkerBooking(status);
 
@@ -57,43 +59,54 @@ export default function WorkerBookingsPage() {
         onComplete={id => setFinishBId(id)}
         onReqExtra={id => setExtraChargeBId(id)}
         // onCancel={id => reject(id)}
+        onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
         detailBasePath="/worker/bookings"
       />
       <WorkerAcceptModal
         isSubmitting={isAccepting}
-        onSubmit={acceptBooking}
+        onSubmit={handleAcceptBooking}
         open={!!acceptBId}
         bookingId={acceptBId}
         onClose={() => setAcceptBId(null)}
       />
       <WorkerRejectModal
         isSubmitting={isRejecting}
-        onSubmit={rejectBooking}
+        onSubmit={handleRejectBooking}
         open={!!rejectBId}
         bookingId={rejectBId}
         onClose={() => setRejectBId(null)}
       />
       <WorkerCompleteModal
         isSubmitting={isCompleting}
-        onSubmit={finishJob}
+        onSubmit={handleFinishJob}
         open={!!finishBId}
         bookingId={finishBId}
         onClose={() => setFinishBId(null)}
       />
       <WorkerExtraChargeModal
         isSubmitting={isRequestingExtraCharge}
-        onSubmit={requestExtraCharge}
+        onSubmit={handleExtraCharge}
         open={!!extraChargeBId}
         bookingId={extraChargeBId}
         onClose={() => setExtraChargeBId(null)}
       />
       <WorkerStartJobModal
         isSubmitting={isStarting}
-        onSubmit={startJob}
+        onSubmit={handleStartJob}
         open={!!startB}
         booking={startB}
         onClose={() => setStartB(null)}
       />
+
+      {reviewData?.reviewId && (
+        <WorkerReviewReplyModal
+          onClose={() => setReviewData(null)}
+          onSubmit={handleReviewReply}
+          open={!!reviewData}
+          reviewId={reviewData?.reviewId}
+          isReplying={isReplying}
+        />
+      )}
     </div>
   );
 }

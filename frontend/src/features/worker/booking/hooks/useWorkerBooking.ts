@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 
 import type { BookingFilterStatus } from '@/constants';
 import { bookingKeys, useAcceptBooking } from '@/features/booking/hooks/useBooking';
+import { useAddReviewReply } from '@/features/user/booking/hooks/useReview';
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 
@@ -85,7 +86,10 @@ export function useExtraCharge() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: ExtraChargeFormType }) =>
       BookingService.requestExtraCharge(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
 
@@ -96,14 +100,16 @@ export function useWorkerBookingHandler() {
   const { mutateAsync: finishJobMutate, isPending: isCompleting } = useFinishJob();
   const { mutateAsync: requestExtraChargeMutate, isPending: isRequestingExtraCharge } =
     useExtraCharge();
+  const { mutateAsync: replyToReview, isPending: isReplying } = useAddReviewReply();
 
   const [acceptBId, setAcceptBId] = useState<string | null>(null);
   const [rejectBId, setRejectBId] = useState<string | null>(null);
   const [finishBId, setFinishBId] = useState<string | null>(null);
   const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
   const [startB, setStartB] = useState<BookingListItem | null>(null);
+  const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
 
-  async function acceptBooking(id: string) {
+  async function handleAcceptBooking(id: string) {
     const res = await accept(id);
     if (res?.message) {
       toast.success(res.message);
@@ -111,7 +117,7 @@ export function useWorkerBookingHandler() {
     setAcceptBId(null);
   }
 
-  async function startJob(id: string, otp: string) {
+  async function handleStartJob(id: string, otp: string) {
     const res = await startJobMutate({ id, otp });
     if (res?.message) {
       toast.success(res.message);
@@ -119,7 +125,7 @@ export function useWorkerBookingHandler() {
     setStartB(null);
   }
 
-  async function rejectBooking(reason: string) {
+  async function handleRejectBooking(reason: string) {
     const res = await rejectBookingMutate({ id: rejectBId!, reason });
     if (res?.message) {
       toast.success(res.message);
@@ -127,7 +133,7 @@ export function useWorkerBookingHandler() {
     setRejectBId(null);
   }
 
-  async function finishJob(data: BookigCompleteForm) {
+  async function handleFinishJob(data: BookigCompleteForm) {
     const res = await finishJobMutate({ id: finishBId!, data });
     if (res?.message) {
       toast.success(res.message);
@@ -135,7 +141,7 @@ export function useWorkerBookingHandler() {
     setFinishBId(null);
   }
 
-  async function requestExtraCharge(data: ExtraChargeFormType) {
+  async function handleExtraCharge(data: ExtraChargeFormType) {
     if (!extraChargeBId) {
       return;
     }
@@ -146,36 +152,53 @@ export function useWorkerBookingHandler() {
     setExtraChargeBId(null);
   }
 
+  async function handleReviewReply(message: string) {
+    if (!reviewData?.reviewId) {
+      return;
+    }
+    const res = await replyToReview({ reviewId: reviewData?.reviewId, message });
+    if (res?.message) {
+      toast.success(res.message);
+    }
+    setReviewData(null);
+  }
+
   return {
     accept: {
       acceptBId,
       setAcceptBId,
-      acceptBooking,
+      handleAcceptBooking,
       isAccepting,
     },
     start: {
       startB,
       setStartB,
-      startJob,
+      handleStartJob,
       isStarting,
     },
     reject: {
       rejectBId,
       setRejectBId,
-      rejectBooking,
+      handleRejectBooking,
       isRejecting,
     },
     finish: {
       finishBId,
       setFinishBId,
-      finishJob,
+      handleFinishJob,
       isCompleting,
     },
     extraCharge: {
       extraChargeBId,
       setExtraChargeBId,
-      requestExtraCharge,
+      handleExtraCharge,
       isRequestingExtraCharge,
+    },
+    review: {
+      reviewData,
+      setReviewData,
+      handleReviewReply,
+      isReplying,
     },
   };
 }

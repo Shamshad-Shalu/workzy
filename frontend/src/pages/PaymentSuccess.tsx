@@ -44,8 +44,6 @@ export default function PaymentSuccess() {
     retry: false,
   });
 
-  console.log(details);
-
   if (!sessionId || isError) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background px-4">
@@ -128,7 +126,7 @@ export default function PaymentSuccess() {
 
           <div className="w-full flex flex-col gap-2">
             <button
-              onClick={() => navigate(config.buttonPath)}
+              onClick={() => navigate(config.buttonPath, { replace: true })}
               className="w-full py-2.5 rounded-xl text-sm font-semibold text-white
                          bg-violet-600 hover:bg-violet-500 transition-colors
                          flex items-center justify-center gap-2"

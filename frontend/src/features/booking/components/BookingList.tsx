@@ -29,6 +29,7 @@ interface BookingListProps {
   onEnRoute?: (id: string) => void;
   onReqExtra?: (id: string) => void;
   onPayExtra?: (id: string) => void;
+  onReview?: (data: { id: string; reviewId?: string }) => void;
   detailBasePath?: string;
 }
 
@@ -50,6 +51,7 @@ export function BookingList({
   onComplete,
   onReqExtra,
   onApprove,
+  onReview,
   onPayExtra,
   onDispute,
   detailBasePath = '/bookings',
@@ -107,6 +109,7 @@ export function BookingList({
               onApprove,
               onDispute,
               onPayExtra,
+              onReview,
             }}
           />
         ))}

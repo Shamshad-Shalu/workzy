@@ -65,29 +65,29 @@ export default function ExtraChargeModal({
       hideFooter={status === 'approved'}
     >
       <>
-        <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
+        <div className="bg-amber-500/15 border-amber-500/30 border rounded-xl p-4 mb-6">
           <div className="flex justify-between items-start mb-1.5">
-            <p className="text-sm font-semibold text-amber-800">Worker Requested Extra Charge</p>
+            <p className="text-sm font-semibold text-amber-400">Worker Requested Extra Charge</p>
             <span className="text-lg font-bold text-muted-foreground">
               {formatCurrency(amount)}
             </span>
           </div>
           <p className="text-sm text-muted-foreground">{reason}</p>
-          <p className="text-xs text-amber-500 mt-2">Requested {formatSmartDate(requestedAt)}</p>
+          <p className="text-xs text-muted-foreground mt-2">
+            Requested {formatSmartDate(requestedAt)}
+          </p>
         </div>
-        {evidenceUrl && (
-          <div>
-            <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-              Receipt / Evidence
-            </p>
-            <img
-              src={evidenceUrl}
-              alt="evidence"
-              className="w-full rounded-xl object-cover h-40 bg-slate-100"
-            />
-          </div>
-        )}
-        <div className="bg-slate-50 rounded-xl p-3 text-sm space-y-1.5">
+        <div className="my-6">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">
+            Receipt / Evidence
+          </p>
+          <img
+            src={evidenceUrl}
+            alt="evidence"
+            className="w-full rounded-xl object-cover h-45 bg-slate-100"
+          />
+        </div>
+        <div className="bg-slate-500/15 rounded-xl p-3 text-sm space-y-1.5">
           <div className="flex justify-between">
             <span className="text-muted-foreground">Original Total</span>
             <span>{formatCurrency(booking.total)}</span>
@@ -96,7 +96,7 @@ export default function ExtraChargeModal({
             <span className="text-muted-foreground">Extra Charge</span>
             <span className="text-amber-600">{formatCurrency(amount)}</span>
           </div>
-          <div className="border-t border-slate-200 pt-1.5 flex justify-between font-bold text-slate-800">
+          <div className="border-t border-slate-500/30 pt-1.5 flex justify-between font-bold text-slate-400">
             <span>New Total</span>
             <span>{formatCurrency(booking.total + amount)}</span>
           </div>

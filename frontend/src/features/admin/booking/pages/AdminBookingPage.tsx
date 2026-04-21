@@ -18,7 +18,8 @@ import { BookingList } from '@/features/booking/components/BookingList';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { cn } from '@/lib/utils';
 
-import { useAdminBookings } from '../hooks/useAdminBooking';
+import AdminReviewModal from '../components/AdminReviewModal';
+import { useAdminBookingHandler, useAdminBookings } from '../hooks/useAdminBooking';
 
 const CUSTOM_PARAMS = [
   { key: 'paymentStatus', defaultValue: 'all' },
@@ -26,7 +27,7 @@ const CUSTOM_PARAMS = [
   { key: 'toDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
 ];
 
-const formatDateForUrl = (date: Date | null | undefined): string | null => {
+const formatDateForUrl = (date?: Date | null): string | null => {
   if (!date) {
     return null;
   }
@@ -39,6 +40,9 @@ export default function AdminBookingsPage() {
     fromDate: Date | null;
     toDate: Date | null;
   }>(CUSTOM_PARAMS);
+
+  const { review } = useAdminBookingHandler();
+  const { handleToggleReview, isTogglingReview, reviewData, setReviewData } = review;
 
   const handleSearchChange = useCallback(
     (v: string) => updateParams({ search: v }),
@@ -150,7 +154,17 @@ export default function AdminBookingsPage() {
         refetch={refetch}
         role={ROLE.ADMIN}
         detailBasePath="/admin/bookings"
+        onReview={data => review.setReviewData({ id: data.id, reviewId: data.reviewId })}
       />
+      {reviewData?.reviewId && (
+        <AdminReviewModal
+          onClose={() => setReviewData(null)}
+          onToggleVisibility={handleToggleReview}
+          isToggling={isTogglingReview}
+          open={!!reviewData}
+          reviewId={reviewData?.reviewId}
+        />
+      )}
     </div>
   );
 }

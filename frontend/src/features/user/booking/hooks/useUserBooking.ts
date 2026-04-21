@@ -12,6 +12,10 @@ import {
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 
+import { useCreateBookingReview, useEditBookingReview } from './useReview';
+
+import type { ReviewFormType } from '../validation/ReviewFormData';
+
 const LIMIT = 5;
 
 export function useUserBookings(status: BookingFilterStatus) {
@@ -41,12 +45,15 @@ export function useUserBookingHandler() {
   const [approveBId, setApproveBId] = useState<string | null>(null);
   const [evidenceBId, setEvidenceBId] = useState<string | null>(null);
   const [payExtraBId, setPayExtraBId] = useState<string | null>(null);
+  const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
 
-  const { mutateAsync: cancel, isPending: cancelPending } = useCancelBooking();
-  const { mutateAsync: approve, isPending: approvePending } = useApproveBooking();
-  const { mutateAsync: payExtra, isPending: payExtraPending } = usePayExtraCharge();
+  const { mutateAsync: cancel, isPending: isCancelling } = useCancelBooking();
+  const { mutateAsync: approve, isPending: isApproving } = useApproveBooking();
+  const { mutateAsync: payExtra, isPending: isPayingExtra } = usePayExtraCharge();
+  const { mutateAsync: addReview } = useCreateBookingReview();
+  const { mutateAsync: editReview } = useEditBookingReview();
 
-  const submitCancel = async (reason: string) => {
+  const handleCancelBooking = async (reason: string) => {
     if (!cancelB?.id) {
       return;
     }
@@ -54,7 +61,7 @@ export function useUserBookingHandler() {
     setCancelB(null);
   };
 
-  const submitApprove = async () => {
+  const handleApproveBooking = async () => {
     if (!approveBId) {
       return;
     }
@@ -64,7 +71,8 @@ export function useUserBookingHandler() {
     }
     setApproveBId(null);
   };
-  const submitPayExtra = async () => {
+
+  const handlePayExtra = async () => {
     if (!payExtraBId) {
       return;
     }
@@ -75,30 +83,56 @@ export function useUserBookingHandler() {
     setPayExtraBId(null);
   };
 
-  console.log('extra', { payExtraBId, payExtraPending });
+  const handleSubmitReview = async (data: ReviewFormType) => {
+    const { rating, reviewText, media } = data;
+    if (reviewData?.reviewId) {
+      const res = await editReview({
+        reviewId: reviewData.reviewId,
+        data: {
+          media,
+          rating,
+          reviewText,
+        },
+      });
+      if (res.message) {
+        toast.success(res.message);
+      }
+    } else {
+      const res = await addReview(data);
+      if (res.message) {
+        toast.success(res.message);
+      }
+    }
+    setReviewData(null);
+  };
 
   return {
     cancel: {
       cancelB,
       setCancelB,
-      submitCancel,
-      cancelPending,
+      handleCancelBooking,
+      isCancelling,
     },
     approve: {
       approveBId,
       setApproveBId,
-      submitApprove,
-      approvePending,
+      handleApproveBooking,
+      isApproving,
     },
     payExtra: {
       payExtraBId,
       setPayExtraBId,
-      submitPayExtra,
-      payExtraPending,
+      handlePayExtra,
+      isPayingExtra,
     },
     evidence: {
       evidenceBId,
       setEvidenceBId,
+    },
+    review: {
+      reviewData,
+      setReviewData,
+      handleSubmitReview,
     },
   };
 }

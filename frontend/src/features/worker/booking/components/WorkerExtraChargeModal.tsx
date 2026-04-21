@@ -1,17 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertTriangle, CheckCheck, Clock, ImageIcon, Upload, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCheck, Clock, XCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { Controller, useForm } from 'react-hook-form';
 
 import Button from '@/components/atoms/Button';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
+import { ImageUpload } from '@/components/molecules/ImageUpload';
+import { UploadPurposes } from '@/constants';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
-import { uploadToS3 } from '@/services/upload.service';
 
 import { ExtraChargeSchema, type ExtraChargeFormType } from '../validation/extraChargeSchema';
 
@@ -28,9 +28,18 @@ export default function WorkerExtraChargeModal({
   onClose,
   onSubmit,
   bookingId,
-  isSubmitting = false,
 }: WorkerExtraChargeModalProps) {
-  const form = useForm<ExtraChargeFormType>({
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const { booking } = useBookingDetails(bookingId);
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<ExtraChargeFormType>({
     resolver: zodResolver(ExtraChargeSchema),
     mode: 'onChange',
     defaultValues: {
@@ -40,70 +49,47 @@ export default function WorkerExtraChargeModal({
     },
   });
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = form;
-
-  const [evidenceFile, setEvidenceFile] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
-  const { booking } = useBookingDetails(bookingId);
-
-  const isViewOnly = !!booking?.extraCharge;
-
   useEffect(() => {
-    if (!open) {
-      reset({ reason: '', amount: 0, evidenceUrl: '' });
-      setEvidenceFile(null);
-    } else if (booking?.extraCharge) {
-      reset({
-        reason: booking.extraCharge.reason,
-        amount: booking.extraCharge.amount,
-        evidenceUrl: booking.extraCharge.evidenceUrl || '',
-      });
+    if (bookingId) {
+      if (booking?.extraCharge) {
+        reset({
+          reason: booking.extraCharge.reason,
+          amount: booking.extraCharge.amount,
+          evidenceUrl: booking.extraCharge.evidenceUrl || '',
+        });
+      }
     }
-  }, [open, booking, reset]);
+  }, [booking, bookingId, reset]);
 
+  const handleClose = () => {
+    setIsEditMode(false);
+    onClose();
+  };
   if (!booking) {
     return null;
   }
+  const { extraCharge } = booking;
 
   const onFormSubmit = async (data: ExtraChargeFormType) => {
-    if (isViewOnly) {
-      return;
-    }
-    setUploading(true);
-    try {
-      let finalEvidenceUrl = data.evidenceUrl;
-      if (evidenceFile) {
-        finalEvidenceUrl = await uploadToS3({ file: evidenceFile, purpose: 'SERVICE_EVIDENCE' });
-      }
-      await onSubmit({
-        amount: data.amount,
-        reason: data.reason as string,
-        evidenceUrl: finalEvidenceUrl || undefined,
-      });
-    } catch (err) {
-      toast.error('Failed to upload evidence');
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
+    console.log('data::', data);
+    await onSubmit(data);
+    setIsEditMode(false);
   };
 
   const footer = (
     <div className="flex justify-end gap-2">
-      <Button variant="outline" disabled={isSubmitting || uploading} onClick={onClose}>
-        {isViewOnly ? 'Close' : 'Cancel'}
+      <Button variant="outline" disabled={isSubmitting || isUploading} onClick={handleClose}>
+        {isEditMode ? 'Cancel' : 'Close'}
       </Button>
-      {!isViewOnly && (
+      {extraCharge && extraCharge.status === 'pending' && !isEditMode && (
+        <Button onClick={() => setIsEditMode(true)}>Edit</Button>
+      )}
+      {isEditMode && (
         <Button
           variant="warning"
-          disabled={isSubmitting || uploading}
+          disabled={isSubmitting || isUploading}
           onClick={handleSubmit(onFormSubmit)}
-          loading={isSubmitting || uploading}
+          loading={isSubmitting}
         >
           Request Extra Charge
         </Button>
@@ -114,14 +100,14 @@ export default function WorkerExtraChargeModal({
   return (
     <AppModal
       open={open}
-      onClose={onClose}
-      title={isViewOnly ? 'Extra Charge Request' : 'Request Extra Charge'}
-      canCloseOnOutsideClick={!isSubmitting && !uploading}
+      onClose={handleClose}
+      title={isEditMode ? 'Request Extra Charge' : 'Extra Charge Request'}
+      canCloseOnOutsideClick={!isSubmitting && !isUploading}
       className="max-w-lg"
       footer={footer}
     >
       <div className="flex flex-col gap-4">
-        {isViewOnly ? (
+        {!isEditMode ? (
           <div
             className={cn(
               'flex items-center gap-2 p-3 rounded-xl border mb-2',
@@ -160,7 +146,7 @@ export default function WorkerExtraChargeModal({
             className="px-3"
             type="number"
             placeholder="Enter amount"
-            disabled={isSubmitting || uploading || isViewOnly}
+            disabled={!isEditMode}
             error={errors.amount?.message}
             {...register('amount', { valueAsNumber: true })}
           />
@@ -170,76 +156,32 @@ export default function WorkerExtraChargeModal({
           <Label>Reason</Label>
           <Textarea
             placeholder="Briefly explain why this extra charge is needed..."
-            disabled={isSubmitting || uploading || isViewOnly}
+            disabled={!isEditMode}
             error={errors.reason?.message}
             {...register('reason')}
           />
         </div>
-
-        {(evidenceFile || booking.extraCharge?.evidenceUrl) && (
-          <div className="flex flex-col gap-1.5">
-            <Label>Evidence</Label>
-            {isViewOnly ? (
-              <a
-                href={booking.extraCharge?.evidenceUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-xs text-blue-600 hover:underline flex items-center gap-1.5"
-              >
-                <ImageIcon size={14} />
-                View Uploaded Receipt
-              </a>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => document.getElementById('extra-evidence')?.click()}
-                  iconLeft={<Upload size={14} />}
-                  disabled={isSubmitting || uploading}
-                >
-                  {evidenceFile ? 'Change Photo' : 'Upload Photo'}
-                </Button>
-                <input
-                  id="extra-evidence"
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={e => setEvidenceFile(e.target.files?.[0] || null)}
-                />
-                {evidenceFile && (
-                  <span className="text-xs text-muted-foreground truncate max-w-[200px]">
-                    {evidenceFile.name}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {!isViewOnly && !evidenceFile && (
-          <div className="flex flex-col gap-1.5">
-            <Label>Evidence (Optional Receipt/Photo)</Label>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('extra-evidence')?.click()}
-                iconLeft={<Upload size={14} />}
-                disabled={isSubmitting || uploading}
-              >
-                Upload Photo
-              </Button>
-              <input
-                id="extra-evidence"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={e => setEvidenceFile(e.target.files?.[0] || null)}
+        <div className="flex flex-col gap-1.5">
+          <Label>Evidence </Label>
+          <Controller
+            name="evidenceUrl"
+            rules={{
+              validate: v => (v ? true : 'Image is required'),
+            }}
+            control={control}
+            render={({ field, fieldState }) => (
+              <ImageUpload
+                value={field.value}
+                onChange={url => field.onChange(url)}
+                error={fieldState.error?.message}
+                className="h-40"
+                isEditable={isEditMode}
+                purpose={UploadPurposes.SERVICE_EVIDENCE}
+                onUploadingChange={setIsUploading}
               />
-            </div>
-          </div>
-        )}
+            )}
+          />
+        </div>
       </div>
     </AppModal>
   );

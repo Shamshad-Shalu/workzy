@@ -4,6 +4,7 @@ import { Search, Filter, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { cn } from '@/lib/utils';
 import CategoryService from '@/services/category.service';
 
@@ -64,7 +65,7 @@ export default function ServiceDiscoveryPage() {
     isLoading: isInitialLoading,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage: loadingMore,
+    isFetchingNextPage,
   } = usePublicServices({
     categoryId: activeCategoryId || undefined,
     sortBy: sortBy,
@@ -72,6 +73,7 @@ export default function ServiceDiscoveryPage() {
   });
 
   const services = data?.pages.flatMap(page => page.categories) ?? [];
+  const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
   return (
     <div className="min-h-screen flex flex-col pt-8 overflow-x-hidden">
@@ -211,19 +213,8 @@ export default function ServiceDiscoveryPage() {
                   </motion.div>
                 ))}
               </div>
-              {hasNextPage && !loadingMore && (
-                <div className="flex justify-center pb-8 px-1">
-                  <button
-                    onClick={() => fetchNextPage()}
-                    disabled={loadingMore}
-                    className="group flex w-full sm:w-auto justify-center items-center gap-2 bg-card border border-border text-foreground px-6 sm:px-8 py-3 rounded-full font-semibold shadow-sm hover:shadow-md hover:border-primary/20 hover:text-primary transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {' '}
-                    Show More Services
-                  </button>
-                </div>
-              )}
-              {loadingMore && (
+              <div ref={sentinelRef} className="h-4" />
+              {isFetchingNextPage && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                   <ServiceGridSkeleton count={6} />
                 </motion.div>

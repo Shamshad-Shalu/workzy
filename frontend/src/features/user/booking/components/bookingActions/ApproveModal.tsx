@@ -63,7 +63,7 @@ export default function ApproveModal({
     >
       <div className="space-y-6 py-2">
         <div className="flex flex-col items-center text-center gap-4">
-          <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+          <div className="w-16 h-16 rounded-full  flex items-center justify-center bg-emerald-500/15 text-emerald-400 border-emerald-500/30">
             <CheckCircle2 size={32} />
           </div>
           <div>
@@ -85,13 +85,13 @@ export default function ApproveModal({
           </div>
         )}
 
-        <div className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 flex items-start gap-3">
+        <div className="bg-blue-500/15 text-blue-400 border-blue-500/30 border rounded-xl p-4 flex items-start gap-3">
           <div className="mt-1">
-            <Star size={18} className="text-indigo-600 fill-indigo-600" />
+            <Star size={18} className="text-blue-400 fill-indigo-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-indigo-900">What happens next?</p>
-            <p className="text-xs text-indigo-700 leading-relaxed mt-0.5">
+            <p className="text-sm font-semibold">What happens next?</p>
+            <p className="text-xs leading-relaxed mt-0.5">
               After approval, you can leave a review for the worker and download your formal
               receipt.
             </p>

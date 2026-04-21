@@ -22,7 +22,6 @@ import type { PaymentWorker } from '@/types/payment';
 
 import { useWorkerPayments } from '../hooks/useWorkerPayments';
 
-
 type BadgeVariant = 'green' | 'blue' | 'amber' | 'red' | 'slate' | 'secondary';
 
 const STATUS_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {

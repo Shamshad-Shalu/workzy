@@ -1,4 +1,11 @@
-import type { BookingFilterStatus, BookingPaymentStatus, BookingStatus, Role } from '@/constants';
+import type {
+  BookingFilterStatus,
+  BookingPaymentStatus,
+  BookingStatus,
+  PricingMode,
+  Role,
+  ServiceType,
+} from '@/constants';
 
 import type { Location } from './user';
 
@@ -22,12 +29,14 @@ export interface BookingSlot {
 }
 
 interface UserSnapshot {
+  id: string;
   name: string;
   phone: string;
   profileImage: string;
 }
 
 interface WorkerSnapshot {
+  id: string;
   name: string;
   phone: string;
   profileImage: string;
@@ -35,8 +44,11 @@ interface WorkerSnapshot {
 }
 
 interface CategorySnapshot {
+  id: string;
   name: string;
   iconUrl: string;
+  serviceType: ServiceType;
+  pricingMode: PricingMode;
 }
 
 export interface BookingSnapshot {
@@ -112,7 +124,8 @@ export interface Booking {
   status: BookingStatus;
   statusHistory: BookingStatusHistory[];
 
-  isReviewed: boolean;
+  hasVisibleReview: boolean;
+  reviewId?: string;
   userNote?: string;
   workerNote?: string;
   adminNote?: string;
@@ -142,13 +155,15 @@ export type BookingListItem = {
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;
   userNote?: string;
-  isReviewed: boolean;
+  hasVisibleReview: boolean;
+  reviewId?: string;
   total: number;
   extraCharge?: {
     amount: number;
     status: ExtraChargeStatus;
   };
   createdAt: Date;
+  completedAt: Date | null;
 };
 
 export interface BookingListingResponse {
