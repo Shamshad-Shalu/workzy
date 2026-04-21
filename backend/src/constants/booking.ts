@@ -9,7 +9,7 @@ export const BOOKING_STATUS = {
   CANCELLED: "cancelled", // cancelled before start
   REJECTED: "rejected", // worker rejected
   DISPUTED: "disputed", // user raised dispute
-  // EXPIRED: "expired"
+  EXPIRED: "expired",
 } as const;
 
 export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);

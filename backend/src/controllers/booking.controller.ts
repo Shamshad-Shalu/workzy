@@ -57,7 +57,6 @@ export class BookingController implements IBookingController {
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const result = await this._bookingService.getBookingDetails(bookingId);
-    console.log("result::", result);
     res.status(HTTPSTATUS.OK).json({ booking: result });
   });
 
@@ -107,7 +106,6 @@ export class BookingController implements IBookingController {
   approveBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { bookingId } = req.params;
-
     await this._bookingService.approveBooking(bookingId, userId);
     res.status(HTTPSTATUS.OK).json({ message: "Job approved and payment released" });
   });

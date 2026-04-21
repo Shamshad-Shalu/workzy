@@ -61,7 +61,7 @@ const ExtraChargeSchema = new Schema<IExtraCharge>(
   { _id: false }
 );
 
-const EvidenceItemSchema = new Schema(
+export const EvidenceItemSchema = new Schema(
   {
     url: { type: String, required: true, trim: true },
     type: { type: String, enum: ["image", "video"], required: true },
@@ -169,6 +169,10 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Quote",
     },
+    reviewId: {
+      type: Schema.Types.ObjectId,
+      ref: "Review",
+    },
     snapshot: {
       type: BookingSnapshotSchema,
       required: true,
@@ -246,7 +250,7 @@ const BookingSchema: Schema<IBooking> = new Schema(
     },
     extraCharge: { type: ExtraChargeSchema, default: null },
     evidence: { type: EvidenceSchema, default: null },
-    isReviewed: { type: Boolean, default: false },
+    hasVisibleReview: { type: Boolean, default: false },
     paymentStatus: {
       type: String,
       enum: BOOKING_PAYMENT_STATUS_VALUES,

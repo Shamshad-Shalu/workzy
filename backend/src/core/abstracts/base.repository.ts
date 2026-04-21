@@ -18,7 +18,7 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
   }
 
   async findByIdAndUpdate(id: Types.ObjectId | string, update: UpdateQuery<T>): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, update, { upsert: true, new: true });
+    return this.model.findByIdAndUpdate(id, update, { new: true });
   }
 
   async findAll(): Promise<T[]> {
@@ -54,36 +54,15 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
     return this.model.findOne(filter);
   }
 
-  async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T> {
-    return this.model.findOneAndUpdate(filter, update, { upsert: true, new: true });
+  async findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null> {
+    return this.model.findOneAndUpdate(filter, update, { new: true });
   }
 
   async findOneAndDelete(filter: FilterQuery<T>): Promise<T | null> {
     return this.model.findOneAndDelete(filter);
   }
 
-  async softDelete(id: Types.ObjectId | string): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, { isActive: false }, { new: true });
-  }
-
-  async restore(id: Types.ObjectId | string): Promise<T | null> {
-    return this.model.findByIdAndUpdate(id, { isActive: true }, { new: true });
-  }
   countDocuments(filter: FilterQuery<T>): Promise<number> {
     return this.model.countDocuments(filter).exec();
-  }
-  async findWithPopulate(
-    filter: FilterQuery<T>,
-    populate: string,
-    select: string,
-    skip: number,
-    limit: number
-  ): Promise<T[]> {
-    return this.model
-      .find(filter)
-      .populate(populate, select)
-      .skip(skip)
-      .limit(limit)
-      .sort({ createdAt: -1 });
   }
 }

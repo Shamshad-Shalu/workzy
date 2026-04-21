@@ -1,6 +1,6 @@
-import { DEFAULT_IMAGE_URL } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { NearbyWorkerEntity } from "@/types/worker";
+import { resolveS3Image } from "@/utils/s3.utils";
 
 export class NearbyWorkerResponseDTO {
   id!: string;
@@ -16,18 +16,13 @@ export class NearbyWorkerResponseDTO {
     s3Service: IS3Service
   ): Promise<NearbyWorkerResponseDTO> {
     const dto = new NearbyWorkerResponseDTO();
-
-    const profileImage = entity.profileImage?.includes("private")
-      ? await s3Service.generateSignedUrl(entity.profileImage)
-      : entity.profileImage || DEFAULT_IMAGE_URL;
-
     dto.id = entity._id.toString();
     dto.workerId = entity.workerId.toString();
     dto.displayName = entity.displayName;
     dto.tagline = entity.tagline;
     dto.experience = entity.experience;
 
-    dto.profileImage = profileImage;
+    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
     dto.distance = Math.round(entity.distance);
 
     return dto;

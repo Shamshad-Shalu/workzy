@@ -73,7 +73,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const docs = await this.model
       .find(query)
       .select(
-        "bookingId dates duration snapshot address total itemCount status paymentStatus createdAt workerId userId serviceId categoryId isReviewed completedAt userNote quoteId extraCharge"
+        "bookingId dates duration snapshot address total completedAt itemCount status paymentStatus createdAt workerId userId serviceId categoryId hasVisibleReview reviewId completedAt userNote quoteId extraCharge"
       )
       .sort({ createdAt: -1, _id: -1 })
       .limit(limit + 1)
@@ -95,5 +95,19 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       bookings: docs,
       nextCursor: nextCursor,
     };
+  }
+
+  getExpiredBookings(): Promise<IBooking[]> {
+    const cutoffDate = dayjs().subtract(1, "day").startOf("day").toDate();
+    return this.model.find({
+      status: BOOKING_STATUS.PENDING,
+      dates: {
+        $not: {
+          $elemMatch: {
+            date: { $gte: cutoffDate },
+          },
+        },
+      },
+    });
   }
 }

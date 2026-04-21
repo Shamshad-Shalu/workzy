@@ -1,4 +1,10 @@
-import { BookingPaymentStatus, BookingStatus, DEFAULT_IMAGE_URL } from "@/constants";
+import {
+  BookingPaymentStatus,
+  BookingStatus,
+  DEFAULT_IMAGE_URL,
+  PricingMode,
+  ServiceType,
+} from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import {
   BookingDetails,
@@ -32,6 +38,8 @@ export class BookingListItemDTO {
     id: string;
     name: string;
     iconUrl: string;
+    serviceType: ServiceType;
+    pricingMode: PricingMode;
   };
   addressLabel!: string;
   date!: Date;
@@ -45,7 +53,8 @@ export class BookingListItemDTO {
   status!: BookingStatus;
   paymentStatus!: BookingPaymentStatus;
   userNote?: string;
-  isReviewed!: boolean;
+  hasVisibleReview!: boolean;
+  reviewId?: string;
   total!: number;
   extraCharge?: {
     amount: number;
@@ -53,6 +62,7 @@ export class BookingListItemDTO {
   };
 
   createdAt!: Date;
+  completedAt!: Date | null;
 
   static async fromEntity(
     entity: BookingListItem,
@@ -103,11 +113,13 @@ export class BookingListItemDTO {
     dto.status = entity.status;
     dto.paymentStatus = entity.paymentStatus;
     dto.userNote = entity.userNote || "";
-    dto.isReviewed = entity.isReviewed;
+    dto.hasVisibleReview = entity.hasVisibleReview;
+    dto.reviewId = entity.reviewId ? entity.reviewId.toString() : undefined;
     dto.total = entity.total;
     dto.extraCharge = extraCharge
       ? { amount: extraCharge.amount, status: extraCharge.status }
       : undefined;
+    dto.completedAt = entity.completedAt || null;
 
     return dto;
   }
@@ -141,6 +153,8 @@ export class BookingResponseDTO {
     id: string;
     name: string;
     iconUrl: string;
+    serviceType: ServiceType;
+    pricingMode: PricingMode;
   };
   addressLabel!: string;
   duration!: number;
@@ -172,9 +186,11 @@ export class BookingResponseDTO {
   status!: BookingStatus;
   paymentStatus!: BookingPaymentStatus;
   statusHistory!: IBookingStatusHistory[];
-  isReviewed!: boolean;
+  hasVisibleReview!: boolean;
+  reviewId?: string;
   userNote?: string;
-  completedAt?: Date;
+  createdAt!: Date;
+  completedAt!: Date | null;
 
   static async fromEntity(
     entity: BookingDetails,
@@ -239,9 +255,12 @@ export class BookingResponseDTO {
     dto.paymentStatus = entity.paymentStatus;
     dto.status = entity.status;
     dto.statusHistory = entity.statusHistory;
-    dto.isReviewed = entity.isReviewed;
+    dto.hasVisibleReview = entity.hasVisibleReview;
+    dto.reviewId = entity.reviewId ? entity.reviewId.toString() : undefined;
     dto.userNote = entity.userNote;
-    dto.completedAt = entity.completedAt;
+
+    dto.completedAt = entity.completedAt || null;
+    dto.createdAt = entity.createdAt;
     return dto;
   }
 }

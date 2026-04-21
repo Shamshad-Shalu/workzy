@@ -13,11 +13,8 @@ export interface IBaseRepository<T> {
   updateOne(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<UpdateWriteOpResult>;
   deleteOne(filter: FilterQuery<T>): Promise<DeleteResult>;
 
-  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T>;
+  findOneAndUpdate(filter: FilterQuery<T>, update: UpdateQuery<T>): Promise<T | null>;
   findOneAndDelete(filter: FilterQuery<T>): Promise<T | null>;
-
-  softDelete(id: Types.ObjectId | string): Promise<T | null>;
-  restore(id: Types.ObjectId | string): Promise<T | null>;
 
   countDocuments(filter: FilterQuery<T>): Promise<number>;
 }

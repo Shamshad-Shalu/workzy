@@ -9,6 +9,7 @@ import leaveRoutes from "./leave.routes";
 import paymentRoutes from "./payment.routes";
 import planRoutes from "./plan.routes";
 import profileRoute from "./profile.routes";
+import reviewRoutes from "./review.routes";
 import serviceRoutes from "./service.routes";
 import slotRoutes from "./slot.routes";
 import subscriptionRoutes from "./subscription.routes";
@@ -31,5 +32,6 @@ router.use("/payments", paymentRoutes);
 router.use("/slots", slotRoutes);
 router.use("/booking", bookingRoutes);
 router.use("/leave", leaveRoutes);
+router.use("/reviews", reviewRoutes);
 
 export default router;

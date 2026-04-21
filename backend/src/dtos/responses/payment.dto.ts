@@ -1,7 +1,7 @@
 import { BillType, PaymentStatus } from "@/constants";
 import { IPayment } from "@/types/payment";
 
-export class PaymentBaseDTO {
+class PaymentBaseDTO {
   id!: string;
   refId!: string;
   transactionId!: string;

@@ -26,4 +26,7 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
     serviceId: string,
     params: WorkerListingFilters
   ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }>;
+  incrementRating(workerId: string, rating: number): Promise<void>;
+  adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void>;
+  decrementRating(workerId: string, rating: number): Promise<void>;
 }

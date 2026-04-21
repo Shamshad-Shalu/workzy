@@ -139,6 +139,7 @@ export class PaymentService implements IPaymentService {
           type: "BOOKING",
           bookingId,
           slotId,
+          workerId,
           userId,
         },
       },
@@ -147,6 +148,7 @@ export class PaymentService implements IPaymentService {
       metadata: {
         type: "BOOKING",
         bookingId,
+        workerId,
         slotId,
         userId,
       },
@@ -281,6 +283,9 @@ export class PaymentService implements IPaymentService {
         if (session.metadata?.type === "BOOKING") {
           await this._handleBookingCheckoutExpired(session);
         }
+        if (session.metadata?.type === "SUBSCRIPTION") {
+          await this._handleSubscriptionCheckoutExpired(session);
+        }
         break;
       }
 
@@ -371,10 +376,11 @@ export class PaymentService implements IPaymentService {
     const metadata = session.metadata as {
       bookingId: string;
       slotId: string;
+      workerId: string;
     };
-    const { bookingId, slotId } = metadata;
+    const { bookingId, slotId, workerId } = metadata;
 
-    const [slot, booking, payment] = await Promise.all([
+    await Promise.all([
       this._slotRepository.update(slotId, {
         status: SLOT_STATUS.BOOKED,
         bookingId: new Types.ObjectId(bookingId),
@@ -397,8 +403,8 @@ export class PaymentService implements IPaymentService {
           paymentIntentId: session.payment_intent as string,
         }
       ),
+      this._workerRepository.findByIdAndUpdate(workerId, { $inc: { jobsOffered: 1 } }),
     ]);
-    console.log("webhook updated::", { booking, payment, slot });
   }
 
   private async handleSubscriptionPaid(session: Stripe.Checkout.Session) {
@@ -487,6 +493,13 @@ export class PaymentService implements IPaymentService {
       ]);
       return;
     }
+  }
+
+  private async _handleSubscriptionCheckoutExpired(session: Stripe.Checkout.Session) {
+    await this._paymentRepo.findOneAndUpdate(
+      { sessionId: session.id },
+      { status: PAYMENT_STATUS.CANCELLED }
+    );
   }
 
   private async _handleBookingCheckoutExpired(session: Stripe.Checkout.Session) {

@@ -99,7 +99,7 @@ export class AuthController implements IAuthController {
   });
 
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    clearRefreshTokenCookie(res);
+    await clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGOUT_SUCCESS });
   });
 

@@ -11,3 +11,4 @@ export * from "./slot";
 export * from "./payment";
 export * from "./booking";
 export * from "./leave";
+export * from "./review";

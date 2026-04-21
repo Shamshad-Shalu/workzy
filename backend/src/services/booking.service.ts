@@ -12,10 +12,12 @@ import {
   BookingStatus,
   CATEGORY,
   HTTPSTATUS,
+  PRICING_MODE,
   PricingMode,
   Role,
   ROLE,
   SERVICE,
+  SERVICE_TYPE,
   SLOT,
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
@@ -107,7 +109,6 @@ export class BookingService implements IBookingService {
         address.location.coordinates[1],
         address.location.coordinates[0]
       );
-
     const subtotal = rate * itemCount;
 
     const finalEndTime = dayjs(`2000-01-01 ${endTime}`)
@@ -139,7 +140,6 @@ export class BookingService implements IBookingService {
       platformFeePercent,
       platformFee,
       total: chargeableAmount + travelCost,
-
       address: address,
       userNote,
       snapshot: {
@@ -152,10 +152,11 @@ export class BookingService implements IBookingService {
         category: {
           name: category.name,
           iconUrl: category.iconUrl,
+          pricingMode: category.pricingMode ?? PRICING_MODE.PER_UNIT,
+          serviceType: category.serviceType ?? SERVICE_TYPE.SMALL_TASK,
         },
       },
     });
-    console.log("booking::", booking);
 
     const url = await this._paymentService.createBookingPaymentCheckout({
       bookingId: booking._id.toString(),
@@ -171,6 +172,378 @@ export class BookingService implements IBookingService {
       workerName: booking.snapshot.worker.name,
     });
     return { url };
+  }
+
+  async cancelBooking(bookingId: string, userId: string, reason: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+
+    if (booking.userId.toString() !== userId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    const cancellableStatuses = [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED];
+    if (!cancellableStatuses.includes(booking.status as (typeof cancellableStatuses)[number])) {
+      throw new CustomError(BOOKING.CANNOT_CANCEL(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
+      await this._paymentService.refundBookingPayment(bookingId);
+    }
+    const paymentStatus =
+      booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+        ? BOOKING_PAYMENT_STATUS.REFUNDED
+        : booking.paymentStatus;
+
+    await this._bookingRepository.update(bookingId, {
+      $set: {
+        status: BOOKING_STATUS.CANCELLED,
+        paymentStatus,
+      },
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
+      },
+    });
+    await this._slotRepository.findOneAndDelete({
+      bookingId: new Types.ObjectId(bookingId),
+      reservedBy: new Types.ObjectId(userId),
+      status: SLOT_STATUS.BOOKED,
+    });
+  }
+
+  async acceptBooking(bookingId: string, workerId: string): Promise<void> {
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        workerId: new Types.ObjectId(workerId),
+        status: BOOKING_STATUS.PENDING,
+        paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
+      },
+      {
+        status: BOOKING_STATUS.CONFIRMED,
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.CONFIRMED,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.CONFIRMED
+          ),
+        },
+      }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
+    }
+    await this._workerRepository.findOneAndUpdate({ _id: workerId }, { $inc: { jobsAccepted: 1 } });
+  }
+
+  async rejectBooking(data: {
+    bookingId: string;
+    workerId: string;
+    reason: string;
+  }): Promise<void> {
+    const { bookingId, workerId, reason } = data;
+    const booking = await this.getBookingOrThrow(bookingId);
+    this.assertWorkerOwnership(booking, workerId);
+    if (booking.status !== BOOKING_STATUS.PENDING) {
+      throw new CustomError(BOOKING.CANNOT_REJECT(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
+      await this._paymentService.refundBookingPayment(bookingId);
+    }
+    const paymentStatus =
+      booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+        ? BOOKING_PAYMENT_STATUS.REFUNDED
+        : booking.paymentStatus;
+
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.REJECTED,
+      paymentStatus,
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
+      },
+    });
+    await this._slotRepository.findOneAndDelete({
+      bookingId: new Types.ObjectId(bookingId),
+      reservedBy: new Types.ObjectId(booking.userId),
+      status: SLOT_STATUS.BOOKED,
+    });
+  }
+
+  async markEnRoute(bookingId: string, workerId: string): Promise<void> {
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        workerId: new Types.ObjectId(workerId),
+        status: BOOKING_STATUS.CONFIRMED,
+      },
+      {
+        status: BOOKING_STATUS.EN_ROUTE,
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.EN_ROUTE,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.EN_ROUTE
+          ),
+        },
+      }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.CANNOT_EN_ROUTE, HTTPSTATUS.BAD_REQUEST);
+    }
+  }
+
+  async markReached(bookingId: string, workerId: string): Promise<void> {
+    const otp = this._otpService.generateOTP();
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        workerId: new Types.ObjectId(workerId),
+        status: BOOKING_STATUS.EN_ROUTE,
+      },
+      {
+        status: BOOKING_STATUS.REACHED,
+        otp,
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.REACHED,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.REACHED
+          ),
+        },
+      }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.CANNOT_REACH, HTTPSTATUS.BAD_REQUEST);
+    }
+    const user = await this._userRepository.findById(booking.userId);
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
+    await this._emailService.sendEmail(user.email, otp);
+  }
+
+  async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+    this.assertWorkerOwnership(booking, workerId);
+    if (booking.status !== BOOKING_STATUS.REACHED) {
+      throw new CustomError(BOOKING.CANNOT_START(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!booking.otp || booking.otp !== otp) {
+      throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
+    }
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.IN_PROGRESS,
+      $unset: { otp: "" },
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.IN_PROGRESS,
+          ROLE.WORKER,
+          BOOKING_STATUS_MESSAGES.IN_PROGRESS
+        ),
+      },
+    });
+  }
+
+  async completeJob(bookingId: string, workerId: string, data: CompleteBookingDTO): Promise<void> {
+    const { evidence, note } = data;
+    const bookingEvidence: IEvidence = {
+      after: evidence.after,
+      before: evidence.before,
+      uploadedAt: new Date(),
+    };
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        workerId: new Types.ObjectId(workerId),
+        status: BOOKING_STATUS.IN_PROGRESS,
+      },
+      {
+        status: BOOKING_STATUS.COMPLETED,
+        evidence: bookingEvidence,
+        workerNote: note,
+        completedAt: new Date(),
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.COMPLETED,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.COMPLETED
+          ),
+        },
+      }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.CANNOT_COMPLETE, HTTPSTATUS.BAD_REQUEST);
+    }
+    await Promise.all([
+      this._slotRepository.findOneAndDelete({
+        bookingId: new Types.ObjectId(bookingId),
+        reservedBy: new Types.ObjectId(booking.userId),
+        status: SLOT_STATUS.BOOKED,
+      }),
+      this._workerRepository.findByIdAndUpdate(workerId, { $inc: { jobsCompleted: 1 } }),
+    ]);
+  }
+
+  async approveBooking(bookingId: string, userId: string): Promise<void> {
+    const booking = await this.getBookingOrThrow(bookingId);
+    if (booking.userId.toString() !== userId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    if (booking.status !== BOOKING_STATUS.COMPLETED) {
+      throw new CustomError(BOOKING.CANNOT_APPROVE(booking.status), HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.paymentStatus !== BOOKING_PAYMENT_STATUS.HELD) {
+      throw new CustomError(BOOKING.PAYMENT_NOT_HELD, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (booking.extraCharge?.status === "pending") {
+      throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
+    }
+    await this._paymentService.releaseBookingPayment(booking);
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.APPROVED,
+      paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
+      completedAt: new Date(),
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.APPROVED,
+          ROLE.USER,
+          BOOKING_STATUS_MESSAGES.APPROVED
+        ),
+      },
+    });
+  }
+
+  async payExtraCharge(bookingId: string, userId: string): Promise<{ url: string }> {
+    const booking = await this.getBookingOrThrow(bookingId);
+    if (booking.userId.toString() !== userId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    if (booking.status !== BOOKING_STATUS.COMPLETED) {
+      throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!booking.extraCharge || booking.extraCharge.status !== "pending") {
+      throw new CustomError(BOOKING.EXTRA_CHARGE_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    const url = await this._paymentService.createExtraChargeCheckout({
+      userId,
+      booking,
+      amount: booking.extraCharge.amount,
+    });
+    return { url };
+  }
+
+  async rejectExtraCharge(bookingId: string, userId: string): Promise<void> {
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        userId: new Types.ObjectId(userId),
+        "extraCharge.status": "pending",
+      },
+      {
+        "extraCharge.status": "rejected",
+        "extraCharge.respondedAt": new Date(),
+      }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.EXTRA_CHARGE_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+  }
+
+  async requestExtraCharge(
+    bookingId: string,
+    workerId: string,
+    data: ExtraChargeDTO
+  ): Promise<void> {
+    const { amount, reason, evidenceUrl } = data;
+    const extraCharge: IExtraCharge = {
+      amount,
+      reason,
+      status: "pending",
+      evidenceUrl,
+      requestedAt: new Date(),
+    };
+    const booking = await this._bookingRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(bookingId),
+        workerId: new Types.ObjectId(workerId),
+        status: { $in: [BOOKING_STATUS.IN_PROGRESS, BOOKING_STATUS.COMPLETED] },
+        $or: [
+          { extraCharge: { $exists: false } },
+          { "extraCharge.status": { $in: ["pending", "rejected"] } },
+        ],
+      },
+      { extraCharge }
+    );
+    if (!booking) {
+      throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
+    }
+  }
+
+  async expireBooking(): Promise<void> {
+    const bookings = await this._bookingRepository.getExpiredBookings();
+    if (!bookings.length) {
+      return;
+    }
+    const results = await Promise.allSettled(
+      bookings.map((booking) => this.processBookingExpiry(booking))
+    );
+    const succeeded = results.filter((r) => r.status === "fulfilled").length;
+    const failed = results.filter((r) => r.status === "rejected").length;
+
+    logger.info(`Booking expiry job done — ${succeeded} expired successfully, ${failed} failed.`);
+  }
+
+  private async processBookingExpiry(booking: IBooking): Promise<void> {
+    try {
+      if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
+        await this._paymentService.refundBookingPayment(booking._id.toString());
+      }
+      await Promise.all([
+        this._bookingRepository.update(booking._id.toString(), {
+          status: BOOKING_STATUS.EXPIRED,
+          paymentStatus:
+            booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+              ? BOOKING_PAYMENT_STATUS.REFUNDED
+              : booking.paymentStatus,
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.EXPIRED,
+              ROLE.SYSTEM,
+              BOOKING_STATUS_MESSAGES.EXPIRED
+            ),
+          },
+        }),
+        this._slotRepository.findOneAndDelete({
+          bookingId: new Types.ObjectId(booking._id.toString()),
+          reservedBy: new Types.ObjectId(booking.userId),
+          status: SLOT_STATUS.BOOKED,
+        }),
+        this._workerRepository.findOneAndUpdate(
+          { _id: booking.workerId },
+          { $inc: { noResponses: 1 } }
+        ),
+      ]);
+    } catch (error) {
+      logger.error(`Failed to expire booking ${booking._id}:`, error);
+      throw error;
+    }
+  }
+
+  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
+    if (booking.workerId.toString() !== workerId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+  }
+
+  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
+    return {
+      status,
+      changedBy,
+      reason: reason ?? null,
+      changedAt: new Date(),
+    };
+  }
+
+  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
+    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
   }
 
   private getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
@@ -250,315 +623,5 @@ export class BookingService implements IBookingService {
       distanceKm,
       travelCost,
     };
-  }
-
-  async cancelBooking(bookingId: string, userId: string, reason: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-
-    if (booking.userId.toString() !== userId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    const cancellableStatuses = [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED];
-    if (!cancellableStatuses.includes(booking.status as (typeof cancellableStatuses)[number])) {
-      throw new CustomError(BOOKING.CANNOT_CANCEL(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
-      await this._paymentService.refundBookingPayment(bookingId);
-    }
-    const paymentStatus =
-      booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
-        ? BOOKING_PAYMENT_STATUS.REFUNDED
-        : booking.paymentStatus;
-
-    await this._bookingRepository.update(bookingId, {
-      $set: {
-        status: BOOKING_STATUS.CANCELLED,
-        paymentStatus,
-      },
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
-      },
-    });
-    await this._slotRepository.findOneAndDelete({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(userId),
-      status: SLOT_STATUS.BOOKED,
-    });
-  }
-
-  async acceptBooking(bookingId: string, workerId: string): Promise<void> {
-    const [booking, _worker] = await Promise.all([
-      this.getBookingOrThrow(bookingId),
-      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
-    ]);
-    this.assertWorkerOwnership(booking, workerId);
-    if (booking.status !== BOOKING_STATUS.PENDING) {
-      throw new CustomError(BOOKING.CANNOT_ACCEPT(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.paymentStatus !== BOOKING_PAYMENT_STATUS.HELD) {
-      throw new CustomError(BOOKING.PAYMENT_NOT_CONFIRMED, HTTPSTATUS.BAD_REQUEST);
-    }
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.CONFIRMED,
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.CONFIRMED,
-          ROLE.WORKER,
-          BOOKING_STATUS_MESSAGES.CONFIRMED
-        ),
-      },
-    });
-  }
-
-  async rejectBooking(data: {
-    bookingId: string;
-    workerId: string;
-    reason: string;
-  }): Promise<void> {
-    const { bookingId, workerId, reason } = data;
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
-    if (booking.status !== BOOKING_STATUS.PENDING) {
-      throw new CustomError(BOOKING.CANNOT_REJECT(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
-      await this._paymentService.refundBookingPayment(bookingId);
-    }
-    const paymentStatus =
-      booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
-        ? BOOKING_PAYMENT_STATUS.REFUNDED
-        : booking.paymentStatus;
-
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.REJECTED,
-      paymentStatus,
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
-      },
-    });
-    await this._slotRepository.findOneAndDelete({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(booking.userId),
-      status: SLOT_STATUS.BOOKED,
-    });
-  }
-
-  async markEnRoute(bookingId: string, workerId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
-
-    if (booking.status !== BOOKING_STATUS.CONFIRMED) {
-      throw new CustomError(BOOKING.CANNOT_EN_ROUTE(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.EN_ROUTE,
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.EN_ROUTE,
-          ROLE.WORKER,
-          BOOKING_STATUS_MESSAGES.EN_ROUTE
-        ),
-      },
-    });
-  }
-
-  async markReached(bookingId: string, workerId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    const user = await this._userRepository.findById(booking.userId);
-    if (!user) {
-      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    this.assertWorkerOwnership(booking, workerId);
-    if (booking.status !== BOOKING_STATUS.EN_ROUTE) {
-      throw new CustomError(BOOKING.CANNOT_REACH(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    const otp = this._otpService.generateOTP();
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.REACHED,
-      otp,
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.REACHED,
-          ROLE.WORKER,
-          BOOKING_STATUS_MESSAGES.REACHED
-        ),
-      },
-    });
-    logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
-    await this._emailService.sendEmail(user.email, otp);
-  }
-
-  async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    this.assertWorkerOwnership(booking, workerId);
-    if (booking.status !== BOOKING_STATUS.REACHED) {
-      throw new CustomError(BOOKING.CANNOT_START(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    if (!booking.otp || booking.otp !== otp) {
-      throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
-    }
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.IN_PROGRESS,
-      $unset: { otp: "" },
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.IN_PROGRESS,
-          ROLE.WORKER,
-          BOOKING_STATUS_MESSAGES.IN_PROGRESS
-        ),
-      },
-    });
-  }
-
-  async completeJob(bookingId: string, workerId: string, data: CompleteBookingDTO): Promise<void> {
-    const { evidence, note } = data;
-    const [booking] = await Promise.all([
-      this.getBookingOrThrow(bookingId),
-      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
-    ]);
-    this.assertWorkerOwnership(booking, workerId);
-    if (booking.status !== BOOKING_STATUS.IN_PROGRESS) {
-      throw new CustomError(BOOKING.CANNOT_COMPLETE(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    const bookingEvidence: IEvidence = {
-      after: evidence.after,
-      before: evidence.before,
-      uploadedAt: new Date(),
-    };
-    await Promise.all([
-      this._bookingRepository.update(bookingId, {
-        status: BOOKING_STATUS.COMPLETED,
-        evidence: bookingEvidence,
-        adminNote: note,
-        completedAt: new Date(),
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            BOOKING_STATUS.COMPLETED,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.COMPLETED
-          ),
-        },
-      }),
-      this._slotRepository.findOneAndDelete({
-        bookingId: new Types.ObjectId(bookingId),
-        reservedBy: new Types.ObjectId(booking.userId),
-        status: SLOT_STATUS.BOOKED,
-      }),
-    ]);
-  }
-
-  async approveBooking(bookingId: string, userId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    if (booking.userId.toString() !== userId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    if (booking.status !== BOOKING_STATUS.COMPLETED) {
-      throw new CustomError(BOOKING.CANNOT_APPROVE(booking.status), HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.paymentStatus !== BOOKING_PAYMENT_STATUS.HELD) {
-      throw new CustomError(BOOKING.PAYMENT_NOT_HELD, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.extraCharge?.status === "pending") {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
-    }
-    await this._paymentService.releaseBookingPayment(booking);
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.APPROVED,
-      paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
-      completedAt: new Date(),
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.APPROVED,
-          ROLE.USER,
-          BOOKING_STATUS_MESSAGES.APPROVED
-        ),
-      },
-    });
-  }
-
-  async payExtraCharge(bookingId: string, userId: string): Promise<{ url: string }> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    if (booking.userId.toString() !== userId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    if (booking.status !== BOOKING_STATUS.COMPLETED) {
-      throw new CustomError(
-        "Extra charge can only be paid on completed bookings",
-        HTTPSTATUS.BAD_REQUEST
-      );
-    }
-    if (!booking.extraCharge || booking.extraCharge.status !== "pending") {
-      throw new CustomError(
-        "No pending extra charge found on this booking",
-        HTTPSTATUS.BAD_REQUEST
-      );
-    }
-    const url = await this._paymentService.createExtraChargeCheckout({
-      userId,
-      booking,
-      amount: booking.extraCharge.amount,
-    });
-    return { url };
-  }
-
-  async rejectExtraCharge(bookingId: string, userId: string): Promise<void> {
-    const booking = await this.getBookingOrThrow(bookingId);
-    if (booking.userId.toString() !== userId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    if (!booking.extraCharge || booking.extraCharge.status !== "pending") {
-      throw new CustomError("No pending extra charge to reject", HTTPSTATUS.BAD_REQUEST);
-    }
-    await this._bookingRepository.update(bookingId, {
-      "extraCharge.status": "rejected",
-      "extraCharge.respondedAt": new Date(),
-    });
-  }
-
-  async requestExtraCharge(
-    bookingId: string,
-    workerId: string,
-    data: ExtraChargeDTO
-  ): Promise<void> {
-    const { amount, reason, evidenceUrl } = data;
-    const [booking] = await Promise.all([
-      this.getBookingOrThrow(bookingId),
-      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
-    ]);
-    this.assertWorkerOwnership(booking, workerId);
-    const allowedStatuses: BookingStatus[] = [BOOKING_STATUS.IN_PROGRESS, BOOKING_STATUS.COMPLETED];
-    if (!allowedStatuses.includes(booking.status)) {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (booking.extraCharge) {
-      throw new CustomError(BOOKING.EXTRA_CHARGE_ALREADY_EXISTS, HTTPSTATUS.CONFLICT);
-    }
-    const extraCharge: IExtraCharge = {
-      amount,
-      reason,
-      status: "pending",
-      evidenceUrl,
-      requestedAt: new Date(),
-    };
-    await this._bookingRepository.update(bookingId, { extraCharge });
-  }
-
-  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
-    if (booking.workerId.toString() !== workerId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-  }
-
-  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
-    return {
-      status,
-      changedBy,
-      reason: reason ?? null,
-      changedAt: new Date(),
-    };
-  }
-
-  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
-    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
   }
 }

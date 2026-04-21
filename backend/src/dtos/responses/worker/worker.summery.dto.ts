@@ -1,8 +1,9 @@
 import dayjs from "dayjs";
 
-import { DEFAULT_IMAGE_URL, DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
+import { DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { WorkerSummaryEntity } from "@/types/worker";
+import { resolveS3Image } from "@/utils/s3.utils";
 
 export class WorkerSummaryResponseDTO {
   id!: string;
@@ -19,9 +20,10 @@ export class WorkerSummaryResponseDTO {
   isPremium!: boolean;
 
   averageRating!: number;
-  completionRate!: number | null;
   reviewCount!: number;
-  worksCompleted!: number;
+
+  completionRate!: number | null;
+  workCompleted!: number;
 
   static async fromEntity(
     entity: WorkerSummaryEntity,
@@ -34,10 +36,6 @@ export class WorkerSummaryResponseDTO {
       ? `${address.place}, ${address.city}, ${address.state} - ${address.pincode}`
       : "";
 
-    const profileImage = entity.profileImage?.includes("private")
-      ? await s3Service.generateSignedUrl(entity.profileImage)
-      : entity.profileImage || DEFAULT_IMAGE_URL;
-
     const yearsSinceJoining = dayjs().diff(entity.createdAt, "year");
     const totalExperience = (entity.experience ?? 0) + yearsSinceJoining;
 
@@ -45,7 +43,7 @@ export class WorkerSummaryResponseDTO {
     dto.displayName = entity.displayName;
     dto.tagline = entity.tagline || "";
     dto.about = entity.about || "";
-    dto.profileImage = profileImage;
+    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
     dto.coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
 
     dto.skills = entity.skills;
@@ -56,9 +54,12 @@ export class WorkerSummaryResponseDTO {
     dto.isPremium = entity.isPremium;
 
     dto.averageRating = entity.averageRating;
-    dto.completionRate = entity.completionRate ?? null;
     dto.reviewCount = entity.reviewCount;
-    dto.worksCompleted = entity.worksCompleted;
+    dto.workCompleted = entity.jobsCompleted;
+    dto.completionRate =
+      entity.jobsAccepted > 0
+        ? Math.round((entity.jobsCompleted / entity.jobsAccepted) * 100)
+        : null;
 
     return dto;
   }

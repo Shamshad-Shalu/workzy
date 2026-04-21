@@ -47,7 +47,6 @@ const PaymentSchema: Schema<IPayment> = new Schema(
 
 PaymentSchema.index({ userId: 1, createdAt: -1 });
 PaymentSchema.index({ workerId: 1, createdAt: -1 });
-PaymentSchema.index({ referenceId: 1 });
 PaymentSchema.index({ billType: 1, status: 1 });
 PaymentSchema.index({ status: 1, createdAt: -1 });
 

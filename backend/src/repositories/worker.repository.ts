@@ -428,4 +428,60 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       { $toInt: { $substr: [timeField, 3, 2] } },
     ],
   });
+
+  async incrementRating(workerId: string, rating: number): Promise<void> {
+    const pipeline: PipelineStage[] = [
+      {
+        $set: {
+          totalRating: { $add: ["$totalRating", rating] },
+          reviewCount: { $add: ["$reviewCount", 1] },
+        },
+      },
+      {
+        $set: {
+          averageRating: { $divide: ["$totalRating", "$reviewCount"] },
+        },
+      },
+    ];
+    await this.model.findByIdAndUpdate(workerId, pipeline);
+  }
+
+  async decrementRating(workerId: string, rating: number): Promise<void> {
+    const pipeline: PipelineStage[] = [
+      {
+        $set: {
+          totalRating: { $subtract: ["$totalRating", rating] },
+          reviewCount: { $subtract: ["$reviewCount", 1] },
+        },
+      },
+      {
+        $set: {
+          averageRating: {
+            $cond: {
+              if: { $eq: ["$reviewCount", 0] },
+              then: 0,
+              else: { $divide: ["$totalRating", "$reviewCount"] },
+            },
+          },
+        },
+      },
+    ];
+    await this.model.findByIdAndUpdate(workerId, pipeline);
+  }
+
+  async adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void> {
+    const pipeline: PipelineStage[] = [
+      {
+        $set: {
+          totalRating: { $add: ["$totalRating", newRating - oldRating] },
+        },
+      },
+      {
+        $set: {
+          averageRating: { $divide: ["$totalRating", "$reviewCount"] },
+        },
+      },
+    ];
+    await this.model.findByIdAndUpdate(workerId, pipeline);
+  }
 }

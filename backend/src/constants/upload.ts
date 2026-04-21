@@ -67,6 +67,11 @@ export const PURPOSE_POLICY = {
     maxSizeMB: 50,
     allowedTypes: [...FILE_TYPES.IMAGES, ...FILE_TYPES.VIDEOS],
   },
+  REVIEW_EVIDENCE: {
+    folder: "public/bookings/reviews",
+    maxSizeMB: 50,
+    allowedTypes: [...FILE_TYPES.IMAGES, ...FILE_TYPES.VIDEOS],
+  },
 } as const;
 
 export type UploadPurpose = keyof typeof PURPOSE_POLICY;

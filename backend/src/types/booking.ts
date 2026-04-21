@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 
-import { BookingPaymentStatus, BookingStatus, PricingMode, Role } from "@/constants";
+import { BookingPaymentStatus, BookingStatus, PricingMode, Role, ServiceType } from "@/constants";
 
 import { ICategory } from "./category";
 import { IService } from "./service";
@@ -13,6 +13,7 @@ export interface IBookingLocation {
   label: string;
   location: ILocation;
 }
+
 export interface IBookingSlot {
   date: Date;
   startTime: string;
@@ -34,6 +35,8 @@ export interface IBookingSnapshot {
   category: {
     name: string;
     iconUrl: string;
+    serviceType: ServiceType;
+    pricingMode: PricingMode;
   };
 }
 
@@ -98,7 +101,8 @@ export interface IBooking extends Document<string> {
   status: BookingStatus;
   statusHistory: IBookingStatusHistory[];
 
-  isReviewed: boolean;
+  reviewId?: Types.ObjectId;
+  hasVisibleReview: boolean;
   userNote?: string;
   workerNote?: string;
   adminNote?: string;
@@ -115,7 +119,8 @@ export type BookingListItem = Pick<
   | "duration"
   | "itemCount"
   | "userNote"
-  | "isReviewed"
+  | "hasVisibleReview"
+  | "reviewId"
   | "snapshot"
   | "address"
   | "total"
@@ -127,6 +132,7 @@ export type BookingListItem = Pick<
   | "serviceId"
   | "userId"
   | "quoteId"
+  | "completedAt"
   | "extraCharge"
 >;
 

@@ -125,15 +125,10 @@ export class CategoryService implements ICategoryService {
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    console.log(filters);
-
     const { data, nextCursor } = await this._categoryRepository.findPublicCategories(filters);
-
-    console.log({ data, nextCursor });
     const categories = PublicCategoryResponseDTO.fromEntities(data);
     const response = { categories, nextCursor };
     await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
-    // await redisClient.set(cacheKey, JSON.stringify(response), { EX: 60 * 5 }); // 5 minutes cache
 
     return response;
   }

@@ -82,6 +82,10 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: Boolean,
       default: false,
     },
+    totalRating: {
+      type: Number,
+      default: 0,
+    },
     averageRating: {
       type: Number,
       default: 0,

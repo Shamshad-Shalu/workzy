@@ -48,11 +48,17 @@ export interface IWorker extends Document<string> {
   cities: string[];
   availability: IAvailabilitySlots;
   rejectReason?: string;
-  averageRating: number;
-  reviewCount: number;
-  completionRate: number | null;
-  worksCompleted: number;
   location: ILocation;
+  // Job Stats
+  jobsOffered: number;
+  jobsAccepted: number;
+  jobsCompleted: number;
+  noResponses: number;
+  // Rating
+  averageRating: number;
+  totalRating: number;
+  reviewCount: number;
+
   stripeAccountId?: string;
   stripeAccountStatus: StripeAccountStatus;
   createdAt: Date;
@@ -60,7 +66,6 @@ export interface IWorker extends Document<string> {
 
 export type Day = keyof IAvailabilitySlots;
 export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };
-// completedJobs
 
 export type WorkerSummaryEntity = Pick<
   IWorker,
@@ -70,11 +75,11 @@ export type WorkerSummaryEntity = Pick<
   | "coverImage"
   | "about"
   | "experience"
-  | "worksCompleted"
+  | "jobsCompleted"
+  | "jobsAccepted"
   | "reviewCount"
   | "defaultRate"
   | "averageRating"
-  | "completionRate"
   | "cities"
   | "skills"
   | "isPremium"
