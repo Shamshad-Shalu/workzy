@@ -6,29 +6,38 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
+
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
+
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
+
   --color-destructive: var(--destructive);
+
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
+
   --color-chart-1: var(--chart-1);
   --color-chart-2: var(--chart-2);
   --color-chart-3: var(--chart-3);
   --color-chart-4: var(--chart-4);
   --color-chart-5: var(--chart-5);
+
   --color-sidebar: var(--sidebar);
   --color-sidebar-foreground: var(--sidebar-foreground);
   --color-sidebar-primary: var(--sidebar-primary);
@@ -37,17 +46,23 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  /* Fine Blue Colors */
-  --color-fine-blue: var(--fine-blue);
-  --color-fine-blue-light: var(--fine-blue-light);
-  --color-fine-blue-dark: var(--fine-blue-dark);
-  /* Section Background Colors */
+
   --color-section-blue: var(--section-blue);
   --color-section-blue-border: var(--section-blue-border);
+  --color-section-blue-text: var(--section-blue-text);
+
   --color-section-red: var(--section-red);
   --color-section-red-border: var(--section-red-border);
+  --color-section-red-text: var(--section-red-text);
+
   --color-section-green: var(--section-green);
   --color-section-green-border: var(--section-green-border);
+  --color-section-green-text: var(--section-green-text);
+
+  --color-section-amber: var(--section-amber);
+  --color-section-amber-border: var(--section-amber-border);
+  --color-section-amber-text: var(--section-amber-text);
+
   --color-golden: var(--golden);
   --color-section-dark: var(--section-dark);
 }
@@ -85,20 +100,22 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  /* Fine Blue Colors - Light Theme */
-  --fine-blue: oklch(0.6 0.118 184.704);
-  --fine-blue-light: oklch(0.92 0.04 200);
-  --fine-blue-dark: oklch(0.45 0.12 190);
 
-  /* Section Background Colors - Light Theme */
-  --section-blue: oklch(96.552% 0.01363 277.023);
-  /* --section-blue: oklch(96.552% 0.01363 277.023); */
-  --section-blue-border: oklch(72.447% 0.06955 282.646);
-  --section-red: oklch(0.9 0.06 343);
-  --section-red-border: oklch(0.85 0.08 15);
-  --section-green: oklch(0.97 0.07 122);
-  --section-green-border: oklch(0.85 0.08 140);
+  --section-blue: oklch(0.95 0.03 250);
+  --section-blue-border: oklch(0.75 0.08 250);
+  --section-blue-text: oklch(0.45 0.12 250);
 
+  --section-red: oklch(0.95 0.04 25);
+  --section-red-border: oklch(0.75 0.1 25);
+  --section-red-text: oklch(0.5 0.15 25);
+
+  --section-green: oklch(0.696 0.17 162 / 0.15);
+  --section-green-border: oklch(0.696 0.17 162 / 0.3);
+  --section-green-text: oklch(0.765 0.177 163);
+
+  --section-amber: oklch(0.96 0.05 85);
+  --section-amber-border: oklch(0.75 0.1 85);
+  --section-amber-text: oklch(0.5 0.12 85);
   --golden: oklch(0.72 0.08 65);
   --section-dark: oklch(21.48% 0.03444 254.607);
 }
@@ -135,19 +152,22 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
-  /* Fine Blue Colors - Dark Theme */
-  --fine-blue: oklch(0.696 0.17 162.48);
-  --fine-blue-light: oklch(0.35 0.08 200);
-  --fine-blue-dark: oklch(0.75 0.15 185);
 
-  /* Section Background Colors - Dark Theme */
-  /* --section-blue: oklch(15.255% 0.04883 263.978);    */
-  --section-blue: oklch(25% 0.04 277);
-  --section-blue-border: oklch(0.81 0.1 294);
-  --section-red: oklch(0.29 0.13 326);
-  --section-red-border: oklch(77.232% 0.11976 346.008);
-  --section-green: oklch(0.27 0.07 132);
-  --section-green-border: oklch(0.94 0.12 124);
+  --section-blue: oklch(0.25 0.05 250);
+  --section-blue-border: oklch(0.65 0.1 250);
+  --section-blue-text: oklch(0.75 0.12 250);
+
+  --section-red: oklch(0.28 0.13 25);
+  --section-red-border: oklch(0.7 0.15 25);
+  --section-red-text: oklch(0.78 0.16 25);
+
+  --section-green: oklch(0.27 0.08 140);
+  --section-green-border: oklch(0.7 0.12 140);
+  --section-green-text: oklch(0.75 0.14 140);
+
+  --section-amber: oklch(0.3 0.08 85);
+  --section-amber-border: oklch(0.75 0.12 85);
+  --section-amber-text: oklch(0.8 0.13 85);
 
   --golden: oklch(0.72 0.08 65);
   --section-dark: oklch(89.1% 0.01315 266.734);

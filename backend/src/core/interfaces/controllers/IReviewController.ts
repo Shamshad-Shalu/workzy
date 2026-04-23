@@ -8,7 +8,8 @@ export interface IReviewController {
   ToggleReviewVisibilityById: RequestHandler;
   listReviews: RequestHandler;
 
-  getReviewsByWorkerId: RequestHandler;
+  getPublicWorkerReviews: RequestHandler;
+  getWorkerReviewStats: RequestHandler;
   getMyWorkerReviews: RequestHandler;
   getMyReviews: RequestHandler;
 }

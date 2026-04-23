@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW } from "@/constants";
+import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW, WORKER } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -17,7 +17,7 @@ import {
   ReviewUserDTO,
   ReviewWorkerDTO,
 } from "@/dtos/responses/review.dto";
-import { ReviewListQuery, ReviewListQueryInput } from "@/types/review";
+import { ReviewListQuery, ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -152,7 +152,7 @@ export class ReviewService implements IReviewService {
     };
   }
 
-  async getReviewsByWorkerId(
+  async getPublicWorkerReviews(
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }> {
@@ -197,6 +197,14 @@ export class ReviewService implements IReviewService {
       reviews: await ReviewWorkerDTO.fromEntities(reviews, this._s3Service),
       nextCursor,
     };
+  }
+
+  async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats> {
+    const reviewStats = await this._workerRepository.getWorkerReviewStats(workerId);
+    if (!reviewStats) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    return reviewStats;
   }
 
   private mapToReviewListQuery(input: ReviewListQueryInput): ReviewListQuery {

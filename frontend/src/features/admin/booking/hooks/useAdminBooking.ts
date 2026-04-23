@@ -41,7 +41,9 @@ export function useAdminBookingHandler() {
   const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
 
   async function handleToggleReview() {
-    if (!reviewData?.reviewId) {return;}
+    if (!reviewData?.reviewId) {
+      return;
+    }
 
     const res = await toggleReviewVisibility({
       reviewId: reviewData.reviewId,

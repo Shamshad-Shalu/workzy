@@ -1,12 +1,9 @@
 import { Document, Types } from "mongoose";
 
-import { PricingMode, ServiceType, StripeAccountStatus } from "@/constants";
+import { PricingMode, ServiceType, StripeAccountStatus, WorkerStatus } from "@/constants";
 
 import { BulkDiscountType } from "./service";
 import { ILocation, IUser } from "./user";
-
-export type WorkerStatus = "pending" | "verified" | "rejected" | "needs_revision";
-
 export type DocumentType = "id_proof" | "license" | "certificate" | "other";
 
 export interface ITimeSlot {
@@ -58,6 +55,13 @@ export interface IWorker extends Document<string> {
   averageRating: number;
   totalRating: number;
   reviewCount: number;
+  ratingBreakdown: {
+    "1": number;
+    "2": number;
+    "3": number;
+    "4": number;
+    "5": number;
+  };
 
   stripeAccountId?: string;
   stripeAccountStatus: StripeAccountStatus;

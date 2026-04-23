@@ -1,6 +1,6 @@
 import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
 import { ReviewResponseDTO, ReviewUserDTO } from "@/dtos/responses/review.dto";
-import { ReviewListQueryInput } from "@/types/review";
+import { ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
 
 import {
   ReviewAdminDTO,
@@ -10,7 +10,6 @@ import {
 
 export interface IReviewService {
   createReview(userId: string, reviewData: CreateReviewDTO): Promise<ReviewResponseDTO>;
-
   updateReview(reviewId: string, updateData: UpdateReviewDTO): Promise<ReviewResponseDTO>;
   getReviewById(reviewId: string): Promise<ReviewResponseDTO>;
   addReplyToReview(
@@ -19,11 +18,10 @@ export interface IReviewService {
     workerId: string
   ): Promise<ReviewResponseDTO>;
   toggleReviewVisibility(reviewId: string): Promise<string>;
-
   listReviews(
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewAdminDTO[]; nextCursor: string | null }>;
-  getReviewsByWorkerId(
+  getPublicWorkerReviews(
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }>;
@@ -37,4 +35,6 @@ export interface IReviewService {
     userId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }>;
+
+  getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats>;
 }

@@ -7,11 +7,3 @@ export const ROLE = {
 
 export type Role = (typeof ROLE)[keyof typeof ROLE];
 export const ROLE_VALUES = Object.values(ROLE);
-export const WORKER_STATUS = {
-  PENDING: "pending",
-  VERIFIED: "verified",
-  REJECTED: "rejected",
-  NEEDS_REVISION: "needs_revision",
-} as const;
-
-export type WORKER_STATUSES = (typeof WORKER_STATUS)[keyof typeof WORKER_STATUS];

@@ -229,8 +229,8 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
           </span>
         </div>
         {extraApproved && b.extraCharge?.amount && (
-          <div className="mt-3 text-xs font-medium text-muted-foreground bg-emerald-500/15  border-emerald-500/30 rounded-xl px-3 py-2 flex items-center gap-2">
-            <CheckCheck size={12} className="text-green-600 dark:text-green-400 flex-shrink-0" />
+          <div className="mt-3 text-xs font-medium bg-section-green rounded-xl px-3 py-2 flex items-center gap-2">
+            <CheckCheck size={12} className="text-[var(--section-green-text)] flex-shrink-0" />
             Extra charge of <strong>{formatCurrency(b.extraCharge.amount)}</strong> approved and
             added to total
           </div>

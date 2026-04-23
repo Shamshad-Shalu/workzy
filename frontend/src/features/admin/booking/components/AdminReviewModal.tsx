@@ -29,7 +29,9 @@ export default function AdminReviewModal({
   const mediaItems = review?.media ?? [];
 
   async function handleToggle() {
-    if (!review) {return;}
+    if (!review) {
+      return;
+    }
     await onToggleVisibility(reviewId);
   }
 

@@ -216,7 +216,7 @@ export default function ServiceDiscoveryPage() {
               <div ref={sentinelRef} className="h-4" />
               {isFetchingNextPage && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                  <ServiceGridSkeleton count={6} />
+                  <ServiceGridSkeleton />
                 </motion.div>
               )}
             </div>

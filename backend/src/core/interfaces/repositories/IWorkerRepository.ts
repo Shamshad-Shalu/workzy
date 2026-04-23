@@ -1,6 +1,7 @@
 import { FilterQuery } from "mongoose";
 
 import { BaseRepository } from "@/core/abstracts/base.repository";
+import { WorkerReviewStats } from "@/types/review";
 import {
   IWorker,
   NearbyWorkerEntity,
@@ -29,4 +30,5 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
   incrementRating(workerId: string, rating: number): Promise<void>;
   adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void>;
   decrementRating(workerId: string, rating: number): Promise<void>;
+  getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats | null>;
 }

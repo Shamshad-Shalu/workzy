@@ -13,7 +13,8 @@ const router = Router();
 const controller = container.get<IReviewController>(TYPES.ReviewController);
 
 router.get("/", controller.listReviews);
-router.get("/worker/:workerId", controller.getReviewsByWorkerId);
+router.get("/worker/:workerId", controller.getPublicWorkerReviews);
+router.get("/worker/:workerId/stats", controller.getWorkerReviewStats);
 router.get("/:reviewId", controller.getReviewById);
 router.patch(
   "/:reviewId/toggle",

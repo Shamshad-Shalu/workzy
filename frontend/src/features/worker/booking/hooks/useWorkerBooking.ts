@@ -11,7 +11,7 @@ import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 import type { BookigCompleteForm } from '../components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '../validation/extraChargeSchema';
 
-const LIMIT = 5;
+const LIMIT = 1;
 
 export function useWorkerBooking(status: BookingFilterStatus) {
   return useInfiniteQuery<

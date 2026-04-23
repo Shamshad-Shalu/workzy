@@ -27,6 +27,18 @@ export interface IReview extends Document<string> {
   updatedAt: Date;
 }
 
+export interface WorkerReviewStats {
+  averageRating: number;
+  reviewCount: number;
+  ratingBreakdown: {
+    "1": number;
+    "2": number;
+    "3": number;
+    "4": number;
+    "5": number;
+  };
+}
+
 export type ReviewListQueryInput = {
   limit: number;
   cursor?: {

@@ -1,5 +1,8 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import relativeTime from 'dayjs/plugin/relativeTime';
+
+dayjs.extend(relativeTime);
 dayjs.extend(duration);
 
 export function formatTime12(time: string): string {
@@ -68,4 +71,14 @@ export function formatDateRangeDuration(start: string | Date, end: string | Date
   const days = endDate.diff(startDate, 'day') + 1;
 
   return days === 1 ? '1 day' : `${days} days`;
+}
+
+export function formatReviewDate(date: string | Date) {
+  const now = dayjs();
+  const reviewDate = dayjs(date);
+
+  if (now.diff(reviewDate, 'day') < 7) {
+    return reviewDate.fromNow();
+  }
+  return reviewDate.format('DD MMM YYYY');
 }

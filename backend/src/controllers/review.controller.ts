@@ -16,7 +16,6 @@ export class ReviewController implements IReviewController {
 
   getReviewById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
-    console.log({ reviewId });
     const review = await this._reviewService.getReviewById(reviewId);
     res.status(HTTPSTATUS.CREATED).json({ review });
   });
@@ -42,11 +41,13 @@ export class ReviewController implements IReviewController {
     await this._reviewService.addReplyToReview(reviewId, data, workerId);
     res.status(HTTPSTATUS.OK).json({ message: REVIEW.REPLY_ADDED });
   });
+
   ToggleReviewVisibilityById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
     const message = await this._reviewService.toggleReviewVisibility(reviewId);
     res.status(HTTPSTATUS.OK).json({ message });
   });
+
   listReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const query = this.parseQuery(req);
     const userId = req.query.userId as string | undefined;
@@ -59,18 +60,30 @@ export class ReviewController implements IReviewController {
     });
     res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
   });
-  getReviewsByWorkerId = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+
+  getPublicWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const query = this.parseQuery(req);
-    const result = await this._reviewService.getReviewsByWorkerId(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
+    const { reviews, nextCursor } = await this._reviewService.getPublicWorkerReviews(
+      workerId,
+      query
+    );
+    res.status(HTTPSTATUS.OK).json({ reviews: reviews, nextCursor: nextCursor });
   });
+  getWorkerReviewStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId } = req.params;
+    const result = await this._reviewService.getWorkerReviewStats(workerId);
+    res.status(HTTPSTATUS.OK).json(result);
+  });
+
   getMyWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
+
     const result = await this._reviewService.getMyWorkerReviews(workerId, query);
     res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
   });
+
   getMyReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
@@ -104,7 +117,6 @@ export class ReviewController implements IReviewController {
       sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
     };
   }
-
   private requireUserId(req: Request): string {
     if (!req.user?.id) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);

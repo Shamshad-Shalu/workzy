@@ -1,3 +1,3 @@
 export default function WorkerProfilePage() {
-  return <div>WorkerProfilePage</div>;
+  return <main className="space-y-6"></main>;
 }

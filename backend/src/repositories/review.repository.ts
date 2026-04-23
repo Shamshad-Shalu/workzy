@@ -116,7 +116,6 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
         })
       ).toString("base64url");
     }
-    console.log("reviews::", docs);
     return { reviews: docs, nextCursor };
   }
 }

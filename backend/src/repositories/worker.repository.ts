@@ -6,6 +6,7 @@ import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import User from "@/models/user.model";
 import Worker from "@/models/worker.model";
+import { WorkerReviewStats } from "@/types/review";
 import {
   IWorker,
   NearbyWorkerEntity,
@@ -430,11 +431,24 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
   });
 
   async incrementRating(workerId: string, rating: number): Promise<void> {
+    const ratingKey = rating.toString();
     const pipeline: PipelineStage[] = [
       {
         $set: {
           totalRating: { $add: ["$totalRating", rating] },
           reviewCount: { $add: ["$reviewCount", 1] },
+          ratingBreakdown: {
+            $setField: {
+              field: ratingKey,
+              input: "$ratingBreakdown",
+              value: {
+                $add: [
+                  { $ifNull: [{ $getField: { field: ratingKey, input: "$ratingBreakdown" } }, 0] },
+                  1,
+                ],
+              },
+            },
+          },
         },
       },
       {
@@ -447,11 +461,34 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
   }
 
   async decrementRating(workerId: string, rating: number): Promise<void> {
+    const ratingKey = rating.toString();
     const pipeline: PipelineStage[] = [
       {
         $set: {
           totalRating: { $subtract: ["$totalRating", rating] },
           reviewCount: { $subtract: ["$reviewCount", 1] },
+          ratingBreakdown: {
+            $setField: {
+              field: ratingKey,
+              input: "$ratingBreakdown",
+              value: {
+                $max: [
+                  {
+                    $subtract: [
+                      {
+                        $ifNull: [
+                          { $getField: { field: ratingKey, input: "$ratingBreakdown" } },
+                          0,
+                        ],
+                      },
+                      1,
+                    ],
+                  },
+                  0,
+                ],
+              },
+            },
+          },
         },
       },
       {
@@ -470,10 +507,55 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
   }
 
   async adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void> {
+    const oldKey = oldRating.toString();
+    const newKey = newRating.toString();
+
     const pipeline: PipelineStage[] = [
       {
         $set: {
           totalRating: { $add: ["$totalRating", newRating - oldRating] },
+          ratingBreakdown: {
+            $let: {
+              vars: {
+                updatedOld: {
+                  $setField: {
+                    field: oldKey,
+                    input: "$ratingBreakdown",
+                    value: {
+                      $max: [
+                        {
+                          $subtract: [
+                            {
+                              $ifNull: [
+                                { $getField: { field: oldKey, input: "$ratingBreakdown" } },
+                                0,
+                              ],
+                            },
+                            1,
+                          ],
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                },
+              },
+              in: {
+                $setField: {
+                  field: newKey,
+                  input: "$$updatedOld",
+                  value: {
+                    $add: [
+                      {
+                        $ifNull: [{ $getField: { field: newKey, input: "$$updatedOld" } }, 0],
+                      },
+                      1,
+                    ],
+                  },
+                },
+              },
+            },
+          },
         },
       },
       {
@@ -482,6 +564,14 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
         },
       },
     ];
+
     await this.model.findByIdAndUpdate(workerId, pipeline);
+  }
+
+  async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats | null> {
+    return await this.model
+      .findById(workerId)
+      .select("averageRating reviewCount ratingBreakdown")
+      .lean();
   }
 }

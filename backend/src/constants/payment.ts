@@ -20,11 +20,3 @@ export const PAYMENT_PROVIDER = {
   STRIPE: "stripe",
 } as const;
 export type PaymentProvider = (typeof PAYMENT_PROVIDER)[keyof typeof PAYMENT_PROVIDER];
-
-export const STRIPE_ACCOUNT_STATUS = {
-  NOT_CONNECTED: "not_connected",
-  PENDING: "pending",
-  ACTIVE: "active",
-} as const;
-export type StripeAccountStatus =
-  (typeof STRIPE_ACCOUNT_STATUS)[keyof typeof STRIPE_ACCOUNT_STATUS];

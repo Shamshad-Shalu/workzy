@@ -1,7 +1,12 @@
 import { REVIEW_API } from '@/constants';
 import type { ReviewFormType } from '@/features/user/booking/validation/ReviewFormData';
 import api from '@/lib/api/axios';
-import type { Review } from '@/types/review';
+import type {
+  PublicReviewListResponse,
+  Review,
+  ReviewListQuery,
+  WorkerReviewStats,
+} from '@/types/review';
 
 const ReviewService = {
   createReview: async (data: ReviewFormType): Promise<{ message: string }> => {
@@ -36,10 +41,17 @@ const ReviewService = {
   //   return res.data.reviews;
   // },
 
-  // getWorkerReviews: async (workerId: string): Promise<Review[]> => {
-  //   const res = await api.get(REVIEW_API.WORKER_REVIEWS(workerId));
-  //   return res.data.reviews;
-  // },
+  getWorkerReviewStats: async (workerId: string): Promise<WorkerReviewStats> => {
+    const res = await api.get(REVIEW_API.WORKER_REVIEWS_STATS(workerId));
+    return res.data;
+  },
+  getPublicWorkerReviews: async (
+    workerId: string,
+    query: ReviewListQuery
+  ): Promise<PublicReviewListResponse> => {
+    const res = await api.get(REVIEW_API.WORKER_REVIEWS(workerId), { params: query });
+    return res.data;
+  },
 
   // getMyWorkerReviews: async (): Promise<Review[]> => {
   //   const res = await api.get(REVIEW_API.MY_WORKER_REVIEWS);

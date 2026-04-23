@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-import { STRIPE_ACCOUNT_STATUS } from "@/constants";
+import { STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
 import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
 
 import { LocationSchema } from "./user.model";
@@ -19,6 +19,7 @@ const AvailabilitySchema = new Schema<IAvailabilitySlots>(
 );
 
 const DocumentSchema = new Schema<IDocument>({
+  name: { type: String },
   type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
   url: { type: String, required: true },
   status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
@@ -41,7 +42,8 @@ const workerSchema: Schema = new Schema<IWorker>(
     about: { type: String },
     status: {
       type: String,
-      default: "pending",
+      enum: Object.values(WORKER_STATUS),
+      default: WORKER_STATUS.PENDING,
     },
     coverImage: {
       type: String,
@@ -82,7 +84,19 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: Boolean,
       default: false,
     },
-    totalRating: {
+    jobsOffered: {
+      type: Number,
+      default: 0,
+    },
+    noResponses: {
+      type: Number,
+      default: 0,
+    },
+    jobsAccepted: {
+      type: Number,
+      default: 0,
+    },
+    jobsCompleted: {
       type: Number,
       default: 0,
     },
@@ -90,25 +104,28 @@ const workerSchema: Schema = new Schema<IWorker>(
       type: Number,
       default: 0,
     },
+    totalRating: {
+      type: Number,
+      default: 0,
+    },
     reviewCount: {
       type: Number,
       default: 0,
     },
-    worksCompleted: {
-      type: Number,
-      default: 0,
+    ratingBreakdown: {
+      "1": { type: Number, default: 0 },
+      "2": { type: Number, default: 0 },
+      "3": { type: Number, default: 0 },
+      "4": { type: Number, default: 0 },
+      "5": { type: Number, default: 0 },
     },
-    completionRate: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: null,
-    },
+
     rejectReason: { type: String },
     location: {
       type: LocationSchema,
+      required: true,
     },
-    stripeAccountId: { type: String, default: undefined },
+    stripeAccountId: { type: String },
     stripeAccountStatus: {
       type: String,
       enum: Object.values(STRIPE_ACCOUNT_STATUS),
