@@ -315,14 +315,14 @@ export default function AdminReviewCard({ review, onOpenMedia, onToggleReview }:
 interface PartyInfo {
   id: string;
   name: string;
-  profileImage: string;
+  profileImage?: string;
   phone?: string;
 }
 
 function PartyBlock({ label, party }: { label: string; party: PartyInfo }) {
   return (
     <div className="flex min-w-0 items-center gap-2">
-      <ProfileImage src={party.profileImage} name={party.name} size={32} />
+      <ProfileImage src={party?.profileImage} name={party.name} size={32} />
       <div className="min-w-0">
         <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           {label}

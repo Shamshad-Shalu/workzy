@@ -2,7 +2,7 @@ import { injectable } from "inversify";
 
 import logger from "@/config/logger";
 import redisClient from "@/config/redisClient";
-import { REDIS_EXPIRY } from "@/constants";
+import { REDIS, REDIS_EXPIRY } from "@/constants";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 
 @injectable()
@@ -11,7 +11,7 @@ export class RedisService implements IRedisService {
     try {
       return await redisClient.get(key);
     } catch (error) {
-      logger.error(`Redis GET error for key ${key}:`, error);
+      logger.error(REDIS.GET_ERROR(key), error);
       return null;
     }
   }
@@ -20,7 +20,7 @@ export class RedisService implements IRedisService {
     try {
       await redisClient.set(key, value);
     } catch (error) {
-      logger.error(`Redis SET error for key ${key}:`, error);
+      logger.error(REDIS.SET_ERROR(key), error);
     }
   }
 
@@ -28,7 +28,7 @@ export class RedisService implements IRedisService {
     try {
       await redisClient.set(key, value, { EX: ttlSeconds });
     } catch (error) {
-      logger.error(`Redis SET WITH TTL error for key ${key}:`, error);
+      logger.error(REDIS.SET_TTL_ERROR(key), error);
     }
   }
 
@@ -36,38 +36,63 @@ export class RedisService implements IRedisService {
     try {
       await redisClient.del(key);
     } catch (error) {
-      logger.error(`Redis DELETE error for key ${key}:`, error);
+      logger.error(REDIS.DELETE_ERROR(key), error);
     }
   }
+  // async clearPattern(prefix: string): Promise<void> {
+  //   try {
+  //     if (!prefix) return;
 
+  //     const stream = redisClient.scanIterator({
+  //       MATCH: `${prefix}:*`,
+  //       COUNT: 100,
+  //     });
+
+  //     let pipeline = redisClient.multi();
+  //     let pending = 0;
+
+  //     for await (const key of stream) {
+  //       if (!key) continue;
+
+  //       pipeline.unlink(key);
+  //       pending++;
+
+  //       if (pending >= 100) {
+  //         await pipeline.exec();
+  //         pipeline = redisClient.multi();
+  //         pending = 0;
+  //       }
+  //     }
+
+  //     if (pending > 0) {
+  //       await pipeline.exec();
+  //     }
+
+  //     logger.info(REDIS.CLEAR_PATTERN_SUCCESS(prefix));
+  //   } catch (error) {
+  //     logger.error(REDIS.CLEAR_PATTERN_ERROR(prefix), error);
+  //   }
+  // }
   async clearPattern(prefix: string): Promise<void> {
     try {
-      const stream = redisClient.scanIterator({
-        MATCH: `${prefix}:*`,
-        COUNT: 100,
-      });
-
-      const pipeline = redisClient.multi();
-
-      pipeline.del(prefix);
-
-      for await (const key of stream) {
-        pipeline.del(key);
+      await redisClient.del(prefix);
+      const pattern = `${prefix}:*`;
+      const keys = await redisClient.keys(pattern);
+      if (keys.length > 0) {
+        await redisClient.del(keys);
       }
-
-      await pipeline.exec();
+      logger.info(REDIS.CLEAR_PATTERN_SUCCESS(prefix));
     } catch (error) {
-      logger.error(`Redis CLEAR PATTERN error for ${prefix}:`, error);
+      logger.error(REDIS.CLEAR_PATTERN_ERROR(prefix), error);
+      console.log("error:", error);
     }
   }
   async deleteMany(keys: string[]): Promise<void> {
     try {
       if (keys.length === 0) return;
-      const pipeline = redisClient.multi();
-      for (const key of keys) pipeline.del(key);
-      await pipeline.exec();
+      await redisClient.del(keys);
     } catch (error) {
-      logger.error(`Redis DELETE MANY error:`, error);
+      logger.error(REDIS.DELETE_MANY_ERROR, error);
     }
   }
 }

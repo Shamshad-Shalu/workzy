@@ -55,6 +55,14 @@ export class ReviewController implements IReviewController {
 
     const { reviews, nextCursor } = await this._reviewService.listReviews({
       ...query,
+      status: (req.query.status as "all" | "hidden" | "visible") ?? "all",
+      search: (req.query.search as string) ?? "",
+      serviceId: (req.query.serviceId as string) ?? undefined,
+      categoryId: (req.query.categoryId as string) ?? undefined,
+      minRating: req.query.minRating ? Number(req.query.minRating) : undefined,
+      maxRating: req.query.maxRating ? Number(req.query.maxRating) : undefined,
+      fromDate: req.query.fromDate as string | undefined,
+      toDate: req.query.toDate as string | undefined,
       userId,
       workerId,
     });
@@ -98,13 +106,7 @@ export class ReviewController implements IReviewController {
       : undefined;
     return {
       limit,
-      status: (req.query.status as "all" | "hidden" | "visible") ?? "all",
-      search: (req.query.search as string) ?? "",
-      serviceId: (req.query.serviceId as string) ?? undefined,
-      categoryId: (req.query.categoryId as string) ?? undefined,
       rating: req.query.rating ? Number(req.query.rating) : undefined,
-      minRating: req.query.minRating ? Number(req.query.minRating) : undefined,
-      maxRating: req.query.maxRating ? Number(req.query.maxRating) : undefined,
       cursor: parsedCursor
         ? {
             createdAt: new Date(parsedCursor.createdAt),
@@ -112,8 +114,6 @@ export class ReviewController implements IReviewController {
             _id: parsedCursor._id,
           }
         : undefined,
-      fromDate: req.query.fromDate as string | undefined,
-      toDate: req.query.toDate as string | undefined,
       sortBy: req.query.sortBy as "createdAt" | "rating" | undefined,
       sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
     };

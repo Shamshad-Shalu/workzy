@@ -50,13 +50,13 @@ export default function ProfileImage({
   }
   function getGradient(name: string) {
     const gradients = [
-      'from-pink-500 to-orange-400',
-      'from-blue-500 to-cyan-400',
-      'from-green-500 to-emerald-400',
-      'from-purple-500 to-indigo-400',
-      'from-yellow-400 to-orange-500',
-      'from-rose-500 to-pink-400',
-      'from-sky-500 to-blue-400',
+      'from-pink-600 to-orange-500',
+      'from-blue-600 to-cyan-500',
+      'from-green-600 to-emerald-500',
+      'from-purple-600 to-indigo-500',
+      'from-amber-600 to-orange-500',
+      'from-rose-600 to-pink-500',
+      'from-sky-600 to-blue-500',
     ];
     if (!name) {
       return gradients[0];
@@ -74,7 +74,7 @@ export default function ProfileImage({
       className="relative cursor-pointer group inline-block"
       style={{ width: size, height: size }}
     >
-      {((!imgLoaded && !imgError) || loading) && (
+      {src && ((!imgLoaded && !imgError) || loading) && (
         <Skeleton style={{ width: size, height: size }} className="absolute inset-0 rounded-full" />
       )}
 

@@ -54,7 +54,6 @@ class ReviewBaseDTO {
   category!: {
     id: string;
     name: string;
-    iconUrl: string;
   };
   rating!: number;
   reviewText?: string;
@@ -77,7 +76,6 @@ class ReviewBaseDTO {
     dto.category = {
       id: entity.categoryId.toString(),
       name: entity.bookingId.snapshot.category.name,
-      iconUrl: entity.bookingId.snapshot.category.iconUrl,
     };
 
     dto.rating = entity.rating;
@@ -94,17 +92,19 @@ export class ReviewUserDTO extends ReviewBaseDTO {
   worker!: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   static async fromEntity(entity: IReviewPopulated, s3Service: IS3Service): Promise<ReviewUserDTO> {
     const dto = new ReviewUserDTO();
     Object.assign(dto, ReviewUserDTO.baseMap(entity));
-    const worker = entity.bookingId.snapshot.worker;
+    const worker = entity.workerId;
 
     dto.worker = {
-      id: entity.workerId.toString(),
-      name: worker.name,
-      profileImage: await resolveS3Image(worker.profileImage, s3Service),
+      id: worker._id.toString(),
+      name: entity.bookingId.snapshot.worker.name,
+      profileImage: worker.profileImage
+        ? await resolveS3Image(worker.profileImage, s3Service)
+        : undefined,
     };
     return dto;
   }
@@ -120,7 +120,7 @@ export class ReviewWorkerDTO extends ReviewBaseDTO {
   user!: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   static async fromEntity(
     entity: IReviewPopulated,
@@ -128,12 +128,14 @@ export class ReviewWorkerDTO extends ReviewBaseDTO {
   ): Promise<ReviewWorkerDTO> {
     const dto = new ReviewWorkerDTO();
     Object.assign(dto, ReviewWorkerDTO.baseMap(entity));
-    const user = entity.bookingId.snapshot.user;
+    const user = entity.userId;
 
     dto.user = {
-      id: entity.userId.toString(),
-      name: user.name,
-      profileImage: await resolveS3Image(user.profileImage, s3Service),
+      id: user._id.toString(),
+      name: entity.bookingId.snapshot.user.name,
+      profileImage: user.profileImage
+        ? await resolveS3Image(user.profileImage, s3Service)
+        : undefined,
     };
     return dto;
   }
@@ -150,12 +152,12 @@ export class ReviewAdminDTO extends ReviewBaseDTO {
   user!: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   worker!: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   static async fromEntity(
     entity: IReviewPopulated,
@@ -163,18 +165,24 @@ export class ReviewAdminDTO extends ReviewBaseDTO {
   ): Promise<ReviewAdminDTO> {
     const dto = new ReviewAdminDTO();
     Object.assign(dto, ReviewAdminDTO.baseMap(entity));
-    const { worker, user } = entity.bookingId.snapshot;
+    const user = entity.userId;
+    const worker = entity.workerId;
+    const snapshot = entity.bookingId.snapshot;
 
     dto.isHidden = entity.isHidden;
     dto.worker = {
-      id: entity.workerId.toString(),
-      name: worker.name,
-      profileImage: await resolveS3Image(worker.profileImage, s3Service),
+      id: worker._id.toString(),
+      name: snapshot.worker.name,
+      profileImage: worker.profileImage
+        ? await resolveS3Image(worker.profileImage, s3Service)
+        : undefined,
     };
     dto.user = {
-      id: entity.userId.toString(),
-      name: user.name,
-      profileImage: await resolveS3Image(user.profileImage, s3Service),
+      id: user._id.toString(),
+      name: snapshot.user.name,
+      profileImage: user.profileImage
+        ? await resolveS3Image(user.profileImage, s3Service)
+        : undefined,
     };
     return dto;
   }
@@ -190,7 +198,7 @@ export class ReviewPublicDTO extends ReviewBaseDTO {
   user!: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   static async fromEntity(
     entity: IReviewPopulated,
@@ -198,12 +206,14 @@ export class ReviewPublicDTO extends ReviewBaseDTO {
   ): Promise<ReviewPublicDTO> {
     const dto = new ReviewPublicDTO();
     Object.assign(dto, ReviewPublicDTO.baseMap(entity));
-    const user = entity.bookingId.snapshot.user;
+    const user = entity.userId;
 
     dto.user = {
-      id: entity.userId.toString(),
-      name: user.name,
-      profileImage: await resolveS3Image(user.profileImage, s3Service),
+      id: user._id.toString(),
+      name: entity.bookingId.snapshot.user.name,
+      profileImage: user.profileImage
+        ? await resolveS3Image(user.profileImage, s3Service)
+        : undefined,
     };
     return dto;
   }

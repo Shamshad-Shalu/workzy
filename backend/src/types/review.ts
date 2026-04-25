@@ -39,38 +39,46 @@ export interface WorkerReviewStats {
   };
 }
 
-export type ReviewListQueryInput = {
+export interface ReviewListQueryInput {
   limit: number;
   cursor?: {
     createdAt: Date;
     _id: string;
     rating?: number;
   };
+  rating?: number;
+  sortBy?: "createdAt" | "rating";
+  sortOrder?: "asc" | "desc";
+}
+export interface AdminReviewListQueryInput extends ReviewListQueryInput {
   search?: string;
-
   serviceId?: string;
   categoryId?: string;
   userId?: string;
   workerId?: string;
-
-  rating?: number;
   minRating?: number;
   maxRating?: number;
   status: "all" | "hidden" | "visible";
   fromDate?: string;
   toDate?: string;
-  sortBy?: "createdAt" | "rating";
-  sortOrder?: "asc" | "desc";
-};
+}
 
-export interface ReviewListQuery extends Omit<ReviewListQueryInput, "fromDate" | "toDate"> {
+export interface ReviewListQuery extends Omit<AdminReviewListQueryInput, "fromDate" | "toDate"> {
   fromDate?: Date;
   toDate?: Date;
 }
 
-export interface IReviewPopulated extends Omit<IReview, "bookingId"> {
+export interface IReviewPopulated extends Omit<IReview, "bookingId" | "userId" | "workerId"> {
   bookingId: {
     _id: Types.ObjectId;
     snapshot: IBookingSnapshot;
+  };
+  userId: {
+    _id: Types.ObjectId;
+    profileImage?: string;
+  };
+  workerId: {
+    _id: Types.ObjectId;
+    profileImage?: string;
   };
 }

@@ -54,7 +54,7 @@ export interface PublicReviewView extends ReviewBaseView {
   user: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
 }
 
@@ -63,12 +63,12 @@ export interface AdminReviewView extends ReviewBaseView {
   user: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
   worker: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
 }
 
@@ -76,7 +76,7 @@ export interface UserReviewView extends ReviewBaseView {
   worker: {
     id: string;
     name: string;
-    profileImage: string;
+    profileImage?: string;
   };
 }
 

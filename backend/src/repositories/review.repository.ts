@@ -101,6 +101,8 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
     const docs = await this.model
       .find(query)
       .populate("bookingId", "snapshot")
+      .populate("userId", "profileImage")
+      .populate("workerId", "profileImage")
       .sort(sortQuery)
       .limit(limit + 1)
       .lean<IReviewPopulated[]>();

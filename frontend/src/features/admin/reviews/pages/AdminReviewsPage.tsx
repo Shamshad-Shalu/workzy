@@ -26,9 +26,6 @@ import { AdminReviewCardSkeleton } from '../components/AdminReviewsSkeleton';
 import { useAdminReviewFilters } from '../hooks/useAdminReviewFilters';
 import { useAdminReviews } from '../hooks/useAdminReviews';
 
-
-
-
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1, transition: { staggerChildren: 0.05 } },
@@ -84,7 +81,7 @@ export default function AdminReviewsPage() {
   return (
     <div className="space-y-6 pt-0">
       <PageHeader title="All Reviews" description="Platform-wide Review management" />
-      <div className="md:sticky md:-top-6 md:z-20 bg-background pt-4 pb-2 md:shadow-sm">
+      <div className="md:sticky md:-top-6 md:z-20 bg-background pt-4 pb-2 ">
         <div className="bg-card border rounded-xl p-4">
           <div className="grid sm:grid-cols-12 gap-3">
             <div className="sm:col-span-6">

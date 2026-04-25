@@ -6,6 +6,7 @@ import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW, WORKER } from "@/con
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
@@ -17,7 +18,7 @@ import {
   ReviewUserDTO,
   ReviewWorkerDTO,
 } from "@/dtos/responses/review.dto";
-import { ReviewListQuery, ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
+import { AdminReviewListQueryInput, ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -27,7 +28,8 @@ export class ReviewService implements IReviewService {
     @inject(TYPES.ReviewRepository) private _reviewRepo: IReviewRepository,
     @inject(TYPES.BookingRepository) private _bookingRepo: IBookingRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   async createReview(userId: string, reviewData: CreateReviewDTO): Promise<ReviewResponseDTO> {
@@ -61,6 +63,7 @@ export class ReviewService implements IReviewService {
       }),
       this._workerRepository.incrementRating(workerId.toString(), rating),
     ]);
+    await this._redisService.clearPattern("reviews");
     return ReviewResponseDTO.fromEntity(review);
   }
 
@@ -93,6 +96,7 @@ export class ReviewService implements IReviewService {
     if (!updated) {
       throw new CustomError(REVIEW.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
+    await this._redisService.clearPattern("reviews");
     return ReviewResponseDTO.fromEntity(updated);
   }
 
@@ -122,8 +126,9 @@ export class ReviewService implements IReviewService {
       }
     );
     if (!review) {
-      throw new CustomError("Review not found or unauthorized");
+      throw new CustomError(REVIEW.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
+    await this._redisService.clearPattern("reviews");
     return ReviewResponseDTO.fromEntity(review);
   }
 
@@ -137,15 +142,20 @@ export class ReviewService implements IReviewService {
       newStatus
         ? this._workerRepository.decrementRating(review.workerId.toString(), review.rating)
         : this._workerRepository.incrementRating(review.workerId.toString(), review.rating),
+      this._redisService.clearPattern("reviews"),
     ]);
     return newStatus ? REVIEW.HIDDEN : REVIEW.UNHIDDEN;
   }
 
   async listReviews(
-    input: ReviewListQueryInput
+    input: AdminReviewListQueryInput
   ): Promise<{ reviews: ReviewAdminDTO[]; nextCursor: string | null }> {
-    const query = this.mapToReviewListQuery(input);
-    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews(query);
+    const { fromDate, toDate } = input;
+    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
+      ...input,
+      fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
+      toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
+    });
     return {
       reviews: await ReviewAdminDTO.fromEntities(reviews, this._s3Service),
       nextCursor,
@@ -156,47 +166,68 @@ export class ReviewService implements IReviewService {
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }> {
-    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
+    const { limit, cursor, rating, sortBy, sortOrder } = input;
+    const cacheKey = `reviews:public:${workerId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
+    const cachedData = await this._redisService.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
       workerId,
       status: "visible",
-      ...rest,
+      ...input,
     });
-    return {
+    const response = {
       reviews: await ReviewPublicDTO.fromEntities(reviews, this._s3Service),
       nextCursor,
     };
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    return response;
   }
   async getUserReviews(
     userId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }> {
-    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
+    const { limit, cursor, rating, sortBy, sortOrder } = input;
+    const cacheKey = `reviews:${userId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
+    const cachedData = await this._redisService.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
       userId,
       status: "visible",
-      ...rest,
+      ...input,
     });
-    return {
+    const response = {
       reviews: await ReviewUserDTO.fromEntities(reviews, this._s3Service),
       nextCursor,
     };
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    return response;
   }
 
   async getMyWorkerReviews(
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewWorkerDTO[]; nextCursor: string | null }> {
-    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
+    const { limit, cursor, rating, sortBy, sortOrder } = input;
+    const cacheKey = `reviews:${workerId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
+    const cachedData = await this._redisService.get(cacheKey);
+    if (cachedData) {
+      return JSON.parse(cachedData);
+    }
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
       workerId,
       status: "visible",
-      ...rest,
+      ...input,
     });
-    return {
+    const response = {
       reviews: await ReviewWorkerDTO.fromEntities(reviews, this._s3Service),
       nextCursor,
     };
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
+    return response;
   }
 
   async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats> {
@@ -205,14 +236,5 @@ export class ReviewService implements IReviewService {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
     return reviewStats;
-  }
-
-  private mapToReviewListQuery(input: ReviewListQueryInput): ReviewListQuery {
-    const { fromDate, toDate, ...rest } = input;
-    return {
-      ...rest,
-      fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
-      toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
-    };
   }
 }
