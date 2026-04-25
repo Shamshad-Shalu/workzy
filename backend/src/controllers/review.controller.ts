@@ -53,12 +53,12 @@ export class ReviewController implements IReviewController {
     const userId = req.query.userId as string | undefined;
     const workerId = req.query.workerId as string | undefined;
 
-    const result = await this._reviewService.listReviews({
+    const { reviews, nextCursor } = await this._reviewService.listReviews({
       ...query,
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
+    res.status(HTTPSTATUS.OK).json({ reviews, nextCursor });
   });
 
   getPublicWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -70,6 +70,7 @@ export class ReviewController implements IReviewController {
     );
     res.status(HTTPSTATUS.OK).json({ reviews: reviews, nextCursor: nextCursor });
   });
+
   getWorkerReviewStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const result = await this._reviewService.getWorkerReviewStats(workerId);
@@ -79,9 +80,8 @@ export class ReviewController implements IReviewController {
   getMyWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
-
-    const result = await this._reviewService.getMyWorkerReviews(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
+    const { reviews, nextCursor } = await this._reviewService.getMyWorkerReviews(workerId, query);
+    res.status(HTTPSTATUS.OK).json({ reviews, nextCursor });
   });
 
   getMyReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -98,6 +98,7 @@ export class ReviewController implements IReviewController {
       : undefined;
     return {
       limit,
+      status: (req.query.status as "all" | "hidden" | "visible") ?? "all",
       search: (req.query.search as string) ?? "",
       serviceId: (req.query.serviceId as string) ?? undefined,
       categoryId: (req.query.categoryId as string) ?? undefined,

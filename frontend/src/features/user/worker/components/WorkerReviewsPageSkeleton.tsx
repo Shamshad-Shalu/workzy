@@ -62,28 +62,3 @@ export function ReviewSummarySkeleton() {
     </div>
   );
 }
-
-export function WorkerReviewsPageSkeleton() {
-  return (
-    <div className="space-y-6">
-      <ReviewSummarySkeleton />
-      <div className="flex gap-3">
-        <Skeleton className="h-9 w-20" />
-        <Skeleton className="h-9 w-[150px]" />
-        <Skeleton className="h-9 w-[140px]" />
-      </div>
-      <div className="space-y-4">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-          >
-            <ReviewCardSkeleton />
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  );
-}

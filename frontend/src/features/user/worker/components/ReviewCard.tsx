@@ -31,7 +31,7 @@ export default function ReviewCard({ review, onOpenMedia }: ReviewCardProps) {
     >
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-3">
-          <ProfileImage src={user.profileImage} size={40} />
+          <ProfileImage src={user.profileImage} size={40} name={user.name} />
           <div>
             <div className="flex items-center gap-2">
               <p className="font-semibold text-foreground">{user.name}</p>

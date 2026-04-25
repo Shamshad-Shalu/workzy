@@ -82,3 +82,10 @@ export function formatReviewDate(date: string | Date) {
   }
   return reviewDate.format('DD MMM YYYY');
 }
+
+export function formatDateForUrl(date: Date | null | undefined): string | undefined {
+  if (!date) {
+    return undefined;
+  }
+  return dayjs(date).format('YYYY-MM-DD');
+}

@@ -40,7 +40,7 @@ export default function StatusChangeModal({
                 Are you sure you want to update <b>{name}</b>'s status?
               </span>
             )}
-            This action will update the user's workflow immediately.
+            This action will update the workflow immediately.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex justify-end gap-3">

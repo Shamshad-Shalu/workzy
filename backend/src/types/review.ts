@@ -56,7 +56,7 @@ export type ReviewListQueryInput = {
   rating?: number;
   minRating?: number;
   maxRating?: number;
-  isHidden?: boolean;
+  status: "all" | "hidden" | "visible";
   fromDate?: string;
   toDate?: string;
   sortBy?: "createdAt" | "rating";

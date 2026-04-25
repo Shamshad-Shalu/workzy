@@ -47,7 +47,6 @@ interface ReviewBaseView extends Pick<Review, ReviewBaseFields> {
   category: {
     id: string;
     name: string;
-    iconUrl: string;
   };
 }
 
@@ -85,6 +84,10 @@ export interface PublicReviewListResponse {
   reviews: PublicReviewView[];
   nextCursor: string | null;
 }
+export interface WorkerReviewListResponse {
+  reviews: PublicReviewView[];
+  nextCursor: string | null;
+}
 
 export interface AdminReviewListResponse {
   reviews: AdminReviewView[];
@@ -113,7 +116,7 @@ export interface AdminReviewListQuery extends ReviewListQuery {
   categoryId?: string;
   userId?: string;
   workerId?: string;
-  isHidden?: boolean;
+  status: string; // 'all' | 'hidden' | 'visible';
   fromDate?: string;
   toDate?: string;
 }

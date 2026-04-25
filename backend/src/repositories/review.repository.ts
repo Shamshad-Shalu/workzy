@@ -19,7 +19,7 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
       limit,
       cursor,
       fromDate,
-      isHidden,
+      status,
       maxRating,
       minRating,
       rating,
@@ -37,8 +37,10 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
     if (workerId) query.workerId = new Types.ObjectId(workerId);
     if (serviceId) query.serviceId = new Types.ObjectId(serviceId);
 
-    if (isHidden === false) {
-      query.isHidden = isHidden;
+    if (status === "hidden") {
+      query.isHidden = true;
+    } else if (status === "visible") {
+      query.isHidden = false;
     }
 
     if (rating) {

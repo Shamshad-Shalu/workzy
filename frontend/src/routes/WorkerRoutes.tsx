@@ -8,6 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/Dashboard'));
+const WorkerReviews = lazy(() => import('@/features/worker/reviews/pages/WorkerReviewsPage'));
 const WorkerServicesPage = lazy(
   () => import('@/features/worker/services/pages/WorkerServicesPage')
 );
@@ -38,6 +39,7 @@ export default function WorkerRoutes() {
       <Route element={<ProtectedRoute requiredRoles={[ROLE.WORKER]} />}>
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
+          <Route path="reviews" element={<WorkerReviews />} />
           <Route path="services" element={<WorkerServicesPage />} />
           <Route path="subscriptions" element={<SubscriptionPage />} />
           <Route path="payments" element={<WorkerPaymentsPage />} />

@@ -13,6 +13,7 @@ const router = Router();
 const controller = container.get<IReviewController>(TYPES.ReviewController);
 
 router.get("/", controller.listReviews);
+router.get("/worker/me", authenticate([ROLE.WORKER]), controller.getMyWorkerReviews);
 router.get("/worker/:workerId", controller.getPublicWorkerReviews);
 router.get("/worker/:workerId/stats", controller.getWorkerReviewStats);
 router.get("/:reviewId", controller.getReviewById);
@@ -21,8 +22,6 @@ router.patch(
   authenticate([ROLE.ADMIN]),
   controller.ToggleReviewVisibilityById
 );
-
-router.get("/worker/me", authenticate([ROLE.WORKER]), controller.getMyWorkerReviews);
 
 router.use(authenticate([ROLE.WORKER, ROLE.USER]));
 

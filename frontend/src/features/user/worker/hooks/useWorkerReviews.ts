@@ -1,18 +1,27 @@
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
 
 import ReviewService from '@/services/review.service';
-import type { PublicReviewListResponse, ReviewListQuery, WorkerReviewStats } from '@/types/review';
+import type {
+  AdminReviewListQuery,
+  PublicReviewListResponse,
+  ReviewListQuery,
+  WorkerReviewStats,
+} from '@/types/review';
 
 export const reviewKeys = {
   all: ['reviews'] as const,
   lists: () => [...reviewKeys.all, 'list'] as const,
-  user: (status: string) => [...reviewKeys.lists(), 'user', status] as const,
-  worker: (status: string) => [...reviewKeys.lists(), 'worker', status] as const,
+  user: (filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
+    [...reviewKeys.lists(), 'user', filters] as const,
+  worker: (filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
+    [...reviewKeys.lists(), 'worker', filters] as const,
   public: (workerId: string, filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
     [...reviewKeys.lists(), 'public', workerId, filters] as const,
-  admin: (filters: string) => [...reviewKeys.lists(), 'admin', filters] as const,
+  admin: (filters: Omit<AdminReviewListQuery, 'cursor' | 'limit'>) =>
+    [...reviewKeys.lists(), 'admin', filters] as const,
   detail: (id: string) => [...reviewKeys.all, 'detail', id] as const,
 };
+
 const LIMIT = 5;
 
 export function useWorkerPublicReviews(

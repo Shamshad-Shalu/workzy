@@ -156,11 +156,11 @@ export class ReviewService implements IReviewService {
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }> {
-    const query = this.mapToReviewListQuery(input);
+    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
-      isHidden: false,
       workerId,
-      ...query,
+      status: "visible",
+      ...rest,
     });
     return {
       reviews: await ReviewPublicDTO.fromEntities(reviews, this._s3Service),
@@ -171,11 +171,11 @@ export class ReviewService implements IReviewService {
     userId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }> {
-    const query = this.mapToReviewListQuery(input);
+    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
-      isHidden: false,
       userId,
-      ...query,
+      status: "visible",
+      ...rest,
     });
     return {
       reviews: await ReviewUserDTO.fromEntities(reviews, this._s3Service),
@@ -187,11 +187,11 @@ export class ReviewService implements IReviewService {
     workerId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewWorkerDTO[]; nextCursor: string | null }> {
-    const query = this.mapToReviewListQuery(input);
+    const { status: _s, ...rest } = this.mapToReviewListQuery(input);
     const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
-      isHidden: false,
       workerId,
-      ...query,
+      status: "visible",
+      ...rest,
     });
     return {
       reviews: await ReviewWorkerDTO.fromEntities(reviews, this._s3Service),

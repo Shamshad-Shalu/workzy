@@ -2,9 +2,12 @@ import { REVIEW_API } from '@/constants';
 import type { ReviewFormType } from '@/features/user/booking/validation/ReviewFormData';
 import api from '@/lib/api/axios';
 import type {
+  AdminReviewListQuery,
+  AdminReviewListResponse,
   PublicReviewListResponse,
   Review,
   ReviewListQuery,
+  WorkerReviewListResponse,
   WorkerReviewStats,
 } from '@/types/review';
 
@@ -53,20 +56,15 @@ const ReviewService = {
     return res.data;
   },
 
-  // getMyWorkerReviews: async (): Promise<Review[]> => {
-  //   const res = await api.get(REVIEW_API.MY_WORKER_REVIEWS);
-  //   return res.data.reviews;
-  // },
-  // listReviews: async (params?: {
-  //   search?: string;
-  //   rating?: number;
-  //   isHidden?: boolean;
-  //   limit?: number;
-  //   cursor?: string;
-  // }): Promise<Review[]> => {
-  //   const res = await api.get(REVIEW_API.ROOT, { params });
-  //   return res.data.reviews;
-  // }
+  getWorkerReviews: async (params: ReviewListQuery): Promise<WorkerReviewListResponse> => {
+    const res = await api.get(REVIEW_API.MY_WORKER_REVIEWS, { params });
+    return res.data;
+  },
+
+  listReviews: async (params: AdminReviewListQuery): Promise<AdminReviewListResponse> => {
+    const res = await api.get(REVIEW_API.ROOT, { params });
+    return res.data;
+  },
 };
 
 export default ReviewService;

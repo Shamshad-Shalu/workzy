@@ -1,32 +1,31 @@
 import { Camera } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
-import userprofile from '@/assets/images/userprofile.avif';
-
 import { Skeleton } from '../ui/skeleton';
 
 interface Props {
-  src: string | undefined;
+  src?: string;
+  name?: string;
   size?: number;
   editable?: boolean;
   onChange?: (file: File) => Promise<void>;
   onClickImage?: () => void;
   loading?: boolean;
   progress?: number;
-  fallbackImage?: string;
 }
 export default function ProfileImage({
   src,
+  name = '',
   size = 120,
   editable = false,
   onChange,
   onClickImage,
   loading = false,
   progress = 0,
-  fallbackImage,
 }: Props) {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     if (!editable || !onChange) {
@@ -38,26 +37,76 @@ export default function ProfileImage({
     }
     await onChange(file);
   }
+  function getInitials(name: string) {
+    if (!name) {
+      return '?';
+    }
+    const parts = name.trim().split(' ');
+    if (parts.length === 1) {
+      return parts[0][0].toUpperCase();
+    }
+
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+  function getGradient(name: string) {
+    const gradients = [
+      'from-pink-500 to-orange-400',
+      'from-blue-500 to-cyan-400',
+      'from-green-500 to-emerald-400',
+      'from-purple-500 to-indigo-400',
+      'from-yellow-400 to-orange-500',
+      'from-rose-500 to-pink-400',
+      'from-sky-500 to-blue-400',
+    ];
+    if (!name) {
+      return gradients[0];
+    }
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return gradients[Math.abs(hash) % gradients.length];
+  }
+  const showImage = src && !imgError && imgLoaded && !loading;
+
   return (
     <div
       className="relative cursor-pointer group inline-block"
       style={{ width: size, height: size }}
     >
-      {(!imgLoaded || loading) && (
+      {((!imgLoaded && !imgError) || loading) && (
         <Skeleton style={{ width: size, height: size }} className="absolute inset-0 rounded-full" />
       )}
 
-      <img
-        src={src}
-        onClick={onClickImage}
-        onLoad={() => setImgLoaded(true)}
-        onError={e => {
-          e.currentTarget.src = fallbackImage ?? userprofile;
-        }}
-        style={{ width: size, height: size, display: imgLoaded && !loading ? 'block' : 'none' }}
-        className="rounded-full object-cover border-2 border-bg-accent/30"
-        alt="Profile"
-      />
+      {src && (
+        <img
+          src={src}
+          onClick={onClickImage}
+          onLoad={() => setImgLoaded(true)}
+          onError={() => setImgError(true)}
+          style={{ width: size, height: size, display: showImage ? 'block' : 'none' }}
+          className="rounded-full object-cover border-2 border-bg-accent/30"
+          alt="Profile"
+        />
+      )}
+      {(!src || imgError) && !loading && (
+        <div
+          onClick={onClickImage}
+          className={`
+            flex items-center justify-center
+            rounded-full text-white font-semibold
+            bg-gradient-to-br ${getGradient(name)}
+          `}
+          style={{
+            width: size,
+            height: size,
+            fontSize: size * 0.35,
+          }}
+        >
+          {getInitials(name)}
+        </div>
+      )}
+
       {loading && (
         <div className="absolute inset-0 bg-black/40 rounded-full flex flex-col items-center justify-center gap-1.5 p-2">
           <div className="relative flex items-center justify-center h-8 w-8">
@@ -74,7 +123,7 @@ export default function ProfileImage({
         </div>
       )}
 
-      {editable && imgLoaded && !loading && (
+      {editable && !loading && (
         <>
           <button
             onClick={() => fileRef.current?.click()}

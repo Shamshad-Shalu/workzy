@@ -44,7 +44,6 @@ export function useAdminBookingHandler() {
     if (!reviewData?.reviewId) {
       return;
     }
-
     const res = await toggleReviewVisibility({
       reviewId: reviewData.reviewId,
     });
