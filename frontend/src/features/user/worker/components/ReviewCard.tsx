@@ -6,7 +6,7 @@ import ProfileImage from '@/components/molecules/ProfileImage';
 import { Badge } from '@/components/ui/badge';
 import type { EvidenceItem } from '@/types/booking';
 import type { PublicReviewView } from '@/types/review';
-import { formatReviewDate } from '@/utils/time.format';
+import { formatDate } from '@/utils/time.format';
 
 interface ReviewCardProps {
   review: PublicReviewView;
@@ -44,7 +44,7 @@ export default function ReviewCard({ review, onOpenMedia }: ReviewCardProps) {
             </div>
             <div className="mt-0.5 flex items-center gap-2">
               <StarRating rating={rating} />
-              <span className="text-xs text-muted-foreground">{formatReviewDate(createdAt)}</span>
+              <span className="text-xs text-muted-foreground">{formatDate(createdAt)}</span>
             </div>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function ReviewCard({ review, onOpenMedia }: ReviewCardProps) {
             <MessageSquare size={13} />
             Your Reply
             <span className="ml-1 font-normal text-muted-foreground">
-              · {formatReviewDate(reply?.repliedAt)}
+              · {formatDate(reply?.repliedAt)}
             </span>
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-foreground/80">{reply?.message}</p>

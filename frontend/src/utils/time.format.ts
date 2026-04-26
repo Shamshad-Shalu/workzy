@@ -9,6 +9,37 @@ export function formatTime12(time: string): string {
   return dayjs(`2000-01-01 ${time}`).format('h:mm A');
 }
 
+export function formatDate(
+  date: string | Date,
+  mode: 'calendar' | 'relative' = 'relative'
+): string {
+  const d = dayjs(date);
+  const now = dayjs();
+
+  if (mode === 'relative') {
+    if (now.diff(d, 'day') < 7) {
+      return d.fromNow();
+    }
+    return d.format('DD MMM YYYY');
+  }
+
+  const today = now;
+  const tomorrow = now.add(1, 'day');
+  const yesterday = now.subtract(1, 'day');
+
+  if (d.isSame(today, 'day')) {
+    return 'Today';
+  }
+  if (d.isSame(tomorrow, 'day')) {
+    return 'Tomorrow';
+  }
+  if (d.isSame(yesterday, 'day')) {
+    return 'Yesterday';
+  }
+
+  return d.format('dddd, DD MMM');
+}
+
 export function formatDuration(minutes: number): string {
   const d = dayjs.duration(minutes, 'minutes');
 
@@ -22,24 +53,6 @@ export function formatDuration(minutes: number): string {
     return `${hours}h`;
   }
   return `${hours}h ${mins}m`;
-}
-
-export function formatSmartDate(date: string | Date): string {
-  const d = dayjs(date);
-  const today = dayjs();
-  const tomorrow = today.add(1, 'day');
-  const yesterday = today.subtract(1, 'day');
-
-  if (d.isSame(today, 'day')) {
-    return 'Today';
-  }
-  if (d.isSame(tomorrow, 'day')) {
-    return 'Tomorrow';
-  }
-  if (d.isSame(yesterday, 'day')) {
-    return 'Yesterday';
-  }
-  return d.format('dddd, DD MMM');
 }
 
 export function formatSmartDateTime(date: string | Date): string {
@@ -71,16 +84,6 @@ export function formatDateRangeDuration(start: string | Date, end: string | Date
   const days = endDate.diff(startDate, 'day') + 1;
 
   return days === 1 ? '1 day' : `${days} days`;
-}
-
-export function formatReviewDate(date: string | Date) {
-  const now = dayjs();
-  const reviewDate = dayjs(date);
-
-  if (now.diff(reviewDate, 'day') < 7) {
-    return reviewDate.fromNow();
-  }
-  return reviewDate.format('DD MMM YYYY');
 }
 
 export function formatDateForUrl(date: Date | null | undefined): string | undefined {

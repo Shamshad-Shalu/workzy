@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAvailableSlots } from '@/features/user/slot/hooks/useSlot';
 import type { AvailableSlot, BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDuration, formatDate, formatTime12 } from '@/utils/time.format';
 
 export default function SlotsStep({
   worker,
@@ -66,7 +66,7 @@ export default function SlotsStep({
         <p className="text-sm font-semibold flex items-center gap-2">
           <Clock className="w-4 h-4" /> Select Time
         </p>
-        <p className="text-xs text-muted-foreground">{formatSmartDate(booking.date)}</p>
+        <p className="text-xs text-muted-foreground">{formatDate(booking.date)}</p>
       </div>
 
       {isLoading ? (

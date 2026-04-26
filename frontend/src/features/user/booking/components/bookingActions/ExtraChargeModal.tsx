@@ -5,7 +5,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { formatCurrency } from '@/utils/currency';
-import { formatSmartDate } from '@/utils/time.format';
+import { formatDate } from '@/utils/time.format';
 
 interface ExtraChargeModalProps {
   open: boolean;
@@ -73,9 +73,7 @@ export default function ExtraChargeModal({
             </span>
           </div>
           <p className="text-sm text-muted-foreground">{reason}</p>
-          <p className="text-xs text-muted-foreground mt-2">
-            Requested {formatSmartDate(requestedAt)}
-          </p>
+          <p className="text-xs text-muted-foreground mt-2">Requested {formatDate(requestedAt)}</p>
         </div>
         <div className="my-6">
           <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-3">

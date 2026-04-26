@@ -1,9 +1,10 @@
 import { motion, type MotionProps } from 'framer-motion';
+import { RefreshCcw } from 'lucide-react';
 
 import type { ReactNode } from 'react';
 
 interface EmptyStateProps {
-  icon: ReactNode;
+  icon?: ReactNode;
   title: string;
   description: string;
   hint?: string;
@@ -31,7 +32,7 @@ export default function EmptyState({
       className={`flex flex-col items-center justify-center text-center py-16 px-6 bg-card border border-border rounded-2xl ${className ?? ''}`}
     >
       <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center mb-4 text-muted-foreground">
-        {icon}
+        {icon ?? <RefreshCcw />}
       </div>
       <h3 className="text-base font-semibold text-foreground mb-1">{title}</h3>
       <p className="text-sm text-muted-foreground max-w-xs">{description}</p>

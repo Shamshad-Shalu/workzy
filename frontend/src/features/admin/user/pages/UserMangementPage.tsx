@@ -1,70 +1,76 @@
-import { useQuery } from '@tanstack/react-query';
 import { Filter } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
+import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
-import Table from '@/components/data-table/Table';
-import { AppModal } from '@/components/molecules/AppModal';
+import { DataList } from '@/components/data-table/DataList';
+import EmptyState from '@/components/molecules/EmptyState';
+import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
-import AdminUserService from '@/services/admin/userManagement.service';
-import type { UserResponse, UserRow } from '@/types/admin/user';
+import StatusChangeModal from '@/components/molecules/StatusChangeModal';
+import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+import type { UserListItem } from '@/types/admin/user';
 
-import { useToggleStatus } from '../../hooks/useUserToggleStatus';
 import userColumns from '../components/columns';
+import { useAdminUsers } from '../hooks/useAdminUsers';
 
+const CUSTOM_PARAMS = [{ key: 'role', defaultValue: 'all' }];
 export default function UserManagementPage() {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('all');
-  const [selectedUser, setSelectedUser] = useState<UserRow | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const navigate = useNavigate();
+  const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
+  const { pageIndex, pageSize, search, status, updateParams, role } = useUrlFilterParams<{
+    role: string;
+  }>(CUSTOM_PARAMS);
+  const { users, isLoading, error, isError, refetch, total, isToggling, toggleUserStatus } =
+    useAdminUsers({ page: pageIndex, limit: pageSize, search, status, role });
 
-  const { data, isLoading } = useQuery<UserResponse, Error>({
-    queryKey: ['admin-users', pageIndex, pageSize, search, status],
-    queryFn: () => AdminUserService.getUsers(pageIndex + 1, pageSize, search, status),
-    placeholderData: prev => prev,
-  });
+  const handleSearchChange = useCallback(
+    (v: string) => updateParams({ search: v, pageIndex: 0 }),
+    [updateParams]
+  );
 
-  const toggleStatusMutation = useToggleStatus(() => setModalOpen(false));
+  const handleToggleUserStatus = async () => {
+    if (!selectedUser?.id) {
+      return;
+    }
+    const res = await toggleUserStatus(selectedUser.id);
+    if (res.message) {
+      toast.success(res.message);
+      setSelectedUser(null);
+    }
+  };
 
-  const openStatusModal = (user: UserRow) => {
+  const openStatusModal = (user: UserListItem) => {
     setSelectedUser(user);
-    setModalOpen(true);
   };
+  const isHideButton = search !== '' || status !== 'all' || role !== 'all';
 
-  const handleSearchChange = useCallback((v: string) => {
-    setPageIndex(0);
-    setSearch(v);
-  }, []);
-
-  const openView = (id: string) => {
-    navigate(id);
-    console.log('open User view,', id);
-  };
+  const clearAllFilters = useCallback(() => {
+    updateParams({
+      search: '',
+      status: 'all',
+      role: 'all',
+      pageIndex: 0,
+    });
+  }, [updateParams]);
 
   return (
     <div>
       <PageHeader title="User Management" description="Manage your platform users" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">
-          <div className="sm:col-span-7">
+          <div className="sm:col-span-6">
             <SearchInput
               placeholder="Search by name or email..."
               value={search}
               onChange={handleSearchChange}
             />
           </div>
-          <div className="sm:col-span-5">
+          <div className="sm:col-span-3">
             <Select
               value={status}
-              onChange={v => {
-                setPageIndex(0);
-                setStatus(v);
-              }}
+              onChange={v => updateParams({ status: v, pageIndex: 0 })}
               leftIcon={<Filter />}
               options={[
                 { label: 'All Status', value: 'all' },
@@ -73,44 +79,58 @@ export default function UserManagementPage() {
               ]}
             />
           </div>
+          <div className="sm:col-span-3">
+            <Select
+              value={role}
+              onChange={v => updateParams({ role: v, pageIndex: 0 })}
+              leftIcon={<Filter />}
+              options={[
+                { label: 'All Role', value: 'all' },
+                { label: 'User', value: 'user' },
+                { label: 'Worker', value: 'worker' },
+              ]}
+            />
+          </div>
         </div>
       </div>
-      <Table
-        columns={userColumns(openStatusModal, openView)}
-        data={data?.users ?? []}
-        total={data?.total}
+      <DataList
+        data={users}
+        total={total}
         pageIndex={pageIndex}
         pageSize={pageSize}
-        pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
-        manual={{
-          serverSidePagination: true,
-        }}
+        mode="table"
         isLoading={isLoading}
-        onPageChange={p => setPageIndex(p)}
-        onPageSizeChange={s => {
-          setPageSize(s);
-          setPageIndex(0);
-        }}
+        onPageChange={v => updateParams({ pageIndex: v })}
+        onPageSizeChange={v => updateParams({ pageSize: v, pageIndex: 0 })}
+        pageCount={Math.ceil(total / pageSize) || 1}
+        columns={userColumns(openStatusModal)}
+        isError={isError}
+        errorState={<ErrorState onRetry={() => refetch()} description={error?.message} />}
+        emptyState={
+          <EmptyState
+            title="No users found"
+            description={
+              isHideButton ? 'Try adjusting your filters or search' : 'No users available yet'
+            }
+            action={
+              isHideButton ? (
+                <Button onClick={clearAllFilters} variant="red" size="sm">
+                  Clear Filters
+                </Button>
+              ) : null
+            }
+          />
+        }
       />
-
-      <AppModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        isTitleHidden={true}
-        confirmText={selectedUser?.isBlocked ? 'Unblock' : 'Block'}
-        onConfirm={() => {
-          if (!selectedUser?.id) {
-            return;
-          }
-          toggleStatusMutation.mutate(selectedUser?.id);
-        }}
-        className="sm:mx-1"
-      >
-        <span className="block mb-2">
-          Are you sure you want to {selectedUser?.isBlocked ? 'Unblok' : 'Block'}{' '}
-          <b>{selectedUser?.name}</b>
-        </span>
-      </AppModal>
+      <StatusChangeModal
+        open={!!selectedUser}
+        onClose={() => setSelectedUser(null)}
+        onConfirm={handleToggleUserStatus}
+        fromStatus={selectedUser?.isBlocked ? 'Block' : 'Unblok'}
+        toStatus={selectedUser?.isBlocked ? 'Unblok' : 'Block'}
+        loading={isToggling}
+        name={selectedUser?.name}
+      />
     </div>
   );
 }

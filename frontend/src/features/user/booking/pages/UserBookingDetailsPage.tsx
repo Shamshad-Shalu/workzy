@@ -8,9 +8,9 @@ import { useUserBookingHandler } from '../hooks/useUserBooking';
 
 export default function UserBookingDetailsPage() {
   const { cancel, approve, payExtra } = useUserBookingHandler();
-  const { cancelB, cancelPending, setCancelB, submitCancel } = cancel;
-  const { approveBId, approvePending, setApproveBId, submitApprove } = approve;
-  const { payExtraBId, payExtraPending, setPayExtraBId, submitPayExtra } = payExtra;
+  const { cancelB, handleCancelBooking, setCancelB, isCancelling } = cancel;
+  const { approveBId, handleApproveBooking, setApproveBId, isApproving } = approve;
+  const { payExtraBId, handlePayExtra, setPayExtraBId, isPayingExtra } = payExtra;
 
   return (
     <div className="p-4">
@@ -26,22 +26,22 @@ export default function UserBookingDetailsPage() {
         open={!!cancelB}
         booking={cancelB}
         onClose={() => setCancelB(null)}
-        onSubmit={submitCancel}
-        isSubmitting={cancelPending}
+        onSubmit={handleCancelBooking}
+        isSubmitting={isCancelling}
       />
       <ApproveModal
         open={!!approveBId}
         bookingId={approveBId}
         onClose={() => setApproveBId(null)}
-        onSubmit={submitApprove}
-        isSubmitting={approvePending}
+        onSubmit={handleApproveBooking}
+        isSubmitting={isApproving}
       />
       <ExtraChargeModal
         open={!!payExtraBId}
         bookingId={payExtraBId}
         onClose={() => setPayExtraBId(null)}
-        onPayAmount={submitPayExtra}
-        isSubmitting={payExtraPending}
+        onPayAmount={handlePayExtra}
+        isSubmitting={isPayingExtra}
       />
     </div>
   );

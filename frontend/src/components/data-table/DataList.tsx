@@ -24,12 +24,14 @@ interface DataListProps<T extends RowWithAnyId> {
   onPageChange: (p: number) => void;
   onPageSizeChange: (s: number) => void;
   isLoading?: boolean;
+  isError?: boolean;
   mode: DataListMode;
   columns?: TableColumnDef<T>[];
   renderCard?: (item: T) => ReactNode;
   gridClassName?: string;
 
-  emptyText?: string;
+  emptyState?: ReactNode;
+  errorState?: ReactNode;
 }
 
 export function DataList<T extends RowWithAnyId>({
@@ -41,11 +43,13 @@ export function DataList<T extends RowWithAnyId>({
   onPageChange,
   onPageSizeChange,
   isLoading = false,
+  isError,
   mode,
   columns = [],
   renderCard,
   gridClassName = 'grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
-  emptyText = 'No results found',
+  emptyState,
+  errorState,
 }: DataListProps<T>) {
   const [isSmallScreen, setIsSmallScreen] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
@@ -75,6 +79,33 @@ export function DataList<T extends RowWithAnyId>({
       total,
     },
   });
+  const renderState = () => {
+    if (isLoading) {
+      return null;
+    }
+    if (isError) {
+      return (
+        errorState ?? (
+          <div className="bg-card border rounded-xl p-8 text-center text-destructive">
+            Something went wrong
+          </div>
+        )
+      );
+    }
+    if (data.length === 0) {
+      return (
+        emptyState ?? (
+          <div className="bg-card border rounded-xl p-8 text-center text-muted-foreground">
+            No results found
+          </div>
+        )
+      );
+    }
+
+    return null;
+  };
+
+  const uiState = renderState();
 
   if (mode === 'card') {
     const paginationAdapter: PaginationAdapter = {
@@ -98,10 +129,8 @@ export function DataList<T extends RowWithAnyId>({
               <DataTableSkeletonRow key={i} isSmallScreen rowCount={1} />
             ))}
           </div>
-        ) : data.length === 0 ? (
-          <div className="bg-card border rounded-xl p-8 text-center text-muted-foreground">
-            {emptyText}
-          </div>
+        ) : uiState ? (
+          uiState
         ) : (
           <div className={gridClassName}>
             {data.map(item => (
@@ -132,10 +161,8 @@ export function DataList<T extends RowWithAnyId>({
               <DataTableSkeletonRow key={i} isSmallScreen rowCount={1} />
             ))}
           </div>
-        ) : data.length === 0 ? (
-          <div className="bg-card border rounded-xl p-8 text-center text-muted-foreground">
-            {emptyText}
-          </div>
+        ) : uiState ? (
+          uiState
         ) : (
           <div className="space-y-4">
             {data.map(item => (
@@ -174,14 +201,23 @@ export function DataList<T extends RowWithAnyId>({
               </tr>
             ))}
           </thead>
-
           <tbody>
             {isLoading ? (
               <DataTableSkeletonRow isSmallScreen={false} rowCount={pageSize} />
+            ) : isError ? (
+              <tr>
+                <td colSpan={100}>
+                  {errorState ?? (
+                    <div className="py-8 text-center text-destructive">Something went wrong</div>
+                  )}
+                </td>
+              </tr>
             ) : data.length === 0 ? (
               <tr>
-                <td colSpan={100} className="text-center py-8 text-muted-foreground">
-                  {emptyText}
+                <td colSpan={100}>
+                  {emptyState ?? (
+                    <div className="py-8 text-center text-muted-foreground">No results found</div>
+                  )}
                 </td>
               </tr>
             ) : (

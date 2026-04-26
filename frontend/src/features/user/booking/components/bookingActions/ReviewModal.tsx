@@ -11,7 +11,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { MultiUpload } from '@/components/molecules/MultiUpload';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { UploadPurposes } from '@/constants';
-import { formatSmartDate } from '@/utils/time.format';
+import { formatDate } from '@/utils/time.format';
 
 import { useReviewDetails } from '../../hooks/useReview';
 import { ReviewSchema, type ReviewFormType } from '../../validation/ReviewFormData';
@@ -186,7 +186,7 @@ export default function ReviewModal({
                   <span className="text-sm font-semibold text-foreground">Worker's Reply</span>
                 </div>
                 <span className="text-[11px] text-muted-foreground">
-                  {formatSmartDate(review.reply.repliedAt)} ·{' '}
+                  {formatDate(review.reply.repliedAt)} ·{' '}
                   {dayjs(review.reply.repliedAt).format('h:mm A')}
                 </span>
               </div>

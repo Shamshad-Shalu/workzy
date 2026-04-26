@@ -1,17 +1,25 @@
-export interface UserRow {
+import type { Role } from '@/constants';
+
+export interface UserListItem {
   id: string;
   name: string;
   email: string;
+  role: Role;
   phone?: string;
-  isPremium: boolean;
-  isBlocked: boolean;
   profileImage?: string;
-  createdAt: string;
+  isBlocked: boolean;
+  createdAt: Date;
 }
 
-export interface UserResponse {
-  users: UserRow[];
+export interface AdminUserListResponse {
+  users: UserListItem[];
   total: number;
-  totalPages: number;
-  page: number;
 }
+
+export type AdminUserListQuery = {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+  role?: string;
+};

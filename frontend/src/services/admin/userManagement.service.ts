@@ -1,16 +1,16 @@
 import { ADMIN_API } from '@/constants';
 import api from '@/lib/api/axios';
-import type { UserResponse } from '@/types/admin/user';
+import type { AdminUserListQuery, AdminUserListResponse } from '@/types/admin/user';
 
 const AdminUserService = {
-  getUsers: async (page = 1, limit = 10, search = '', status = 'all'): Promise<UserResponse> => {
+  getUsers: async (params: AdminUserListQuery): Promise<AdminUserListResponse> => {
     const res = await api.get(ADMIN_API.USER.USERS, {
-      params: { page, limit, search, status },
+      params,
     });
     return res.data;
   },
 
-  toggleStatus: async (userId: string): Promise<{ message: string }> => {
+  toggleUserStatus: async (userId: string): Promise<{ message: string }> => {
     const res = await api.patch(ADMIN_API.USER.USER_STATUS(userId));
     return res.data;
   },

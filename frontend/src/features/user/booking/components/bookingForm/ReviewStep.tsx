@@ -3,7 +3,7 @@ import { CalendarDays, Clock, Percent, StickyNote, Zap } from 'lucide-react';
 import { PRICING_MODE } from '@/constants';
 import type { BookingState } from '@/types/slot';
 import type { WorkerListingInfo } from '@/types/worker';
-import { formatDuration, formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDuration, formatDate, formatTime12 } from '@/utils/time.format';
 
 import type { BookingPricing } from '../../hooks/useBooking';
 
@@ -23,7 +23,7 @@ export default function ReviewStep({
       icon: <CalendarDays className="w-4 h-4" />,
       label: 'Date & Time',
       value: booking.slot
-        ? `${formatSmartDate(booking.date)} · ${formatTime12(booking.slot.startTime)}`
+        ? `${formatDate(booking.date, 'calendar')} · ${formatTime12(booking.slot.startTime)}`
         : '—',
     },
     ...(worker.estimatedDuration

@@ -11,7 +11,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { createDescriptionRule } from '@/lib/validation/rules';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface DisputeModalProps {
   open: boolean;
@@ -104,8 +104,7 @@ export default function DisputeModal({
             Booking Info
           </p>
           <p className="text-sm font-semibold">
-            {booking.category.name} • {formatSmartDate(booking.date)} •{' '}
-            {formatTime12(booking.startTime)}
+            {booking.category.name} • {formatDate(booking.date)} • {formatTime12(booking.startTime)}
           </p>
           <p className="text-xs text-muted-foreground italic">
             Professional: {booking.worker.name}

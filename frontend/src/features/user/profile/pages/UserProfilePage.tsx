@@ -72,6 +72,7 @@ export default function ProfilePage() {
           <div className="text-center">
             <ProfileImage
               src={user?.profileImage}
+              name={user.name}
               editable
               loading={imageLoading}
               progress={imageProgress}

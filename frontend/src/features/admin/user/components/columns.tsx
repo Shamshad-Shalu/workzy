@@ -1,16 +1,16 @@
-import dayjs from 'dayjs';
 import { Eye } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Badge } from '@/components/ui/badge';
-import type { UserRow } from '@/types/admin/user';
+import type { UserListItem } from '@/types/admin/user';
 import type { TableColumnDef } from '@/types/table.types';
+import { formatDate } from '@/utils/time.format';
 
 const userColumns = (
-  onToggleStatus: (user: UserRow) => void,
-  onView: (id: string) => void
-): TableColumnDef<UserRow>[] => [
+  onToggleStatus: (user: UserListItem) => void
+): TableColumnDef<UserListItem>[] => [
   {
     id: 'index',
     header: '#',
@@ -29,9 +29,15 @@ const userColumns = (
     accessorKey: 'name',
     cell: ({ row }) => (
       <div className="flex items-center gap-3">
-        <ProfileImage src={row.original.profileImage} size={40} />
+        <ProfileImage src={row.original.profileImage} size={40} name={row.original.name} />
         <div>
-          <div className="font-medium">{row.original.name}</div>
+          <div className="flex items-center gap-2 font-medium">
+            {row.original.name}
+            {row.original.role === 'worker' && (
+              <Badge className="text-xs px-2 py-0.5">Worker</Badge>
+            )}
+          </div>
+
           <div className="text-sm text-muted-foreground">{row.original.email}</div>
         </div>
       </div>
@@ -72,8 +78,7 @@ const userColumns = (
     header: 'Joined',
     accessorKey: 'createdAt',
     cell: ({ row }) => {
-      const date = row.original.createdAt;
-      return <span className="text-muted-foreground">{dayjs(date).format('YYYY-MM-DD')}</span>;
+      return <span className="text-muted-foreground">{formatDate(row.original.createdAt)}</span>;
     },
     hideOnSmall: true,
     showInMobileHeader: false,
@@ -86,14 +91,11 @@ const userColumns = (
     header: 'Actions',
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          variant="outline"
-          iconLeft={<Eye className="w-4 h-4" />}
-          onClick={() => onView(row.original.id)}
-        >
-          View
-        </Button>
+        <Link to={row.original.id}>
+          <Button size="sm" variant="outline" iconLeft={<Eye className="w-4 h-4" />}>
+            View
+          </Button>
+        </Link>
         <Button size="sm" variant="secondary" onClick={() => onToggleStatus(row.original)}>
           {row.original.isBlocked ? 'Unblock' : 'Block'}
         </Button>

@@ -7,7 +7,7 @@ import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
 import { createDescriptionRule } from '@/lib/validation/rules';
 import type { BookingListItem } from '@/types/booking';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface CancelModalProps {
   open: boolean;
@@ -97,9 +97,9 @@ export default function CancelModal({
         <div className="bg-muted/60 border border-border rounded-xl p-3 flex flex-col gap-0.5">
           <p className="text-xs text-muted-foreground">Booking</p>
           <p className="text-sm font-medium text-foreground">
-            {category.name} — {formatSmartDate(date)} —
+            {category.name} — {formatDate(date)} —
             {isMultiday
-              ? `${formatSmartDate(endDate)} ${totalDays}Days`
+              ? `${formatDate(endDate)} ${totalDays}Days`
               : `${formatTime12(startTime)} — ${formatTime12(endTime)}`}
           </p>
         </div>

@@ -22,7 +22,7 @@ import type { BookingStatus, Role } from '@/constants';
 import { cn } from '@/lib/utils';
 import type { BookingListItem } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatus.config';
 
@@ -212,7 +212,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
         >
           <span className="flex items-center gap-1.5">
             <Calendar size={11} className="flex-shrink-0" />
-            {formatSmartDate(b.date)}
+            {formatDate(b.date)}
             {b.totalDays > 1 && (
               <span className="text-muted-foreground/60">
                 +{b.totalDays - 1} day{b.totalDays > 2 ? 's' : ''}
