@@ -6,9 +6,9 @@ export interface IPayment extends Document<string> {
   transactionId: string;
   title: string;
   userId: Types.ObjectId;
-  workerId?: Types.ObjectId;
+  workerId: Types.ObjectId;
+  bookingId: Types.ObjectId;
   billType: BillType;
-  referenceId: Types.ObjectId;
 
   amount: number;
   platformFee?: number;
@@ -18,7 +18,6 @@ export interface IPayment extends Document<string> {
   provider: PaymentProvider;
   paymentIntentId?: string;
   sessionId?: string;
-  // idempotencyKey: string
   failureReason?: string;
   userName?: string;
   workerName?: string;
@@ -49,31 +48,4 @@ export interface VerifySessionType {
   date?: string;
   type?: string;
   receiptUrl?: string;
-}
-
-export interface PaymentListQueryInput {
-  limit: number;
-  cursor?: {
-    createdAt: string;
-    id: string;
-  };
-  billType?: BillType | "all";
-  status?: PaymentStatus | "all";
-  userId?: string;
-  workerId?: string;
-  fromDate?: string;
-  toDate?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  search?: string;
-}
-
-export interface PaymentListQuery
-  extends Omit<PaymentListQueryInput, "cursor" | "fromDate" | "toDate"> {
-  cursor?: {
-    createdAt: Date;
-    _id: string;
-  };
-  fromDate?: Date;
-  toDate?: Date;
 }

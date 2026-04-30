@@ -22,9 +22,7 @@ const WorkerDocumentsContentPage = lazy(
   () => import('@/features/worker/profile/pages/DocumentsContentPage')
 );
 const AccountPage = lazy(() => import('@/features/worker/profile/pages/AccountPage'));
-const SubscriptionPage = lazy(
-  () => import('@/features/worker/subscription/pages/SubscriptionPage')
-);
+
 const WorkerBookingDetailsPage = lazy(
   () => import('@/features/worker/booking/pages/WorkerBookingDetailsPage')
 );
@@ -41,7 +39,6 @@ export default function WorkerRoutes() {
           <Route path="dashboard" element={<WorkerDashboard />} />
           <Route path="reviews" element={<WorkerReviews />} />
           <Route path="services" element={<WorkerServicesPage />} />
-          <Route path="subscriptions" element={<SubscriptionPage />} />
           <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />

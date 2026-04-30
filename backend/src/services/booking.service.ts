@@ -44,7 +44,7 @@ import {
   IBooking,
   IEvidence,
   IExtraCharge,
-} from "@/types/booking";
+} from "@/types/booking/booking.entity";
 import { BulkDiscountType } from "@/types/service";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";

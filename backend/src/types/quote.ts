@@ -2,7 +2,7 @@ import { Document, Types } from "mongoose";
 
 import { QuoteStatus } from "@/constants";
 
-import { IBookingSlot } from "./booking";
+import { IBookingSlot } from "./booking/booking.entity";
 
 export interface IQuote extends Document<string> {
   workerId: Types.ObjectId;

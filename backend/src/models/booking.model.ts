@@ -13,7 +13,7 @@ import {
   IBookingStatusHistory,
   IEvidence,
   IExtraCharge,
-} from "@/types/booking";
+} from "@/types/booking/booking.entity";
 
 import { LocationSchema } from "./user.model";
 

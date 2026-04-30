@@ -1,6 +1,6 @@
 import { Document, Types } from "mongoose";
 
-import { IBookingSnapshot } from "./booking";
+import { IBookingSnapshot } from "./booking/booking.entity";
 
 export interface IReview extends Document<string> {
   bookingId: Types.ObjectId;

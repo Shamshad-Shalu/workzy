@@ -1,14 +1,13 @@
 import Stripe from "stripe";
 
 import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
-import { IBooking } from "@/types/booking";
-import { BookingCheckoutParams, PaymentListQueryInput, VerifySessionType } from "@/types/payment";
-import { AddSubscriptionDto } from "@/types/subscription";
-import { IWorker } from "@/types/worker";
+import { IBooking } from "@/types/booking/booking.entity";
+import { PaymentListQueryInput } from "@/types/payment/booking.query";
+import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
+import { IWorker } from "@/types/worker/worker.entity";
 
 export interface IPaymentService {
   handleWebhookEvent(event: Stripe.Event): Promise<void>;
-  createSubscriptionCheckout(data: AddSubscriptionDto): Promise<string>;
   verifySession(sessionId: string): Promise<VerifySessionType>;
   createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string>;
   createStripeConnectLink(worker: IWorker): Promise<string>;

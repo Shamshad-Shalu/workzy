@@ -1,5 +1,5 @@
 import { BillType, PaymentStatus } from "@/constants";
-import { IPayment } from "@/types/payment";
+import { IPayment } from "@/types/payment/payment.entity";
 
 class PaymentBaseDTO {
   id!: string;

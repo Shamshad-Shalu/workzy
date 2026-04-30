@@ -18,26 +18,19 @@ import {
   ROLE,
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
-  SUBSCRIPTION_STATUS,
   WORKER,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
-import { ISubscriptionRepository } from "@/core/interfaces/repositories/ISubscriptionRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
-import { IBooking } from "@/types/booking";
-import {
-  BookingCheckoutParams,
-  PaymentListQuery,
-  PaymentListQueryInput,
-  VerifySessionType,
-} from "@/types/payment";
-import { AddSubscriptionDto } from "@/types/subscription";
+import { IBooking } from "@/types/booking/booking.entity";
+import { PaymentListQuery, PaymentListQueryInput } from "@/types/payment/booking.query";
+import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
 import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -47,59 +40,11 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 export class PaymentService implements IPaymentService {
   constructor(
     @inject(TYPES.PaymentRepository) private _paymentRepo: IPaymentRepository,
-    @inject(TYPES.SubscriptionRepository) private _subscriptionRepo: ISubscriptionRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.SlotService) private _slotService: ISlotService
   ) {}
-
-  async createSubscriptionCheckout(data: AddSubscriptionDto): Promise<string> {
-    const { name, workerId, subscriptionId, amount, userId, userName } = data;
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price_data: {
-            currency: "inr",
-            product_data: { name },
-            unit_amount: amount * 100,
-          },
-          quantity: 1,
-        },
-      ],
-      mode: "payment",
-      payment_intent_data: {
-        metadata: {
-          type: "SUBSCRIPTION",
-          workerId,
-          subscriptionId,
-        },
-      },
-      success_url: `${CLIENT_URL}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${CLIENT_URL}/payment/cancelled`,
-      metadata: {
-        type: "SUBSCRIPTION",
-        workerId,
-        subscriptionId,
-      },
-    });
-    await this._paymentRepo.create({
-      transactionId: generateTxnCode("TXN"),
-      title: name,
-      userId: new Types.ObjectId(userId),
-      workerId: new Types.ObjectId(workerId),
-      billType: BILL_TYPE.SUBSCRIPTION,
-      referenceId: new Types.ObjectId(subscriptionId),
-      amount,
-      currency: "inr",
-      provider: PAYMENT_PROVIDER.STRIPE,
-      status: PAYMENT_STATUS.PENDING,
-      userName,
-      sessionId: session.id,
-    });
-    return session.url!;
-  }
 
   async createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string> {
     const {
@@ -162,7 +107,7 @@ export class PaymentService implements IPaymentService {
       workerAmount,
       platformFee,
       billType: BILL_TYPE.BOOKING,
-      referenceId: new Types.ObjectId(bookingId),
+      bookingId: new Types.ObjectId(bookingId),
       status: PAYMENT_STATUS.PENDING,
       amount,
       currency: "inr",
@@ -227,7 +172,7 @@ export class PaymentService implements IPaymentService {
       userId: new Types.ObjectId(userId),
       workerId: new Types.ObjectId(booking.workerId),
       billType: BILL_TYPE.EXTRA_CHARGE,
-      referenceId: new Types.ObjectId(booking._id.toString()),
+      bookingId: new Types.ObjectId(booking._id.toString()),
       amount,
       currency: "inr",
       provider: PAYMENT_PROVIDER.STRIPE,
@@ -264,9 +209,7 @@ export class PaymentService implements IPaymentService {
       case "checkout.session.completed": {
         const session = event.data.object as Stripe.Checkout.Session;
         const type = session.metadata?.type;
-        if (type === "SUBSCRIPTION") {
-          await this.handleSubscriptionPaid(session);
-        } else if (type === "BOOKING") {
+        if (type === "BOOKING") {
           await this.handleBookingPaid(session);
         } else if (type === "EXTRA_CHARGE") {
           await this.handleExtraChargePaid(session);
@@ -282,9 +225,6 @@ export class PaymentService implements IPaymentService {
         const session = event.data.object as Stripe.Checkout.Session;
         if (session.metadata?.type === "BOOKING") {
           await this._handleBookingCheckoutExpired(session);
-        }
-        if (session.metadata?.type === "SUBSCRIPTION") {
-          await this._handleSubscriptionCheckoutExpired(session);
         }
         break;
       }
@@ -407,27 +347,6 @@ export class PaymentService implements IPaymentService {
     ]);
   }
 
-  private async handleSubscriptionPaid(session: Stripe.Checkout.Session) {
-    const metadata = session.metadata as {
-      workerId: string;
-      subscriptionId: string;
-    };
-    const { workerId, subscriptionId } = metadata;
-    await Promise.all([
-      this._workerRepository.update(workerId, { isPremium: true }),
-      this._paymentRepo.findOneAndUpdate(
-        { sessionId: session.id },
-        {
-          status: PAYMENT_STATUS.SUCCEEDED,
-          paymentIntentId: session.payment_intent as string,
-        }
-      ),
-      this._subscriptionRepo.findByIdAndUpdate(subscriptionId, {
-        status: SUBSCRIPTION_STATUS.ACTIVE,
-      }),
-    ]);
-  }
-
   async verifySession(sessionId: string): Promise<VerifySessionType> {
     const session = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["payment_intent.latest_charge", "line_items"],
@@ -458,7 +377,7 @@ export class PaymentService implements IPaymentService {
   }
 
   private async _handlePaymentFailed(pi: Stripe.PaymentIntent) {
-    const { type, bookingId, userId, subscriptionId, slotId } = pi.metadata;
+    const { type, bookingId, userId, slotId } = pi.metadata;
     if (type === "BOOKING" && bookingId) {
       await Promise.all([
         this._bookingRepository.update(bookingId, {
@@ -477,29 +396,6 @@ export class PaymentService implements IPaymentService {
       ]);
       return;
     }
-    if (type === "SUBSCRIPTION" && subscriptionId) {
-      await Promise.all([
-        this._subscriptionRepo.findByIdAndUpdate(subscriptionId, {
-          status: SUBSCRIPTION_STATUS.FAILED,
-        }),
-        this._paymentRepo.findOneAndUpdate(
-          { referenceId: new Types.ObjectId(subscriptionId), billType: BILL_TYPE.SUBSCRIPTION },
-          {
-            status: PAYMENT_STATUS.FAILED,
-            paymentIntentId: pi.id,
-            failureReason: pi.last_payment_error?.message,
-          }
-        ),
-      ]);
-      return;
-    }
-  }
-
-  private async _handleSubscriptionCheckoutExpired(session: Stripe.Checkout.Session) {
-    await this._paymentRepo.findOneAndUpdate(
-      { sessionId: session.id },
-      { status: PAYMENT_STATUS.CANCELLED }
-    );
   }
 
   private async _handleBookingCheckoutExpired(session: Stripe.Checkout.Session) {

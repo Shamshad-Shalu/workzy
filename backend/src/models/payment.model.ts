@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { BILL_TYPE, PAYMENT_PROVIDER, PAYMENT_STATUS } from "@/constants";
-import { IPayment } from "@/types/payment";
+import { IPayment } from "@/types/payment/payment.entity";
 
 const PaymentSchema: Schema<IPayment> = new Schema(
   {
@@ -10,7 +10,7 @@ const PaymentSchema: Schema<IPayment> = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     workerId: { type: Schema.Types.ObjectId, ref: "Worker", default: null, index: true },
     billType: { type: String, required: true, enum: Object.values(BILL_TYPE) },
-    referenceId: {
+    bookingId: {
       type: Schema.Types.ObjectId,
       index: true,
       required: true,

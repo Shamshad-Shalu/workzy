@@ -47,15 +47,6 @@ const TYPES = {
   HomeSectionRepository: Symbol.for("HomeSectionRepository"),
   HomeLayoutRepository: Symbol.for("HomeLayoutRepository"),
 
-  // plan /subcription
-  PlanController: Symbol.for("PlanController"),
-  PlanService: Symbol.for("PlanService"),
-  PlanRepository: Symbol.for("PlanRepository"),
-
-  SubscriptionController: Symbol.for("SubscriptionController"),
-  SubscriptionService: Symbol.for("SubscriptionService"),
-  SubscriptionRepository: Symbol.for("SubscriptionRepository"),
-
   PaymentController: Symbol.for("PaymentController"),
   PaymentRepository: Symbol.for("PaymentRepository"),
   PaymentService: Symbol.for("PaymentService"),

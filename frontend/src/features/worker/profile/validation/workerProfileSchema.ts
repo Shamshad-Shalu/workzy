@@ -2,7 +2,7 @@ import z from 'zod';
 
 import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
 
-import { availabilitySchema } from '../../validation/availabilitySchema';
+import { availabilitySchema } from './availabilitySchema';
 
 const geoLocationSchema = z.object({
   type: z.literal('Point'),

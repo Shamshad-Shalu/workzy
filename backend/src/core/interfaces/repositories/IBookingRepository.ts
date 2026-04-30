@@ -1,5 +1,5 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
-import { BookingListItem, BookingListQuery, IBooking } from "@/types/booking";
+import { BookingListItem, BookingListQuery, IBooking } from "@/types/booking/booking.entity";
 
 export interface IBookingRepository extends BaseRepository<IBooking> {
   getBookings(

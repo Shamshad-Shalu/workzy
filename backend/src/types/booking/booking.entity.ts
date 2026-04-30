@@ -2,9 +2,9 @@ import { Document, Types } from "mongoose";
 
 import { BookingPaymentStatus, BookingStatus, PricingMode, Role, ServiceType } from "@/constants";
 
-import { ICategory } from "./category";
-import { IService } from "./service";
-import { ILocation } from "./user/user.entity";
+import { ICategory } from "../category";
+import { IService } from "../service";
+import { ILocation } from "../user/user.entity";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";
 export type ListingStatus = BookingStatus | "all" | "upcoming";

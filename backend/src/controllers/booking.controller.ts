@@ -14,7 +14,7 @@ import {
   RejectBookingDTO,
   VerifyBookingOtpDTO,
 } from "@/dtos/requests/booking.dto";
-import { BookingListQuery, ListingStatus } from "@/types/booking";
+import { BookingListQuery, ListingStatus } from "@/types/booking/booking.entity";
 import CustomError from "@/utils/customError";
 
 @injectable()

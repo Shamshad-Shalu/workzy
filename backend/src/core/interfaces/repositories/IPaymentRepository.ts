@@ -1,5 +1,6 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
-import { IPayment, PaymentListQuery } from "@/types/payment";
+import { PaymentListQuery } from "@/types/payment/booking.query";
+import { IPayment } from "@/types/payment/payment.entity";
 
 export interface IPaymentRepository extends BaseRepository<IPayment> {
   getPayments(

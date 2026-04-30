@@ -21,14 +21,7 @@ const CategoryManagementPage = lazy(
 
 const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
 const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));
-
-const SubscriptionLayout = lazy(
-  () => import('@/features/admin/subcription/pages/SubscriptionLayout')
-);
 const AdminReviewsPage = lazy(() => import('@/features/admin/reviews/pages/AdminReviewsPage'));
-
-const SubscriptionPage = lazy(() => import('@/features/admin/subcription/pages/SubscriptionPage'));
-const PlanManagementPage = lazy(() => import('@/features/admin/subcription/pages/PlanManagement'));
 const AdminBookingPage = lazy(() => import('@/features/admin/booking/pages/AdminBookingPage'));
 const AdminPaymentsPage = lazy(() => import('@/features/admin/payments/pages/AdminPaymentsPage'));
 const AdminBookingDetailsPage = lazy(
@@ -54,11 +47,6 @@ export default function AdminRoutes() {
             <Route path="categories" element={<CategoryManagementPage />} />
             <Route path="bookings" element={<AdminBookingPage />} />
             <Route path="bookings/:bookingId" element={<AdminBookingDetailsPage />} />
-
-            <Route path="subscriptions" element={<SubscriptionLayout />}>
-              <Route index element={<PlanManagementPage />} />
-              <Route path="subscriptions" element={<SubscriptionPage />} />
-            </Route>
 
             <Route path="home" element={<HomePageLayout />}>
               <Route index element={<HomeLayoutPage />} />

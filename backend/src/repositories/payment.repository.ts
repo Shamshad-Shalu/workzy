@@ -4,7 +4,8 @@ import { FilterQuery, Types } from "mongoose";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import Payment from "@/models/payment.model";
-import { IPayment, PaymentListQuery } from "@/types/payment";
+import { PaymentListQuery } from "@/types/payment/booking.query";
+import { IPayment } from "@/types/payment/payment.entity";
 
 @injectable()
 export class PaymentRepository extends BaseRepository<IPayment> implements IPaymentRepository {

@@ -6,7 +6,7 @@ import { CATEGORY, HTTPSTATUS } from "@/constants";
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { TYPES } from "@/di/types";
-import { CategoryRequestDTO, CategoryUpdateRequestDTO } from "@/dtos/requests/category.dto";
+import { CategoryRequestDTO } from "@/dtos/requests/category.dto";
 
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
@@ -23,7 +23,7 @@ export class AdminCategoryController implements IAdminCategoryController {
 
   updateCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const categoryId = req.params.categoryId;
-    const updateData = req.body as CategoryUpdateRequestDTO;
+    const updateData = req.body;
 
     const category = await this._categoryManagement.updateCategory(categoryId, updateData);
     res.status(HTTPSTATUS.OK).json({ message: CATEGORY.UPDATED, category });

@@ -17,7 +17,7 @@ import {
 import { IPaymentController } from "@/core/interfaces/controllers/IPaymentController";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { TYPES } from "@/di/types";
-import { PaymentListQueryInput } from "@/types/payment";
+import { PaymentListQueryInput } from "@/types/payment/booking.query";
 import CustomError from "@/utils/customError";
 
 @injectable()

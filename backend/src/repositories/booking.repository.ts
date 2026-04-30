@@ -5,7 +5,7 @@ import { BOOKING_STATUS, BookingPaymentStatus, BookingStatus } from "@/constants
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
-import { BookingListItem, BookingListQuery, IBooking } from "@/types/booking";
+import { BookingListItem, BookingListQuery, IBooking } from "@/types/booking/booking.entity";
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {

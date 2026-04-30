@@ -1,6 +1,6 @@
 import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import { BookingListQuery } from "@/types/booking";
+import { BookingListQuery } from "@/types/booking/booking.entity";
 
 export interface IBookingService {
   getBookings(
