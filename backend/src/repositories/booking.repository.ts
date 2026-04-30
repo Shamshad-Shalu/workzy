@@ -1,19 +1,25 @@
 import dayjs from "dayjs";
 import { FilterQuery, Types } from "mongoose";
 
-import { BOOKING_STATUS, BookingPaymentStatus, BookingStatus } from "@/constants";
+import {
+  BOOKING_PAYMENT_STATUS,
+  BOOKING_STATUS,
+  BookingPaymentStatus,
+  BookingStatus,
+} from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
-import { BookingListItem, BookingListQuery, IBooking } from "@/types/booking/booking.entity";
+import { IBooking } from "@/types/booking/booking.entity";
+import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
+import { BookingListQuery } from "@/types/booking/booking.query";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
     super(Booking);
   }
-  async getBookings(
-    input: BookingListQuery
-  ): Promise<{ bookings: BookingListItem[]; nextCursor: string | null }> {
+  async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItem>> {
     const { status, search, paymentStatus, limit, userId, workerId, cursor, fromDate, toDate } =
       input;
 
@@ -35,8 +41,10 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     } else if (status && status !== "all") {
       query.status = status as BookingStatus;
     }
-    if (paymentStatus !== "all") {
+    if (paymentStatus && paymentStatus !== "all") {
       query.paymentStatus = paymentStatus as BookingPaymentStatus;
+    } else if (!paymentStatus) {
+      query.paymentStatus = { $ne: BOOKING_PAYMENT_STATUS.PENDING };
     }
     if (search) {
       andConditions.push({
@@ -75,6 +83,9 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .select(
         "bookingId dates duration snapshot address total completedAt itemCount status paymentStatus createdAt workerId userId serviceId categoryId hasVisibleReview reviewId completedAt userNote quoteId extraCharge"
       )
+      .populate("workerId", "profileImage")
+      .populate("userId", "profileImage")
+      .populate("categoryId", "iconUrl")
       .sort({ createdAt: -1, _id: -1 })
       .limit(limit + 1)
       .lean<BookingListItem[]>();
@@ -92,12 +103,12 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       ).toString("base64url");
     }
     return {
-      bookings: docs,
+      data: docs,
       nextCursor: nextCursor,
     };
   }
 
-  getExpiredBookings(): Promise<IBooking[]> {
+  async getExpiredBookings(): Promise<IBooking[]> {
     const cutoffDate = dayjs().subtract(1, "day").startOf("day").toDate();
     return this.model.find({
       status: BOOKING_STATUS.PENDING,
@@ -109,5 +120,13 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         },
       },
     });
+  }
+  async getBookingDetailById(bookingId: string): Promise<BookingDetails | null> {
+    return await this.model
+      .findById(bookingId)
+      .populate("workerId", "profileImage")
+      .populate("userId", "profileImage")
+      .populate("categoryId", "iconUrl")
+      .lean<BookingDetails>();
   }
 }

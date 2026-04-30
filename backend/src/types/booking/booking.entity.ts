@@ -7,7 +7,6 @@ import { IService } from "../service";
 import { ILocation } from "../user/user.entity";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";
-export type ListingStatus = BookingStatus | "all" | "upcoming";
 
 export interface IBookingLocation {
   label: string;
@@ -24,16 +23,13 @@ export interface IBookingSnapshot {
   user: {
     name: string;
     phone?: string;
-    profileImage?: string;
   };
   worker: {
     name: string;
     phone?: string;
-    profileImage?: string;
   };
   category: {
     name: string;
-    iconUrl: string;
     serviceType: ServiceType;
     pricingMode: PricingMode;
   };
@@ -110,36 +106,10 @@ export interface IBooking extends Document<string> {
   updatedAt: Date;
 }
 
-export type BookingListItem = Pick<
-  IBooking,
-  | "_id"
-  | "bookingId"
-  | "dates"
-  | "duration"
-  | "itemCount"
-  | "userNote"
-  | "hasVisibleReview"
-  | "reviewId"
-  | "snapshot"
-  | "address"
-  | "total"
-  | "status"
-  | "paymentStatus"
-  | "createdAt"
-  | "workerId"
-  | "categoryId"
-  | "serviceId"
-  | "userId"
-  | "quoteId"
-  | "completedAt"
-  | "extraCharge"
->;
-
 export interface BookingContext {
   worker: {
     name: string;
     phone?: string;
-    profileImage?: string;
   };
   service: IService;
   category: ICategory;
@@ -153,22 +123,3 @@ export interface BookingContext {
   travelCost: number;
   workerStripeId: string;
 }
-
-export interface Cursor {
-  createdAt: string;
-  _id: string;
-}
-
-export interface BookingListQuery {
-  status: ListingStatus;
-  paymentStatus: BookingPaymentStatus | "all";
-  userId?: string;
-  workerId?: string;
-  search?: string;
-  fromDate?: string;
-  toDate?: string;
-  limit: number;
-  cursor?: Cursor | null;
-}
-
-export type BookingDetails = Omit<IBooking, "otp">;

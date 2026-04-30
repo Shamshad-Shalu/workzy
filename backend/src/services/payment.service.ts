@@ -29,8 +29,8 @@ import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
-import { PaymentListQuery, PaymentListQueryInput } from "@/types/payment/booking.query";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
+import { PaymentListQuery, PaymentListQueryInput } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -186,7 +186,7 @@ export class PaymentService implements IPaymentService {
 
   async releaseBookingPayment(booking: IBooking): Promise<void> {
     const payment = await this._paymentRepo.findOne({
-      referenceId: new Types.ObjectId(booking._id.toString()),
+      bookingId: new Types.ObjectId(booking._id.toString()),
       billType: BILL_TYPE.BOOKING,
       status: PAYMENT_STATUS.SUCCEEDED,
     });

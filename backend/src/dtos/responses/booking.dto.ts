@@ -1,20 +1,14 @@
-import {
-  BookingPaymentStatus,
-  BookingStatus,
-  DEFAULT_IMAGE_URL,
-  PricingMode,
-  ServiceType,
-} from "@/constants";
+import { BookingPaymentStatus, BookingStatus, PricingMode, ServiceType } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import {
-  BookingDetails,
-  BookingListItem,
   ExtraChargeStatus,
   IBookingLocation,
   IBookingStatusHistory,
   IEvidence,
   IExtraCharge,
 } from "@/types/booking/booking.entity";
+import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
+import { resolveS3Image } from "@/utils/s3.utils";
 
 export class BookingListItemDTO {
   id!: string;
@@ -25,14 +19,13 @@ export class BookingListItemDTO {
     id: string;
     name: string;
     phone: string;
-    profileImage: string;
+    profileImage?: string;
   };
   worker!: {
     id: string;
     name: string;
     phone: string;
-    profileImage: string;
-    rating: number;
+    profileImage?: string;
   };
   category!: {
     id: string;
@@ -74,10 +67,6 @@ export class BookingListItemDTO {
     const dates = entity.dates || [];
     const first = dates[0];
     const last = dates[dates.length - 1];
-    const resolveImage = async (path?: string) =>
-      path?.includes("private/user/profiles")
-        ? ((await s3Service.generateSignedUrl(path)) ?? DEFAULT_IMAGE_URL)
-        : (path ?? DEFAULT_IMAGE_URL);
     const extraCharge = entity.extraCharge;
 
     dto.id = entity._id.toString();
@@ -88,17 +77,17 @@ export class BookingListItemDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveImage(user.profileImage),
+      profileImage: await resolveS3Image(entity.userId.profileImage, s3Service),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
       name: worker.name,
       phone: worker.phone || "",
-      profileImage: await resolveImage(worker.profileImage),
-      rating: worker.rating,
+      profileImage: entity.workerId.profileImage,
     };
     dto.category = {
       id: entity.categoryId._id.toString(),
+      iconUrl: entity.categoryId.iconUrl,
       ...category,
     };
     dto.addressLabel = entity.address.label;
@@ -140,14 +129,13 @@ export class BookingResponseDTO {
     id: string;
     name: string;
     phone: string;
-    profileImage: string;
+    profileImage?: string;
   };
   worker!: {
     id: string;
     name: string;
     phone: string;
-    profileImage: string;
-    rating: number;
+    profileImage?: string;
   };
   category!: {
     id: string;
@@ -203,11 +191,6 @@ export class BookingResponseDTO {
     const first = dates[0];
     const last = dates[dates.length - 1];
 
-    const resolveImage = async (path?: string) =>
-      path?.includes("private/user/profiles")
-        ? ((await s3Service.generateSignedUrl(path)) ?? DEFAULT_IMAGE_URL)
-        : (path ?? DEFAULT_IMAGE_URL);
-
     dto.id = entity._id.toString();
     dto.bookingId = entity.bookingId;
     dto.serviceId = entity.serviceId._id.toString();
@@ -215,17 +198,17 @@ export class BookingResponseDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveImage(user.profileImage),
+      profileImage: await resolveS3Image(entity.userId.profileImage, s3Service),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
       name: worker.name,
       phone: worker.phone || "",
-      profileImage: await resolveImage(worker.profileImage),
-      rating: worker.rating,
+      profileImage: entity.workerId.profileImage,
     };
     dto.category = {
       id: entity.categoryId._id.toString(),
+      iconUrl: entity.categoryId.iconUrl,
       ...category,
     };
     dto.dates = entity.dates || [];

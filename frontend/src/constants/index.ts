@@ -6,6 +6,5 @@ export * from './service';
 export * from './home';
 export * from './apiRoutes/index';
 export * from './upload';
-export * from './plan';
 export * from './booking';
 export * from './worker';

@@ -14,7 +14,7 @@ import {
   RejectBookingDTO,
   VerifyBookingOtpDTO,
 } from "@/dtos/requests/booking.dto";
-import { BookingListQuery, ListingStatus } from "@/types/booking/booking.entity";
+import { BookingListQuery, ListingStatus } from "@/types/booking/booking.query";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -31,27 +31,28 @@ export class BookingController implements IBookingController {
     const query = this.parseQuery(req);
     const userId = req.query.userId as string | undefined;
     const workerId = req.query.workerId as string | undefined;
-    console.log("query:", query);
-    const result = await this._bookingService.getBookings({
+    const paymentStatus = (req.query.paymentStatus as BookingPaymentStatus) || "all";
+    const { data, nextCursor } = await this._bookingService.getBookings({
       ...query,
+      paymentStatus,
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ bookings: result.bookings, nextCursor: result.nextCursor });
+    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
   });
 
   getUserBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
-    const result = await this._bookingService.getBookings({ userId, ...query });
-    res.status(HTTPSTATUS.OK).json({ bookings: result.bookings, nextCursor: result.nextCursor });
+    const { data, nextCursor } = await this._bookingService.getBookings({ userId, ...query });
+    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
   });
 
   getWorkerBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
-    const result = await this._bookingService.getBookings({ workerId, ...query });
-    res.status(HTTPSTATUS.OK).json({ bookings: result.bookings, nextCursor: result.nextCursor });
+    const { data, nextCursor } = await this._bookingService.getBookings({ workerId, ...query });
+    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
   });
 
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -83,11 +84,13 @@ export class BookingController implements IBookingController {
     await this._bookingService.rejectBooking({ bookingId, reason, workerId });
     res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.REJECTED });
   });
+
   markEnRoute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     await this._bookingService.markEnRoute(req.params.bookingId, workerId);
     res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.EN_ROUTE });
   });
+
   markReached = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     await this._bookingService.markReached(req.params.bookingId, workerId);
@@ -147,7 +150,6 @@ export class BookingController implements IBookingController {
     const search = (req.query.search as string) ?? "";
     const status = (req.query.status as ListingStatus) ?? ("all" as ListingStatus);
 
-    const paymentStatus = (req.query.paymentStatus as BookingPaymentStatus) || "all";
     const fromDate = req.query.fromDate as string | undefined;
     const toDate = req.query.toDate as string | undefined;
     const parsedCursor = req.query.cursor
@@ -157,7 +159,6 @@ export class BookingController implements IBookingController {
     return {
       limit,
       status,
-      paymentStatus,
       search,
       cursor: parsedCursor,
       fromDate,

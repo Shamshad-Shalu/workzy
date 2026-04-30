@@ -1,11 +1,10 @@
 import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import { BookingListQuery } from "@/types/booking/booking.entity";
+import { BookingListQuery } from "@/types/booking/booking.query";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 
 export interface IBookingService {
-  getBookings(
-    input: BookingListQuery
-  ): Promise<{ bookings: BookingListItemDTO[]; nextCursor: string | null }>;
+  getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>>;
   getBookingDetails(bookingId: string): Promise<BookingResponseDTO>;
 
   createBooking(userId: string, data: CreatebookingDTO): Promise<{ url: string }>;

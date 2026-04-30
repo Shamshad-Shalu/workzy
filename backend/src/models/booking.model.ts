@@ -120,16 +120,13 @@ const BookingSnapshotSchema = new Schema<IBookingSnapshot>(
     user: {
       name: { type: String, required: true },
       phone: String,
-      profileImage: String,
     },
     worker: {
       name: { type: String, required: true },
       phone: String,
-      profileImage: String,
     },
     category: {
       name: { type: String, required: true },
-      iconUrl: String,
     },
   },
   { _id: false }

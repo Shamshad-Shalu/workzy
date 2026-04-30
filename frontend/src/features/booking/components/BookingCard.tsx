@@ -17,6 +17,7 @@ import {
 import { Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
+import ProfileImage from '@/components/molecules/ProfileImage';
 import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
 import { cn } from '@/lib/utils';
@@ -56,21 +57,6 @@ export function StatusBadge({ status }: { status: BookingStatus }) {
     </span>
   );
 }
-
-const ProfileImage = ({ src, size = 40, name }: { src?: string; size?: number; name: string }) => (
-  <div
-    className="rounded-xl bg-muted overflow-hidden flex-shrink-0 flex items-center justify-center"
-    style={{ width: size, height: size }}
-  >
-    {src ? (
-      <img src={src} alt={name} className="w-full h-full object-cover" />
-    ) : (
-      <span className="text-sm font-bold text-muted-foreground">
-        {name?.[0]?.toUpperCase() ?? '?'}
-      </span>
-    )}
-  </div>
-);
 
 interface Props {
   booking: BookingListItem;
@@ -250,16 +236,6 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                 Details
               </Button>
             </Link>
-            {/* {b.status === BOOKING_STATUS.CONFIRMED && (
-              <Button
-                variant="blue"
-                size="sm"
-                iconLeft={<Phone size={12} />}
-                onClick={() => handlers?.onEvide?.(b.id)}
-              >
-                Evidence
-              </Button>
-            )} */}
             {role === ROLE.USER && (
               <>
                 {(b.status === BOOKING_STATUS.PENDING || b.status === BOOKING_STATUS.CONFIRMED) && (
@@ -288,7 +264,6 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     size="sm"
                     iconLeft={<CheckCircle size={12} />}
                     onClick={() => {
-                      console.log('hello');
                       handlers?.onReview?.({ id: b.id, reviewId: b.reviewId });
                     }}
                   >

@@ -23,6 +23,7 @@ import {
   STRIPE_ACCOUNT_STATUS,
   USER,
   WORKER,
+  WORKER_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -38,13 +39,9 @@ import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import {
-  BookingContext,
-  BookingListQuery,
-  IBooking,
-  IEvidence,
-  IExtraCharge,
-} from "@/types/booking/booking.entity";
+import { BookingContext, IBooking, IEvidence, IExtraCharge } from "@/types/booking/booking.entity";
+import { BookingListQuery } from "@/types/booking/booking.query";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 import { BulkDiscountType } from "@/types/service";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -66,18 +63,16 @@ export class BookingService implements IBookingService {
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
-  async getBookings(
-    input: BookingListQuery
-  ): Promise<{ bookings: BookingListItemDTO[]; nextCursor: string | null }> {
-    const { bookings, nextCursor } = await this._bookingRepository.getBookings(input);
+  async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
+    const { data, nextCursor } = await this._bookingRepository.getBookings(input);
     return {
-      bookings: await BookingListItemDTO.fromEntities(bookings, this._s3Service),
+      data: await BookingListItemDTO.fromEntities(data, this._s3Service),
       nextCursor,
     };
   }
 
   async getBookingDetails(bookingId: string): Promise<BookingResponseDTO> {
-    const booking = await this._bookingRepository.findById(bookingId);
+    const booking = await this._bookingRepository.getBookingDetailById(bookingId);
     if (!booking) {
       throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
@@ -146,12 +141,10 @@ export class BookingService implements IBookingService {
         user: {
           name: user.name,
           phone: user.phone,
-          profileImage: user.profileImage,
         },
         worker,
         category: {
           name: category.name,
-          iconUrl: category.iconUrl,
           pricingMode: category.pricingMode ?? PRICING_MODE.PER_UNIT,
           serviceType: category.serviceType ?? SERVICE_TYPE.SMALL_TASK,
         },
@@ -570,18 +563,12 @@ export class BookingService implements IBookingService {
     if (!service) {
       throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    if (!worker || worker.status !== "verified") {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    if (!worker || worker.status !== WORKER_STATUS.VERIFIED) {
+      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
     }
-    const [category, user] = await Promise.all([
-      this._categoryRepository.findById(service.categoryId),
-      this._userRepository.findById(worker.userId),
-    ]);
+    const category = await this._categoryRepository.findById(service.categoryId);
     if (!category) {
       throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (!user || user.isBlocked) {
-      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
     }
     const workerStripeId = worker.stripeAccountId;
     if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
@@ -607,8 +594,7 @@ export class BookingService implements IBookingService {
     return {
       worker: {
         name: worker.displayName,
-        phone: user.phone,
-        profileImage: user.profileImage,
+        phone: worker.phone,
       },
       service,
       category,

@@ -16,11 +16,14 @@ export interface IPayment extends Document<string> {
   currency: string; // "inr" | "aed" | "usd"
   status: PaymentStatus;
   provider: PaymentProvider;
+
   paymentIntentId?: string;
   sessionId?: string;
   failureReason?: string;
+
   userName?: string;
   workerName?: string;
+
   createdAt: Date;
   updatedAt: Date;
 }

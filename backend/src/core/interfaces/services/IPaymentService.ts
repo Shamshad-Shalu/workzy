@@ -2,8 +2,8 @@ import Stripe from "stripe";
 
 import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
-import { PaymentListQueryInput } from "@/types/payment/booking.query";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
+import { PaymentListQueryInput } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 
 export interface IPaymentService {
