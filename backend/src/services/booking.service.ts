@@ -607,7 +607,6 @@ export class BookingService implements IBookingService {
     return {
       worker: {
         name: worker.displayName,
-        rating: worker.averageRating,
         phone: user.phone,
         profileImage: user.profileImage,
       },

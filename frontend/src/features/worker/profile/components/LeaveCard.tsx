@@ -6,7 +6,7 @@ import Button from '@/components/atoms/Button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { Leave } from '@/types/leave';
-import { formatDateRangeDuration, formatSmartDate } from '@/utils/time.format';
+import { formatDateRangeDuration, formatDate } from '@/utils/time.format';
 
 function getLeaveStatus(leave: Leave): 'active' | 'upcoming' | 'past' {
   const now = dayjs();
@@ -57,11 +57,11 @@ export function LeaveCard({ leave, onCancel }: { leave: Leave; onCancel: (id: st
 
         <div className="min-w-0">
           <p className="text-sm font-medium text-foreground truncate">
-            {formatSmartDate(leave.startDate)}
+            {formatDate(leave.startDate)}
             {!isSameDay && (
               <span className="text-muted-foreground font-normal">
                 {' → '}
-                {formatSmartDate(leave.endDate)}
+                {formatDate(leave.endDate)}
               </span>
             )}
           </p>

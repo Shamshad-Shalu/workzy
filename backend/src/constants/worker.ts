@@ -3,6 +3,7 @@ export const WORKER_STATUS = {
   VERIFIED: "verified",
   REJECTED: "rejected",
   NEEDS_REVISION: "needs_revision",
+  SUSPENDED: "suspended",
 } as const;
 export type WorkerStatus = (typeof WORKER_STATUS)[keyof typeof WORKER_STATUS];
 

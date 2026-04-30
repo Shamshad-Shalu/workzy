@@ -5,7 +5,7 @@ import { useMemo, useState } from 'react';
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
 import { BOOKING_STEPS, PRICING_MODE, type BookingStep } from '@/constants';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 
 import { useBooking } from '../../hooks/useBooking';
 import CountStep from '../bookingForm/CountStep';
@@ -24,11 +24,10 @@ const slideVariants = {
 interface BookingModalProps {
   open: boolean;
   onClose: () => void;
-  worker: WorkerListingInfo;
+  worker: PublicWorkerListItem;
 }
 
 export default function BookingModal({ open, onClose, worker }: BookingModalProps) {
-  console.log('worker::', worker);
   const isPerUnit = worker.PricingMode === PRICING_MODE.PER_UNIT;
   const [stepIndex, setStepIndex] = useState(0);
   const [direction, setDirection] = useState(1);

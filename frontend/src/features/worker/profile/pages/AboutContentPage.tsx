@@ -1,25 +1,20 @@
-import { Mail, Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { toast } from 'sonner';
-import z from 'zod';
 
-import AccountChangeActions from '@/features/profile/components/AccountChangeActions';
-import ProfileInfoCard from '@/features/profile/components/ProfileInfoCard';
-import { useProfile } from '@/features/profile/hooks/useProfile';
-import ChangeFieldModal from '@/features/profile/modals/ChangeFieldModal';
-import ChangePasswordModal from '@/features/profile/modals/ChangePasswordModal';
-import OtpModal from '@/features/profile/modals/OtpModal';
-import { emailRule, phoneRule } from '@/lib/validation/rules';
+import ContactChangeModal from '@/features/profile/modals/ContactChangeModal';
 import PageError from '@/pages/PageError';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { updateUser } from '@/store/slices/authSlice';
+import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import { handleApiError } from '@/utils/handleApiError';
 
-import WorkerSection from '../components/WorkerSection';
-import WorkerSectionSkeleton from '../components/WorkerSectionSkeleton';
-import { useWorkerProfile } from '../hooks/useWorkerProfile';
+import WorkeAboutSkeleton from '../components/WorkeAboutSkeleton';
+import WorkerProfileSection from '../components/WorkerProfileSection';
+import {
+  useUpdateWorkerProfile,
+  useWorkerPhoneChange,
+  useWorkerProfileDetails,
+} from '../hooks/useWorkerProfile';
 
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
 
@@ -28,122 +23,49 @@ type OutletContext = {
 };
 
 export default function WorkeAboutContentPage() {
-  const [openEmail, setOpenEmail] = useState(false);
-  const [openPhone, setOpenPhone] = useState(false);
-  const [openPass, setOpenPass] = useState(false);
-  const [openOtpModal, setOpenOtpModal] = useState(false);
-  const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
-
-  const { user } = useAppSelector((s: RootState) => s.auth);
   const { reloadWorkerData } = useOutletContext<OutletContext>();
-  const { changeEmail, changePhone, loading, updateBasic, getUserProfilePage } = useProfile();
-  const { workerProfileQueries, updateMutation } = useWorkerProfile();
-  const dispatch = useAppDispatch();
-  const { data: workerInfo, isLoading: isWorkerLoading, error: workerError } = workerProfileQueries;
+  const [phoneModalOpen, setPhoneModalOpen] = useState(false);
+  const { user } = useAppSelector((s: RootState) => s.auth);
+  const { data: workerData, isLoading, isError, refetch } = useWorkerProfileDetails();
+  const { updateProfile } = useUpdateWorkerProfile();
+  const { changePhone, isChangePhone } = useWorkerPhoneChange();
 
-  useEffect(() => {
-    async function loadProfile() {
-      const [userInfo] = await Promise.all([getUserProfilePage()]);
-      if (userInfo) {
-        dispatch(updateUser(userInfo));
-      }
-    }
-    loadProfile();
-  }, []);
-
-  if (!user) {
-    return null;
-  }
-  function handleOtpRequest(type: 'email' | 'phone', value: string) {
-    setOtpData({ type, value });
-    setOpenOtpModal(true);
-  }
-
-  async function handleWorkerProfileSubmit(data: WorkerProfileSchemaType) {
+  const handleWorkerProfileSubmit = async (data: WorkerProfileSchemaType): Promise<string> => {
     try {
-      const { message } = await updateMutation.mutateAsync(data);
-      reloadWorkerData();
-      toast.success(message);
+      const { message } = await updateProfile(data);
+      await reloadWorkerData();
+      return message;
     } catch (error) {
       toast.error(handleApiError(error));
+      return '';
     }
-  }
+  };
+  const handlePhoneChange = async (phone: string) => {
+    const { message } = await changePhone(phone);
+    toast.success(message);
+  };
 
   return (
     <div>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
-        <div className="lg:col-span-2">
-          <ProfileInfoCard
-            user={user}
-            onSave={async payload => {
-              const res = await updateBasic(payload);
-              toast.success(res?.message);
-              if (res?.user) {
-                dispatch(updateUser(res?.user));
-              }
-            }}
-          />
-        </div>
-        {/* Right Sidebar */}
-        <div className="lg:col-span-1 space-y-6">
-          <div className="bg-card rounded-2xl shadow-sm p-6 sticky top-6">
-            <h3 className="text-lg font-bold text-primary mb-4">Account Settings</h3>
-            <AccountChangeActions
-              onChangeEmail={() => setOpenEmail(true)}
-              onChangePhone={() => setOpenPhone(true)}
-              onChangePassword={() => setOpenPass(true)}
-            />
-          </div>
-        </div>
-      </div>
-
-      {isWorkerLoading ? (
-        <WorkerSectionSkeleton />
-      ) : workerError || !workerInfo ? (
-        <PageError fullScreen={false} onRetry={() => workerProfileQueries.refetch()} />
+      {isLoading ? (
+        <WorkeAboutSkeleton />
+      ) : isError || !workerData ? (
+        <PageError fullScreen={false} onRetry={() => refetch()} />
       ) : (
-        <WorkerSection workerData={workerInfo} onSubmit={handleWorkerProfileSubmit} />
+        <WorkerProfileSection
+          workerData={workerData}
+          onSubmit={handleWorkerProfileSubmit}
+          onChangePhone={() => setPhoneModalOpen(true)}
+        />
       )}
-
-      {/* email  */}
-      <ChangeFieldModal
-        open={openEmail}
-        onOpenChange={setOpenEmail}
-        title="Change Email"
-        label="New Email"
-        loading={loading}
-        schema={z.object({ value: emailRule })}
-        leftIcon={<Mail size={18} />}
-        description="We'll send a verification code to your new email address."
-        placeholder="Enter new email"
-        initialValue={user.email}
-        onSubmit={async email => {
-          const res = await changeEmail(email);
-          console.log('res', res);
-          toast.success(res.message);
-          handleOtpRequest('email', email);
-        }}
+      <ContactChangeModal
+        currentValue={workerData?.phone ?? ''}
+        open={phoneModalOpen}
+        onClose={() => setPhoneModalOpen(false)}
+        userEmail={user?.email ?? ''}
+        onConfirm={handlePhoneChange}
+        isPending={isChangePhone}
       />
-
-      <ChangeFieldModal
-        open={openPhone}
-        onOpenChange={setOpenPhone}
-        title="Change Phone"
-        label="New Phone Number"
-        leftIcon={<Phone size={18} />}
-        description="We'll send a verification code to your email address." //WhatsApp number
-        placeholder="Enter phone number"
-        loading={loading}
-        schema={z.object({ value: phoneRule })}
-        initialValue={String(user.phone)}
-        onSubmit={async phone => {
-          const res = await changePhone(phone);
-          toast.success(res.message);
-          handleOtpRequest('phone', phone);
-        }}
-      />
-      <ChangePasswordModal open={openPass} onOpenChange={setOpenPass} />
-      <OtpModal open={openOtpModal} onOpenChange={setOpenOtpModal} otpData={otpData} />
     </div>
   );
 }

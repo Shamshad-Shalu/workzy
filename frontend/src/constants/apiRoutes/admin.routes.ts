@@ -13,8 +13,9 @@ export const ADMIN_API = {
     CATEGORY_STATUS: (id: string) => admin(`/categories/toggle-status/${id}`),
   },
   WORKER: {
-    WORKERS: admin(`/workers/all`),
+    WORKERS: admin(`/workers`),
     WORKER_VERIFICATION: (id: string) => admin(`/workers/verify/${id}`),
+    STATUS_CHANGE: (id: string) => admin(`/workers/status/${id}`),
   },
   BOOKING: {
     ROOT: admin('/booking/'),

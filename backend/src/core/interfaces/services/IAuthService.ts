@@ -1,12 +1,12 @@
 import { Role } from "@/constants";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { LoginResponseDTO, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
-import { IUser } from "@/types/user";
+import { LoginResponseDto, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
+import { IUser } from "@/types/user/user.entity";
 
 export interface IAuthService {
   findUserByEmail(email: string): Promise<boolean>;
   register(registerDto: RegisterRequestDTO): Promise<RegisterResponseDTO>;
-  login(loginDto: LoginRequestDTO): Promise<LoginResponseDTO>;
+  login(loginDto: LoginRequestDTO): Promise<LoginResponseDto>;
   isUserBlocked(userId: string): Promise<boolean>;
   getUserByRoleAndId(role: Role, id: string): Promise<IUser | null>;
   updatePassword(email: string, newPassword: string): Promise<void>;
@@ -15,5 +15,5 @@ export interface IAuthService {
     email: string;
     name: string;
     profile: string;
-  }): Promise<LoginResponseDTO>;
+  }): Promise<LoginResponseDto>;
 }

@@ -4,7 +4,7 @@ import { BookingPaymentStatus, BookingStatus, PricingMode, Role, ServiceType } f
 
 import { ICategory } from "./category";
 import { IService } from "./service";
-import { ILocation } from "./user";
+import { ILocation } from "./user/user.entity";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";
 export type ListingStatus = BookingStatus | "all" | "upcoming";
@@ -30,7 +30,6 @@ export interface IBookingSnapshot {
     name: string;
     phone?: string;
     profileImage?: string;
-    rating: number;
   };
   category: {
     name: string;
@@ -141,7 +140,6 @@ export interface BookingContext {
     name: string;
     phone?: string;
     profileImage?: string;
-    rating: number;
   };
   service: IService;
   category: ICategory;

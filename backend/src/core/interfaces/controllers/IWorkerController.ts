@@ -1,13 +1,17 @@
 import { RequestHandler } from "express";
 
 export interface IWorkerController {
-  createWorkerProfile: RequestHandler;
-  getWorkerSummary: RequestHandler;
+  listPublicWorkers: RequestHandler;
   getWorkerProfile: RequestHandler;
+  getWorkerProfileDetails: RequestHandler;
+
   updateWorkerProfile: RequestHandler;
-  getMe: RequestHandler;
+  updateWorkerPhone: RequestHandler;
+  updateProfileImage: RequestHandler;
+
+  createWorkerProfile: RequestHandler;
   reSubmitWorkerDocument: RequestHandler;
-  listWorkers: RequestHandler;
   connectStripe: RequestHandler;
   getStripeStatus: RequestHandler;
+  // getWorkerAbout
 }

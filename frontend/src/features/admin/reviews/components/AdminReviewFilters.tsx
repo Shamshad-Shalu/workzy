@@ -105,7 +105,7 @@ export function AdminReviewFilters({
             onClick={() => updateParams({ status: v })}
             className={cn(
               'flex-1 rounded-md border py-1 text-xs',
-              status === v ? 'bg-primary text-white' : 'hover:bg-accent'
+              status === v ? 'bg-primary text-primary-foreground' : 'hover:bg-accent'
             )}
           >
             {v}

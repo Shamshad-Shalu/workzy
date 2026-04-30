@@ -10,8 +10,8 @@ import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { LoginResponseDTO, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
-import { IUser } from "@/types/user";
+import { LoginResponseDto, RegisterResponseDTO } from "@/dtos/responses/auth.dto";
+import { IUser } from "@/types/user/user.entity";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -46,14 +46,13 @@ export class AuthService implements IAuthService {
     return userData;
   }
 
-  async login(data: LoginRequestDTO): Promise<LoginResponseDTO> {
+  async login(data: LoginRequestDTO): Promise<LoginResponseDto> {
     const { email, password } = data;
 
     const user = await this._userRepository.findByEmail(email);
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);
@@ -64,12 +63,16 @@ export class AuthService implements IAuthService {
     if (user.role === ROLE.WORKER) {
       const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
-        const workerId = worker as { _id: string };
-        userObj.workerId = workerId._id.toString();
+        const { _id, displayName, profileImage } = worker;
+        userObj.worker = {
+          _id: _id.toString(),
+          displayName,
+          profileImage,
+        };
       }
     }
 
-    return await LoginResponseDTO.fromEntity(userObj, this._s3Service);
+    return await LoginResponseDto.fromEntity(userObj, this._s3Service);
   }
 
   async isUserBlocked(userId: string): Promise<boolean> {
@@ -99,7 +102,7 @@ export class AuthService implements IAuthService {
     email: string;
     name: string;
     profile: string;
-  }): Promise<LoginResponseDTO> {
+  }): Promise<LoginResponseDto> {
     let user = await this._userRepository.findByGoogleId(googleData.googleId);
 
     if (!user) {
@@ -120,9 +123,14 @@ export class AuthService implements IAuthService {
     if (user.role === ROLE.WORKER) {
       const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
-        userObj.workerId = worker._id.toString();
+        const { _id, displayName, profileImage } = worker;
+        userObj.worker = {
+          _id: _id.toString(),
+          displayName,
+          profileImage,
+        };
       }
     }
-    return await LoginResponseDTO.fromEntity(userObj, this._s3Service);
+    return await LoginResponseDto.fromEntity(userObj, this._s3Service);
   }
 }

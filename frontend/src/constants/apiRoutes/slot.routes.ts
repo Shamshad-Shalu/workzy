@@ -6,5 +6,5 @@ export const SLOT_API = {
   ROOT: slot(`/`),
   BY_ID: (id: string) => slot(`/${id}`),
   REVERSE: slot(`/reserve`),
-  DATES: slot(`/dates`),
+  DATES: slot(`/available-dates`),
 } as const;

@@ -1,9 +1,57 @@
 import mongoose, { Schema } from "mongoose";
 
 import { STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
-import { IAvailabilitySlots, IDocument, IWorker } from "@/types/worker";
+import {
+  IAvailabilitySlots,
+  IDocument,
+  IGeoLocation,
+  IJobStats,
+  IReviewStats,
+  IWorker,
+} from "@/types/worker/worker.entity";
 
-import { LocationSchema } from "./user.model";
+const LocationSchema = new Schema<IGeoLocation>(
+  {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      required: true, // [lng , lat]
+      validate: {
+        validator: (v: number[]) => v.length === 2,
+        message: "Coordinates must be [lng, lat]",
+      },
+    },
+    addressLabel: { type: String, default: "" },
+  },
+  { _id: false }
+);
+
+const CurrentLocationSchema = new Schema(
+  {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      validate: {
+        validator: (v: number[]) => v.length === 2,
+        message: "Coordinates must be [lng, lat]",
+      },
+    },
+    lastUpdated: {
+      type: Date,
+      default: Date.now,
+    },
+  },
+  { _id: false }
+);
 
 const AvailabilitySchema = new Schema<IAvailabilitySlots>(
   {
@@ -22,9 +70,40 @@ const DocumentSchema = new Schema<IDocument>({
   name: { type: String },
   type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
   url: { type: String, required: true },
-  status: { type: String, enum: ["pending", "verified", "rejected"], default: "pending" },
+  status: {
+    type: String,
+    enum: ["pending", "in_review", "verified", "rejected"],
+    default: "pending",
+  },
   rejectReason: { type: String },
+  verifiedAt: { type: Date },
 });
+
+const JobStatsSchema = new Schema<IJobStats>(
+  {
+    offered: { type: Number, default: 0 },
+    accepted: { type: Number, default: 0 },
+    completed: { type: Number, default: 0 },
+    noResponse: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
+
+const ReviewStatsSchema = new Schema<IReviewStats>(
+  {
+    averageRating: { type: Number, default: 0 },
+    totalRating: { type: Number, default: 0 },
+    reviewCount: { type: Number, default: 0 },
+    breakdown: {
+      "1": { type: Number, default: 0 },
+      "2": { type: Number, default: 0 },
+      "3": { type: Number, default: 0 },
+      "4": { type: Number, default: 0 },
+      "5": { type: Number, default: 0 },
+    },
+  },
+  { _id: false }
+);
 
 const workerSchema: Schema = new Schema<IWorker>(
   {
@@ -39,7 +118,16 @@ const workerSchema: Schema = new Schema<IWorker>(
       required: true,
     },
     tagline: { type: String },
+    phone: {
+      type: String,
+      required: true,
+      trim: true,
+    },
     about: { type: String },
+    profileImage: {
+      type: String,
+      default: "",
+    },
     status: {
       type: String,
       enum: Object.values(WORKER_STATUS),
@@ -47,26 +135,14 @@ const workerSchema: Schema = new Schema<IWorker>(
     },
     coverImage: {
       type: String,
-      default: null,
-    },
-    defaultRate: {
-      type: Number,
     },
     experience: {
       type: Number,
       default: 0,
     },
-    skills: {
-      type: [String],
-      default: [],
-    },
-    cities: {
-      type: [String],
-      default: [],
-    },
     availability: {
       type: AvailabilitySchema,
-      default: {
+      default: () => ({
         monday: [],
         tuesday: [],
         wednesday: [],
@@ -74,57 +150,27 @@ const workerSchema: Schema = new Schema<IWorker>(
         friday: [],
         saturday: [],
         sunday: [],
-      },
+      }),
     },
     documents: {
       type: [DocumentSchema],
       default: [],
     },
-    isPremium: {
-      type: Boolean,
-      default: false,
+    jobStats: {
+      type: JobStatsSchema,
+      default: () => ({}),
     },
-    jobsOffered: {
-      type: Number,
-      default: 0,
+    reviewStats: {
+      type: ReviewStatsSchema,
+      default: () => ({}),
     },
-    noResponses: {
-      type: Number,
-      default: 0,
-    },
-    jobsAccepted: {
-      type: Number,
-      default: 0,
-    },
-    jobsCompleted: {
-      type: Number,
-      default: 0,
-    },
-    averageRating: {
-      type: Number,
-      default: 0,
-    },
-    totalRating: {
-      type: Number,
-      default: 0,
-    },
-    reviewCount: {
-      type: Number,
-      default: 0,
-    },
-    ratingBreakdown: {
-      "1": { type: Number, default: 0 },
-      "2": { type: Number, default: 0 },
-      "3": { type: Number, default: 0 },
-      "4": { type: Number, default: 0 },
-      "5": { type: Number, default: 0 },
-    },
-
     rejectReason: { type: String },
+    suspensionReason: { type: String },
     location: {
       type: LocationSchema,
       required: true,
     },
+    currentLocation: CurrentLocationSchema,
     stripeAccountId: { type: String },
     stripeAccountStatus: {
       type: String,
@@ -137,6 +183,6 @@ const workerSchema: Schema = new Schema<IWorker>(
 
 workerSchema.index({ displayName: "text" });
 workerSchema.index({ location: "2dsphere" });
-
+workerSchema.index({ status: 1, stripeAccountStatus: 1 });
 const Worker = mongoose.model<IWorker>("Worker", workerSchema);
 export default Worker;

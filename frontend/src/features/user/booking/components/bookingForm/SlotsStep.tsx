@@ -8,7 +8,7 @@ import ErrorState from '@/components/molecules/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAvailableSlots } from '@/features/user/slot/hooks/useSlot';
 import type { AvailableSlot, BookingState } from '@/types/slot';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 import { formatDuration, formatDate, formatTime12 } from '@/utils/time.format';
 
 export default function SlotsStep({
@@ -18,14 +18,14 @@ export default function SlotsStep({
   lat,
   lng,
 }: {
-  worker: WorkerListingInfo;
+  worker: PublicWorkerListItem;
   booking: BookingState;
   onSelectSlot: (slot: AvailableSlot) => void | Promise<void>;
   lat?: number;
   lng?: number;
 }) {
   const { data, isLoading, error, refetch } = useAvailableSlots({
-    workerId: worker.workerId,
+    workerId: worker.id,
     serviceId: worker.serviceId,
     date: booking.date,
     itemCount: booking.itemCount,
@@ -118,12 +118,6 @@ export default function SlotsStep({
                         }`}
                       >
                         <span>{formatTime12(slot.startTime)}</span>
-
-                        {/* {slot.travelFromPrev > 0 && (
-                          <span className="text-[9px] text-amber-500">
-                            +{slot.travelFromPrev}m
-                          </span>
-                        )} */}
                       </motion.button>
                     );
                   })}

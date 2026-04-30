@@ -16,7 +16,7 @@ import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
 import { ICategory } from "@/types/category";
 import { IService } from "@/types/service";
 import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO, ISlot } from "@/types/slot";
-import { Day, IWorker } from "@/types/worker";
+import { Day, IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { calculateDistanceKm } from "@/utils/geo";
 import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
@@ -46,8 +46,6 @@ export class SlotService implements ISlotService {
       this._slotRepository.getOccupiedSlots(workerId, today.toDate(), rangeEnd.toDate()),
       this._leaveRepository.getActiveLeaves(workerId, today.toDate(), rangeEnd.toDate()),
     ]);
-    console.log("Occupied:", allOccupied.length);
-    console.log("Leaves:", leaves.length);
 
     const duration = this.resolveDuration(service, category, itemCount);
     const allowSudden = service.allowSuddenBooking ?? false;
@@ -176,15 +174,17 @@ export class SlotService implements ISlotService {
     const existing = await this._redisService.get(lockKey);
     if (existing) throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
 
-    const { service, category } = await this.getSlotContext(workerId, serviceId);
-    const availableSlots = await this.getAvailableSlots({
-      workerId,
-      serviceId,
-      date,
-      lat,
-      lng,
-      itemCount,
-    });
+    const [{ service, category }, availableSlots] = await Promise.all([
+      this.getSlotContext(workerId, serviceId),
+      this.getAvailableSlots({
+        workerId,
+        serviceId,
+        date,
+        lat,
+        lng,
+        itemCount,
+      }),
+    ]);
     const duration = this.resolveDuration(service, category, itemCount);
 
     const slot = availableSlots.find((s) => s.startTime === startTime);

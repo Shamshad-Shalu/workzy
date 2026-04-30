@@ -1,72 +1,51 @@
-import { Expose } from "class-transformer";
-import { IsBoolean, IsEmail, IsOptional, IsString } from "class-validator";
-
-import { DEFAULT_IMAGE_URL, Role } from "@/constants";
+import { Role } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { IUser } from "@/types/user";
+import { IAdress, ILocation, IUser } from "@/types/user/user.entity";
+import { resolveS3Image } from "@/utils/s3.utils";
 
 export class RegisterResponseDTO {
-  @Expose()
-  @IsString()
   id!: string;
-
-  @Expose()
-  @IsString()
   name!: string;
-
-  @Expose()
-  @IsEmail()
   email!: string;
-
-  @Expose()
-  @IsString()
   role!: Role;
 }
 
-export class LoginResponseDTO {
-  @IsString()
+export class LoginResponseDto {
   id!: string;
-
-  @IsString()
   name!: string;
-
-  @IsEmail()
   email!: string;
-
-  @IsString()
-  profileImage!: string | undefined;
-
-  @IsString()
   role!: Role;
-
-  @IsBoolean()
-  isPremium!: boolean;
-
-  @IsOptional()
-  @IsString()
-  workerId?: string;
+  phone?: string;
+  profileImage?: string;
+  profile?: {
+    address: IAdress;
+    location: ILocation;
+  };
+  worker?: {
+    id: string;
+    displayName: string;
+    profileImage?: string;
+  };
 
   static async fromEntity(
-    entity: IUser & { workerId?: string },
+    entity: IUser & { workerData?: { _id: string; displayName: string; profileImage?: string } },
     s3Service: IS3Service
-  ): Promise<LoginResponseDTO> {
-    const dto = new LoginResponseDTO();
-
+  ): Promise<LoginResponseDto> {
+    const dto = new LoginResponseDto();
     dto.id = entity._id.toString();
     dto.name = entity.name;
     dto.email = entity.email;
     dto.role = entity.role;
-    dto.isPremium = entity.isPremium;
-    dto.workerId = entity.workerId;
+    dto.phone = entity.phone;
+    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
+    dto.profile = entity.profile;
 
-    const image = entity.profileImage;
-
-    if (!image) {
-      dto.profileImage = DEFAULT_IMAGE_URL;
-    } else if (image?.includes("private/user/profiles")) {
-      dto.profileImage = await s3Service.generateSignedUrl(image);
-    } else if (image?.startsWith("http")) {
-      dto.profileImage = image;
+    if (entity.workerData) {
+      dto.worker = {
+        id: entity.workerData._id.toString(),
+        displayName: entity.workerData.displayName,
+        profileImage: entity.workerData.profileImage,
+      };
     }
 
     return dto;

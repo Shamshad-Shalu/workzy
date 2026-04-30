@@ -1,11 +1,10 @@
 import { inject, injectable } from "inversify";
-import mongoose, { FilterQuery } from "mongoose";
+import { Types } from "mongoose";
 
 import {
   DEFAULT_WORKER_COVER_IMAGE,
   HTTPSTATUS,
   ROLE,
-  SERVER,
   StripeAccountStatus,
   WORKER,
   WORKER_STATUS,
@@ -19,13 +18,21 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
-import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
-import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
-import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing.response.dto";
+import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
+import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
+import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
-import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
-import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker, WorkerListingFilters } from "@/types/worker";
+import {
+  WorkerDetailsResponseDto,
+  WorkerProfileResponseDTO,
+} from "@/dtos/responses/worker/worker.profile.dto";
+import { CursorPaginatedResult, PaginatedResult } from "@/types/common/pagination";
+import { IWorker } from "@/types/worker/worker.entity";
+import {
+  NearbyWorkerListQuery,
+  PublicWorkerListQuery,
+  WorkerListQuery,
+} from "@/types/worker/worker.query";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -42,41 +49,86 @@ export class WorkerService implements IWorkerService {
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
     return this._workerRepository.findOne({ userId });
   };
-  async getWorkerSummary(workerId: string): Promise<WorkerSummaryResponseDTO> {
-    const worker = await this._workerRepository.getWorkerSummary(workerId);
-    if (!worker) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    return WorkerSummaryResponseDTO.fromEntity(worker, this._s3Service);
+  // worker listing - admin side
+  async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListResponseDto>> {
+    const { data, total } = await this._workerRepository.listWorkers(query);
+    return {
+      data: await WorkerListResponseDto.fromEntities(data, this._s3Service),
+      total,
+    };
+  }
+
+  async listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerResponseDTO[]> {
+    const workers = await this._workerRepository.listNearbyWorkers(query);
+    return await NearbyWorkerResponseDTO.fromEntities(workers, this._s3Service);
+  }
+
+  async listPublicWorkers(
+    serviceId: string,
+    query: PublicWorkerListQuery
+  ): Promise<CursorPaginatedResult<PublicWorkerListResponseDto>> {
+    const { data, nextCursor } = await this._workerRepository.listPublicWorkers(serviceId, query);
+    return {
+      data: PublicWorkerListResponseDto.fromEntities(data),
+      nextCursor,
+    };
   }
 
   async getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    const worker = await this._workerRepository.getWorkerProfile(workerId);
+    if (!worker) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    return WorkerProfileResponseDTO.fromEntity(worker);
+  }
 
-    return await WorkerProfileResponseDTO.fromEntity(worker, this._s3Service);
+  async getWorkerProfileDetails(workerId: string): Promise<WorkerDetailsResponseDto> {
+    const worker = await this._workerRepository.findById(workerId);
+    if (!worker) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    return await WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
   }
 
   async updateWorkerProfile(
     workerId: string,
-    data: WorkerProfileRequestDTO
-  ): Promise<WorkerProfileResponseDTO> {
+    data: WorkerProfileRequestDto
+  ): Promise<WorkerDetailsResponseDto> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-
     const { coverImage } = data;
-
     if (coverImage === DEFAULT_WORKER_COVER_IMAGE || coverImage === null) {
       data.coverImage = null;
+    }
+    const updatedWorker = await this._workerRepository.update(workerId, data);
+    if (!updatedWorker) {
+      throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
 
     if (worker?.coverImage && coverImage !== worker.coverImage) {
       await this._s3Service.deleteFile(worker.coverImage);
     }
+    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+  }
 
-    const updatedWorker = await this._workerRepository.update(workerId, data);
-    if (!updatedWorker) {
+  async updateWorkerPhone(workerId: string, phone: string): Promise<boolean> {
+    const worker = await this._workerRepository.findByIdAndUpdate(workerId, { phone: phone });
+    if (!worker) {
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    return true;
+  }
+
+  async updateProfileImage(workerId: string, url: string): Promise<string> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+
+    const updateWorker = await this._workerRepository.update(workerId, { profileImage: url });
+    if (!updateWorker?.profileImage) {
       throw new CustomError(WORKER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
-    return await WorkerProfileResponseDTO.fromEntity(updatedWorker, this._s3Service);
+    if (worker.profileImage?.includes("public/worker/profiles")) {
+      await this._s3Service.deleteFile(worker.profileImage);
+    }
+    return updateWorker.profileImage;
   }
 
   async createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO> {
@@ -90,49 +142,17 @@ export class WorkerService implements IWorkerService {
     const url = extractKeyFromUrl(document);
 
     updates.documents = [{ url, type: "id_proof" }];
-    updates.userId = new mongoose.Types.ObjectId(userId);
+    updates.userId = new Types.ObjectId(userId);
     const worker = await this._workerRepository.create({
       ...updates,
     });
-    return WorkerProfileResponseDTO.fromEntity(worker, this._s3Service);
+    return WorkerProfileResponseDTO.fromEntity(worker);
   }
 
-  async getAllWorkers(
-    page: number,
-    limit: number,
-    search: string,
-    status: string,
-    workerStatus: string
-  ): Promise<{ workers: WorkerResponseDTO[]; total: number }> {
-    const skip = (page - 1) * limit;
-
-    const query: FilterQuery<IWorker> = {};
-    if (search && search.trim() !== "") {
-      query.displayName = { $regex: search, $options: "i" };
-    }
-    if (status && status !== "all") {
-      const isBlocked = status === "blocked";
-      const matchingUsers = await this._userRepository.find({ isBlocked });
-      const userIds = matchingUsers.map((user) => user._id);
-      query.userId = { $in: userIds };
-    }
-    if (workerStatus && workerStatus !== "all") {
-      query.status = workerStatus;
-    }
-
-    const [workers, total] = await Promise.all([
-      this._workerRepository.getAllWorkers(query, skip, limit),
-      this._workerRepository.countDocuments(query),
-    ]);
-    if (!workers) {
-      throw new CustomError(SERVER.ERROR, HTTPSTATUS.BAD_REQUEST);
-    }
-    const workerDtos = await WorkerResponseDTO.fromEntities(workers, this._s3Service);
-
-    return { workers: workerDtos, total };
-  }
-
-  async verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerResponseDTO> {
+  async verifyWorker(
+    workerId: string,
+    data: VerifyWorkerRequestDTO
+  ): Promise<WorkerProfileResponseDTO> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
     const { status, docName, reason, docId } = data;
     const updates: Partial<IWorker> = {};
@@ -166,7 +186,7 @@ export class WorkerService implements IWorkerService {
     if (status === WORKER_STATUS.VERIFIED) {
       await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
     }
-    return await WorkerResponseDTO.fromEntity(updatedWorker, this._s3Service);
+    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
 
   async reSubmitWorkerDocument(
@@ -207,26 +227,7 @@ export class WorkerService implements IWorkerService {
     if (!updatedWorker) {
       throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
     }
-    return await WorkerProfileResponseDTO.fromEntity(updatedWorker, this._s3Service);
-  }
-
-  async getNearbyWorkers(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-    limit: number
-  ): Promise<NearbyWorkerResponseDTO[]> {
-    const workers = await this._workerRepository.findNearbyWorkers(lat, lng, radiusKm, limit);
-    return await NearbyWorkerResponseDTO.fromEntities(workers, this._s3Service);
-  }
-
-  async listWorkers(
-    serviceId: string,
-    data: WorkerListingFilters
-  ): Promise<{ total: number; workers: WorkerListingResponseDto[] }> {
-    const { workersRaw, total } = await this._workerRepository.listWorkers(serviceId, data);
-    const workers = await WorkerListingResponseDto.fromEntities(workersRaw, this._s3Service);
-    return { total, workers };
+    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
 
   async getStripeStatus(
@@ -238,6 +239,7 @@ export class WorkerService implements IWorkerService {
       stripeAccountId: worker.stripeAccountId ?? null,
     };
   }
+
   async connectStripe(workerId: string): Promise<string> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
 

@@ -5,13 +5,13 @@ import Button from '@/components/atoms/Button';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import Pagination from '@/components/molecules/Pagination';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 
 import { WorkerCard } from './WorkerCard';
 import WorkerCardSkeleton from './WorkerCardSkeleton';
 
 type WorkerListProps = {
-  workers: WorkerListingInfo[];
+  workers: PublicWorkerListItem[];
   isLoading: boolean;
   total: number;
   error: null | Error;
@@ -21,7 +21,7 @@ type WorkerListProps = {
   page: number;
   limit: number;
   onPageChange: (page: number) => void;
-  onBook: (worker: WorkerListingInfo) => void;
+  onBook: (worker: PublicWorkerListItem) => void;
 };
 
 export interface WorkerListParams {
@@ -103,7 +103,7 @@ export function WorkerList({
             className="flex flex-col gap-4"
           >
             {workers.map((worker, i) => (
-              <WorkerCard key={worker.userId} worker={worker} index={i} onBook={onBook} />
+              <WorkerCard key={worker.id} worker={worker} index={i} onBook={onBook} />
             ))}
           </motion.div>
         )}

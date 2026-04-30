@@ -1,84 +1,41 @@
-import { DEFAULT_IMAGE_URL } from "@/constants";
+import { StripeAccountStatus, WorkerStatus } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { IUser } from "@/types/user";
-import { DocumentDto, IDocument, IWorker } from "@/types/worker";
+import { WorkerListItem } from "@/types/worker/worker.projection";
+import { resolveS3Image } from "@/utils/s3.utils";
 
-export class WorkerResponseDTO {
+export class WorkerListResponseDto {
   id!: string;
-  status!: string;
-  documents?: DocumentDto[];
   displayName!: string;
-  tagline!: string;
-  about!: string;
-  defaultRate?: number;
-  experience!: number;
+  profileImage?: string;
+  status!: WorkerStatus;
+  userId!: string;
+  email!: string;
+  phone?: string;
+  stripeAccountStatus!: StripeAccountStatus;
   createdAt!: Date;
 
-  userId!: string;
-  name!: string;
-  age?: number;
-  email!: string;
-  phone!: string;
-  isPremium!: boolean;
-  isBlocked!: boolean;
-  profileImage!: string;
-
-  static async fromEntity(entity: any, s3Service: IS3Service): Promise<WorkerResponseDTO> {
-    const dto = new WorkerResponseDTO();
-
-    const user = entity.userId as IUser;
+  static async fromEntity(
+    entity: WorkerListItem,
+    s3Service: IS3Service
+  ): Promise<WorkerListResponseDto> {
+    const dto = new WorkerListResponseDto();
 
     dto.id = entity._id.toString();
-    dto.status = entity.status;
     dto.displayName = entity.displayName;
-    dto.tagline = entity.tagline;
-    dto.about = entity.about;
-    dto.defaultRate = entity.defaultRate;
-    if (entity.documents && entity.documents.length > 0) {
-      dto.documents = await Promise.all(
-        (entity.documents || []).map(
-          async (doc: IDocument): Promise<DocumentDto> => ({
-            id: doc._id,
-            name: doc.name,
-            type: doc.type,
-            status: doc.status,
-            rejectReason: doc.rejectReason,
-            url: await s3Service.generateSignedUrl(doc.url),
-          })
-        )
-      );
-    } else {
-      dto.documents = [];
-    }
-    dto.experience = entity.experience;
+    dto.userId = entity.userId._id.toString();
+    dto.email = entity.userId.email;
+    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
+    dto.stripeAccountStatus = entity.stripeAccountStatus;
+    dto.status = entity.status;
+    dto.phone = entity.phone;
     dto.createdAt = entity.createdAt;
-
-    if (user) {
-      dto.userId = user._id.toString();
-      dto.name = user.name;
-      dto.email = user.email;
-      dto.phone = user.phone || "-";
-      dto.isPremium = user.isPremium;
-      dto.isBlocked = user.isBlocked;
-      dto.age = user.age;
-
-      const image = user.profileImage;
-      if (!image) {
-        dto.profileImage = DEFAULT_IMAGE_URL;
-      } else if (image.includes("private/user/profiles")) {
-        dto.profileImage = await s3Service.generateSignedUrl(image);
-      } else {
-        dto.profileImage = image;
-      }
-    }
-
     return dto;
   }
 
   static async fromEntities(
-    entities: IWorker[],
+    entities: WorkerListItem[],
     s3Service: IS3Service
-  ): Promise<WorkerResponseDTO[]> {
+  ): Promise<WorkerListResponseDto[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }

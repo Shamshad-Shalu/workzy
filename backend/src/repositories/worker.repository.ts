@@ -1,19 +1,23 @@
 import { injectable } from "inversify";
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
-import { ROLE, SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
+import { SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
-import User from "@/models/user.model";
 import Worker from "@/models/worker.model";
-import { WorkerReviewStats } from "@/types/review";
+import { CursorPaginatedResult, PaginatedResult } from "@/types/common/pagination";
+import { IReviewStats, IWorker } from "@/types/worker/worker.entity";
 import {
-  IWorker,
-  NearbyWorkerEntity,
-  WorkerListingEntity,
-  WorkerListingFilters,
-  WorkerSummaryEntity,
-} from "@/types/worker";
+  NearbyWorkerItem,
+  PublicWorkerListItem,
+  WorkerListItem,
+  WorkerProfile,
+} from "@/types/worker/worker.projection";
+import {
+  NearbyWorkerListQuery,
+  PublicWorkerListQuery,
+  WorkerListQuery,
+} from "@/types/worker/worker.query";
 import { timeToMinutes } from "@/utils/time.convert";
 import { getCurrentTime, getTodayKey, getTodayStart, getTodayEnd } from "@/utils/time.utils";
 
@@ -23,146 +27,109 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     super(Worker);
   }
 
-  async getWorkerSummary(workerId: string): Promise<WorkerSummaryEntity | null> {
-    const pipeline: PipelineStage[] = [
-      {
-        $match: {
-          _id: new Types.ObjectId(workerId),
-        },
-      },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user",
-        },
-      },
-      {
-        $unwind: {
-          path: "$user",
-          preserveNullAndEmptyArrays: false,
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          displayName: 1,
-          tagline: 1,
-          coverImage: 1,
-          about: 1,
-          experience: 1,
-          worksCompleted: 1,
-          reviewCount: 1,
-          defaultRate: 1,
-          averageRating: 1,
-          completionRate: 1,
-          cities: 1,
-          skills: 1,
-          isPremium: 1,
-          profileImage: "$user.profileImage",
-          profile: "$user.profile",
-          createdAt: 1,
-        },
-      },
-    ];
+  async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>> {
+    const { page, limit, search, status, stripStatus } = query;
+    const skip = (page - 1) * limit;
 
-    const result = await this.model.aggregate<WorkerSummaryEntity>(pipeline).exec();
-    return result[0];
+    const filter: FilterQuery<IWorker> = {};
+    if (search?.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ displayName: regex }];
+    }
+    if (status !== "all") {
+      filter.status = status;
+    }
+    if (stripStatus !== "all") {
+      filter.stripeAccountStatus = stripStatus;
+    }
+    const [workers, total] = await Promise.all([
+      this.model
+        .find(filter)
+        .select("displayName phone status stripeAccountStatus profileImage createdAt userId")
+        .populate<{ userId: { _id: Types.ObjectId; email: string } }>("userId", "email")
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
+      this.model.countDocuments(filter),
+    ]);
+    return { data: workers, total };
   }
 
-  async getAllWorkers(
-    filter: FilterQuery<IWorker>,
-    skip: number,
-    limit: number
-  ): Promise<IWorker[] | null> {
-    const workers = await this.model
-      .find(filter)
-      .populate("userId", "name email phone isPremium isBlocked profileImage age")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean()
-      .exec();
-
-    return workers as unknown as IWorker[];
-  }
-
-  findNearbyWorkers(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-    limit: number
-  ): Promise<NearbyWorkerEntity[]> {
-    const maxDistance = radiusKm * 1000; // Convert km to meters
-
+  async listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerItem[]> {
+    const { limit, radius, lat, lng } = query;
     const pipeline: PipelineStage[] = [
       {
         $geoNear: {
-          near: { type: "Point", coordinates: [lng, lat] },
-          key: "profile.location",
-          distanceField: "distance",
-          maxDistance: maxDistance,
+          near: {
+            type: "Point",
+            coordinates: [lng, lat],
+          },
+          key: "location",
+          distanceField: "distance", // in meters
+          maxDistance: radius * 1000,
           spherical: true,
           query: {
-            role: ROLE.WORKER,
-            isBlocked: false,
+            status: WORKER_STATUS.VERIFIED,
+            stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
           },
         },
       },
       {
-        $lookup: {
-          from: "workers",
-          localField: "_id",
-          foreignField: "userId",
-          as: "worker",
-        },
-      },
-      {
-        $unwind: "$worker",
-      },
-      {
-        $match: { "worker.status": WORKER_STATUS.VERIFIED },
-      },
-      {
-        $project: {
-          _id: 1,
-          profileImage: 1,
-          distance: { $divide: ["$distance", 1000] },
-
-          workerId: "$worker._id",
-          displayName: "$worker.displayName",
-          tagline: "$worker.tagline",
-          experience: "$worker.experience",
+        $addFields: {
+          distance: {
+            $round: [{ $divide: ["$distance", 1000] }, 2],
+          },
         },
       },
       { $sort: { distance: 1 } },
       { $limit: limit },
+      {
+        $project: {
+          _id: { $toString: "$_id" },
+          profileImage: 1,
+          displayName: 1,
+          tagline: 1,
+          experience: 1,
+          distance: 1,
+          completedJobs: "$jobStats.completed",
+          averageRating: "$reviewStats.averageRating",
+        },
+      },
     ];
-    return User.aggregate<NearbyWorkerEntity>(pipeline).exec();
+    return await this.model.aggregate(pipeline);
   }
 
-  async listWorkers(
+  async getWorkerProfile(workerId: string): Promise<WorkerProfile | null> {
+    return await this.model
+      .findById(workerId)
+      .select(
+        " displayName tagline about profileImage coverImage experience location jobStats reviewStats"
+      )
+      .lean()
+      .exec();
+  }
+
+  async listPublicWorkers(
     serviceId: string,
-    params: WorkerListingFilters
-  ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }> {
+    query: PublicWorkerListQuery
+  ): Promise<CursorPaginatedResult<PublicWorkerListItem>> {
     const {
-      lng,
       lat,
       limit,
-      page,
-      availableNow = false,
+      lng,
+      radiusKm,
+      cursor,
+      availableNow,
       maxPrice,
       minPrice,
       minRating,
-      radiusKm,
       workerId,
-    } = params;
+    } = query;
 
     const nowMinutes = timeToMinutes(getCurrentTime());
     const PREP_BUFFER = 15;
 
-    const skip = (page - 1) * limit;
     const pipeline: PipelineStage[] = [
       {
         $geoNear: {
@@ -174,16 +141,33 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           query: {
             status: WORKER_STATUS.VERIFIED,
             stripeAccountStatus: STRIPE_ACCOUNT_STATUS.ACTIVE,
-            ...(minRating !== undefined && { averageRating: { $gte: minRating } }),
+            ...(minRating !== undefined && {
+              "reviewStats.averageRating": { $gte: minRating },
+            }),
             ...(workerId && { _id: { $ne: new Types.ObjectId(workerId) } }),
           },
         },
       },
       {
         $addFields: {
-          distanceKm: { $round: [{ $divide: ["$distance", 1000] }, 1] },
+          distanceKm: { $round: [{ $divide: ["$distance", 1000] }, 2] },
         },
       },
+      ...(cursor
+        ? [
+            {
+              $match: {
+                $or: [
+                  { distance: { $gt: cursor.distance } },
+                  {
+                    distance: cursor.distance,
+                    _id: { $gt: new Types.ObjectId(cursor._id) },
+                  },
+                ],
+              },
+            },
+          ]
+        : []),
       {
         $lookup: {
           from: "services",
@@ -244,16 +228,6 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           },
         },
       },
-      {
-        $lookup: {
-          from: "users",
-          localField: "userId",
-          foreignField: "_id",
-          as: "user",
-        },
-      },
-      { $unwind: "$user" },
-      { $match: { "user.isBlocked": false } },
       ...(availableNow
         ? [
             {
@@ -367,60 +341,69 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
           ]
         : []),
       {
-        $facet: {
-          workersRaw: [
-            { $skip: skip },
-            { $limit: limit },
-            {
-              $project: {
-                _id: 0,
-                serviceId: "$services._id",
-                workerId: "$_id",
-                userId: "$userId",
-                displayName: "$displayName",
-                tagline: "$tagline",
-                description: "$services.description",
-                coverImage: "$coverImage",
-                isPremium: "$isPremium",
-                reviewCount: "$reviewCount",
-                worksCompleted: "$worksCompleted",
-                profileImage: "$user.profileImage",
-                experience: "$experience",
-                averageRating: "$averageRating",
-                serviceRate: "$services.rate",
-                estimatedDuration: "$services.estimatedDuration",
-                bufferTime: "$services.bufferTime",
-                categoryName: "$category.name",
-                pricingMode: "$category.pricingMode",
-                serviceType: "$category.serviceType",
-                distanceKm: "$distanceKm",
-                bulkDiscounts: {
-                  $cond: [
-                    { $gt: [{ $size: { $ifNull: ["$services.bulkDiscounts", []] } }, 0] },
-                    "$services.bulkDiscounts",
-                    null,
-                  ],
-                },
-                travelCost: {
-                  $trunc: {
-                    $min: [
-                      { $multiply: ["$distanceKm", { $ifNull: ["$category.travelRatePerKM", 0] }] },
-                      { $ifNull: ["$services.maxTravelCost", 999999] },
-                    ],
-                  },
-                },
-              },
+        $sort: { distance: 1, _id: 1 },
+      },
+      {
+        $limit: limit + 1,
+      },
+      {
+        $project: {
+          _id: 1,
+          displayName: 1,
+          tagline: 1,
+          profileImage: 1,
+          experience: 1,
+
+          serviceId: "$services._id",
+          serviceRate: "$services.rate",
+          description: "$services.description",
+          estimatedDuration: "$services.estimatedDuration",
+          bufferTime: "$services.bufferTime",
+          categoryName: "$category.name",
+          serviceType: "$category.serviceType",
+          pricingMode: "$category.pricingMode",
+          bulkDiscounts: {
+            $cond: [
+              { $gt: [{ $size: { $ifNull: ["$services.bulkDiscounts", []] } }, 0] },
+              "$services.bulkDiscounts",
+              null,
+            ],
+          },
+          averageRating: "$reviewStats.averageRating",
+          jobCompleted: "$jobStats.completed",
+          reviewCount: "$reviewStats.reviewCount",
+          isAvailable: "$reviewStats.isAvailable",
+          distanceKm: 1,
+          travelCost: {
+            $trunc: {
+              $min: [
+                { $multiply: ["$distanceKm", { $ifNull: ["$category.travelRatePerKM", 0] }] },
+                { $ifNull: ["$services.maxTravelCost", 999999] },
+              ],
             },
-          ],
-          total: [{ $count: "count" }],
+          },
         },
       },
     ];
 
-    const res = await this.model.aggregate(pipeline).exec();
-    const workersRaw = res[0]?.workersRaw ?? [];
-    const total = res[0]?.total?.[0]?.count ?? 0;
-    return { workersRaw, total };
+    const docs = await this.model.aggregate(pipeline);
+    let nextCursor: string | null = null;
+
+    if (docs.length > limit) {
+      docs.pop();
+      const last = docs[docs.length - 1];
+      nextCursor = Buffer.from(
+        JSON.stringify({
+          distance: last.distance,
+          _id: last._id.toString(),
+        })
+      ).toString("base64url");
+    }
+
+    return {
+      data: docs,
+      nextCursor,
+    };
   }
 
   private toMinutes = (timeField: string) => ({
@@ -435,15 +418,20 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     const pipeline: PipelineStage[] = [
       {
         $set: {
-          totalRating: { $add: ["$totalRating", rating] },
-          reviewCount: { $add: ["$reviewCount", 1] },
-          ratingBreakdown: {
+          "reviewStats.totalRating": { $add: ["$reviewStats.totalRating", rating] },
+          "reviewStats.reviewCount": { $add: ["$reviewStats.reviewCount", 1] },
+          "reviewStats.breakdown": {
             $setField: {
               field: ratingKey,
-              input: "$ratingBreakdown",
+              input: "$reviewStats.breakdown",
               value: {
                 $add: [
-                  { $ifNull: [{ $getField: { field: ratingKey, input: "$ratingBreakdown" } }, 0] },
+                  {
+                    $ifNull: [
+                      { $getField: { field: ratingKey, input: "$reviewStats.breakdown" } },
+                      0,
+                    ],
+                  },
                   1,
                 ],
               },
@@ -453,7 +441,9 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       },
       {
         $set: {
-          averageRating: { $divide: ["$totalRating", "$reviewCount"] },
+          "reviewStats.averageRating": {
+            $divide: ["$reviewStats.totalRating", "$reviewStats.reviewCount"],
+          },
         },
       },
     ];
@@ -465,19 +455,19 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     const pipeline: PipelineStage[] = [
       {
         $set: {
-          totalRating: { $subtract: ["$totalRating", rating] },
-          reviewCount: { $subtract: ["$reviewCount", 1] },
-          ratingBreakdown: {
+          "reviewStats.totalRating": { $subtract: ["$reviewStats.totalRating", rating] },
+          "reviewStats.reviewCount": { $subtract: ["$reviewStats.reviewCount", 1] },
+          "reviewStats.breakdown": {
             $setField: {
               field: ratingKey,
-              input: "$ratingBreakdown",
+              input: "$reviewStats.breakdown",
               value: {
                 $max: [
                   {
                     $subtract: [
                       {
                         $ifNull: [
-                          { $getField: { field: ratingKey, input: "$ratingBreakdown" } },
+                          { $getField: { field: ratingKey, input: "$reviewStats.breakdown" } },
                           0,
                         ],
                       },
@@ -493,11 +483,13 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       },
       {
         $set: {
-          averageRating: {
+          "reviewStats.averageRating": {
             $cond: {
-              if: { $eq: ["$reviewCount", 0] },
+              if: { $eq: ["$reviewStats.reviewCount", 0] },
               then: 0,
-              else: { $divide: ["$totalRating", "$reviewCount"] },
+              else: {
+                $divide: ["$reviewStats.totalRating", "$reviewStats.reviewCount"],
+              },
             },
           },
         },
@@ -513,21 +505,28 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     const pipeline: PipelineStage[] = [
       {
         $set: {
-          totalRating: { $add: ["$totalRating", newRating - oldRating] },
-          ratingBreakdown: {
+          "reviewStats.totalRating": {
+            $add: ["$reviewStats.totalRating", newRating - oldRating],
+          },
+          "reviewStats.breakdown": {
             $let: {
               vars: {
                 updatedOld: {
                   $setField: {
                     field: oldKey,
-                    input: "$ratingBreakdown",
+                    input: "$reviewStats.breakdown",
                     value: {
                       $max: [
                         {
                           $subtract: [
                             {
                               $ifNull: [
-                                { $getField: { field: oldKey, input: "$ratingBreakdown" } },
+                                {
+                                  $getField: {
+                                    field: oldKey,
+                                    input: "$reviewStats.breakdown",
+                                  },
+                                },
                                 0,
                               ],
                             },
@@ -547,7 +546,15 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
                   value: {
                     $add: [
                       {
-                        $ifNull: [{ $getField: { field: newKey, input: "$$updatedOld" } }, 0],
+                        $ifNull: [
+                          {
+                            $getField: {
+                              field: newKey,
+                              input: "$$updatedOld",
+                            },
+                          },
+                          0,
+                        ],
                       },
                       1,
                     ],
@@ -560,18 +567,21 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       },
       {
         $set: {
-          averageRating: { $divide: ["$totalRating", "$reviewCount"] },
+          "reviewStats.averageRating": {
+            $divide: ["$reviewStats.totalRating", "$reviewStats.reviewCount"],
+          },
         },
       },
     ];
-
     await this.model.findByIdAndUpdate(workerId, pipeline);
   }
 
-  async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats | null> {
-    return await this.model
+  async getWorkerReviewStats(workerId: string): Promise<IReviewStats | null> {
+    const worker = await this.model
       .findById(workerId)
-      .select("averageRating reviewCount ratingBreakdown")
-      .lean();
+      .select("reviewStats")
+      .lean<{ reviewStats: IReviewStats }>();
+
+    return worker?.reviewStats ?? null;
   }
 }

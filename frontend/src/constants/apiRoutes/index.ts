@@ -1,5 +1,5 @@
 export * from './auth.routes';
-export * from './profile.routes';
+export * from './user.routes';
 export * from './category.routes';
 export * from './home.routes';
 export * from './service.routes';

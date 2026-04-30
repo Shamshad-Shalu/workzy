@@ -2,7 +2,7 @@ import { Document, Types } from "mongoose";
 
 import { SlotStatus } from "@/constants/booking";
 
-import { ILocation } from "./user";
+import { ILocation } from "./user/user.entity";
 
 export interface ISlot extends Document<string> {
   workerId: Types.ObjectId;

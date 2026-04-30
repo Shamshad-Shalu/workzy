@@ -38,7 +38,7 @@ import {
   VerifySessionType,
 } from "@/types/payment";
 import { AddSubscriptionDto } from "@/types/subscription";
-import { IWorker } from "@/types/worker";
+import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";

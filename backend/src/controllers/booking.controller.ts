@@ -12,7 +12,7 @@ import {
   CreatebookingDTO,
   ExtraChargeDTO,
   RejectBookingDTO,
-  VerifyOtpDTO,
+  VerifyBookingOtpDTO,
 } from "@/dtos/requests/booking.dto";
 import { BookingListQuery, ListingStatus } from "@/types/booking";
 import CustomError from "@/utils/customError";
@@ -97,7 +97,7 @@ export class BookingController implements IBookingController {
   startJob = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const { bookingId } = req.params;
-    const { otp } = req.body as VerifyOtpDTO;
+    const { otp } = req.body as VerifyBookingOtpDTO;
 
     await this._bookingService.startJob(bookingId, workerId, otp);
     res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.IN_PROGRESS });
@@ -137,7 +137,6 @@ export class BookingController implements IBookingController {
   requestExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const { bookingId } = req.params;
-
     const data = req.body as ExtraChargeDTO;
     await this._bookingService.requestExtraCharge(bookingId, workerId, data);
     res.status(HTTPSTATUS.OK).json({ message: "Extra charge request sent to client" });
@@ -168,14 +167,14 @@ export class BookingController implements IBookingController {
 
   private requireUserId(req: Request): string {
     if (!req.user?.id) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     return req.user.id;
   }
 
   private requireWorkerId(req: Request): string {
     if (!req.user?.workerId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     return req.user.workerId;
   }

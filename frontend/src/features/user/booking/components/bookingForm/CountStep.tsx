@@ -2,10 +2,10 @@ import { motion } from 'framer-motion';
 import { Minus, Percent, Plus } from 'lucide-react';
 
 import type { BookingState } from '@/types/slot';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 import { formatDuration } from '@/utils/time.format';
 
-function getBestDiscount(w: WorkerListingInfo, count: number) {
+function getBestDiscount(w: PublicWorkerListItem, count: number) {
   if (!w.bulkDiscounts?.length) {
     return null;
   }
@@ -21,7 +21,7 @@ export default function CountStep({
   booking,
   setBooking,
 }: {
-  worker: WorkerListingInfo;
+  worker: PublicWorkerListItem;
   booking: BookingState;
   setBooking: React.Dispatch<React.SetStateAction<BookingState>>;
 }) {

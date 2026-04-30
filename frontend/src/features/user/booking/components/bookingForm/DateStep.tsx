@@ -7,7 +7,7 @@ import ErrorState from '@/components/molecules/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAvailableDates } from '@/features/user/slot/hooks/useSlot';
 import type { BookingState } from '@/types/slot';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 
 export default function DateStep({
   worker,
@@ -16,19 +16,21 @@ export default function DateStep({
   lat,
   lng,
 }: {
-  worker: WorkerListingInfo;
+  worker: PublicWorkerListItem;
   booking: BookingState;
   onDateSelect: (date: string) => void | Promise<void>;
   lat?: number;
   lng?: number;
 }) {
   const { data, isLoading, error, refetch } = useAvailableDates({
-    workerId: worker.workerId,
+    workerId: worker.id,
     serviceId: worker.serviceId,
     itemCount: booking.itemCount,
     lat,
     lng,
   });
+
+  console.log({ data, worker, booking });
 
   const days = useMemo(() => Array.from({ length: 30 }, (_, i) => dayjs().add(i, 'day')), []);
 

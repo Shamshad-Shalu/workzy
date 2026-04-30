@@ -12,18 +12,37 @@ export interface Location {
   coordinates: [number, number];
 }
 
+type WorkerMeta = {
+  id: string;
+  displayName: string;
+  profileImage?: string;
+};
+
 export interface User {
   id: string;
   name: string;
   email: string;
   role: Role;
   phone?: string;
-  isPremium: boolean;
   profileImage?: string;
   profile?: {
-    address?: Address;
-    location?: Location;
+    address: Address;
+    location: Location;
   };
   isBlocked: boolean;
-  workerId?: string;
+  worker?: WorkerMeta;
+}
+
+export type UpdateUserPayload = Omit<Partial<User>, 'worker'> & {
+  worker?: Partial<WorkerMeta>;
+};
+
+export interface VerifyOtpPayload {
+  type: 'email' | 'phone';
+  contact: string;
+  otp: string;
+}
+export interface ResendOtpPayload {
+  type: 'email' | 'phone';
+  value: string;
 }

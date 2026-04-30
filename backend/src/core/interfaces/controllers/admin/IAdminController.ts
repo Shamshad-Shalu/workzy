@@ -1,8 +1,8 @@
 import { RequestHandler } from "express";
 
 export interface IAdminController {
-  getUsers: RequestHandler;
-  getAllWorkers: RequestHandler;
+  listUsers: RequestHandler;
+  listWorkers: RequestHandler;
   toggleStatus: RequestHandler;
   verifyWorker: RequestHandler;
 }

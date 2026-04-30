@@ -4,21 +4,19 @@ export interface HomeApiResponse {
   sections: HomeSection[];
 }
 
-export interface Worker {
+export interface NearbyWorkerItem {
   id: string;
-  workerId: string;
   displayName: string;
   tagline: string;
-  profileImage: string;
+  profileImage?: string;
   experience: number;
   distance: string;
-
   completedJobs: number;
-  verified: boolean;
+  averageRating: number;
 }
 
-export interface WorkersApiResponse {
-  workers: Worker[];
+export interface NearbyWorkerListResponse {
+  workers: NearbyWorkerItem[];
 }
 
 export interface ServiceItem {
@@ -42,3 +40,10 @@ export interface TopServiceItem {
 export interface TopServicesApiResponse {
   services: TopServiceItem[];
 }
+
+export type NearbyWorkerListQuery = {
+  radius: number;
+  limit: number;
+  lat: number;
+  lng: number;
+};

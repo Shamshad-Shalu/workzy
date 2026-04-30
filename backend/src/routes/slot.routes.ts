@@ -14,7 +14,7 @@ const controller = container.get<ISlotController>(TYPES.SlotController);
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.get("/", controller.getAvailableSlots);
-router.get("/dates", controller.getAvailableDates);
+router.get("/available-dates", controller.getAvailableDates);
 router.post("/reserve", validateDto(CreateSlotDTO), controller.reserveSlot);
 router.delete("/:slotId", controller.releaseSlot);
 

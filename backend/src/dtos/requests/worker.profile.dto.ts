@@ -1,6 +1,5 @@
 import { Type } from "class-transformer";
 import {
-  ArrayMaxSize,
   ArrayMinSize,
   IsArray,
   IsNumber,
@@ -13,7 +12,7 @@ import {
 
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
 
-class AvailabilitySlotDTO {
+class AvailabilitySlotDto {
   @IsString()
   @Matches(/^\d{2}:\d{2}$/, { message: "startTime must be HH:MM" })
   startTime!: string;
@@ -23,69 +22,79 @@ class AvailabilitySlotDTO {
   endTime!: string;
 }
 
-class AvailabilityDTO {
+class AvailabilityDto {
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  monday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  monday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  tuesday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  tuesday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  wednesday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  wednesday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  thursday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  thursday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  friday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  friday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  saturday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  saturday!: AvailabilitySlotDto[];
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => AvailabilitySlotDTO)
-  sunday!: AvailabilitySlotDTO[];
+  @Type(() => AvailabilitySlotDto)
+  sunday!: AvailabilitySlotDto[];
 }
 
-export class WorkerProfileRequestDTO {
+class GeoLocationDto {
+  @IsString()
+  type!: "Point";
+
+  @IsArray()
+  @ArrayMinSize(2)
+  @IsNumber({}, { each: true })
+  coordinates!: [number, number];
+
+  @IsString()
+  addressLabel!: string;
+}
+
+export class WorkerProfileRequestDto {
   @IsString()
   @Matches(SERVICE_NAME_REGEX, { message: "Invalid name format." })
-  displayName?: string;
+  displayName!: string;
 
   @IsString()
   @Matches(SERVICE_NAME_REGEX, { message: "Invalid tagline name format." })
-  tagline?: string;
+  tagline!: string;
 
   @IsOptional()
   @IsString()
   @ValidateIf((o) => o.about !== undefined && o.about !== "")
   @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
-  about?: string;
-
-  @IsNumber({}, { message: "Amount is required" })
-  defaultRate!: number;
+  about!: string;
 
   @IsOptional()
   @ValidateNested()
-  @Type(() => AvailabilityDTO)
-  availability?: AvailabilityDTO;
+  @Type(() => AvailabilityDto)
+  availability?: AvailabilityDto;
 
-  @ArrayMinSize(1, { message: "At least one cities is required." })
-  @ArrayMaxSize(10, { message: "A maximum of 50 skills are allowed." })
-  cities!: string[];
+  @ValidateNested()
+  @Type(() => GeoLocationDto)
+  location!: GeoLocationDto;
 
   @IsString()
   coverImage?: string | null;

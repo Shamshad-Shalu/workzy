@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { injectable, inject } from "inversify";
 
-import { ROLE, WORKER } from "@/constants";
+import { HTTPSTATUS, Role, StripeAccountStatus, WORKER } from "@/constants";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
+import { UserStatusFilter } from "@/types/user/user.query";
+import { WorkerStatusFilter } from "@/types/worker/worker.query";
 
 @injectable()
 export class AdminController implements IAdminController {
@@ -16,27 +18,21 @@ export class AdminController implements IAdminController {
     @inject(TYPES.WorkerService) private _workerService: IWorkerService
   ) {}
 
-  getUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  listUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || "all";
+    const status = (req.query.status as UserStatusFilter) || "all";
+    const role = (req.query.role as Role | "all") || "all";
 
-    const { users, total } = await this._userService.getUsers(
+    const { data, total } = await this._userService.listUsers({
       page,
       limit,
       search,
       status,
-      ROLE.USER
-    );
-
-    const totalPages = Math.ceil(total / limit);
-
-    res.json({
-      users,
-      total,
-      totalPages,
+      role,
     });
+    res.status(HTTPSTATUS.OK).json({ users: data, total });
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -45,23 +41,23 @@ export class AdminController implements IAdminController {
     res.status(200).json({ message });
   });
 
-  getAllWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  listWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || "all";
-    const workerStatus = (req.query.workerStatus as string) || "all";
+    const status = (req.query.status as WorkerStatusFilter) || "all";
+    const stripStatus = (req.query.stripStatus as "all" | StripeAccountStatus) || "all";
 
-    const { workers, total } = await this._workerService.getAllWorkers(
+    const { data, total } = await this._workerService.listWorkers({
       page,
       limit,
       search,
       status,
-      workerStatus
-    );
+      stripStatus,
+    });
 
     res.json({
-      workers,
+      workers: data,
       total,
     });
   });

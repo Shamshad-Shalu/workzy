@@ -10,7 +10,7 @@ import {
   CreatebookingDTO,
   ExtraChargeDTO,
   RejectBookingDTO,
-  VerifyOtpDTO,
+  VerifyBookingOtpDTO,
 } from "@/dtos/requests/booking.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
@@ -49,7 +49,7 @@ router.patch("/:bookingId/reached", controller.markReached);
 router.patch(
   "/:bookingId/start",
   authenticate([ROLE.WORKER]),
-  validateDto(VerifyOtpDTO),
+  validateDto(VerifyBookingOtpDTO),
   controller.startJob
 );
 router.patch(

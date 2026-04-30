@@ -9,7 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { createDescriptionRule } from '@/lib/validation/rules';
 import { formatCurrency } from '@/utils/currency';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface WorkerRejectModalProps {
   open: boolean;
@@ -103,7 +103,7 @@ export default function WorkerRejectModal({
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground font-medium">Time</span>
             <span className="text-red-900 font-medium">
-              {formatSmartDate(date)} • {formatTime12(startTime)}
+              {formatDate(date)} • {formatTime12(startTime)}
             </span>
           </div>
 

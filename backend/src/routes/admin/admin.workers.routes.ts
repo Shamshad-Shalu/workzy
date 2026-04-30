@@ -10,7 +10,7 @@ const router = Router();
 
 const adminController = container.get<IAdminController>(TYPES.AdminController);
 
-router.get("/all", adminController.getAllWorkers);
+router.get("/", adminController.listWorkers);
 router.patch(
   "/verify/:workerId",
   validateDto(VerifyWorkerRequestDTO),

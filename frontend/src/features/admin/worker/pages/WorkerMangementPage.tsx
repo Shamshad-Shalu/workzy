@@ -1,72 +1,51 @@
-import { useQuery } from '@tanstack/react-query';
 import { Filter } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
+import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
-import Table from '@/components/data-table/Table';
-import { AppModal } from '@/components/molecules/AppModal';
+import { DataList } from '@/components/data-table/DataList';
+import EmptyState from '@/components/molecules/EmptyState';
+import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
+import { STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from '@/constants';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import AdminWorkerService from '@/services/admin/workerManagement.service';
-import type { WorkerResponse, WorkerRow } from '@/types/admin/worker';
 
-import { useToggleStatus } from '../../hooks/useUserToggleStatus';
-import workerColumns from '../components/columns';
-import ReviewWorkerModal from '../components/ReviewWorkerModal';
-import { useVerifyWorker } from '../hooks/useWorkerMutations';
+import workerColumns from '../components/workerColumns';
+import { useAdminWorkers } from '../hooks/useAdminWorkers';
 
-import type { ReviewWorkerSchemaType } from '../validation/reviewWorkerShema';
-
-type CustomParams = { workerStatus: string };
+const CUSTOM_PARAMS = [{ key: 'stripStatus', defaultValue: 'all' }];
 
 export default function WorkerManagementPage() {
-  const [selectedWorker, setSelectedWorker] = useState<WorkerRow | null>(null);
-  const [verifySelectedWorker, setverifySelectedWorker] = useState<WorkerRow | null>(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+  // const [selectedWorker, setSelectedWorker] = useState<WorkerListItem | null>(null);
+  const { pageIndex, pageSize, search, status, updateParams, stripStatus } = useUrlFilterParams<{
+    stripStatus: string;
+  }>(CUSTOM_PARAMS);
 
-  const { pageIndex, pageSize, search, status, workerStatus, updateParams } =
-    useUrlFilterParams<CustomParams>([{ key: 'workerStatus' }]);
-  const navigate = useNavigate();
-
-  const { data, isLoading } = useQuery<WorkerResponse, Error>({
-    queryKey: ['admin-workers', pageIndex, pageSize, search, status, workerStatus],
-    queryFn: () =>
-      AdminWorkerService.getWorkers(pageIndex + 1, pageSize, search, status, workerStatus),
-    placeholderData: prev => prev,
+  const { workers, total, isLoading, isError, error, refetch } = useAdminWorkers({
+    page: pageIndex,
+    limit: pageSize,
+    search,
+    status,
+    stripStatus,
   });
+  const isHideButton = search !== '' || status !== 'all' || stripStatus !== 'all';
 
-  const toggleStatusMutation = useToggleStatus(() => setModalOpen(false));
-  const verifyWorkerMutation = useVerifyWorker(() => setVerifyModalOpen(false));
+  const clearAllFilters = useCallback(() => {
+    updateParams({
+      search: '',
+      status: 'all',
+      stripStatus: 'all',
+      pageIndex: 0,
+    });
+  }, [updateParams]);
 
   const handleSearchChange = useCallback(
     (v: string) => {
-      updateParams({ search: v, page: 0 });
+      updateParams({ search: v, pageIndex: 0 });
     },
     [updateParams]
   );
-
-  const openStatusModal = (worker: WorkerRow) => {
-    setSelectedWorker(worker);
-    setModalOpen(true);
-  };
-  const openView = (id: string) => {
-    navigate(id);
-    console.log('open worker view,', id);
-  };
-  const openVerifyView = (worker: WorkerRow) => {
-    setverifySelectedWorker(worker);
-    setVerifyModalOpen(true);
-  };
-
-  const handleSubmitReview = async (data: ReviewWorkerSchemaType) => {
-    if (!verifySelectedWorker?.id) {
-      return;
-    }
-    verifyWorkerMutation.mutate({ id: verifySelectedWorker.id, data });
-  };
 
   return (
     <div>
@@ -82,70 +61,64 @@ export default function WorkerManagementPage() {
           </div>
           <div className="sm:col-span-3">
             <Select
+              placeholder="All Status"
               value={status}
-              onChange={v => updateParams({ status: v, page: 0 })}
+              onChange={v => updateParams({ status: v, pageIndex: 0 })}
               leftIcon={<Filter />}
               options={[
                 { label: 'All Status', value: 'all' },
-                { label: 'Active', value: 'active' },
-                { label: 'Blocked', value: 'blocked' },
+                ...Object.values(WORKER_STATUS).map(val => ({
+                  label: val.charAt(0).toUpperCase() + val.slice(1),
+                  value: val,
+                })),
               ]}
             />
           </div>
           <div className="sm:col-span-4">
             <Select
               placeholder="All Status"
-              value={workerStatus}
-              onChange={v => updateParams({ workerStatus: v, page: 0 })}
+              value={stripStatus}
+              onChange={v => updateParams({ stripStatus: v, pageIndex: 0 })}
               leftIcon={<Filter />}
               options={[
                 { label: 'All Status', value: 'all' },
-                { label: 'Pending', value: 'pending' },
-                { label: 'Verified', value: 'verified' },
-                { label: 'Rejected', value: 'rejected' },
-                { label: 'Needs Revision', value: 'needs_revision' },
+                ...Object.values(STRIPE_ACCOUNT_STATUS).map(val => ({
+                  label: val.charAt(0).toUpperCase() + val.slice(1),
+                  value: val,
+                })),
               ]}
             />
           </div>
         </div>
       </div>
-      <Table
-        columns={workerColumns(openStatusModal, openView, openVerifyView)}
-        data={data?.workers ?? []}
-        total={data?.total}
+      <DataList
+        data={workers}
+        total={total}
         pageIndex={pageIndex}
         pageSize={pageSize}
-        pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
-        manual={{
-          serverSidePagination: true,
-        }}
+        mode="table"
         isLoading={isLoading}
-        onPageChange={p => updateParams({ page: p })}
-        onPageSizeChange={s => updateParams({ pageSize: s, page: 0 })}
-      />
-      <AppModal
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        isTitleHidden={true}
-        confirmText={selectedWorker?.isBlocked ? 'Unblock' : 'Block'}
-        onConfirm={() => {
-          if (!selectedWorker?.id) {
-            return;
-          }
-          toggleStatusMutation.mutate(selectedWorker?.userId);
-        }}
-        className="sm:mx-1"
-      >
-        <span className="block mb-2">
-          Are you sure you want to {selectedWorker?.isBlocked ? 'Unblok' : 'Block'}{' '}
-          <b>{selectedWorker?.name}</b>
-        </span>
-      </AppModal>
-      <ReviewWorkerModal
-        open={verifyModalOpen}
-        onClose={() => setVerifyModalOpen(false)}
-        onSubmit={handleSubmitReview}
-        selectedWorker={verifySelectedWorker}
+        columns={workerColumns()}
+        onPageChange={v => updateParams({ pageIndex: v })}
+        onPageSizeChange={v => updateParams({ pageSize: v, pageIndex: 0 })}
+        pageCount={Math.ceil(total / pageSize) || 1}
+        isError={isError}
+        errorState={<ErrorState onRetry={() => refetch()} description={error?.message} />}
+        emptyState={
+          <EmptyState
+            title="No Workers found"
+            description={
+              isHideButton ? 'Try adjusting your filters or search' : 'No users available yet'
+            }
+            action={
+              isHideButton ? (
+                <Button onClick={clearAllFilters} variant="red" size="sm">
+                  Clear Filters
+                </Button>
+              ) : null
+            }
+          />
+        }
       />
     </div>
   );

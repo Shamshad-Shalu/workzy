@@ -12,6 +12,7 @@ import type { User } from '@/types/user';
 
 import workzyLogo from '../../assets/icons/logo-icon.jpg';
 import workzyIcon from '../../assets/icons/logo-icon.jpg';
+import ProfileImage from '../molecules/ProfileImage';
 import { SidebarItem } from '../molecules/SidebarItem';
 import {
   DropdownMenu,
@@ -45,6 +46,7 @@ export function BaseSidebar({
 }: BaseSidebarProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const worker = user.worker;
 
   const handleLogout = async () => {
     try {
@@ -130,13 +132,19 @@ export function BaseSidebar({
                 collapsed && 'justify-center'
               )}
             >
-              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0">
-                <img src={user.profileImage} className="w-full h-full object-cover" />
-              </div>
+              {user.role === ROLE.WORKER ? (
+                <ProfileImage src={worker?.profileImage} name={worker?.displayName} size={40} />
+              ) : (
+                <ProfileImage src={user?.profileImage} name={user?.name} size={40} />
+              )}
 
               {!collapsed && (
                 <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium">{user.name}</p>
+                  {user.role === ROLE.WORKER ? (
+                    <p className="text-sm font-medium">{worker?.displayName}</p>
+                  ) : (
+                    <p className="text-sm font-medium">{user.name}</p>
+                  )}
                   <p className="text-xs text-muted-foreground">{user.email}</p>
                 </div>
               )}

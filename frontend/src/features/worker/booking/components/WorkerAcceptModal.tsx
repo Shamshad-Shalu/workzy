@@ -5,7 +5,7 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { formatCurrency } from '@/utils/currency';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface WorkerAcceptModalProps {
   open: boolean;
@@ -75,7 +75,7 @@ export default function WorkerAcceptModal({
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Date</span>
-            <span className="text-sm font-medium">{formatSmartDate(dates[0].date)}</span>
+            <span className="text-sm font-medium">{formatDate(dates[0].date)}</span>
           </div>
 
           <div className="flex justify-between items-center">

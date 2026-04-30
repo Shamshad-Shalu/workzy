@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 
 import { ROLE } from "@/constants";
-import { IAdress, ILocation, IUser } from "@/types/user";
+import { IAdress, ILocation, IUser } from "@/types/user/user.entity";
 
 export const LocationSchema = new Schema<ILocation>(
   {
@@ -61,7 +61,7 @@ const userSchema: Schema<IUser> = new Schema(
       required: true,
       default: ROLE.USER,
     },
-    phone: { type: Number },
+    phone: { type: String },
     isBlocked: {
       type: Boolean,
       default: false,
@@ -70,10 +70,6 @@ const userSchema: Schema<IUser> = new Schema(
       type: String,
       unique: true,
       sparse: true,
-    },
-    isPremium: {
-      type: Boolean,
-      default: false,
     },
     profile: {
       address: {
@@ -87,7 +83,7 @@ const userSchema: Schema<IUser> = new Schema(
   { timestamps: true }
 );
 
-userSchema.index({ "profile.location": "2dsphere" });
+userSchema.index({ "profile.location": "2dsphere" }, { sparse: true });
 userSchema.index({ name: "text", email: "text" });
 
 const User = mongoose.model<IUser>("User", userSchema);

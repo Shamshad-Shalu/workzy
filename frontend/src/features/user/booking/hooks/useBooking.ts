@@ -5,7 +5,7 @@ import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import type { BulkDiscountType } from '@/types/service';
 import type { AvailableSlot, BookingState } from '@/types/slot';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 import { handleApiError } from '@/utils/handleApiError';
 
 import { useReleaseSlot, useReserveSlot } from '../../slot/hooks/useSlot';
@@ -44,7 +44,7 @@ const INITIAL_BOOKING_STATE: BookingState = {
   reservedUntil: null,
 };
 
-export function useBooking(worker: WorkerListingInfo) {
+export function useBooking(worker: PublicWorkerListItem) {
   const {
     latitude: lat,
     longitude: lng,
@@ -89,7 +89,7 @@ export function useBooking(worker: WorkerListingInfo) {
       }
       return {
         serviceId: worker.serviceId,
-        workerId: worker.workerId,
+        workerId: worker.id,
         slotId: state.slotId,
         // date: state.date,
         // startTime: state.slot.startTime,
@@ -133,7 +133,7 @@ export function useBooking(worker: WorkerListingInfo) {
         await releaseSlot(booking.slotId);
       }
       const res = await reserveSlot({
-        workerId: worker.workerId,
+        workerId: worker.id,
         serviceId: worker.serviceId,
         date: new Date(booking.date),
         startTime: booking.slot.startTime,

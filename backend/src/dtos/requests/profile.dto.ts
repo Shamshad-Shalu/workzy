@@ -9,12 +9,14 @@ import {
   ArrayMinSize,
   ArrayMaxSize,
   ValidateNested,
+  IsIn,
+  Length,
 } from "class-validator";
 
 import { PLACE_REGEX } from "@/constants";
 import { PasswordRule } from "@/validations/rules";
 
-export class ChangePasswordDTO {
+export class ChangePasswordDto {
   @IsString()
   currentPassword!: string;
 
@@ -23,7 +25,29 @@ export class ChangePasswordDTO {
   newPassword!: string;
 }
 
-export class LocationDTO {
+export class VerifyOtpDto {
+  @IsIn(["email", "phone"], {
+    message: "Type must be either 'email' or 'phone'",
+  })
+  type!: "email" | "phone";
+
+  @IsString()
+  @Length(3, 100, {
+    message: "Contact must be a valid email or phone",
+  })
+  contact!: string;
+
+  @IsString()
+  @Length(6, 6, {
+    message: "OTP must be exactly 6 digits",
+  })
+  @Matches(/^[0-9]+$/, {
+    message: "OTP must contain only numbers",
+  })
+  otp!: string;
+}
+
+export class LocationDto {
   @IsString()
   type!: "Point";
 
@@ -34,7 +58,7 @@ export class LocationDTO {
   coordinates!: [number, number];
 }
 
-class AddressDTO {
+class AddressDto {
   @IsOptional()
   @IsString()
   @MinLength(3, { message: "House address must be at least 3 characters" })
@@ -66,23 +90,23 @@ class AddressDTO {
   pincode?: string;
 }
 
-class ProfileDTO {
+class ProfileDto {
   @IsOptional()
   @ValidateNested()
-  @Type(() => AddressDTO)
-  address?: AddressDTO;
+  @Type(() => AddressDto)
+  address?: AddressDto;
 
   @ValidateNested()
-  @Type(() => LocationDTO)
-  location!: LocationDTO;
+  @Type(() => LocationDto)
+  location!: LocationDto;
 }
 
-export class ProfileRequestDTO {
+export class UserProfileRequestDto {
   @IsString()
   @MinLength(1, { message: "Name is required" })
   name!: string;
 
   @ValidateNested()
-  @Type(() => ProfileDTO)
-  profile!: ProfileDTO;
+  @Type(() => ProfileDto)
+  profile!: ProfileDto;
 }

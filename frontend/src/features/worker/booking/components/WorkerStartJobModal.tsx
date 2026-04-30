@@ -6,7 +6,7 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { AppModal } from '@/components/molecules/AppModal';
 import type { BookingListItem } from '@/types/booking';
-import { formatSmartDate, formatTime12 } from '@/utils/time.format';
+import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface WorkerStartJobModalProps {
   open: boolean;
@@ -92,7 +92,7 @@ export default function WorkerStartJobModal({
           </div>
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Scheduled Date</span>
-            <span className="font-medium text-foreground">{formatSmartDate(date)}</span>
+            <span className="font-medium text-foreground">{formatDate(date)}</span>
           </div>
           <div className="flex justify-between items-center text-sm">
             <span className="text-muted-foreground">Scheduled Time</span>

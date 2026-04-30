@@ -31,15 +31,16 @@ export class HomeController implements IHomeController {
   });
 
   getNearbyWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const radius = Number(req.query.radius ?? 20);
+    const radius = Number(req.query.radius ?? 150);
     const limit = Number(req.query.limit ?? 10);
+
     const lat = Number(req.query.lat);
     const lng = Number(req.query.lng);
 
     if (isNaN(lat) || isNaN(lng)) {
       throw new CustomError("Invalid query parameters", HTTPSTATUS.BAD_REQUEST);
     }
-    const workers = await this._workerService.getNearbyWorkers(lat, lng, radius, limit);
+    const workers = await this._workerService.listNearbyWorkers({ lat, lng, radius, limit });
     res.status(HTTPSTATUS.OK).json({ workers });
   });
 

@@ -1,45 +1,47 @@
 import { StripeAccountStatus } from "@/constants";
 import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
 import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
-import { WorkerProfileRequestDTO } from "@/dtos/requests/worker.profile.dto";
-import { WorkerResponseDTO } from "@/dtos/responses/admin/worker.dto";
-import { WorkerListingResponseDto } from "@/dtos/responses/worker/worker-listing.response.dto";
+import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
+import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
+import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
 import { NearbyWorkerResponseDTO } from "@/dtos/responses/worker/worker.nearby.response.dto";
-import { WorkerProfileResponseDTO } from "@/dtos/responses/worker/worker.profile.dto";
-import { WorkerSummaryResponseDTO } from "@/dtos/responses/worker/worker.summery.dto";
-import { IWorker, WorkerListingFilters } from "@/types/worker";
+import {
+  WorkerDetailsResponseDto,
+  WorkerProfileResponseDTO,
+} from "@/dtos/responses/worker/worker.profile.dto";
+import { CursorPaginatedResult, PaginatedResult } from "@/types/common/pagination";
+import { IWorker } from "@/types/worker/worker.entity";
+import {
+  NearbyWorkerListQuery,
+  PublicWorkerListQuery,
+  WorkerListQuery,
+} from "@/types/worker/worker.query";
 
 export interface IWorkerService {
-  getWorkerByUserId(userId: string): Promise<IWorker | null>;
-  getWorkerSummary(workerId: string): Promise<WorkerSummaryResponseDTO>;
+  listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListResponseDto>>;
+  listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerResponseDTO[]>;
   getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO>;
+  getWorkerByUserId(userId: string): Promise<IWorker | null>;
+  listPublicWorkers(
+    serviceId: string,
+    query: PublicWorkerListQuery
+  ): Promise<CursorPaginatedResult<PublicWorkerListResponseDto>>;
+
+  updateWorkerPhone(workerId: string, phone: string): Promise<boolean>;
+  updateProfileImage(workerId: string, url: string): Promise<string>;
+
+  getWorkerProfileDetails(workerId: string): Promise<WorkerDetailsResponseDto>;
   updateWorkerProfile(
     workerId: string,
-    data: WorkerProfileRequestDTO
-  ): Promise<WorkerProfileResponseDTO>;
+    data: WorkerProfileRequestDto
+  ): Promise<WorkerDetailsResponseDto>;
+
   createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO>;
-  getAllWorkers(
-    page: number,
-    limit: number,
-    search: string,
-    status: string,
-    workerStatus: string
-  ): Promise<{ workers: WorkerResponseDTO[]; total: number }>;
-  verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerResponseDTO>;
+  verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerProfileResponseDTO>;
   reSubmitWorkerDocument(
     workerId: string,
     data: ResubmitDocument
   ): Promise<WorkerProfileResponseDTO>;
-  getNearbyWorkers(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-    limit: number
-  ): Promise<NearbyWorkerResponseDTO[]>;
-  listWorkers(
-    serviceId: string,
-    data: WorkerListingFilters
-  ): Promise<{ total: number; workers: WorkerListingResponseDto[] }>;
   connectStripe(workerId: string): Promise<string>;
   getStripeStatus(
     workerId: string

@@ -1,8 +1,6 @@
-import type { PricingMode, ServiceType } from '@/constants';
+import type { PricingMode, ServiceType, WorkerStatus } from '@/constants';
 
 import type { BulkDiscountType } from './service';
-
-export type WorkerStatus = 'pending' | 'verified' | 'rejected' | 'needs_revision';
 
 export interface TimeSlot {
   startTime: string;
@@ -43,16 +41,6 @@ export interface Worker {
   rejectReason?: string;
 }
 
-export interface WorkerProfile {
-  displayName: string;
-  tagline?: string;
-  about: string;
-  coverImage: string;
-  defaultRate: number;
-  cities: string[];
-  availability: AvailabilitySlots;
-}
-
 export interface WorkerInfo {
   id: string;
   displayName: string;
@@ -78,29 +66,64 @@ export interface ResubmitDocumentPayload {
   url: string;
 }
 
-export interface WorkerListingInfo {
-  serviceId: string;
-  workerId: string;
-  userId: string;
+export interface GeoLocation {
+  type: 'Point';
+  coordinates: [number, number];
+  addressLabel: string;
+}
+
+export interface PublicWorkerListItem {
+  id: string;
   displayName: string;
   tagline: string;
-  description: string;
-  coverImage: string | null;
-  profileImage: string;
+  profileImage?: string;
   experience: number;
+
+  serviceId: string;
   serviceRate: number;
+  description: string;
   estimatedDuration: number;
   bufferTime: number;
-  isAvailable: boolean;
-  averageRating: number;
-  completionRate: number | null;
-  bulkDiscounts: BulkDiscountType[] | null;
-  reviewCount: number;
   categoryName: string;
   serviceType: ServiceType;
   PricingMode: PricingMode;
-  isPremium: boolean;
+  bulkDiscounts: BulkDiscountType[] | null;
+
+  averageRating: number;
+  reviewCount: number;
+  isAvailable: boolean;
+  travelCost: number;
+  distanceKm: number;
   totalAmount: number;
-  travelCost: number | null;
-  distanceKm: number | null;
 }
+
+export type WorkerProfile = {
+  id: string;
+  displayName: string;
+  tagline: string;
+  about: string;
+  experience: number;
+  profileImage?: string;
+  coverImage: string;
+  addressLabel: string;
+  completedJobs: number;
+  complitionRate: number;
+  averageRating: number;
+  reviewCount: number;
+};
+
+export type WorkerProfileDetails = {
+  id: string;
+  displayName: string;
+  tagline: string;
+  about: string;
+  experience: number;
+  phone: string;
+  profileImage?: string;
+  coverImage: string;
+  location: GeoLocation;
+  status: WorkerStatus;
+  availability: AvailabilitySlots;
+  rejectReason?: string;
+  suspensionReason?: string;
+};

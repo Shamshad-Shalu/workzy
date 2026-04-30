@@ -1,8 +1,10 @@
 import { Expose } from "class-transformer";
 
-import { DEFAULT_WORKER_COVER_IMAGE } from "@/constants";
+import { DEFAULT_WORKER_COVER_IMAGE, WorkerStatus } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { DocumentDto, IAvailabilitySlots, IWorker, WorkerStatus } from "@/types/worker";
+import { IAvailabilitySlots, IGeoLocation, IWorker } from "@/types/worker/worker.entity";
+import { WorkerProfile } from "@/types/worker/worker.projection";
+import { resolveS3Image } from "@/utils/s3.utils";
 
 export class WorkerProfileResponseDTO {
   @Expose() id!: string;
@@ -10,44 +12,71 @@ export class WorkerProfileResponseDTO {
   @Expose() tagline!: string;
   @Expose() about!: string;
   @Expose() experience!: number;
+  @Expose() profileImage?: string;
   @Expose() coverImage!: string;
-  @Expose() defaultRate!: number;
-  @Expose() status!: WorkerStatus;
-  @Expose() skills!: string[];
-  @Expose() cities!: string[];
-  @Expose() availability!: IAvailabilitySlots;
-  @Expose() documents!: DocumentDto[];
+  @Expose() addressLabel!: string;
+  @Expose() averageRating!: number;
+  @Expose() reviewCount!: number;
+  @Expose() completedJobs!: number;
+  @Expose() complitionRate!: number;
+
+  static fromEntity(entity: WorkerProfile): WorkerProfileResponseDTO {
+    const dto = new WorkerProfileResponseDTO();
+    const { completed, accepted } = entity.jobStats;
+
+    dto.id = entity._id.toString();
+    dto.displayName = entity.displayName;
+    dto.tagline = entity.tagline || "";
+    dto.about = entity.about || "";
+    dto.experience = entity.experience || 0;
+    dto.profileImage = entity.profileImage;
+    dto.coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
+    dto.addressLabel = entity.location.addressLabel ?? "";
+    dto.completedJobs = completed ?? 0;
+    dto.complitionRate = accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0;
+    dto.averageRating = Math.round((entity.reviewStats.averageRating ?? 0) * 10) / 10;
+    dto.reviewCount = entity.reviewStats.reviewCount ?? 0;
+
+    return dto;
+  }
+}
+
+export class WorkerDetailsResponseDto {
+  id!: string;
+  displayName!: string;
+  tagline!: string;
+  about!: string;
+  experience!: number;
+  phone!: string;
+  profileImage?: string;
+  coverImage!: string;
+  location!: IGeoLocation;
+  status!: WorkerStatus;
+  availability!: IAvailabilitySlots;
+  rejectReason?: string;
+  suspensionReason?: string;
 
   static async fromEntity(
-    worker: IWorker,
+    entity: IWorker,
     s3Service: IS3Service
-  ): Promise<WorkerProfileResponseDTO> {
-    const dto = new WorkerProfileResponseDTO();
+  ): Promise<WorkerDetailsResponseDto> {
+    const dto = new WorkerDetailsResponseDto();
 
-    dto.id = worker._id.toString();
-    dto.displayName = worker.displayName;
-    dto.tagline = worker.tagline || "";
-    dto.about = worker.about || "";
-    dto.experience = worker.experience || 0;
-    dto.coverImage = worker.coverImage || DEFAULT_WORKER_COVER_IMAGE;
-    dto.defaultRate = worker.defaultRate;
-    dto.skills = worker.skills;
-    dto.cities = worker.cities;
-    dto.status = worker.status;
-    dto.availability = worker.availability;
+    dto.id = entity._id.toString();
+    dto.displayName = entity.displayName;
+    dto.tagline = entity.tagline || "";
+    dto.about = entity.about || "";
+    dto.phone = entity.phone;
+    dto.experience = entity.experience || 0;
+    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
+    dto.coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
 
-    dto.documents = await Promise.all(
-      (worker.documents || []).map(
-        async (doc): Promise<DocumentDto> => ({
-          id: doc._id,
-          name: doc.name,
-          type: doc.type,
-          status: doc.status,
-          rejectReason: doc.rejectReason,
-          url: await s3Service.generateSignedUrl(doc.url),
-        })
-      )
-    );
+    dto.location = entity.location;
+    dto.status = entity.status;
+    dto.availability = entity.availability;
+    dto.rejectReason = entity.rejectReason;
+    dto.suspensionReason = entity.suspensionReason;
+
     return dto;
   }
 }

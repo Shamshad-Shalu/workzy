@@ -17,7 +17,7 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { AccessTokenPayload } from "@/core/types/global/jwt";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { LoginResponseDTO } from "@/dtos/responses/auth.dto";
+import { LoginResponseDto } from "@/dtos/responses/auth.dto";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
 import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import CustomError from "@/utils/customError";
@@ -92,7 +92,7 @@ export class AuthController implements IAuthController {
     const accessToken = generateAccessToken({
       id: user.id.toString(),
       role: user.role as Role,
-      workerId: user.workerId,
+      workerId: user.worker?.id,
     });
 
     res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGIN_SUCCESS, accessToken, user });
@@ -144,13 +144,13 @@ export class AuthController implements IAuthController {
         clearRefreshTokenCookie(res);
         throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
       }
-      payload["workerId"] = worker._id.toString();
-      fullUser = { ...fullUser, workerId: worker._id.toString() };
+      const { _id, displayName, profileImage } = worker;
+      payload["workerId"] = _id.toString();
+      fullUser = { ...fullUser, workerData: { _id: _id.toString(), displayName, profileImage } };
     }
 
     const accessToken = generateAccessToken(payload);
-    const plainUser = await LoginResponseDTO.fromEntity(fullUser, this._s3Service);
-
+    const plainUser = await LoginResponseDto.fromEntity(fullUser, this._s3Service);
     res.status(HTTPSTATUS.OK).json({ accessToken, user: plainUser });
   });
 
@@ -211,7 +211,6 @@ export class AuthController implements IAuthController {
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }
-
     setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     res.redirect(`${CLIENT_URL}/auth/google/callback`);

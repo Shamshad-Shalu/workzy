@@ -1,34 +1,29 @@
-import { FilterQuery } from "mongoose";
-
 import { BaseRepository } from "@/core/abstracts/base.repository";
-import { WorkerReviewStats } from "@/types/review";
+import { PaginatedResult, CursorPaginatedResult } from "@/types/common/pagination";
+import { IReviewStats, IWorker } from "@/types/worker/worker.entity";
 import {
-  IWorker,
-  NearbyWorkerEntity,
-  WorkerListingEntity,
-  WorkerListingFilters,
-  WorkerSummaryEntity,
-} from "@/types/worker";
+  NearbyWorkerItem,
+  PublicWorkerListItem,
+  WorkerListItem,
+  WorkerProfile,
+} from "@/types/worker/worker.projection";
+import {
+  NearbyWorkerListQuery,
+  PublicWorkerListQuery,
+  WorkerListQuery,
+} from "@/types/worker/worker.query";
 
 export interface IWorkerRepository extends BaseRepository<IWorker> {
-  getWorkerSummary(workerId: string): Promise<WorkerSummaryEntity | null>;
-  getAllWorkers(
-    filter: FilterQuery<IWorker>,
-    skip: number,
-    limit: number
-  ): Promise<IWorker[] | null>;
-  findNearbyWorkers(
-    lat: number,
-    lng: number,
-    radiusKm: number,
-    limit: number
-  ): Promise<NearbyWorkerEntity[]>;
-  listWorkers(
+  getWorkerProfile(workerId: string): Promise<WorkerProfile | null>;
+  listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerItem[]>;
+  listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>>;
+  listPublicWorkers(
     serviceId: string,
-    params: WorkerListingFilters
-  ): Promise<{ total: number; workersRaw: WorkerListingEntity[] }>;
+    query: PublicWorkerListQuery
+  ): Promise<CursorPaginatedResult<PublicWorkerListItem>>;
+
   incrementRating(workerId: string, rating: number): Promise<void>;
   adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void>;
   decrementRating(workerId: string, rating: number): Promise<void>;
-  getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats | null>;
+  getWorkerReviewStats(workerId: string): Promise<IReviewStats | null>;
 }

@@ -16,15 +16,15 @@ import {
   ValidateNested,
 } from "class-validator";
 
-import { LocationDTO } from "./profile.dto";
+import { LocationDto } from "./profile.dto";
 
-class BookingLocationDTO {
+class BookingLocationDto {
   @IsString()
   label!: string;
 
   @ValidateNested()
-  @Type(() => LocationDTO)
-  location!: LocationDTO;
+  @Type(() => LocationDto)
+  location!: LocationDto;
 }
 
 // class BookingScheduleEntryDTO {
@@ -55,8 +55,8 @@ export class CreatebookingDTO {
   itemCount?: number;
 
   @ValidateNested()
-  @Type(() => BookingLocationDTO)
-  address!: BookingLocationDTO;
+  @Type(() => BookingLocationDto)
+  address!: BookingLocationDto;
 
   @IsOptional()
   @IsString()
@@ -77,7 +77,7 @@ export class RejectBookingDTO {
   reason!: string;
 }
 
-export class VerifyOtpDTO {
+export class VerifyBookingOtpDTO {
   @IsString()
   @Length(6, 6, { message: "OTP must be exactly 4 digits" })
   otp!: string;

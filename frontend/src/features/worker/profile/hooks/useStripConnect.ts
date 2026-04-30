@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { STRIPE_ACCOUNT_STATUS } from '@/constants/payment';
+import { STRIPE_ACCOUNT_STATUS } from '@/constants';
 import WorkerService from '@/services/worker.service';
 import { handleApiError } from '@/utils/handleApiError';
 

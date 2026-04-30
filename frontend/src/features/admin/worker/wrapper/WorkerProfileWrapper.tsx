@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 import ProfileImage from '@/components/molecules/ProfileImage';
 import ProfileImageModal from '@/components/molecules/ProfileImageModal';
-import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkerProfileSkeleton';
+import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkeAboutSkeleton';
 import { useWorkerProfile } from '@/features/worker/profile/hooks/useWorkerProfile';
 import type { StatItem } from '@/features/worker/profile/layouts/WorkerProfileLayout';
 import WorkerProfileLayout from '@/features/worker/profile/layouts/WorkerProfileLayout';

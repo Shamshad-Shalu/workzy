@@ -1,31 +1,32 @@
-import { Award, Check, MapPin, Star } from 'lucide-react';
+import { Award, MapPin } from 'lucide-react';
 
-import type { WorkerInfo } from '@/types/worker';
+import type { WorkerProfile } from '@/types/worker';
+
+import { StarRating } from '../atoms/StarRating';
+import ProfileImage from '../molecules/ProfileImage';
 
 import type React from 'react';
 
 interface Props {
-  workerInfo: WorkerInfo;
+  worker: WorkerProfile;
   workerAction?: React.ReactNode;
   showUserButtons?: boolean;
 }
 
 export default function WorkerProfileHeader({
-  workerInfo,
+  worker,
   workerAction,
   showUserButtons = false,
 }: Props) {
   const {
     displayName,
     tagline,
-    isPremium,
-    address,
     experience,
     averageRating,
     reviewCount,
-    rate,
     profileImage,
-  } = workerInfo;
+    addressLabel,
+  } = worker;
 
   return (
     <div className="bg-card border border-border rounded-2xl shadow-sm p-6 md:p-8">
@@ -36,18 +37,14 @@ export default function WorkerProfileHeader({
               {workerAction ? (
                 workerAction
               ) : (
-                <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden ring-2 ring-border shadow-md">
-                  <img
-                    src={profileImage}
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              )}
-              {isPremium && (
-                <span className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full whitespace-nowrap shadow-sm">
-                  <Check className="w-2.5 h-2.5" /> Verified
-                </span>
+                <ProfileImage src={profileImage} name={displayName} />
+                // <div className="w-24 h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden ring-2 ring-border shadow-md">
+                //   <img
+                //     src={profileImage}
+                //     alt={displayName}
+                //     className="w-full h-full object-cover"
+                //   />
+                // </div>
               )}
             </div>
           </div>
@@ -58,11 +55,9 @@ export default function WorkerProfileHeader({
             <p className="text-sm text-muted-foreground">{tagline}</p>
 
             <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 text-xs text-muted-foreground mt-1">
-              {address && (
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5" /> {address}
-                </span>
-              )}
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" /> {addressLabel}
+              </span>
               {experience && (
                 <span className="flex items-center gap-1">
                   <Award className="w-3.5 h-3.5" /> {experience} yrs exp
@@ -73,7 +68,7 @@ export default function WorkerProfileHeader({
         </div>
         <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-4 flex-shrink-0">
           <div className="flex flex-col items-center md:items-end gap-0.5">
-            <div className="flex items-center gap-1.5">
+            {/* <div className="flex items-center gap-1.5">
               <div className="flex">
                 {[1, 2, 3, 4, 5].map((_, i) => {
                   const fill = Math.max(0, Math.min(1, (averageRating || 0) - i));
@@ -91,10 +86,11 @@ export default function WorkerProfileHeader({
                 })}
               </div>
               <span className="text-base font-bold text-foreground">{averageRating}</span>
-            </div>
+            </div> */}
+            <StarRating rating={averageRating} />
             <span className="text-xs text-muted-foreground">({reviewCount} reviews)</span>
           </div>
-          <div className="text-right">
+          {/* <div className="text-right">
             <div className="flex items-start justify-end gap-0.5">
               <span className="text-sm font-bold text-foreground/60 mt-1">₹</span>
               <span className="text-3xl font-black text-foreground tracking-tighter leading-none">
@@ -102,7 +98,7 @@ export default function WorkerProfileHeader({
               </span>
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">per visit</p>
-          </div>
+          </div> */}
         </div>
       </div>
 

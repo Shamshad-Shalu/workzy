@@ -2,7 +2,7 @@ import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/tool
 
 import { AUTH_API, HOST, SESSION_MESSAGES } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
-import type { User } from '@/types/user';
+import type { UpdateUserPayload, User } from '@/types/user';
 
 interface AuthState {
   isAuthenticated: boolean;
@@ -60,9 +60,18 @@ const authSlice = createSlice({
       state.accessToken = action.payload;
       setAxiosToken(action.payload);
     },
-    updateUser: (state, action: PayloadAction<Partial<User>>) => {
+    updateUser: (state, action: PayloadAction<UpdateUserPayload>) => {
       if (state.user) {
-        state.user = { ...state.user, ...action.payload };
+        state.user = {
+          ...state.user,
+          ...action.payload,
+          worker: state.user.worker
+            ? {
+                ...state.user.worker,
+                ...(action.payload.worker ?? {}),
+              }
+            : state.user.worker,
+        };
       }
     },
     // Logout

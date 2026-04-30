@@ -24,7 +24,11 @@ export const passwordRule = z
   .regex(/[^A-Za-z0-9]/, 'Password must contain a symbol')
   .min(8, 'Password must be at least 8 characters');
 
-export const phoneRule = z.string().regex(/^[0-9]{10}$/, 'Phone number must be exactly 10 digits');
+export const phoneRule = z
+  .string()
+  .trim()
+  .min(1, 'Phone number is required')
+  .regex(/^[6-9]\d{9}$/, 'Enter a valid 10-digit Indian phone number');
 
 export const serviceNameRule = z
   .string()

@@ -4,10 +4,10 @@ import { NavLink, Outlet } from 'react-router-dom';
 import StatCard from '@/components/molecules/StatCard';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
 import { cn } from '@/lib/utils';
-import type { WorkerInfo } from '@/types/worker';
+import type { WorkerProfile } from '@/types/worker';
 
 interface WorkerProfileLayoutProps {
-  workerInfo: WorkerInfo;
+  workerInfo: WorkerProfile;
   workerAction?: React.ReactNode;
   reloadWorkerData?: () => void;
 }
@@ -38,13 +38,13 @@ export default function WorkerProfileLayout({
         <img src={workerInfo.coverImage} className="w-full h-full object-cover" alt="banner" />
         <div className="absolute inset-0 bg-black/10" />
       </div>
-      <WorkerProfileHeader workerInfo={workerInfo} workerAction={workerAction} />
+      <WorkerProfileHeader worker={workerInfo} workerAction={workerAction} />
       <div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-7">
           <StatCard
             icon={<ClipboardCheck className="w-6 h-6" />}
             label="Jobs Completed"
-            value={workerInfo.worksCompleted}
+            value={workerInfo.completedJobs}
           />
           <StatCard
             icon={<Star className="w-6 h-6" />}
@@ -54,7 +54,7 @@ export default function WorkerProfileLayout({
           <StatCard
             icon={<TrendingUp className="w-6 h-6" />}
             label="Completion Rate"
-            value={`${workerInfo.worksCompleted ?? 0}%`}
+            value={`${workerInfo.complitionRate}%`}
           />
         </div>
         <div className="bg-card rounded-2xl shadow-sm mb-6 flex px-6 flex justify-between border-b border-border">

@@ -7,7 +7,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { setRadius as setRadiusAction } from '@/store/slices/locationSlice';
 import type { RootState } from '@/store/store';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 
 import BookingModal from '../../booking/components/bookingForm/BookingModal';
 import FilterSidebar from '../components/FilterSidebar';
@@ -28,7 +28,7 @@ export default function WorkerListingPage() {
   const { isAuthenticated } = useAppSelector(s => s.auth);
   const { radius, latitude, longitude, city } = useAppSelector((s: RootState) => s.location);
 
-  const [bookingWorker, setBookingWorker] = useState<WorkerListingInfo | null>(null);
+  const [bookingWorker, setBookingWorker] = useState<PublicWorkerListItem | null>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [minRating, setMinRating] = useState<number>(0);
@@ -38,7 +38,7 @@ export default function WorkerListingPage() {
   const { data: selectedService } = useServiceDetails(serviceId);
   const filterConfig = useMemo(() => getFilterConfig(selectedService ?? null), [selectedService]);
 
-  const handleBook = (worker: WorkerListingInfo) => {
+  const handleBook = (worker: PublicWorkerListItem) => {
     if (!isAuthenticated) {
       navigate('/login', { state: { from: location.pathname } });
       return;

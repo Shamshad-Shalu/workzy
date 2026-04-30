@@ -126,7 +126,6 @@ const BookingSnapshotSchema = new Schema<IBookingSnapshot>(
       name: { type: String, required: true },
       phone: String,
       profileImage: String,
-      rating: Number,
     },
     category: {
       name: { type: String, required: true },

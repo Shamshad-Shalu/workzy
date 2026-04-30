@@ -1,31 +1,26 @@
-export interface WorkerRow {
-  id: string;
-  userId: string;
-  name: string;
+import type { StripeAccountStatus, WorkerStatus } from '@/constants';
+
+export interface WorkerListItem {
   email: string;
-  phone?: string;
-  isPremium: boolean;
-  isBlocked: boolean;
-  profileImage?: string;
-  createdAt: string;
-
-  status: 'pending' | 'verified' | 'rejected' | 'needs_revision';
+  id: string;
   displayName: string;
-  tagline?: string;
-  about?: string;
-  experience?: number;
-
-  documents: {
-    id: string;
-    type: string;
-    url: string;
-    name?: string;
-    status: string;
-  }[];
-  defaultRate?: number;
+  profileImage?: string;
+  status: WorkerStatus;
+  userId: string;
+  phone?: string;
+  stripeAccountStatus: StripeAccountStatus;
+  createdAt: Date;
 }
 
-export interface WorkerResponse {
-  workers: WorkerRow[];
+export interface AdminWorkerListResponse {
+  workers: WorkerListItem[];
   total: number;
 }
+
+export type AdminWorkerListQuery = {
+  page: number;
+  limit: number;
+  search?: string;
+  status?: string;
+  stripStatus?: string;
+};

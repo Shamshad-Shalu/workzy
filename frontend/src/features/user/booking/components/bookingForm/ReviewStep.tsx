@@ -2,7 +2,7 @@ import { CalendarDays, Clock, Percent, StickyNote, Zap } from 'lucide-react';
 
 import { PRICING_MODE } from '@/constants';
 import type { BookingState } from '@/types/slot';
-import type { WorkerListingInfo } from '@/types/worker';
+import type { PublicWorkerListItem } from '@/types/worker';
 import { formatDuration, formatDate, formatTime12 } from '@/utils/time.format';
 
 import type { BookingPricing } from '../../hooks/useBooking';
@@ -12,7 +12,7 @@ export default function ReviewStep({
   booking,
   pricing,
 }: {
-  worker: WorkerListingInfo;
+  worker: PublicWorkerListItem;
   booking: BookingState;
   pricing: BookingPricing;
 }) {

@@ -5,10 +5,10 @@ import { AppCarousel } from '@/components/molecules/AppCarousel';
 import { homeService } from '@/services/home.service';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type { Worker, WorkersApiResponse } from '@/types/home/home';
+import type { NearbyWorkerItem, NearbyWorkerListResponse } from '@/types/home/home';
 import type { NearbyWorkersContent } from '@/types/home/home.sectionContent';
 
-import { WorkerCard } from './WorkerCard';
+import NearbyWorkerCard from './NearbyWorkerCard';
 
 interface NearWorkersSectionProps {
   section: NearbyWorkersContent;
@@ -21,7 +21,7 @@ export default function NearWorkersSection({ section }: NearWorkersSectionProps)
     data: workers = [],
     error,
     isLoading,
-  } = useQuery<WorkersApiResponse, Error, Worker[]>({
+  } = useQuery<NearbyWorkerListResponse, Error, NearbyWorkerItem[]>({
     queryKey: ['workers', latitude, longitude, radiusKm, limit],
     queryFn: () =>
       homeService.getNearbyWorkers({ radius: radiusKm, limit, lat: latitude, lng: longitude }),
@@ -57,7 +57,7 @@ export default function NearWorkersSection({ section }: NearWorkersSectionProps)
         ) : (
           <AppCarousel
             items={workers}
-            renderItem={worker => <WorkerCard key={worker.id} worker={worker} />}
+            renderItem={worker => <NearbyWorkerCard key={worker.id} worker={worker} />}
             className="pl-5"
           />
         )}

@@ -1,11 +1,14 @@
 import { injectable } from "inversify";
-import { Types } from "mongoose";
+import { FilterQuery, Types } from "mongoose";
 
+import { ROLE } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import User from "@/models/user.model";
-import { IUser } from "@/types/user";
-import { buildUserFilter } from "@/utils/admin/filters/buildUserFilter";
+import { PaginatedResult } from "@/types/common/pagination";
+import { IUser } from "@/types/user/user.entity";
+import { UserListItem } from "@/types/user/user.projection";
+import { UserListQuery } from "@/types/user/user.query";
 
 @injectable()
 export class UserRepository extends BaseRepository<IUser> implements IUserRepository {
@@ -30,14 +33,36 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await User.findOne({ googleId });
   }
 
-  async getAllUsers(
-    skip: number,
-    limit: number,
-    search: string,
-    status: string,
-    role: string
-  ): Promise<IUser[]> {
-    const filter = buildUserFilter(search, status, role);
-    return this.model.find(filter).skip(skip).limit(limit).sort({ createdAt: -1 }).exec();
+  async listUsers(query: UserListQuery): Promise<PaginatedResult<UserListItem>> {
+    const { page, limit, search, status, role } = query;
+    const skip = (page - 1) * limit;
+
+    const filter: FilterQuery<IUser> = {};
+    if (search?.trim()) {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [{ name: regex }, { email: regex }];
+    }
+    if (status === "active") filter.isBlocked = false;
+    if (status === "blocked") filter.isBlocked = true;
+
+    if (role === "all") {
+      filter.role = { $ne: ROLE.ADMIN };
+    } else if (role === ROLE.USER) {
+      filter.role = ROLE.USER;
+    } else if (role === ROLE.WORKER) {
+      filter.role = ROLE.WORKER;
+    }
+
+    const [users, total] = await Promise.all([
+      this.model
+        .find(filter)
+        .select("name email phone role isBlocked profileImage  createdAt")
+        .skip(skip)
+        .limit(limit)
+        .lean()
+        .exec(),
+      this.model.countDocuments(filter),
+    ]);
+    return { data: users, total };
   }
 }

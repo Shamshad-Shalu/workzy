@@ -2,19 +2,26 @@ import { WORKER_API } from '@/constants';
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
 import type { WorkerProfileSchemaType } from '@/features/worker/profile/validation/workerProfileSchema';
 import api from '@/lib/api/axios';
-import type { ResubmitDocumentPayload, Worker, WorkerProfile } from '@/types/worker';
+import type { ResubmitDocumentPayload, Worker, WorkerProfileDetails } from '@/types/worker';
 
 const WorkerProfileService = {
-  getWorkerProfileById: async (workerId: string): Promise<WorkerProfile> => {
-    const res = await api.get(WORKER_API.PROFILE_ABOUT(workerId));
+  getWorkerProfileDetails: async (): Promise<WorkerProfileDetails> => {
+    const res = await api.get(WORKER_API.DETAILS);
     return res.data;
   },
-
   updateWorkerProfile: async (
-    workerId: string,
     data: WorkerProfileSchemaType
-  ): Promise<{ message: string; workerData: WorkerProfile }> => {
-    const res = await api.patch(WORKER_API.PROFILE(workerId), data);
+  ): Promise<{ message: string; workerData: WorkerProfileDetails }> => {
+    const res = await api.patch(WORKER_API.PROFILE, data);
+    return res.data;
+  },
+  updateWorkerPhone: async (phone: string): Promise<{ message: string }> => {
+    console.log({ phone });
+    const res = await api.patch(WORKER_API.PHONE, { phone });
+    return res.data;
+  },
+  updateProfileImage: async (url: string): Promise<{ url: string }> => {
+    const res = await api.patch(WORKER_API.PROFILE_IMAGE, { url });
     return res.data;
   },
 
@@ -23,11 +30,6 @@ const WorkerProfileService = {
     data: JoinWorkerSchemaType
   ): Promise<{ worker: Worker; message: string }> => {
     const res = await api.post(WORKER_API.JOIN(userId), data);
-    return res.data;
-  },
-
-  getMe: async (): Promise<Worker> => {
-    const res = await api.get(WORKER_API.ME);
     return res.data;
   },
 

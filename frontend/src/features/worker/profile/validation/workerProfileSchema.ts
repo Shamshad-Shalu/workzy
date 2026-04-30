@@ -4,13 +4,22 @@ import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules
 
 import { availabilitySchema } from '../../validation/availabilitySchema';
 
+const geoLocationSchema = z.object({
+  type: z.literal('Point'),
+  coordinates: z
+    .tuple([z.number(), z.number()])
+    .refine(([lng, lat]) => lng >= -180 && lng <= 180 && lat >= -90 && lat <= 90, {
+      message: 'Invalid coordinates',
+    }),
+  addressLabel: z.string().min(1, 'Address is required'),
+});
+
 export const workerProfileSchema = z.object({
   displayName: serviceNameRule,
   tagline: serviceNameRule,
   about: descriptionRuleRequired,
   coverImage: z.string().optional(),
-  defaultRate: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
-  cities: z.array(z.string()).min(1, 'At least one skill required'),
+  location: geoLocationSchema,
   availability: availabilitySchema,
 });
 

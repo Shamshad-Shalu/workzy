@@ -8,20 +8,20 @@ import homeRoutes from "./home.routes";
 import leaveRoutes from "./leave.routes";
 import paymentRoutes from "./payment.routes";
 import planRoutes from "./plan.routes";
-import profileRoute from "./profile.routes";
 import reviewRoutes from "./review.routes";
 import serviceRoutes from "./service.routes";
 import slotRoutes from "./slot.routes";
 import subscriptionRoutes from "./subscription.routes";
 import uploadRoutes from "./upload.routes";
+import userRoutes from "./user.routes";
 import workerRoutes from "./worker.routes";
 
 const router = Router();
 
 router.use("/auth", authRoute);
-router.use("/profile", profileRoute);
 router.use("/admin", adminRoutes);
-router.use("/worker", workerRoutes);
+router.use("/users", userRoutes);
+router.use("/workers", workerRoutes);
 router.use("/upload", uploadRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/services", serviceRoutes);
