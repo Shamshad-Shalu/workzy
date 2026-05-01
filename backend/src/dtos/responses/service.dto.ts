@@ -27,7 +27,7 @@ export class ServiceResponseDto {
     const dto = new ServiceResponseDto();
     const { _id, name, iconUrl, imageUrl, pricingMode, serviceType } = entity.categoryId;
 
-    dto.id = entity.id;
+    dto.id = entity._id.toString();
     dto.categoryId = _id.toString();
     dto.serviceName = name;
     dto.serviceType = serviceType as ServiceType;

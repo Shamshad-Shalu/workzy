@@ -67,6 +67,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
       { $limit: limit + 1 },
       {
         $project: {
+          _id: 1,
           workerId: 1,
           rate: 1,
           description: 1,

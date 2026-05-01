@@ -25,8 +25,6 @@ import {
 
 import type { ServiceFormType } from '../validation/ServiceFormData';
 
-
-
 type SelectOption = { label: string; value: string };
 
 export default function WorkerServicesPage() {
@@ -90,9 +88,10 @@ export default function WorkerServicesPage() {
     setEditingService(service);
     setServiceModalOpen(true);
   };
-
   const handleToggleStatus = async () => {
-    if (!statusService?.id) {return;}
+    if (!statusService?.id) {
+      return;
+    }
     const res = await toggleServiceStatus(statusService.id);
     if (res.message) {
       setStatusService(null);
