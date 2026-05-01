@@ -3,34 +3,28 @@ import { SERVICE_API } from '@/constants/apiRoutes/service.routes';
 import type { WorkerListParams } from '@/features/user/services/components/WorkerList';
 import type { ServiceFormType } from '@/features/worker/services/validation/ServiceFormData';
 import api from '@/lib/api/axios';
-import type { CategoryOption } from '@/types/category';
-import type { Service, ServiceResponse } from '@/types/service';
-import type { WorkerListingInfo } from '@/types/worker';
+import type {
+  CategoryOption,
+  Service,
+  ServiceFilters,
+  WorkerServicesResponse,
+} from '@/types/service';
+import type { PublicWorkerListItem } from '@/types/worker';
 
-interface Filters {
-  page?: number;
-  limit?: number;
-  search?: string;
-  status?: string;
-  categoryId?: string | null;
-}
 interface SResponse {
   message: string;
   service: Service;
 }
 
 const ServiceManagement = {
-  getServices: async (
-    workerId: string,
-    { page = 1, limit = 10, search = '', status = 'all', categoryId = null }: Filters
-  ): Promise<ServiceResponse> => {
-    const res = await api.get(SERVICE_API.BY_ID(workerId), {
-      params: { page, limit, search, status, categoryId: categoryId === 'all' ? null : categoryId },
+  getServices: async (params: ServiceFilters): Promise<WorkerServicesResponse> => {
+    const res = await api.get(SERVICE_API.BY_WORKER, {
+      params,
     });
     return res.data;
   },
-  getWorkerServiceCategories: async (workerId: string): Promise<CategoryOption[]> => {
-    const res = await api.get(SERVICE_API.FILTERS(workerId));
+  getWorkerServiceCategories: async (): Promise<{ categories: CategoryOption[] }> => {
+    const res = await api.get(SERVICE_API.FILTERS);
     return res.data;
   },
 
@@ -50,7 +44,7 @@ const ServiceManagement = {
   listWorkers: async (
     serviceId: string,
     params: WorkerListParams
-  ): Promise<{ total: number; workers: WorkerListingInfo[] }> => {
+  ): Promise<{ total: number; workers: PublicWorkerListItem[] }> => {
     const res = await api.get(WORKER_API.LIST_BY_SERVICE(serviceId), { params });
     return res.data;
   },

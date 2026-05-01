@@ -26,6 +26,33 @@ export default function ServiceDiscoveryPage() {
     staleTime: 60 * 60 * 1000,
   });
 
+  const {
+    data,
+    isLoading: isInitialLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = usePublicServices({
+    categoryId: activeCategoryId || undefined,
+    sortBy: sortBy,
+    limit: 8,
+  });
+
+  useEffect(() => {
+    const checkOverflow = () => {
+      const el = categoryScrollRef.current;
+      if (!el) {
+        setShowCategoryArrows(false);
+        return;
+      }
+      setShowCategoryArrows(el.scrollWidth > el.clientWidth + 2);
+    };
+
+    checkOverflow();
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [categories, loadingCategories]);
+
   const updateParam = (key: string, value: string) => {
     setSearchParams(prev => {
       if (!value) {
@@ -44,33 +71,6 @@ export default function ServiceDiscoveryPage() {
   const scrollCategories = (delta: number) => {
     categoryScrollRef.current?.scrollBy({ left: delta, behavior: 'smooth' });
   };
-
-  useEffect(() => {
-    const checkOverflow = () => {
-      const el = categoryScrollRef.current;
-      if (!el) {
-        setShowCategoryArrows(false);
-        return;
-      }
-      setShowCategoryArrows(el.scrollWidth > el.clientWidth + 2);
-    };
-
-    checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
-  }, [categories, loadingCategories]);
-
-  const {
-    data,
-    isLoading: isInitialLoading,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = usePublicServices({
-    categoryId: activeCategoryId || undefined,
-    sortBy: sortBy,
-    limit: 8,
-  });
 
   const services = data?.pages.flatMap(page => page.categories) ?? [];
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);

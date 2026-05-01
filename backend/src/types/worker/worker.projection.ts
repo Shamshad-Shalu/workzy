@@ -2,7 +2,7 @@ import { Types } from "mongoose";
 
 import { PricingMode, ServiceType, StripeAccountStatus, WorkerStatus } from "@/constants";
 
-import { BulkDiscountType } from "../service";
+import { BulkDiscountType } from "../service/service.entity";
 
 import { IGeoLocation, IJobStats, IReviewStats } from "./worker.entity";
 

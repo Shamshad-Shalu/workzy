@@ -1,5 +1,5 @@
 import { PricingMode, ServiceType } from "@/constants";
-import { BulkDiscountType } from "@/types/service";
+import { BulkDiscountType } from "@/types/service.entity";
 import { PublicWorkerListItem } from "@/types/worker/worker.projection";
 
 export class PublicWorkerListResponseDto {

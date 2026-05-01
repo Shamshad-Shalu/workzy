@@ -1,16 +1,15 @@
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { CategoryOption } from "@/types/category";
-import { IService } from "@/types/service";
-import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { IService } from "@/types/service/service.entity";
+import { WorkerServiceItem } from "@/types/service/service.projection";
+import { ServiceListQuery } from "@/types/service/service.query";
 
 export interface IServiceRepository extends BaseRepository<IService> {
-  getWorkerServicesAggregate(
+  listWorkerServices(
     workerId: string,
-    page: number,
-    limit: number,
-    search: string,
-    status: string,
-    categoryId: string | null
-  ): Promise<WorkerServicesAggregationResult>;
+    query: ServiceListQuery
+  ): Promise<CursorPaginatedResult<WorkerServiceItem>>;
   getWorkerServiceParentCategories(workerId: string): Promise<CategoryOption[]>;
+  getServiceById(serviceId: string): Promise<WorkerServiceItem | null>;
 }

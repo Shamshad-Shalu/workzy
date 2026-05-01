@@ -14,7 +14,7 @@ import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
 import { ICategory } from "@/types/category";
-import { IService } from "@/types/service";
+import { IService } from "@/types/service/service.entity";
 import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO, ISlot } from "@/types/slot";
 import { Day, IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";

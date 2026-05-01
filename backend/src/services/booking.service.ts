@@ -42,7 +42,7 @@ import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking
 import { BookingContext, IBooking, IEvidence, IExtraCharge } from "@/types/booking/booking.entity";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
-import { BulkDiscountType } from "@/types/service";
+import { BulkDiscountType } from "@/types/service/service.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 import { calculateDistanceKm } from "@/utils/geo";

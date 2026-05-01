@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { HTTPSTATUS, WORKER } from "@/constants";
+import { AUTH, HTTPSTATUS } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
 import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
@@ -14,11 +14,7 @@ import CustomError from "@/utils/customError";
 export class ServiceController implements IServiceController {
   constructor(@inject(TYPES.ServiceManagement) private _serviceMangement: IServiceManagement) {}
   createService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
-
-    if (!workerId) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.UNAUTHORIZED);
-    }
+    const workerId = this.requireWorkerId(req);
     const data = req.body as ServiceRequestDTO;
     const service = await this._serviceMangement.createService(workerId, data);
 
@@ -26,12 +22,8 @@ export class ServiceController implements IServiceController {
   });
 
   updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
+    const workerId = this.requireWorkerId(req);
     const { serviceId } = req.params;
-
-    if (!workerId) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.UNAUTHORIZED);
-    }
     const data = req.body as ServiceRequestDTO;
     const service = await this._serviceMangement.updateService(workerId, serviceId, data);
 
@@ -39,12 +31,8 @@ export class ServiceController implements IServiceController {
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
+    const workerId = this.requireWorkerId(req);
     const { serviceId } = req.params;
-
-    if (!workerId) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.UNAUTHORIZED);
-    }
     const { newStatus, message } = await this._serviceMangement.updateServiceStatus(
       workerId,
       serviceId
@@ -54,31 +42,38 @@ export class ServiceController implements IServiceController {
   });
 
   getWorkerServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { workerId } = req.params;
+    const workerId = this.requireWorkerId(req);
 
-    const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
-    const status = (req.query.status as string) || "all";
+    const status = (req.query.status as "all" | "blocked" | "active") || "all";
     const categoryId = !req.query.categoryId ? null : (req.query.categoryId as string);
+    const parsedCursor = req.query.cursor
+      ? JSON.parse(Buffer.from(req.query.cursor as string, "base64url").toString("utf8"))
+      : undefined;
 
-    const { services, total } = await this._serviceMangement.getWorkerServices(
-      workerId,
-      page,
+    const { data, nextCursor } = await this._serviceMangement.getWorkerServices(workerId, {
       limit,
       search,
       status,
-      categoryId
-    );
-    res.status(HTTPSTATUS.OK).json({
-      services,
-      total,
+      categoryId,
+      cursor: parsedCursor
+        ? { _id: parsedCursor._id, createdAt: new Date(parsedCursor.createdAt) }
+        : undefined,
     });
+    res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
   });
 
   getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { workerId } = req.params;
+    const workerId = this.requireWorkerId(req);
     const categories = await this._serviceMangement.getWorkerServiceFilters(workerId);
     res.status(HTTPSTATUS.OK).json({ categories });
   });
+
+  private requireWorkerId(req: Request): string {
+    if (!req.user?.workerId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    return req.user.workerId;
+  }
 }

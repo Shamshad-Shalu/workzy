@@ -1,24 +1,18 @@
 import { inject } from "inversify";
 import { Types } from "mongoose";
 
-import redisClient from "@/config/redisClient";
-import {
-  CATEGORY,
-  HTTPSTATUS,
-  REFRESH_TOKEN_TTL_SECONDS,
-  SERVICE,
-  SERVICE_TYPE,
-  WORKER,
-} from "@/constants";
+import { CATEGORY, HTTPSTATUS, SERVICE, SERVICE_TYPE, WORKER } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { TYPES } from "@/di/types";
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
-import { ServiceResponseDTO } from "@/dtos/responses/service.dto";
+import { ServiceResponseDto } from "@/dtos/responses/service.dto";
 import { CategoryOption, ICategory } from "@/types/category";
-import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { ServiceListQuery } from "@/types/service/service.query";
 import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -28,10 +22,11 @@ export class ServiceManagement implements IServiceManagement {
   constructor(
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository
   ) {}
 
-  async createService(workerId: string, data: ServiceRequestDTO): Promise<ServiceResponseDTO> {
+  async createService(workerId: string, data: ServiceRequestDTO): Promise<ServiceResponseDto> {
     const isAlredyExists = await this._serviceRepository.findOne({
       workerId,
       categoryId: data.categoryId,
@@ -51,15 +46,19 @@ export class ServiceManagement implements IServiceManagement {
       workerId: new Types.ObjectId(workerId),
       categoryId: category.id,
     });
+    const serviceData = await this._serviceRepository.getServiceById(service._id);
+    if (!serviceData) {
+      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
     await clearRedisListCache(`worker:${workerId}:services`);
-    return ServiceResponseDTO.fromEntity(service, category);
+    return ServiceResponseDto.fromEntity(serviceData);
   }
 
   async updateService(
     workerId: string,
     serviceId: string,
     data: ServiceRequestDTO
-  ): Promise<ServiceResponseDTO> {
+  ): Promise<ServiceResponseDto> {
     const service = await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND);
 
     if (!service.workerId.equals(workerId)) {
@@ -74,12 +73,12 @@ export class ServiceManagement implements IServiceManagement {
     this.validateServiceTiming(category, data);
 
     const updatedService = await this._serviceRepository.findByIdAndUpdate(serviceId, data);
-
-    if (!updatedService) {
+    const serviceData = await this._serviceRepository.getServiceById(service?._id);
+    if (!updatedService || !serviceData) {
       throw new CustomError(SERVICE.UPDATE_ERROR, HTTPSTATUS.NOT_FOUND);
     }
     await clearRedisListCache(`worker:${workerId}:services`);
-    return ServiceResponseDTO.fromEntity(updatedService, category);
+    return ServiceResponseDto.fromEntity(serviceData);
   }
 
   async updateServiceStatus(
@@ -139,27 +138,17 @@ export class ServiceManagement implements IServiceManagement {
 
   async getWorkerServices(
     workerId: string,
-    page: number,
-    limit: number,
-    search: string,
-    status: string,
-    categoryId: string | null
-  ): Promise<WorkerServicesAggregationResult> {
-    const cacheKey = `worker:${workerId}:services:${page}:${limit}:${search}:${status}:${categoryId}`;
-    const cached = await redisClient.get(cacheKey);
+    query: ServiceListQuery
+  ): Promise<CursorPaginatedResult<ServiceResponseDto>> {
+    const { limit, status, categoryId, cursor, search } = query;
+    const cacheKey = `worker:${workerId}:services:${cursor?._id}:${cursor?.createdAt}:${limit}:${search}:${status}:${categoryId}`;
+    const cached = await this._redisService.get(cacheKey);
     if (cached) {
       return JSON.parse(cached);
     }
-    const result = await this._serviceRepository.getWorkerServicesAggregate(
-      workerId,
-      page,
-      limit,
-      search,
-      status,
-      categoryId
-    );
-    await redisClient.set(cacheKey, JSON.stringify(result), { EX: REFRESH_TOKEN_TTL_SECONDS });
-
+    const { data, nextCursor } = await this._serviceRepository.listWorkerServices(workerId, query);
+    const result = { nextCursor, data: ServiceResponseDto.fromEntities(data) };
+    await this._redisService.setWithTTL(cacheKey, JSON.stringify(result));
     return result;
   }
 

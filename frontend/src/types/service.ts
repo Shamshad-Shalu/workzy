@@ -7,33 +7,40 @@ export interface BulkDiscountType {
 
 export interface Service {
   id: string;
-  serviceName: string; // category name
-  serviceType: ServiceType; //category type
-  pricingMode: PricingMode; // category pricing mode ,
-  imageUrl: string;
-  workerId: string;
   categoryId: string;
+  serviceName: string;
+  serviceType: ServiceType;
+  pricingMode: PricingMode;
+  iconUrl: string;
+  imageUrl: string;
+
   rate: number;
-  description: string;
+  description?: string;
+  experience: number;
   estimatedDuration: number;
-  bufferTime: number;
+  bufferTime?: number;
   maxTravelRadius: number;
   bulkDiscounts?: BulkDiscountType[];
   allowSuddenBooking?: boolean;
   isAvailable: boolean;
-  experience: number;
   maxTravelCost?: number | null;
   createdAt: Date;
 }
-export interface ServiceResponse {
-  services: Service[];
-  total: number;
+
+export interface CategoryOption {
+  id: string;
+  name: string;
 }
 
+export type WorkerServicesResponse = {
+  services: Service[];
+  nextCursor: string | null;
+};
+
 export type ServiceFilters = {
-  pageIndex: number;
-  pageSize: number;
-  search: string;
-  status: string;
-  categoryId: string | null;
+  cursor?: string;
+  limit?: number;
+  search?: string;
+  status?: string;
+  categoryId?: string | null;
 };

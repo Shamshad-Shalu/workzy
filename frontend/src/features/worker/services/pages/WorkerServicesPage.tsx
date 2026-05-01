@@ -3,46 +3,67 @@ import { useCallback, useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
-import { DataList } from '@/components/data-table/DataList';
-import { AppModal } from '@/components/molecules/AppModal';
+import EmptyState from '@/components/molecules/EmptyState';
+import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
+import StatusChangeModal from '@/components/molecules/StatusChangeModal';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import { useAppSelector } from '@/store/hooks';
-import type { RootState } from '@/store/store';
 import type { Service } from '@/types/service';
 
+import { WorkerServiceCardSkeletonList } from '../components/serviceCardSkeleton';
 import WorkerServiceCard from '../components/WorkerServiceCard';
 import { WorkerServiceModal } from '../components/WorkerServiceModal';
-import { useServiceMutations } from '../hooks/useServiceMutations';
+import {
+  useAddService,
+  useToggleServiceStatus,
+  useUpdateService,
+  useWorkerServiceCategories,
+  useWorkerServices,
+} from '../hooks/useServiceHooks';
 
 import type { ServiceFormType } from '../validation/ServiceFormData';
+
+
 
 type SelectOption = { label: string; value: string };
 
 export default function WorkerServicesPage() {
   const [serviceModalOpen, setServiceModalOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
+  const [statusService, setStatusService] = useState<Service | null>(null);
   const [editingService, setEditingService] = useState<Service | null>(null);
-  const [statusModalOpen, setStatusModalOpen] = useState<boolean>(false);
 
-  const filters = useUrlFilterParams<{ categoryId: string | null }>([{ key: 'categoryId' }]);
+  const { categoryId, pageSize, search, status, updateParams } = useUrlFilterParams<{
+    categoryId: string | null;
+  }>([{ key: 'categoryId' }]);
 
-  const { pageIndex, pageSize, search, status, categoryId } = filters;
-  const { updateParams } = filters;
-
-  const { user } = useAppSelector((s: RootState) => s.auth);
-
-  const workerId = user?.workerId;
   const {
     data,
-    categoriesList,
     isError,
+    error,
+    refetch,
     isLoading,
-    updateServiceMutation,
-    addServiceMutation,
-    toggleStatusMutation,
-  } = useServiceMutations(workerId!, filters);
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useWorkerServices({ categoryId, limit: pageSize, search, status });
+
+  const { categories, isLoading: categoriesLoading } = useWorkerServiceCategories();
+  const { addService } = useAddService();
+  const { updateService } = useUpdateService();
+  const { toggleServiceStatus, isTogglingStatus } = useToggleServiceStatus();
+
+  const services = data?.pages.flatMap(p => p.services) ?? [];
+  const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
+
+  const isHideButton = search !== '' || status !== 'all';
+  const clearAllFilters = useCallback(() => {
+    updateParams({
+      search: '',
+      status: 'all',
+    });
+  }, [updateParams]);
 
   const handleSearchChange = useCallback(
     (v: string) => {
@@ -51,28 +72,31 @@ export default function WorkerServicesPage() {
     [categoryId, updateParams]
   );
 
-  const categoriesOptions: SelectOption[] = categoriesList.map(category => ({
+  const categoriesOptions: SelectOption[] = categories.map(category => ({
     label: category.name,
     value: category.id,
   }));
 
   const handleSumbit = async (serviceData: ServiceFormType) => {
     if (editingService) {
-      await updateServiceMutation.mutateAsync({ id: editingService.id, data: serviceData });
+      await updateService({ id: editingService.id, data: serviceData });
     } else {
-      await addServiceMutation.mutateAsync(serviceData);
+      await addService(serviceData);
     }
     setEditingService(null);
-  };
-
-  const openStatusModal = (service: Service) => {
-    setSelectedService(service);
-    setStatusModalOpen(true);
   };
 
   const openEditModal = (service: Service) => {
     setEditingService(service);
     setServiceModalOpen(true);
+  };
+
+  const handleToggleStatus = async () => {
+    if (!statusService?.id) {return;}
+    const res = await toggleServiceStatus(statusService.id);
+    if (res.message) {
+      setStatusService(null);
+    }
   };
 
   return (
@@ -108,7 +132,7 @@ export default function WorkerServicesPage() {
             <Select
               placeholder="All Status"
               value={status}
-              onChange={v => updateParams({ status: v, page: 0 })}
+              onChange={v => updateParams({ status: v })}
               leftIcon={<Filter />}
               disabled={isError}
               options={[
@@ -121,64 +145,58 @@ export default function WorkerServicesPage() {
           <div className="sm:col-span-3">
             <Select
               value={categoryId ?? 'all'}
-              onChange={v => updateParams({ categoryId: v === 'all' ? null : v, page: 0 })}
+              onChange={v => updateParams({ categoryId: v === 'all' ? null : v })}
               leftIcon={<Filter />}
-              disabled={isError}
+              disabled={categoriesLoading}
               options={[{ label: 'All Status', value: 'all' }, ...categoriesOptions]}
             />
           </div>
         </div>
       </div>
       <section className="@container pt-12">
-        <DataList<Service>
-          mode="card"
-          data={data?.services ?? []}
-          total={data?.total ?? 0}
-          pageIndex={pageIndex}
-          pageSize={pageSize}
-          pageCount={Math.ceil((data?.total ?? 0) / pageSize) || 1}
-          onPageChange={p => updateParams({ page: p })}
-          onPageSizeChange={s => updateParams({ pageSize: s, page: 0 })}
-          isLoading={isLoading}
-          emptyText="No services found"
-          gridClassName="grid gap-5 grid-cols-1 @[480px]:grid-cols-2 @[800px]:grid-cols-3 @[1220px]:grid-cols-4"
-          renderCard={service => (
-            <WorkerServiceCard
-              service={service}
-              key={service.id}
-              onEdit={openEditModal}
-              onToggleStatus={openStatusModal}
-            />
-          )}
-        />
+        {isLoading ? (
+          <WorkerServiceCardSkeletonList />
+        ) : isError ? (
+          <ErrorState onRetry={refetch} description={error.message} />
+        ) : services.length === 0 ? (
+          <EmptyState
+            title="No Services found"
+            description={
+              isHideButton ? 'Try adjusting your filters or search' : 'No Service available yet'
+            }
+            action={
+              isHideButton ? (
+                <Button onClick={clearAllFilters} variant="red" size="sm">
+                  Clear Filters
+                </Button>
+              ) : null
+            }
+          />
+        ) : (
+          <>
+            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+              {services.map(service => (
+                <WorkerServiceCard
+                  key={service.id}
+                  service={service}
+                  onEdit={openEditModal}
+                  onToggleStatus={setStatusService}
+                />
+              ))}
+            </div>
+            <div ref={sentinelRef} className="h-20" />
+            {isFetchingNextPage && <WorkerServiceCardSkeletonList />}
+          </>
+        )}
       </section>
-      <AppModal
-        open={statusModalOpen}
-        onClose={() => {
-          setStatusModalOpen(false);
-          setSelectedService(null);
-        }}
-        isTitleHidden={true}
-        confirmText={selectedService?.isAvailable ? 'Block' : 'Unblock'}
-        onConfirm={() => {
-          if (!selectedService) {
-            return;
-          }
-          const serviceId = selectedService.id;
-          toggleStatusMutation.mutate(serviceId, {
-            onSuccess: () => {
-              setStatusModalOpen(false);
-              setSelectedService(null);
-            },
-          });
-        }}
-        className="sm:mx-1"
-      >
-        <span className="block mb-2">
-          Are you sure you want to {selectedService?.isAvailable ? 'Block' : 'Unblock'}{' '}
-          <b>{selectedService?.serviceName}</b>
-        </span>
-      </AppModal>
+      <StatusChangeModal
+        open={!!statusService}
+        onClose={() => setStatusService(null)}
+        fromStatus={statusService?.isAvailable ? 'Unblock' : 'Block'}
+        toStatus={statusService?.isAvailable ? 'Block' : 'Unblock'}
+        loading={isTogglingStatus}
+        onConfirm={handleToggleStatus}
+      />
       <WorkerServiceModal
         key={editingService?.id ?? 'add'}
         open={serviceModalOpen}

@@ -4,9 +4,10 @@ import { PipelineStage, Types } from "mongoose";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { CategoryOption } from "@/types/category";
-import { CategorySearchMatch, ServiceMatchStage } from "@/types/mongo-filters.types";
-import { IService } from "@/types/service";
-import { WorkerServicesAggregationResult } from "@/types/service-aggregation.types";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { IService } from "@/types/service/service.entity";
+import { WorkerServiceItem } from "@/types/service/service.projection";
+import { ServiceListQuery } from "@/types/service/service.query";
 
 import Service from "../models/service.model";
 
@@ -16,43 +17,18 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
     super(Service);
   }
 
-  async getWorkerServicesAggregate(
+  async listWorkerServices(
     workerId: string,
-    page: number,
-    limit: number,
-    search: string,
-    status: string,
-    categoryId: string | null
-  ): Promise<WorkerServicesAggregationResult> {
-    const skip = (page - 1) * limit;
-
-    const matchStage: ServiceMatchStage = {
-      workerId: new Types.ObjectId(workerId),
-    };
-
-    if (status === "active") matchStage.isAvailable = true;
-    if (status === "blocked") matchStage.isAvailable = false;
-
-    const categoryFilters: CategorySearchMatch[] = [];
-
-    if (search) {
-      categoryFilters.push({
-        $or: [
-          { "category.name": { $regex: search, $options: "i" } },
-          { description: { $regex: search, $options: "i" } },
-        ],
-      });
-    }
-
-    if (categoryId) {
-      const categoryObjectId = new Types.ObjectId(categoryId);
-      categoryFilters.push({
-        $or: [{ "category.parentId": categoryObjectId }],
-      });
-    }
-
+    query: ServiceListQuery
+  ): Promise<CursorPaginatedResult<WorkerServiceItem>> {
+    const { limit, status, categoryId, cursor, search } = query;
     const pipeline: PipelineStage[] = [
-      { $match: matchStage },
+      {
+        $match: {
+          workerId: new Types.ObjectId(workerId),
+          ...(status !== "all" && { isAvailable: status === "active" }),
+        },
+      },
       {
         $lookup: {
           from: "categories",
@@ -61,56 +37,79 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
           as: "category",
         },
       },
-      { $unwind: "$category" },
-      ...(categoryFilters.length ? [{ $match: { $and: categoryFilters } }] : []),
-      { $sort: { createdAt: -1 } },
       {
-        $facet: {
-          services: [
-            { $skip: skip },
-            { $limit: limit },
-            {
-              $project: {
-                _id: 0,
-                id: { $toString: "$_id" },
-                workerId: 1,
-                categoryId: 1,
-                serviceName: "$category.name",
-                serviceType: "$category.serviceType",
-                pricingMode: "$category.pricingMode",
-                imageUrl: "$category.imageUrl",
-                rate: 1,
-                description: 1,
-                experience: 1,
-                estimatedDuration: 1,
-                bufferTime: 1,
-                maxTravelRadius: 1,
-                allowSuddenBooking: 1,
-                maxTravelCost: 1,
-                isAvailable: 1,
-                bulkDiscounts: 1,
-                createdAt: 1,
-              },
-            },
-          ],
-          total: [{ $count: "count" }],
-        },
-      },
-      {
-        $project: {
-          services: 1,
-          total: {
-            $ifNull: [{ $arrayElemAt: ["$total.count", 0] }, 0],
-          },
-        },
+        $unwind: "$category",
       },
     ];
+    if (search) {
+      pipeline.push({ $match: { "category.name": { $regex: search, $options: "i" } } });
+    }
+    if (categoryId) {
+      pipeline.push({ $match: { "category.parentId": new Types.ObjectId(categoryId) } });
+    }
 
-    const [result] = await this.model.aggregate<WorkerServicesAggregationResult>(pipeline).exec();
+    if (cursor) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { createdAt: { $lt: cursor.createdAt } },
+            {
+              createdAt: cursor.createdAt,
+              _id: { $lt: new Types.ObjectId(cursor._id) },
+            },
+          ],
+        },
+      });
+    }
+
+    pipeline.push(
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $limit: limit + 1 },
+      {
+        $project: {
+          workerId: 1,
+          rate: 1,
+          description: 1,
+          estimatedDuration: 1,
+          bufferTime: 1,
+          maxTravelRadius: 1,
+          bulkDiscounts: 1,
+          allowSuddenBooking: 1,
+          isAvailable: 1,
+          experience: 1,
+          maxTravelCost: 1,
+          createdAt: 1,
+          categoryId: {
+            _id: "$category._id",
+            name: "$category.name",
+            maxTravelCost: "$category.maxTravelCost",
+            iconUrl: "$category.iconUrl",
+            imageUrl: "$category.imageUrl",
+            serviceType: "$category.serviceType",
+            pricingMode: "$category.pricingMode",
+          },
+        },
+      }
+    );
+
+    const docs = await this.model.aggregate<WorkerServiceItem>(pipeline);
+
+    let nextCursor: string | null = null;
+    if (docs.length > limit) {
+      docs.pop();
+      const lastItem = docs[docs.length - 1];
+
+      nextCursor = Buffer.from(
+        JSON.stringify({
+          createdAt: lastItem.createdAt.toISOString(),
+          _id: lastItem._id.toString(),
+        })
+      ).toString("base64url");
+    }
 
     return {
-      services: result?.services ?? [],
-      total: result.total ?? 0,
+      data: docs,
+      nextCursor,
     };
   }
 
@@ -156,5 +155,12 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
       { $sort: { name: 1 } },
     ];
     return this.model.aggregate(pipeline).exec();
+  }
+
+  async getServiceById(serviceId: string): Promise<WorkerServiceItem | null> {
+    return await this.model
+      .findById(serviceId)
+      .populate("categoryId", "name iconUrl imageUrl serviceType pricingMode")
+      .lean<WorkerServiceItem>();
   }
 }

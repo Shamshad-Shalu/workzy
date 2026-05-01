@@ -38,7 +38,6 @@ export default function WorkerServiceCard({
           </div>
         )}
 
-        {/* Badges */}
         <div className="absolute top-3 right-3 flex flex-col gap-2">
           <span className="px-2.5 py-1 bg-purple-500/90 text-white rounded-full text-xs font-semibold">
             {service.serviceType}

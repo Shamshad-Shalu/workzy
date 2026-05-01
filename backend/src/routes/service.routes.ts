@@ -11,10 +11,10 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const serviceController = container.get<IServiceController>(TYPES.ServiceController);
 
-router.get("/:workerId", serviceController.getWorkerServices);
-router.get("/:workerId/service-filters", serviceController.getWorkerServiceCategories);
-
 router.use(authenticate([ROLE.WORKER]));
+
+router.get("/worker", serviceController.getWorkerServices);
+router.get("/service-filters", serviceController.getWorkerServiceCategories);
 router.post("/", validateDto(ServiceRequestDTO), serviceController.createService);
 router.patch("/:serviceId", validateDto(ServiceRequestDTO), serviceController.updateService);
 router.patch("/:serviceId/status", serviceController.toggleStatus);

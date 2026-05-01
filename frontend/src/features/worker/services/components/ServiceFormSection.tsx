@@ -11,19 +11,6 @@ import { useServiceForm } from '../hooks/useServiceForm';
 
 import BulkDiscountSection from './BulkDiscountSection';
 
-// const formatMinutes = (totalMinutes: number) => {
-//   const safe = Number.isFinite(totalMinutes) ? Math.max(0, totalMinutes) : 0;
-//   const h = Math.floor(safe / 60);
-//   const m = safe % 60;
-//   if (h === 0) {
-//     return `${m} min`;
-//   }
-//   if (m === 0) {
-//     return `${h} hour${h > 1 ? 's' : ''}`;
-//   }
-//   return `${h} hour ${m} min`;
-// };
-
 export default function ServiceFormSection({
   form,
   category,

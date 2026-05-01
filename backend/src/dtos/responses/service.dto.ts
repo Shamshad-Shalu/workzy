@@ -1,33 +1,42 @@
 import { PricingMode, ServiceType } from "@/constants";
-import { ICategory } from "@/types/category";
-import { BulkDiscountType, IService } from "@/types/service";
+import { BulkDiscountType } from "@/types/service/service.entity";
+import { WorkerServiceItem } from "@/types/service/service.projection";
 
-export class ServiceResponseDTO {
+export class ServiceResponseDto {
   id!: string;
+  categoryId!: string;
+  serviceName!: string;
+  serviceType!: ServiceType;
+  pricingMode!: PricingMode;
+  iconUrl!: string;
+  imageUrl!: string;
+
   rate!: number;
   description?: string;
-  estimatedDuration?: number;
+  experience!: number;
+  estimatedDuration!: number;
   bufferTime?: number;
   maxTravelRadius!: number;
   bulkDiscounts?: BulkDiscountType[];
   allowSuddenBooking?: boolean;
   isAvailable!: boolean;
-  experience!: number;
   maxTravelCost?: number | null;
   createdAt!: Date;
 
-  serviceType!: ServiceType;
-  pricingMode!: PricingMode;
-  serviceName!: string;
-
-  static fromEntity(entity: IService, category: ICategory): ServiceResponseDTO {
-    const dto = new ServiceResponseDTO();
+  static fromEntity(entity: WorkerServiceItem): ServiceResponseDto {
+    const dto = new ServiceResponseDto();
+    const { _id, name, iconUrl, imageUrl, pricingMode, serviceType } = entity.categoryId;
 
     dto.id = entity.id;
-    dto.serviceName = category.name;
-    dto.serviceType = category.serviceType as ServiceType;
-    dto.pricingMode = category.pricingMode as PricingMode;
+    dto.categoryId = _id.toString();
+    dto.serviceName = name;
+    dto.serviceType = serviceType as ServiceType;
+    dto.pricingMode = pricingMode as PricingMode;
+    dto.iconUrl = iconUrl;
+    dto.imageUrl = imageUrl;
+
     dto.rate = entity.rate;
+    dto.experience = entity.experience;
     dto.description = entity.description;
     dto.estimatedDuration = entity.estimatedDuration;
     dto.bufferTime = entity.bufferTime;
@@ -35,10 +44,13 @@ export class ServiceResponseDTO {
     dto.bulkDiscounts = entity.bulkDiscounts;
     dto.allowSuddenBooking = entity.allowSuddenBooking;
     dto.isAvailable = entity.isAvailable;
-    dto.experience = entity.experience;
     dto.maxTravelCost = entity.maxTravelCost;
     dto.createdAt = entity.createdAt;
 
     return dto;
+  }
+
+  static fromEntities(entities: WorkerServiceItem[]): ServiceResponseDto[] {
+    return entities.map((entity) => this.fromEntity(entity));
   }
 }

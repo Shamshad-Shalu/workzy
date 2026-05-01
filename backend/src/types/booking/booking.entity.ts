@@ -3,7 +3,7 @@ import { Document, Types } from "mongoose";
 import { BookingPaymentStatus, BookingStatus, PricingMode, Role, ServiceType } from "@/constants";
 
 import { ICategory } from "../category";
-import { IService } from "../service";
+import { IService } from "../service/service.entity";
 import { ILocation } from "../user/user.entity";
 
 export type ExtraChargeStatus = "pending" | "approved" | "rejected";

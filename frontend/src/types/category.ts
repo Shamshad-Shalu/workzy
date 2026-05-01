@@ -21,7 +21,5 @@ export interface Category {
   allowBulkOffers?: boolean;
   allowSuddenBooking?: boolean;
 }
-
-export type CategoryOption = Pick<Category, 'id' | 'name'>;
 export type CategoryLite = Pick<Category, 'id' | 'name' | 'level' | 'iconUrl'>;
 export type CategorySuggestion = Pick<Category, 'id' | 'name' | 'level' | 'iconUrl' | 'parentId'>;
