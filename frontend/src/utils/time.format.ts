@@ -90,5 +90,5 @@ export function formatDateForUrl(date: Date | null | undefined): string | undefi
   if (!date) {
     return undefined;
   }
-  return dayjs(date).format('YYYY-MM-DD');
+  return dayjs(date).startOf('day').format('YYYY-MM-DD');
 }

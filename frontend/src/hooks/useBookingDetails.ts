@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import BookingService from '@/services/booking.service';
 import type { BookingDetails } from '@/types/booking';
 
-export function useBookingDetails(bookingId: string | null) {
+export function useBookingDetails(bookingId?: string | null) {
   const query = useQuery<BookingDetails>({
     queryKey: ['booking', bookingId],
     queryFn: async () => {

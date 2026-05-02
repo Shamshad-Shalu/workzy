@@ -29,6 +29,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*"],                    // Include all TypeScript files in the src directory
+  "include": ["src/**/*", "src/controllers/quote.controller.ts"],                    // Include all TypeScript files in the src directory
   "exclude": ["node_modules", "dist"]         // Exclude unnecessary folders
 }

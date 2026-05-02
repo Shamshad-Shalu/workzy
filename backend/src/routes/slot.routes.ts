@@ -15,6 +15,7 @@ router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.get("/", controller.getAvailableSlots);
 router.get("/available-dates", controller.getAvailableDates);
+router.get("/quotes/available-dates/:serviceId", controller.getAvailableDatesForQuotes);
 router.post("/reserve", validateDto(CreateSlotDTO), controller.reserveSlot);
 router.delete("/:slotId", controller.releaseSlot);
 

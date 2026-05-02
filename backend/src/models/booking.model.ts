@@ -5,7 +5,9 @@ import {
   BOOKING_PAYMENT_STATUS_VALUES,
   BOOKING_STATUS,
   BOOKING_STATUS_VALUES,
+  PRICING_MODE_VALUES,
   ROLE_VALUES,
+  SERVICE_TYPE_VALUES,
 } from "@/constants";
 import {
   IBooking,
@@ -127,6 +129,14 @@ const BookingSnapshotSchema = new Schema<IBookingSnapshot>(
     },
     category: {
       name: { type: String, required: true },
+      serviceType: {
+        type: String,
+        enum: SERVICE_TYPE_VALUES,
+      },
+      pricingMode: {
+        type: String,
+        enum: PRICING_MODE_VALUES,
+      },
     },
   },
   { _id: false }

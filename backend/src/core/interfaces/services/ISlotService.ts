@@ -1,8 +1,15 @@
 import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
-import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO } from "@/types/slot";
+import { IBookingSlot } from "@/types/booking/booking.entity";
+import {
+  AvailableSlot,
+  GetAvailableDatesDTO,
+  GetQuoteAvailableDatesDTO,
+  GetSlotsDTO,
+} from "@/types/slot";
 
 export interface ISlotService {
   getAvailableDates(dto: GetAvailableDatesDTO): Promise<Record<string, boolean>>;
+  getAvailableDatesForQuotes(dto: GetQuoteAvailableDatesDTO): Promise<Record<string, boolean>>;
   getAvailableSlots(dto: GetSlotsDTO): Promise<AvailableSlot[]>;
   reserveSlot(
     userId: string,
@@ -11,7 +18,7 @@ export interface ISlotService {
   reserveQuoteSlots(
     workerId: string,
     data: CreateQuoteSlotsDTO
-  ): Promise<{ slotIds: string[]; reservedUntil: Date }>;
+  ): Promise<{ slotIds: string[]; reservedUntil: Date; dates: IBookingSlot[] }>;
   releaseSlot(slotId: string, userId: string): Promise<boolean>;
   cleanupExpired(): Promise<number>;
 }

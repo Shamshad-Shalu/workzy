@@ -100,13 +100,16 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         window.dispatchEvent(new Event('auth:logout'));
-        return Promise.reject(refreshError);
+        const axiosErr = refreshError as AxiosError<{ message?: string }>;
+        const backendMessage = axiosErr.response?.data?.message;
+        return Promise.reject(backendMessage ? new Error(backendMessage) : refreshError);
       } finally {
         isRefreshing = false;
       }
     }
 
-    return Promise.reject(error);
+    const backendMessage = (error.response?.data as { message?: string })?.message;
+    return Promise.reject(backendMessage ? new Error(backendMessage) : error);
   }
 );
 

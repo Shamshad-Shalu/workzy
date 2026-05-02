@@ -40,6 +40,9 @@ export class CreateQuoteSlotsDTO {
   @IsMongoId()
   serviceId!: string;
 
+  @IsMongoId()
+  bookingId!: string;
+
   @IsArray()
   @Type(() => Date)
   @IsDate({ message: "each date must be a valid date" })

@@ -48,6 +48,7 @@ export default function AdminBookingsPage() {
     (v: string) => updateParams({ search: v }),
     [updateParams]
   );
+
   const clearAllFilters = useCallback(() => {
     updateParams({
       search: '',

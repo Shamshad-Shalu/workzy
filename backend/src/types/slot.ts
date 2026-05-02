@@ -35,8 +35,18 @@ export interface GetSlotsDTO {
   lng: number;
   itemCount?: number;
 }
+export type GetQuoteAvailableDatesDTO = {
+  workerId: string;
+  serviceId: string;
+  itemCount?: number;
+  startDate?: string;
+  endDate?: string;
+};
 
-export type GetAvailableDatesDTO = Omit<GetSlotsDTO, "date">;
+export type GetAvailableDatesDTO = GetQuoteAvailableDatesDTO & {
+  lat: number;
+  lng: number;
+};
 
 export interface AvailableSlot {
   startTime: string;

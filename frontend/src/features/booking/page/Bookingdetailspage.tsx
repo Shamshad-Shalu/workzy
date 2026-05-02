@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query';
 import dayjs from 'dayjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
@@ -39,8 +38,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
+import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
-import BookingService from '@/services/booking.service';
 import type { BookingDetails, EvidenceItem, ExtraChargeStatus } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatDuration } from '@/utils/time.format';
@@ -50,9 +49,6 @@ import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatu
 
 import type { BookingCardHandlers } from '../components/BookingCard';
 
-interface BookingDetailsResponse {
-  booking: BookingDetails;
-}
 
 export interface BookingDetailsPageProps {
   role: Role;
@@ -60,13 +56,6 @@ export interface BookingDetailsPageProps {
   bookingId?: string;
 }
 
-function useBookingDetails(id: string) {
-  return useQuery<BookingDetailsResponse>({
-    queryKey: ['booking', id],
-    queryFn: () => BookingService.getBookingDetails(id),
-    enabled: !!id,
-  });
-}
 const ease = [0.22, 1, 0.36, 1] as const;
 const fadeUp = {
   hidden: { opacity: 0, y: 20 },
@@ -121,16 +110,16 @@ export default function BookingDetailsPage({
   const { bookingId: paramId } = useParams<{ bookingId: string }>();
   const id = propBookingId ?? paramId ?? '';
 
-  const { data, isLoading, error } = useBookingDetails(id);
+  const { booking, isLoading, error } = useBookingDetails(id);
 
   if (isLoading) {
     return <BookingDetailsSkeleton />;
   }
-  if (error || !data?.booking) {
+  if (error || !booking) {
     return <ErrorState />;
   }
 
-  const b = data.booking;
+  const b = booking;
   const primaryDate = b.dates[0];
   const pCfg = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
   // const sCfg = BOOKING_STATUS_META[b.status] ?? BOOKING_STATUS_META.pending;
@@ -284,7 +273,6 @@ export default function BookingDetailsPage({
                 phone={b.worker.phone}
                 avatar={b.worker.profileImage}
                 accent="violet"
-                rating={b.worker.rating}
               />
             </GlassCard>
           </motion.div>

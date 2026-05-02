@@ -23,6 +23,7 @@ export default function WorkerAcceptModal({
   isSubmitting = false,
 }: WorkerAcceptModalProps) {
   const { booking, error, isLoading } = useBookingDetails(bookingId);
+  console.log(booking);
 
   if (isLoading) {
     return (
@@ -70,7 +71,7 @@ export default function WorkerAcceptModal({
         <div className="bg-muted/50 border border-border rounded-xl p-4 space-y-3">
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Service</span>
-            <span className="text-sm font-semibold">{category.name}</span>
+            <span className="text-sm font-semibold">{category?.name}</span>
           </div>
 
           <div className="flex justify-between items-center">

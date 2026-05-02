@@ -1,6 +1,12 @@
 import { SLOT_API } from '@/constants/apiRoutes/slot.routes';
 import api from '@/lib/api/axios';
-import type { AvailableSlot, DateSlotParams, SlotFormData, SlotParams } from '@/types/slot';
+import type {
+  AvailableSlot,
+  DateRangeFilter,
+  GetWorkerSlotsQuery,
+  SlotFormData,
+  SlotParams,
+} from '@/types/slot';
 
 const SlotService = {
   getAvailableSlots: async (params: SlotParams): Promise<{ slots: AvailableSlot[] }> => {
@@ -8,9 +14,16 @@ const SlotService = {
     return res.data;
   },
   getAvailableDates: async (
-    params: DateSlotParams
+    params: GetWorkerSlotsQuery
   ): Promise<{ dates: Record<string, boolean> }> => {
     const res = await api.get(SLOT_API.DATES, { params });
+    return res.data;
+  },
+  getAvailableDatesForQuotes: async (
+    serviceId: string,
+    params?: DateRangeFilter
+  ): Promise<{ dates: Record<string, boolean> }> => {
+    const res = await api.get(SLOT_API.DATES_BY_ID(serviceId), { params });
     return res.data;
   },
   reserveSlot: async (

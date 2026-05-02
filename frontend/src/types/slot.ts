@@ -18,7 +18,19 @@ export interface SlotParams {
   itemCount?: number;
   date: string;
 }
-export type DateSlotParams = Omit<SlotParams, 'date'>;
+
+export type DateRangeFilter = {
+  startDate?: string;
+  endDate?: string;
+};
+
+export type GetWorkerSlotsQuery = DateRangeFilter & {
+  lat: number;
+  lng: number;
+  workerId: string;
+  itemCount?: number;
+  serviceId: string;
+};
 
 export interface BookingState {
   itemCount: number;

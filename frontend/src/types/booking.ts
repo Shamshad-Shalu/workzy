@@ -40,7 +40,6 @@ interface WorkerSnapshot {
   name: string;
   phone: string;
   profileImage: string;
-  rating: number;
 }
 
 interface CategorySnapshot {
@@ -186,7 +185,7 @@ export interface AdminBookingListQuery extends BookingListQuery {
   toDate?: string;
 }
 
-export interface BookingDetails extends Booking {
+export interface BookingDetails extends Omit<Booking, 'snapshot'> {
   user: UserSnapshot;
   worker: WorkerSnapshot;
   category: CategorySnapshot;

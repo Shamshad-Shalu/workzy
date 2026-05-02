@@ -3,6 +3,8 @@ import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
 import WorkerPaymentsPage from '@/features/worker/payments/pages/WorkerPaymentsPage';
+import WorkerQuotePage from '@/features/worker/quote/pages/WorkerQuotePage';
+import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesListPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -42,6 +44,8 @@ export default function WorkerRoutes() {
           <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
+          <Route path="quote" element={<WorkerQuotesListPage />} />
+          <Route path="quote/:bookingId" element={<WorkerQuotePage />} />
           <Route path="profile" element={<WorkerProfileRouteWrapper />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />

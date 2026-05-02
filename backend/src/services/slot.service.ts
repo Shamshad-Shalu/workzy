@@ -13,9 +13,16 @@ import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
+import { IBookingSlot } from "@/types/booking/booking.entity";
 import { ICategory } from "@/types/category";
 import { IService } from "@/types/service/service.entity";
-import { AvailableSlot, GetAvailableDatesDTO, GetSlotsDTO, ISlot } from "@/types/slot";
+import {
+  AvailableSlot,
+  GetAvailableDatesDTO,
+  GetQuoteAvailableDatesDTO,
+  GetSlotsDTO,
+  ISlot,
+} from "@/types/slot";
 import { Day, IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { calculateDistanceKm } from "@/utils/geo";
@@ -39,12 +46,28 @@ export class SlotService implements ISlotService {
     const { workerId, serviceId, lat, lng, itemCount = 1 } = dto;
 
     const today = dayjs().startOf("day");
-    const rangeEnd = today.add(30, "day");
+
+    const start = dto.startDate ? dayjs(dto.startDate).startOf("day") : today;
+
+    if (start.isBefore(today)) {
+      throw new CustomError("Cannot query past dates");
+    }
+    const end = dto.endDate ? dayjs(dto.endDate).startOf("day") : start.add(30, "day");
+
+    if (end.isBefore(start)) {
+      throw new CustomError("endDate cannot be before startDate");
+    }
+
+    const totalDays = end.diff(start, "day");
+
+    if (totalDays > 45) {
+      throw new CustomError("Date range too large");
+    }
 
     const [{ worker, service, category }, allOccupied, leaves] = await Promise.all([
       this.getSlotContext(workerId, serviceId),
-      this._slotRepository.getOccupiedSlots(workerId, today.toDate(), rangeEnd.toDate()),
-      this._leaveRepository.getActiveLeaves(workerId, today.toDate(), rangeEnd.toDate()),
+      this._slotRepository.getOccupiedSlots(workerId, start.toDate(), end.toDate()),
+      this._leaveRepository.getActiveLeaves(workerId, start.toDate(), end.toDate()),
     ]);
 
     const duration = this.resolveDuration(service, category, itemCount);
@@ -70,8 +93,8 @@ export class SlotService implements ISlotService {
 
     const result: Record<string, boolean> = {};
 
-    for (let i = 0; i <= 30; i++) {
-      const current = today.add(i, "day");
+    for (let i = 0; i <= totalDays; i++) {
+      const current = start.add(i, "day");
       const dateStr = current.format("YYYY-MM-DD");
 
       if (current.isBefore(earliest, "day")) {
@@ -119,6 +142,78 @@ export class SlotService implements ISlotService {
       }
       result[dateStr] = hasSlot;
     }
+    return result;
+  }
+
+  async getAvailableDatesForQuotes(
+    dto: GetQuoteAvailableDatesDTO
+  ): Promise<Record<string, boolean>> {
+    const { serviceId, workerId, endDate, startDate } = dto;
+    const today = dayjs().startOf("day");
+    const start = startDate ? dayjs(startDate).startOf("day") : today;
+    if (start.isBefore(today)) {
+      throw new CustomError("Cannot query past dates");
+    }
+    const end = endDate ? dayjs(endDate).startOf("day") : start.add(30, "day");
+    if (end.isBefore(start)) {
+      throw new CustomError("endDate cannot be before startDate");
+    }
+    const totalDays = end.diff(start, "day");
+    if (totalDays > 60) {
+      throw new CustomError("Date range too large");
+    }
+    const [{ worker }, allOccupied, leaves] = await Promise.all([
+      this.getSlotContext(workerId, serviceId),
+      this._slotRepository.getOccupiedSlots(workerId, start.toDate(), end.toDate()),
+      this._leaveRepository.getActiveLeaves(workerId, start.toDate(), end.toDate()),
+    ]);
+
+    const occupiedByDate = new Map<string, typeof allOccupied>();
+    for (const s of allOccupied) {
+      const key = dayjs(s.date).format("YYYY-MM-DD");
+      if (!occupiedByDate.has(key)) occupiedByDate.set(key, []);
+      occupiedByDate.get(key)!.push(s);
+    }
+    const leaveRanges = leaves.map((l) => ({
+      start: dayjs(l.startDate).startOf("day"),
+      end: dayjs(l.endDate).startOf("day"),
+    }));
+    const result: Record<string, boolean> = {};
+    const REQUIRED_MINUTES = 8 * 60;
+    for (let i = 0; i <= totalDays; i++) {
+      const current = start.add(i, "day");
+      const dateStr = current.format("YYYY-MM-DD");
+      const isOnLeave = leaveRanges.some(
+        (l) => !current.isBefore(l.start, "day") && !current.isAfter(l.end, "day")
+      );
+      if (isOnLeave) {
+        result[dateStr] = false;
+        continue;
+      }
+      const dayOccupied = occupiedByDate.get(dateStr) ?? [];
+      if (dayOccupied.length > 0) {
+        result[dateStr] = false;
+        continue;
+      }
+      const dayName = current.format("dddd").toLowerCase() as Day;
+      const dayWindows = worker.availability[dayName];
+      if (!dayWindows || dayWindows.length === 0) {
+        result[dateStr] = false;
+        continue;
+      }
+      let totalMinutes = 0;
+      for (const win of dayWindows) {
+        const startMin = timeToMinutes(win.startTime);
+        const endMin = timeToMinutes(win.endTime);
+        totalMinutes += endMin - startMin;
+      }
+      if (totalMinutes < REQUIRED_MINUTES) {
+        result[dateStr] = false;
+        continue;
+      }
+      result[dateStr] = true;
+    }
+
     return result;
   }
 
@@ -216,14 +311,15 @@ export class SlotService implements ISlotService {
   async reserveQuoteSlots(
     workerId: string,
     data: CreateQuoteSlotsDTO
-  ): Promise<{ slotIds: string[]; reservedUntil: Date }> {
-    const { serviceId, dates, lat, lng } = data;
+  ): Promise<{ slotIds: string[]; reservedUntil: Date; dates: IBookingSlot[] }> {
+    const { serviceId, dates, lat, lng, bookingId } = data;
 
     const { worker } = await this.getSlotContext(workerId, serviceId);
     const reservedUntil = new Date(Date.now() + QUOTE_TTL_SECONDS * 1000);
 
     const createdIds: string[] = [];
     const acquiredLocks: string[] = [];
+    const createdSlots: IBookingSlot[] = [];
 
     try {
       for (const date of dates) {
@@ -252,6 +348,7 @@ export class SlotService implements ISlotService {
           status: SLOT_STATUS.RESERVED,
           location: { type: "Point", coordinates: [lng, lat] },
           reservedBy: new Types.ObjectId(workerId),
+          bookingId: new Types.ObjectId(bookingId),
           travelFromPrev: 0,
           reservedUntil,
         });
@@ -259,13 +356,18 @@ export class SlotService implements ISlotService {
         await this._redisService.setWithTTL(lockKey, workerId, QUOTE_TTL_SECONDS);
         acquiredLocks.push(lockKey);
         createdIds.push(newSlot._id.toString());
+        createdSlots.push({
+          date: newSlot.date,
+          startTime: newSlot.startTime,
+          endTime: newSlot.endTime,
+        });
       }
     } catch (err) {
       if (createdIds.length > 0) await this._slotRepository.deleteManyByIds(createdIds);
       await this._redisService.deleteMany(acquiredLocks);
       throw err;
     }
-    return { slotIds: createdIds, reservedUntil };
+    return { slotIds: createdIds, reservedUntil, dates: createdSlots };
   }
 
   async releaseQuoteSlots(slotIds: string[]): Promise<boolean> {

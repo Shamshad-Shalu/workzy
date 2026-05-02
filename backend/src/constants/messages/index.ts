@@ -11,3 +11,4 @@ export * from "./booking";
 export * from "./leave";
 export * from "./review";
 export * from "./redis";
+export * from "./quote";
