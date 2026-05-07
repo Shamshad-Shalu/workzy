@@ -2,7 +2,7 @@ import { z } from 'zod';
 export const emailRule = z.string().email('Invalid email format');
 
 export const DESCRIPTION_REGEX =
-  /^(?=.*[A-Za-z])(?=.*\S)(?!.*(.)\1{3})(?=.{10,500}$)[A-Za-z0-9.,!?&()'"/:%$\s-]+$/;
+  /^(?=.*[A-Za-z])(?=.*\S)(?!.*(.)\1{3})[A-Za-z0-9.,—!?&()'"/:%$\s-]+$/;
 export const SERVICE_NAME_REGEX =
   /^(?!.*(.)\1{2})(?=.{3,40}$)(?=(?:.*[A-Za-z]){2,})[A-Za-z0-9][A-Za-z0-9/&.'\- ]*[A-Za-z0-9]$/;
 

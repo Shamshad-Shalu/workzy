@@ -60,15 +60,15 @@ export default function ReviewModal({
   const rating = watch('rating');
 
   useEffect(() => {
-    if (!bookingId || !review) {
+    if (!bookingId) {
       return;
     }
 
     reset({
       bookingId,
-      media: review.media ?? [],
-      rating: review.rating ?? 0,
-      reviewText: review.reviewText ?? '',
+      media: review?.media ?? [],
+      rating: review?.rating ?? 0,
+      reviewText: review?.reviewText ?? '',
     });
   }, [bookingId, review, reset]);
 

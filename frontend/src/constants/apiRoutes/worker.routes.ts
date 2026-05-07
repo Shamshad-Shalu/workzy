@@ -15,6 +15,7 @@ export const WORKER_API = {
   LIST_BY_SERVICE: (serviceId: string) => worker(`/service/${serviceId}`),
 
   BY_ID: (id: string) => worker(`/${id}`),
+  DETAILS_BY_ID: (id: string) => worker(`/${id}/details`),
 
   STRIPE_CONNECT: worker('/stripe/connect'),
   STRIPE_STATUS: worker('/stripe/status'),

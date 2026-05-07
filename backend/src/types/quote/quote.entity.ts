@@ -8,12 +8,14 @@ export interface IQuote extends Document<string> {
   workerId: Types.ObjectId;
   userId: Types.ObjectId;
   serviceId: Types.ObjectId;
+  categoryId: Types.ObjectId;
   bookingId: Types.ObjectId;
   slotIds: Types.ObjectId[];
+  searchText?: string;
 
   dates: IBookingSlot[];
   totalPrice: number;
-  message?: string; // worker note to user
+  message?: string;
 
   status: QuoteStatus;
   expiresAt: Date;

@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { AUTH, HTTPSTATUS } from "@/constants";
+import { AUTH, HTTPSTATUS, ServiceType } from "@/constants";
 import { SERVICE } from "@/constants/messages/service";
 import { IServiceController } from "@/core/interfaces/controllers/IServiceController";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
@@ -43,7 +43,6 @@ export class ServiceController implements IServiceController {
 
   getWorkerServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
-
     const limit = parseInt(req.query.limit as string) || 10;
     const search = (req.query.search as string) || "";
     const status = (req.query.status as "all" | "blocked" | "active") || "all";
@@ -60,6 +59,25 @@ export class ServiceController implements IServiceController {
       cursor: parsedCursor
         ? { _id: parsedCursor._id, createdAt: new Date(parsedCursor.createdAt) }
         : undefined,
+    });
+    res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
+  });
+
+  listWorkerPublicServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId } = req.params;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = (req.query.search as string) || "";
+    const type = (req.query.type as ServiceType | "all") || "all";
+    const parsedCursor = req.query.cursor
+      ? JSON.parse(Buffer.from(req.query.cursor as string, "base64url").toString("utf8"))
+      : undefined;
+    const { data, nextCursor } = await this._serviceMangement.listWorkerPublicServices(workerId, {
+      limit,
+      type,
+      cursor: parsedCursor
+        ? { _id: parsedCursor._id, createdAt: new Date(parsedCursor.createdAt) }
+        : undefined,
+      search,
     });
     res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
   });

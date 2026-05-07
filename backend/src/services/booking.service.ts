@@ -389,7 +389,7 @@ export class BookingService implements IBookingService {
     if (booking.extraCharge?.status === "pending") {
       throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._paymentService.releaseBookingPayment(booking);
+    // await this._paymentService.releaseBookingPayment(booking);
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.APPROVED,
       paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,

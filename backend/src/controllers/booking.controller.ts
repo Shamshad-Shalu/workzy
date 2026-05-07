@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
+import { isValidObjectId } from "mongoose";
 
 import { AUTH, BOOKING_STATUS_MESSAGES, BookingPaymentStatus, HTTPSTATUS } from "@/constants";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
@@ -57,6 +58,9 @@ export class BookingController implements IBookingController {
 
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
+    if (!isValidObjectId(bookingId)) {
+      throw new CustomError("Invalid Booking ID", HTTPSTATUS.NOT_FOUND);
+    }
     const result = await this._bookingService.getBookingDetails(bookingId);
     res.status(HTTPSTATUS.OK).json({ booking: result });
   });

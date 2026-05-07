@@ -15,6 +15,7 @@ import {
   PAYMENT,
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
+  QUOTE_STATUS,
   ROLE,
   SLOT_STATUS,
   STRIPE_ACCOUNT_STATUS,
@@ -22,6 +23,7 @@ import {
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
+import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
@@ -42,6 +44,7 @@ export class PaymentService implements IPaymentService {
     @inject(TYPES.PaymentRepository) private _paymentRepo: IPaymentRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
+    @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.SlotService) private _slotService: ISlotService
   ) {}
@@ -313,18 +316,32 @@ export class PaymentService implements IPaymentService {
   }
 
   private async handleBookingPaid(session: Stripe.Checkout.Session) {
-    const metadata = session.metadata as {
+    const { bookingId, slotId, workerId } = session.metadata as {
       bookingId: string;
       slotId: string;
       workerId: string;
     };
-    const { bookingId, slotId, workerId } = metadata;
-
-    await Promise.all([
-      this._slotRepository.update(slotId, {
+    const booking = await this._bookingRepository.findById(bookingId);
+    let slotUpdate: Promise<unknown>;
+    if (booking?.quoteId) {
+      const quote = await this._quoteRepository.findById(booking.quoteId.toString());
+      const slotIds = quote?.slotIds?.map((id) => id.toString()) ?? [];
+      slotUpdate = Promise.all([
+        this._slotRepository.updatePaymentSlots(slotIds, new Types.ObjectId(bookingId)),
+        this._quoteRepository.findOneAndUpdate(
+          { _id: booking.quoteId },
+          { status: QUOTE_STATUS.ACCEPTED }
+        ),
+      ]);
+    } else {
+      slotUpdate = this._slotRepository.update(slotId, {
         status: SLOT_STATUS.BOOKED,
         bookingId: new Types.ObjectId(bookingId),
-      }),
+      });
+    }
+
+    await Promise.all([
+      slotUpdate,
       this._bookingRepository.update(bookingId, {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
         statusHistory: [
@@ -444,6 +461,7 @@ export class PaymentService implements IPaymentService {
   ): Promise<{ payments: PaymentWorkerDTO[]; nextCursor: string | null }> {
     const query = this.mapToPaymentDTO(input);
     const { payments, nextCursor } = await this._paymentRepo.getPayments({ workerId, ...query });
+
     return { payments: PaymentWorkerDTO.fromEntities(payments), nextCursor };
   }
 

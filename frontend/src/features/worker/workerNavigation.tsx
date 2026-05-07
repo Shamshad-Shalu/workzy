@@ -2,6 +2,7 @@ import {
   Bell,
   Briefcase,
   ClipboardList,
+  FileText,
   HelpCircle,
   LayoutDashboard,
   MessageSquare,
@@ -20,6 +21,7 @@ export const workerMenuItems: MenuItem[] = [
   { icon: <User2 />, label: 'Profile', to: '/worker/Profile' },
   { icon: <Wallet />, label: 'Payments', to: '/worker/payments' },
   { icon: <Star />, label: 'Reviews', to: '/worker/reviews' },
+  { icon: <FileText />, label: 'Quotes', to: '/worker/quotes' },
   { icon: <MessageSquare />, label: 'Chats', to: '/worker/chats' },
   { icon: <Bell />, label: 'Notifications', to: '/worker/notifications' },
 ];

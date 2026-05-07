@@ -9,10 +9,10 @@ import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { TYPES } from "@/di/types";
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
-import { ServiceResponseDto } from "@/dtos/responses/service.dto";
+import { PublicServiceListResponseDto, ServiceResponseDto } from "@/dtos/responses/service.dto";
 import { CategoryOption, ICategory } from "@/types/category";
 import { CursorPaginatedResult } from "@/types/common/pagination";
-import { ServiceListQuery } from "@/types/service/service.query";
+import { PublicServiceListQuery, ServiceListQuery } from "@/types/service/service.query";
 import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
@@ -134,6 +134,20 @@ export class ServiceManagement implements IServiceManagement {
         HTTPSTATUS.BAD_REQUEST
       );
     }
+  }
+
+  async listWorkerPublicServices(
+    workerId: string,
+    query: PublicServiceListQuery
+  ): Promise<CursorPaginatedResult<PublicServiceListResponseDto>> {
+    const { data, nextCursor } = await this._serviceRepository.listWorkerPublicServices(
+      workerId,
+      query
+    );
+    return {
+      data: PublicServiceListResponseDto.fromEntities(data),
+      nextCursor,
+    };
   }
 
   async getWorkerServices(

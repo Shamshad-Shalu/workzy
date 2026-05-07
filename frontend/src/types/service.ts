@@ -44,3 +44,32 @@ export type ServiceFilters = {
   status?: string;
   categoryId?: string | null;
 };
+
+export type PublicWorkerServiceItem = Pick<
+  Service,
+  | 'id'
+  | 'serviceName'
+  | 'serviceType'
+  | 'pricingMode'
+  | 'rate'
+  | 'description'
+  | 'estimatedDuration'
+  | 'bulkDiscounts'
+  | 'iconUrl'
+  | 'imageUrl'
+  | 'experience'
+> & {
+  categoryName: string;
+};
+
+export type PublicWorkerServicesResponse = {
+  services: PublicWorkerServiceItem[];
+  nextCursor: string | null;
+};
+
+export type PublicServiceFilters = {
+  cursor?: string;
+  limit?: number;
+  search?: string;
+  type?: ServiceType | 'all';
+};

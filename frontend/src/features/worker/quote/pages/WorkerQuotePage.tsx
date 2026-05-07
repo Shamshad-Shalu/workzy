@@ -15,9 +15,8 @@ import { useBookingDetails } from '@/hooks/useBookingDetails';
 import PriceSection from '../components/PriceSection';
 import SlotPicker from '../components/SlotPicker';
 import SummarySection from '../components/SummarySection';
-import { useCreateQuote } from '../hooks/useQuotes';
+import { useCreateQuote } from '../hooks/useWorkerQuotes';
 import { quoteFormSchema, type QuoteFormType } from '../validation/quoteSchema';
-
 
 export default function WorkerQuotePage() {
   const { bookingId } = useParams();
@@ -43,15 +42,19 @@ export default function WorkerQuotePage() {
       message: '',
     },
   });
+  const { handleSubmit , setValue } = methods;
+
   useEffect(() => {
     if (booking?.id) {
-      methods.setValue('bookingId', booking.id);
+      setValue('bookingId', booking.id);
     }
-  }, [booking?.id]);
+  }, [booking?.id ,setValue ]);
 
   const handleQuoteSubmit = async (data: QuoteFormType) => {
     console.log({ QuoteForm: data });
-    if (!bookingId) {return;}
+    if (!bookingId) {
+      return;
+    }
 
     const res = await createQuote({
       bookingId,
@@ -68,7 +71,7 @@ export default function WorkerQuotePage() {
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={methods.handleSubmit(handleQuoteSubmit, errors => {
+        onSubmit={handleSubmit(handleQuoteSubmit, errors => {
           console.log('Validation errors:', errors);
         })}
         className="@container px-4 py-6"

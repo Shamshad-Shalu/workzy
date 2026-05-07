@@ -1,17 +1,19 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import QuoteService from '@/services/quote.service';
 import SlotService from '@/services/slot.service';
+import type { QuoteListQuery } from '@/types/quote';
 import type { DateRangeFilter } from '@/types/slot';
 
 import type { QuoteFormType } from '../validation/quoteSchema';
-
 
 export function useQuoteAvailableDates(serviceId?: string, filters?: DateRangeFilter) {
   const query = useQuery({
     queryKey: ['quotes-available-dates', serviceId, filters?.startDate, filters?.endDate],
     queryFn: () => {
-      if (!serviceId) {throw new Error('serviceId is required');}
+      if (!serviceId) {
+        throw new Error('serviceId is required');
+      }
       return SlotService.getAvailableDatesForQuotes(serviceId, filters);
     },
     staleTime: 1000 * 60,
@@ -26,32 +28,32 @@ export function useQuoteAvailableDates(serviceId?: string, filters?: DateRangeFi
   };
 }
 
-// const LIMIT = 5;
+const LIMIT = 5;
 
-// export function useWorkerQuotes(
-//   query: Omit<ReviewListQuery, 'cursor' | 'limit'>
-// ) {
-//   return useInfiniteQuery<
-//     PublicReviewListResponse,
-//     Error,
-//     { pages: PublicReviewListResponse[]; pageParams: (string | undefined)[] },
-//     ReturnType<typeof reviewKeys.public>,
-//     string | undefined
-//   >({
-//     queryKey: reviewKeys.public(workerId ?? 'disabled', query),
-//     queryFn: ({ pageParam }) =>
-//       ReviewService.getPublicWorkerReviews(workerId!, {
-//         limit: LIMIT,
-//         cursor: pageParam,
-//         ...query,
-//       }),
-//     initialPageParam: undefined,
-//     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-//     staleTime: 1000 * 60 * 2,
-//     gcTime: 1000 * 60 * 5,
-//     enabled: !!workerId,
-//   });
-// }
+export function useWorkerQuotes(filter?: Omit<QuoteListQuery, 'cursor' | 'limit'>) {
+  return useInfiniteQuery({
+    queryKey: ['worker-quotes', filter?.search ?? 'all', filter?.status],
+    queryFn: ({ pageParam }) =>
+      QuoteService.listWorkerQuotes({
+        search: filter?.search,
+        status: filter?.status,
+        limit: LIMIT,
+        cursor: pageParam,
+      }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
+    staleTime: 1000 * 60 * 2,
+    gcTime: 1000 * 60 * 5,
+  });
+}
+
+export function useWokerQuoteStats() {
+  return useQuery({
+    queryKey: ['quotes-stats'],
+    queryFn: () => QuoteService.getWokerQuoteStats(),
+    staleTime: 1000 * 60,
+  });
+}
 
 export function useCreateQuote() {
   const queryClient = useQueryClient();

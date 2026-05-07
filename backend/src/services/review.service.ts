@@ -235,6 +235,10 @@ export class ReviewService implements IReviewService {
     if (!reviewStats) {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    return reviewStats;
+    return {
+      averageRating: reviewStats.averageRating,
+      ratingBreakdown: reviewStats.breakdown,
+      reviewCount: reviewStats.reviewCount,
+    };
   }
 }

@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 
+import { ApiError } from '@/lib/api/apiError';
 import BookingService from '@/services/booking.service';
 import type { BookingDetails } from '@/types/booking';
 
 export function useBookingDetails(bookingId?: string | null) {
-  const query = useQuery<BookingDetails>({
+  const query = useQuery<BookingDetails, ApiError>({
     queryKey: ['booking', bookingId],
     queryFn: async () => {
       const res = await BookingService.getBookingDetails(bookingId!);

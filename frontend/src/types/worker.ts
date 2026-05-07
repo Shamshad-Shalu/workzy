@@ -17,7 +17,7 @@ export interface AvailabilitySlots {
   sunday: TimeSlot[];
 }
 
-export interface IDocument {
+export interface Document {
   id: string;
   type: 'id_proof' | 'license' | 'certificate' | 'other';
   url: string;
@@ -34,7 +34,7 @@ export interface Worker {
   coverImage?: string;
   status: WorkerStatus;
   defaultRate?: number;
-  documents: IDocument[];
+  documents: Document[];
   skills: string[];
   cities: string[];
   availability: AvailabilitySlots;
@@ -109,7 +109,7 @@ export type WorkerProfile = {
   completedJobs: number;
   complitionRate: number;
   averageRating: number;
-  reviewCount: number;
+  totalReviews: number;
 };
 
 export type WorkerProfileDetails = {

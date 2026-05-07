@@ -11,6 +11,8 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const serviceController = container.get<IServiceController>(TYPES.ServiceController);
 
+router.get("/worker/:workerId", serviceController.listWorkerPublicServices);
+
 router.use(authenticate([ROLE.WORKER]));
 
 router.get("/worker", serviceController.getWorkerServices);

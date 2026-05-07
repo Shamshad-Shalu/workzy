@@ -13,13 +13,11 @@ import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { cn } from '@/lib/utils';
 import { formatDateForUrl } from '@/utils/time.format';
 
-import { useQuoteAvailableDates } from '../hooks/useQuotes';
+import { useQuoteAvailableDates } from '../hooks/useWorkerQuotes';
 
 import SlotPickerSkeleton from './SlotPickerSkeleton';
 
-
 import type { QuoteFormType } from '../validation/quoteSchema';
-
 
 const CUSTOM_PARAMS = [
   { key: 'endDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
@@ -60,19 +58,23 @@ export default function SlotPicker({ serviceId }: Props) {
   }, [dateKeys]);
 
   useEffect(() => {
-    if (!startDate || !endDate) {return;}
+    if (!startDate || !endDate) {
+      return;
+    }
     if (dayjs(endDate).isBefore(dayjs(startDate).add(5, 'day'), 'day')) {
       updateParams({ endDate: null });
     }
-  }, [startDate]);
+  }, [startDate, endDate, updateParams]);
 
   useEffect(() => {
-    if (!dateKeys.length) {return;}
+    if (!dateKeys.length) {
+      return;
+    }
     const valid = selectedDates.filter(d => dateKeys.includes(d));
     if (valid.length !== selectedDates.length) {
       setValue('dates', valid, { shouldValidate: true });
     }
-  }, [dateKeys]);
+  }, [dateKeys, selectedDates ,setValue]);
 
   const isAppliedFilter = startDate || endDate;
 
@@ -81,7 +83,9 @@ export default function SlotPicker({ serviceId }: Props) {
   }, [updateParams]);
 
   function toggle(date: string) {
-    if (!dates[date]) {return;}
+    if (!dates[date]) {
+      return;
+    }
     const next = selectedDates.includes(date)
       ? selectedDates.filter(d => d !== date)
       : [...selectedDates, date].sort();
@@ -126,11 +130,15 @@ export default function SlotPicker({ serviceId }: Props) {
           onChange={date => updateParams({ endDate: formatDateForUrl(date) })}
           placeholder="To Date"
           disabled={date => {
-            if (dayjs(date).isBefore(dayjs(), 'day')) {return true;}
-            if (startDate && dayjs(date).isBefore(dayjs(startDate).add(5, 'day'), 'day'))
-              {return true;}
-            if (startDate && dayjs(date).isAfter(dayjs(startDate).add(60, 'day'), 'day'))
-              {return true;}
+            if (dayjs(date).isBefore(dayjs(), 'day')) {
+              return true;
+            }
+            if (startDate && dayjs(date).isBefore(dayjs(startDate).add(5, 'day'), 'day')) {
+              return true;
+            }
+            if (startDate && dayjs(date).isAfter(dayjs(startDate).add(60, 'day'), 'day')) {
+              return true;
+            }
             return false;
           }}
         />

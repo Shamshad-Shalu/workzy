@@ -24,6 +24,8 @@ router.get("/service/:serviceId", optionalAuth, workerController.listPublicWorke
 
 router.get("/details", authenticate([ROLE.WORKER]), workerController.getWorkerProfileDetails);
 
+router.get("/:workerId/details", workerController.getWorkerProfileDetailsById);
+
 router.get("/:workerId", workerController.getWorkerProfile);
 
 router.use(authenticate([ROLE.WORKER]));

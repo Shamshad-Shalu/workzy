@@ -5,6 +5,8 @@ import type { ServiceFormType } from '@/features/worker/services/validation/Serv
 import api from '@/lib/api/axios';
 import type {
   CategoryOption,
+  PublicServiceFilters,
+  PublicWorkerServicesResponse,
   Service,
   ServiceFilters,
   WorkerServicesResponse,
@@ -19,6 +21,15 @@ interface SResponse {
 const ServiceManagement = {
   getServices: async (params: ServiceFilters): Promise<WorkerServicesResponse> => {
     const res = await api.get(SERVICE_API.BY_WORKER, {
+      params,
+    });
+    return res.data;
+  },
+  listWorkerPublicServices: async (
+    workerId: string,
+    params: PublicServiceFilters
+  ): Promise<PublicWorkerServicesResponse> => {
+    const res = await api.get(SERVICE_API.PUBLIC(workerId), {
       params,
     });
     return res.data;

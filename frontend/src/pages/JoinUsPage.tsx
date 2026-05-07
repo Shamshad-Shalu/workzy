@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
+import type { WorkerStatus } from '@/constants';
 import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
 import { UploadPurposes } from '@/constants/upload';
 import CTASection from '@/features/user/home/components/CTASection';
@@ -21,7 +22,7 @@ import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/Joi
 import { cn } from '@/lib/utils';
 import { useAppDispatch } from '@/store/hooks';
 import { updateUser } from '@/store/slices/authSlice';
-import type { IDocument, WorkerStatus } from '@/types/worker';
+// import type { IDocument, WorkerStatus } from '@/types/worker';
 import { handleApiError } from '@/utils/handleApiError';
 
 import userImg from '../assets/auth/signup.jpg';
@@ -35,7 +36,7 @@ export default function JoinUsPage() {
 
   const [loading, setLoading] = useState<boolean>(false);
   const [resubmitted, setResubmitted] = useState<boolean>(false);
-  const [existingDoc, setExistingDoc] = useState<IDocument | null>(null);
+  const [existingDoc, setExistingDoc] = useState<Document | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
   const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
 

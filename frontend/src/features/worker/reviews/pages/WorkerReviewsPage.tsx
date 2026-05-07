@@ -57,7 +57,7 @@ export default function WorkerReviewsPage() {
   const [mediaItems, setMediaItems] = useState<EvidenceItem[]>([]);
 
   const { user } = useAppSelector((s: RootState) => s.auth);
-  const { data: reviewStats, isLoading: statsLoading } = useWorkerReviewStats(user?.workerId);
+  const { data: reviewStats, isLoading: statsLoading } = useWorkerReviewStats(user?.worker?.id);
   const { data, isLoading, error, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useWorkerReviews({ sortBy, sortOrder, rating: rating ?? undefined });
 

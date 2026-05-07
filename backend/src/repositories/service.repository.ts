@@ -6,8 +6,8 @@ import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepos
 import { CategoryOption } from "@/types/category";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IService } from "@/types/service/service.entity";
-import { WorkerServiceItem } from "@/types/service/service.projection";
-import { ServiceListQuery } from "@/types/service/service.query";
+import { PublicWorkerServiceItem, WorkerServiceItem } from "@/types/service/service.projection";
+import { PublicServiceListQuery, ServiceListQuery } from "@/types/service/service.query";
 
 import Service from "../models/service.model";
 
@@ -94,6 +94,109 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
     );
 
     const docs = await this.model.aggregate<WorkerServiceItem>(pipeline);
+
+    let nextCursor: string | null = null;
+    if (docs.length > limit) {
+      docs.pop();
+      const lastItem = docs[docs.length - 1];
+
+      nextCursor = Buffer.from(
+        JSON.stringify({
+          createdAt: lastItem.createdAt.toISOString(),
+          _id: lastItem._id.toString(),
+        })
+      ).toString("base64url");
+    }
+
+    return {
+      data: docs,
+      nextCursor,
+    };
+  }
+
+  async listWorkerPublicServices(
+    workerId: string,
+    query: PublicServiceListQuery
+  ): Promise<CursorPaginatedResult<PublicWorkerServiceItem>> {
+    const { limit, type, cursor, search } = query;
+
+    const pipeline: PipelineStage[] = [
+      {
+        $match: {
+          workerId: new Types.ObjectId(workerId),
+          isAvailable: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "categoryId",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+      {
+        $unwind: "$category",
+      },
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category.parentId",
+          foreignField: "_id",
+          as: "parentCategory",
+        },
+      },
+      {
+        $unwind: "$parentCategory",
+      },
+    ];
+
+    if (type !== "all") {
+      pipeline.push({
+        $match: { "category.serviceType": type },
+      });
+    }
+
+    if (search) {
+      pipeline.push({ $match: { "category.name": { $regex: search, $options: "i" } } });
+    }
+
+    if (cursor) {
+      pipeline.push({
+        $match: {
+          $or: [
+            { createdAt: { $lt: cursor.createdAt } },
+            {
+              createdAt: cursor.createdAt,
+              _id: { $lt: new Types.ObjectId(cursor._id) },
+            },
+          ],
+        },
+      });
+    }
+
+    pipeline.push(
+      { $sort: { createdAt: -1, _id: -1 } },
+      { $limit: limit + 1 },
+      {
+        $project: {
+          _id: 1,
+          rate: 1,
+          description: 1,
+          estimatedDuration: 1,
+          bulkDiscounts: 1,
+          createdAt: 1,
+          serviceName: "$category.name",
+          categoryName: "$parentCategory.name",
+          iconUrl: "$category.iconUrl",
+          imageUrl: "$category.imageUrl",
+          serviceType: "$category.serviceType",
+          pricingMode: "$category.pricingMode",
+        },
+      }
+    );
+
+    const docs = await this.model.aggregate<PublicWorkerServiceItem>(pipeline);
 
     let nextCursor: string | null = null;
     if (docs.length > limit) {

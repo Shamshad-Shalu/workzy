@@ -16,7 +16,7 @@ class PaymentBaseDTO {
     const dto = new PaymentBaseDTO();
 
     dto.id = entity._id.toString();
-    dto.refId = entity.referenceId.toString();
+    dto.refId = entity.bookingId.toString();
     dto.transactionId = entity.transactionId;
     dto.title = entity.title ?? "";
     dto.amount = entity.amount;

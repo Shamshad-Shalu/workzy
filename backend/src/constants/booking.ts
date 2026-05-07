@@ -40,7 +40,7 @@ export type SlotStatus = (typeof SLOT_STATUS)[keyof typeof SLOT_STATUS];
 export const QUOTE_STATUS = {
   PENDING: "pending",
   REJECTED: "rejected",
-  ACCEPETED: "accepted",
+  ACCEPTED: "accepted",
   EXPIRED: "expired",
 } as const;
 

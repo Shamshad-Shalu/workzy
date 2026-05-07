@@ -1,11 +1,8 @@
 import { BookingPaymentStatus, BookingStatus } from "@/constants";
 
-export type ListingStatus = BookingStatus | "all" | "upcoming";
+import { Cursor } from "../common/query";
 
-export interface Cursor {
-  createdAt: string;
-  _id: string;
-}
+export type ListingStatus = BookingStatus | "all" | "upcoming";
 
 export interface BookingListQuery {
   status: ListingStatus;

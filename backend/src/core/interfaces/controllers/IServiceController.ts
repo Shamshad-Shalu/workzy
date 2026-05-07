@@ -5,5 +5,6 @@ export interface IServiceController {
   updateService: RequestHandler;
   toggleStatus: RequestHandler;
   getWorkerServices: RequestHandler;
+  listWorkerPublicServices: RequestHandler;
   getWorkerServiceCategories: RequestHandler;
 }

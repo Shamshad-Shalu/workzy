@@ -11,7 +11,6 @@ export const queryClient = new QueryClient({
     },
     mutations: {
       onError: error => {
-        console.log('Mutation Error in React Query:', error);
         if (error instanceof AxiosError) {
           const status = error.response?.status;
           if (status === 401) {

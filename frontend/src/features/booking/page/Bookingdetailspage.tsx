@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
-  AlertTriangle,
   ArrowUpRight,
   BadgeCheck,
   Calendar,
@@ -30,7 +29,7 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { Navigate, useParams } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
@@ -40,6 +39,7 @@ import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
+import PageError from '@/pages/PageError';
 import type { BookingDetails, EvidenceItem, ExtraChargeStatus } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatDuration } from '@/utils/time.format';
@@ -48,7 +48,6 @@ import { StatusBadge } from '../components/BookingCard';
 import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatus.config';
 
 import type { BookingCardHandlers } from '../components/BookingCard';
-
 
 export interface BookingDetailsPageProps {
   role: Role;
@@ -110,13 +109,16 @@ export default function BookingDetailsPage({
   const { bookingId: paramId } = useParams<{ bookingId: string }>();
   const id = propBookingId ?? paramId ?? '';
 
-  const { booking, isLoading, error } = useBookingDetails(id);
+  const { booking, isLoading, error, refetch } = useBookingDetails(id);
 
   if (isLoading) {
     return <BookingDetailsSkeleton />;
   }
+  if (error?.statusCode === 404) {
+    return <Navigate to="/not-found" replace />;
+  }
   if (error || !booking) {
-    return <ErrorState />;
+    return <PageError title="Error" description={error?.message} onRetry={refetch} />;
   }
 
   const b = booking;
@@ -922,17 +924,6 @@ function BookingDetailsSkeleton() {
             <Skeleton key={i} className="h-48 w-full rounded-2xl" />
           ))}
         </div>
-      </div>
-    </div>
-  );
-}
-
-function ErrorState() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="space-y-3 text-center">
-        <AlertTriangle className="mx-auto h-12 w-12 text-destructive" />
-        <p className="text-sm text-muted-foreground">Failed to load booking details.</p>
       </div>
     </div>
   );

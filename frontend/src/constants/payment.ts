@@ -1,5 +1,4 @@
 export const BILL_TYPE = {
-  SUBSCRIPTION: 'subscription',
   BOOKING: 'booking',
   EXTRA_CHARGE: 'extra_charge',
   REFUND: 'refund',

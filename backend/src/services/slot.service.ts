@@ -259,6 +259,7 @@ export class SlotService implements ISlotService {
     }
     return allSlots;
   }
+
   async reserveSlot(
     userId: string,
     data: CreateSlotDTO

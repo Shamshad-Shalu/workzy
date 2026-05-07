@@ -18,10 +18,12 @@ const QuoteSchema: Schema<IQuote> = new Schema(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     serviceId: { type: Schema.Types.ObjectId, ref: "Service", required: true },
     bookingId: { type: Schema.Types.ObjectId, ref: "Booking", required: true },
+    categoryId: { type: Schema.Types.ObjectId, ref: "Category", required: true },
     slotIds: [{ type: Schema.Types.ObjectId, ref: "Slot" }],
     dates: { type: [BookingSlotSchema], required: true },
     totalPrice: { type: Number, required: true },
     message: { type: String, default: null },
+    searchText: { type: String },
     status: {
       type: String,
       enum: QUOTE_STATUS_VALUES,

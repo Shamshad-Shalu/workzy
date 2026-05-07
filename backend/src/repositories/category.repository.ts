@@ -299,7 +299,7 @@ export class CategoryRepository extends BaseRepository<ICategory> implements ICa
           { createdAt: { $gt: new Date(lastValue) } },
           { createdAt: new Date(lastValue), _id: { $gt: oid } },
         ],
-      }; // 👈 ascending
+      };
     } else {
       return {
         $or: [

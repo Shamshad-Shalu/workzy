@@ -1,6 +1,6 @@
 import { WORKER_API, type StripeAccountStatus } from '@/constants';
 import api from '@/lib/api/axios';
-import type { WorkerProfile } from '@/types/worker';
+import type { WorkerProfile, WorkerProfileDetails } from '@/types/worker';
 
 const WorkerService = {
   getWorkerProfile: async (workerId: string): Promise<{ worker: WorkerProfile }> => {
@@ -16,6 +16,10 @@ const WorkerService = {
   },
   connectStripe: async (): Promise<{ url: string }> => {
     const res = await api.get(WORKER_API.STRIPE_CONNECT);
+    return res.data;
+  },
+  getWorkerProfileDetails: async (workerId: string): Promise<WorkerProfileDetails> => {
+    const res = await api.get(WORKER_API.DETAILS_BY_ID(workerId));
     return res.data;
   },
 };

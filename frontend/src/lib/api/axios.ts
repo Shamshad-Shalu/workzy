@@ -3,6 +3,8 @@ import axios, { AxiosError, type AxiosResponse, type AxiosRequestConfig } from '
 import { AUTH_API, HOST } from '@/constants';
 import type { User } from '@/types/user';
 
+import { ApiError } from './apiError';
+
 const baseURL = import.meta.env.MODE === 'development' ? `${HOST}` : '';
 
 const api = axios.create({
@@ -102,14 +104,16 @@ api.interceptors.response.use(
         window.dispatchEvent(new Event('auth:logout'));
         const axiosErr = refreshError as AxiosError<{ message?: string }>;
         const backendMessage = axiosErr.response?.data?.message;
-        return Promise.reject(backendMessage ? new Error(backendMessage) : refreshError);
+        const status = axiosErr.response?.status ?? 500;
+        return Promise.reject(new ApiError(status, backendMessage ?? 'Session expired'));
       } finally {
         isRefreshing = false;
       }
     }
 
+    const status = error.response?.status ?? 500;
     const backendMessage = (error.response?.data as { message?: string })?.message;
-    return Promise.reject(backendMessage ? new Error(backendMessage) : error);
+    return Promise.reject(new ApiError(status, backendMessage ?? error.message));
   }
 );
 

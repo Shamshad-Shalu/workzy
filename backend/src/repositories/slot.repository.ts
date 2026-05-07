@@ -20,6 +20,18 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
     });
   }
 
+  async updatePaymentSlots(slotIds: string[], bookingId: Types.ObjectId): Promise<void> {
+    await this.model.updateMany(
+      { _id: { $in: slotIds.map((id) => new Types.ObjectId(id)) } },
+      {
+        $set: {
+          status: SLOT_STATUS.BOOKED,
+          bookingId,
+        },
+      }
+    );
+  }
+
   async cleanupExpiredReservations(): Promise<number> {
     const result = await this.model.deleteMany({
       status: SLOT_STATUS.RESERVED,

@@ -16,7 +16,7 @@ export class WorkerProfileResponseDTO {
   @Expose() coverImage!: string;
   @Expose() addressLabel!: string;
   @Expose() averageRating!: number;
-  @Expose() reviewCount!: number;
+  @Expose() totalReviews!: number;
   @Expose() completedJobs!: number;
   @Expose() complitionRate!: number;
 
@@ -35,7 +35,7 @@ export class WorkerProfileResponseDTO {
     dto.completedJobs = completed ?? 0;
     dto.complitionRate = accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0;
     dto.averageRating = Math.round((entity.reviewStats.averageRating ?? 0) * 10) / 10;
-    dto.reviewCount = entity.reviewStats.reviewCount ?? 0;
+    dto.totalReviews = entity.reviewStats.reviewCount ?? 0;
 
     return dto;
   }

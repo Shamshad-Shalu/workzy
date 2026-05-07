@@ -1,6 +1,6 @@
 import { PricingMode, ServiceType } from "@/constants";
 import { BulkDiscountType } from "@/types/service/service.entity";
-import { WorkerServiceItem } from "@/types/service/service.projection";
+import { PublicWorkerServiceItem, WorkerServiceItem } from "@/types/service/service.projection";
 
 export class ServiceResponseDto {
   id!: string;
@@ -51,6 +51,45 @@ export class ServiceResponseDto {
   }
 
   static fromEntities(entities: WorkerServiceItem[]): ServiceResponseDto[] {
+    return entities.map((entity) => this.fromEntity(entity));
+  }
+}
+
+export class PublicServiceListResponseDto {
+  id!: string;
+  serviceName!: string;
+  categoryName!: string;
+  serviceType!: ServiceType;
+  pricingMode!: PricingMode;
+  iconUrl!: string;
+  imageUrl!: string;
+
+  rate!: number;
+  description?: string;
+  experience!: number;
+  estimatedDuration!: number;
+  bulkDiscounts?: BulkDiscountType[];
+
+  static fromEntity(entity: PublicWorkerServiceItem): PublicServiceListResponseDto {
+    const dto = new PublicServiceListResponseDto();
+
+    dto.id = entity._id.toString();
+    dto.serviceName = entity.serviceName;
+    dto.categoryName = entity.categoryName;
+    dto.serviceType = entity.serviceType;
+    dto.pricingMode = entity.pricingMode;
+    dto.iconUrl = entity.iconUrl;
+    dto.imageUrl = entity.imageUrl;
+
+    dto.rate = entity.rate;
+    dto.description = entity.description;
+    dto.estimatedDuration = entity.estimatedDuration;
+    dto.bulkDiscounts = entity.bulkDiscounts;
+
+    return dto;
+  }
+
+  static fromEntities(entities: PublicWorkerServiceItem[]): PublicServiceListResponseDto[] {
     return entities.map((entity) => this.fromEntity(entity));
   }
 }

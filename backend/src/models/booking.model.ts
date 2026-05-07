@@ -190,7 +190,7 @@ const BookingSchema: Schema<IBooking> = new Schema(
     duration: {
       type: Number,
       required: true,
-      min: 1,
+      min: 0,
     },
     address: {
       type: BookingLocationSchema,

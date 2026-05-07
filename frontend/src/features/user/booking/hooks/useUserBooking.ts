@@ -61,6 +61,8 @@ export function useUserBookingHandler() {
     setCancelB(null);
   };
 
+  console.log({ reviewData });
+
   const handleApproveBooking = async () => {
     if (!approveBId) {
       return;

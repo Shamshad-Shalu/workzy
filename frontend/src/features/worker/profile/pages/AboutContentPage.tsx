@@ -19,7 +19,7 @@ import {
 import type { WorkerProfileSchemaType } from '../validation/workerProfileSchema';
 
 type OutletContext = {
-  reloadWorkerData: () => Promise<void>;
+  reloadWorkerData: () => Promise<unknown>;
 };
 
 export default function WorkeAboutContentPage() {

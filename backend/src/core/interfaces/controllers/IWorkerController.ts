@@ -4,6 +4,7 @@ export interface IWorkerController {
   listPublicWorkers: RequestHandler;
   getWorkerProfile: RequestHandler;
   getWorkerProfileDetails: RequestHandler;
+  getWorkerProfileDetailsById: RequestHandler;
 
   updateWorkerProfile: RequestHandler;
   updateWorkerPhone: RequestHandler;

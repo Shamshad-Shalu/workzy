@@ -14,8 +14,8 @@ const WorkerReviews = lazy(() => import('@/features/worker/reviews/pages/WorkerR
 const WorkerServicesPage = lazy(
   () => import('@/features/worker/services/pages/WorkerServicesPage')
 );
-const WorkerProfileRouteWrapper = lazy(
-  () => import('@/features/worker/profile/wrappers/WorkerProfileWrapper')
+const WorkerProfileRouteLayout = lazy(
+  () => import('@/features/worker/profile/WorkerProfileRouteLayout')
 );
 const WorkerAboutContentPage = lazy(
   () => import('@/features/worker/profile/pages/AboutContentPage')
@@ -44,9 +44,9 @@ export default function WorkerRoutes() {
           <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
-          <Route path="quote" element={<WorkerQuotesListPage />} />
-          <Route path="quote/:bookingId" element={<WorkerQuotePage />} />
-          <Route path="profile" element={<WorkerProfileRouteWrapper />}>
+          <Route path="quotes" element={<WorkerQuotesListPage />} />
+          <Route path="quotes/:bookingId" element={<WorkerQuotePage />} />
+          <Route path="profile" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />
             <Route path="account" element={<AccountPage />} />

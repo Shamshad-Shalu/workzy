@@ -31,6 +31,7 @@ const WorkerProfileRouteLayout = lazy(
 const WorkerProfilePage = lazy(() => import('@/features/user/worker/pages/WorkerProfilePage'));
 const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/WorkerServicesPage'));
 const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
+const UserQuotesListPage = lazy(() => import('@/features/user/quote/pages/UserQuotesListPage'));
 
 const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
 const UserBookingDetailsPage = lazy(
@@ -61,12 +62,14 @@ export default function UserRoutes() {
             <Route path="/profile" element={<UserProfilePage />} />
 
             <Route path="/payments" element={<UserPaymentsPage />} />
+            <Route path="/quotes" element={<UserQuotesListPage />} />
           </Route>
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />
             <Route path="services" element={<WorkerServicesPage />} />
             <Route path="reviews" element={<WorkerReviewsPage />} />
           </Route>
+          <Route path="not-found" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>

@@ -20,5 +20,6 @@ export interface ISlotService {
     data: CreateQuoteSlotsDTO
   ): Promise<{ slotIds: string[]; reservedUntil: Date; dates: IBookingSlot[] }>;
   releaseSlot(slotId: string, userId: string): Promise<boolean>;
+  releaseQuoteSlots(slotIds: string[]): Promise<boolean>;
   cleanupExpired(): Promise<number>;
 }
