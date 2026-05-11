@@ -1,28 +1,36 @@
-import { Expose } from "class-transformer";
-
 import { DEFAULT_WORKER_COVER_IMAGE, WorkerStatus } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { IAvailabilitySlots, IGeoLocation, IWorker } from "@/types/worker/worker.entity";
+import {
+  IAvailabilitySlots,
+  IGeoLocation,
+  IReviewStats,
+  IWorker,
+} from "@/types/worker/worker.entity";
 import { WorkerProfile } from "@/types/worker/worker.projection";
 import { resolveS3Image } from "@/utils/s3.utils";
 
 export class WorkerProfileResponseDTO {
-  @Expose() id!: string;
-  @Expose() displayName!: string;
-  @Expose() tagline!: string;
-  @Expose() about!: string;
-  @Expose() experience!: number;
-  @Expose() profileImage?: string;
-  @Expose() coverImage!: string;
-  @Expose() addressLabel!: string;
-  @Expose() averageRating!: number;
-  @Expose() totalReviews!: number;
-  @Expose() completedJobs!: number;
-  @Expose() complitionRate!: number;
+  id!: string;
+  displayName!: string;
+  tagline!: string;
+  about!: string;
+  experience!: number;
+  profileImage?: string;
+  coverImage!: string;
+  addressLabel!: string;
+  reviewStats!: Omit<IReviewStats, "totalRating">;
+  jobStats!: {
+    offered: number;
+    accepted: number;
+    completed: number;
+    noResponse: number;
+    complitionRate: number;
+  };
 
   static fromEntity(entity: WorkerProfile): WorkerProfileResponseDTO {
     const dto = new WorkerProfileResponseDTO();
-    const { completed, accepted } = entity.jobStats;
+    const { completed, accepted, noResponse, offered } = entity.jobStats;
+    const { averageRating, breakdown, reviewCount } = entity.reviewStats;
 
     dto.id = entity._id.toString();
     dto.displayName = entity.displayName;
@@ -32,11 +40,18 @@ export class WorkerProfileResponseDTO {
     dto.profileImage = entity.profileImage;
     dto.coverImage = entity.coverImage || DEFAULT_WORKER_COVER_IMAGE;
     dto.addressLabel = entity.location.addressLabel ?? "";
-    dto.completedJobs = completed ?? 0;
-    dto.complitionRate = accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0;
-    dto.averageRating = Math.round((entity.reviewStats.averageRating ?? 0) * 10) / 10;
-    dto.totalReviews = entity.reviewStats.reviewCount ?? 0;
-
+    dto.jobStats = {
+      accepted,
+      completed,
+      noResponse,
+      offered,
+      complitionRate: accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0,
+    };
+    dto.reviewStats = {
+      averageRating: Math.round((averageRating ?? 0) * 10) / 10,
+      breakdown,
+      reviewCount,
+    };
     return dto;
   }
 }

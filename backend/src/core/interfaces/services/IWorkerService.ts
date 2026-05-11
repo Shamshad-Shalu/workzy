@@ -16,6 +16,7 @@ import {
   PublicWorkerListQuery,
   WorkerListQuery,
 } from "@/types/worker/worker.query";
+import { WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 
 export interface IWorkerService {
   listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListResponseDto>>;
@@ -46,4 +47,5 @@ export interface IWorkerService {
   getStripeStatus(
     workerId: string
   ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }>;
+  getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics>;
 }

@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { injectable } from "inversify";
 import { FilterQuery, Types } from "mongoose";
 
@@ -64,5 +65,44 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
       this.model.countDocuments(filter),
     ]);
     return { data: users, total };
+  }
+
+  async getUserGrowthAnalytics(): Promise<{ month: number; users: number }[]> {
+    const startOfYear = dayjs().startOf("year").toDate();
+
+    const endOfYear = dayjs().endOf("year").toDate();
+
+    return this.model.aggregate<{
+      month: number;
+      users: number;
+    }>([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfYear,
+            $lte: endOfYear,
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            $month: "$createdAt",
+          },
+
+          users: {
+            $sum: 1,
+          },
+        },
+      },
+
+      {
+        $project: {
+          month: "$_id",
+          users: 1,
+        },
+      },
+    ]);
   }
 }

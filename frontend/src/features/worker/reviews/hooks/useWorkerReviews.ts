@@ -4,9 +4,9 @@ import { reviewKeys } from '@/features/user/worker/hooks/useWorkerReviews';
 import ReviewService from '@/services/review.service';
 import type { WorkerReviewListResponse, ReviewListQuery } from '@/types/review';
 
-const LIMIT = 5;
+const LIMIT = 3;
 
-export function useWorkerReviews(query: Omit<ReviewListQuery, 'cursor' | 'limit'>) {
+export function useWorkerReviews(query?: Omit<ReviewListQuery, 'cursor' | 'limit'>) {
   return useInfiniteQuery<
     WorkerReviewListResponse,
     Error,

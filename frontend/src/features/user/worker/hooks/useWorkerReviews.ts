@@ -13,7 +13,7 @@ export const reviewKeys = {
   lists: () => [...reviewKeys.all, 'list'] as const,
   user: (filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
     [...reviewKeys.lists(), 'user', filters] as const,
-  worker: (filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
+  worker: (filters?: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
     [...reviewKeys.lists(), 'worker', filters] as const,
   public: (workerId: string, filters: Omit<ReviewListQuery, 'cursor' | 'limit'>) =>
     [...reviewKeys.lists(), 'public', workerId, filters] as const,

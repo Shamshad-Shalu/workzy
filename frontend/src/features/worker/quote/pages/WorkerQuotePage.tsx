@@ -42,13 +42,13 @@ export default function WorkerQuotePage() {
       message: '',
     },
   });
-  const { handleSubmit , setValue } = methods;
+  const { handleSubmit, setValue } = methods;
 
   useEffect(() => {
     if (booking?.id) {
       setValue('bookingId', booking.id);
     }
-  }, [booking?.id ,setValue ]);
+  }, [booking?.id, setValue]);
 
   const handleQuoteSubmit = async (data: QuoteFormType) => {
     console.log({ QuoteForm: data });

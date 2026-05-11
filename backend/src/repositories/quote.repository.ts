@@ -92,7 +92,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
           },
           accepted: {
             $sum: {
-              $cond: [{ $eq: ["$status", QUOTE_STATUS.ACCEPETED] }, 1, 0],
+              $cond: [{ $eq: ["$status", QUOTE_STATUS.ACCEPTED] }, 1, 0],
             },
           },
           rejected: {
@@ -108,7 +108,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
 
           totalEarned: {
             $sum: {
-              $cond: [{ $eq: ["$status", QUOTE_STATUS.ACCEPETED] }, "$totalPrice", 0],
+              $cond: [{ $eq: ["$status", QUOTE_STATUS.ACCEPTED] }, "$totalPrice", 0],
             },
           },
         },

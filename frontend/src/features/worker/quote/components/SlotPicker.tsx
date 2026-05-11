@@ -74,7 +74,7 @@ export default function SlotPicker({ serviceId }: Props) {
     if (valid.length !== selectedDates.length) {
       setValue('dates', valid, { shouldValidate: true });
     }
-  }, [dateKeys, selectedDates ,setValue]);
+  }, [dateKeys, selectedDates, setValue]);
 
   const isAppliedFilter = startDate || endDate;
 

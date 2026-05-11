@@ -18,7 +18,6 @@ import ApproveQuoteModal from '../components/ApproveQuoteModal';
 import RejectQuoteModal from '../components/RejectQuoteModal';
 import { useAcceptQuote, useRejectQuote, useUserQuotes } from '../hooks/useUserQuotes';
 
-
 export default function UserQuotesListPage() {
   const [approveQuote, setApproveQuote] = useState<null | QuoteListItem>(null);
   const [rejectQuote, setRejectQuote] = useState<null | QuoteListItem>(null);

@@ -23,7 +23,7 @@ export interface Review {
 export interface WorkerReviewStats {
   averageRating: number;
   reviewCount: number;
-  ratingBreakdown: {
+  breakdown: {
     '1': number;
     '2': number;
     '3': number;

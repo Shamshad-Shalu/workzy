@@ -11,9 +11,7 @@ import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 import type { BookigCompleteForm } from '../components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '../validation/extraChargeSchema';
 
-const LIMIT = 3;
-
-export function useWorkerBooking(status: BookingFilterStatus) {
+export function useWorkerBooking(status: BookingFilterStatus = 'all', limit: number = 3) {
   return useInfiniteQuery<
     BookingListingResponse,
     Error,
@@ -25,7 +23,7 @@ export function useWorkerBooking(status: BookingFilterStatus) {
     queryFn: ({ pageParam }) =>
       BookingService.getWorkerBookings({
         status,
-        limit: LIMIT,
+        limit: limit,
         cursor: pageParam ? pageParam : null,
       }),
     initialPageParam: undefined,

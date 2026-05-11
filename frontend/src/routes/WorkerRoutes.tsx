@@ -9,7 +9,7 @@ import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesList
 import ProtectedRoute from './ProtectedRoute';
 
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
-const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/Dashboard'));
+const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/WorkerDashboard'));
 const WorkerReviews = lazy(() => import('@/features/worker/reviews/pages/WorkerReviewsPage'));
 const WorkerServicesPage = lazy(
   () => import('@/features/worker/services/pages/WorkerServicesPage')

@@ -26,4 +26,5 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
   adjustRating(workerId: string, oldRating: number, newRating: number): Promise<void>;
   decrementRating(workerId: string, rating: number): Promise<void>;
   getWorkerReviewStats(workerId: string): Promise<IReviewStats | null>;
+  getWorkerGrowthAnalytics(): Promise<{ month: number; workers: number }[]>;
 }

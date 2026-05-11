@@ -65,7 +65,6 @@ export class WorkerController implements IWorkerController {
   getWorkerProfileDetailsById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const workerData = await this._workerService.getWorkerProfileDetails(workerId);
-    console.log("hello::", workerData);
     res.status(HTTPSTATUS.OK).json(workerData);
   });
 
@@ -112,6 +111,12 @@ export class WorkerController implements IWorkerController {
     const workerId = this.requireWorkerId(req);
     const url = await this._workerService.connectStripe(workerId);
     res.status(HTTPSTATUS.OK).json({ url });
+  });
+
+  getWorkerDashboardAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const stats = await this._workerService.getWorkerDashboardAnalytics(workerId);
+    res.status(HTTPSTATUS.OK).json(stats);
   });
 
   getStripeStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {

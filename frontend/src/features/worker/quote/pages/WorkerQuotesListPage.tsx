@@ -45,10 +45,6 @@ export default function WorkerQuotesListPage() {
           <h1 className="text-2xl font-semibold tracking-tight">My Quotes</h1>
           <p className="text-sm text-muted-foreground">Track quotes you've sent to customers.</p>
         </div>
-        {/* <Button>
-          <Plus className="h-4 w-4" />
-          New Quote
-        </Button> */}
       </div>
       {statsLoading ? (
         <StatsSkeleton />
@@ -57,21 +53,21 @@ export default function WorkerQuotesListPage() {
           <StatCard
             icon={<FileText className="h-4 w-4" />}
             label="Quotes sent"
-            value={counts?.all ?? 0}
+            value={counts?.all}
             sub=""
             tone="amber"
           />
           <StatCard
             icon={<TrendingUp className="h-4 w-4" />}
             label="Acceptance rate"
-            value={`${acceptRate ?? 0}%`}
+            value={`${acceptRate}%`}
             sub=""
             tone="emerald"
           />
           <StatCard
             icon={<Wallet className="h-4 w-4" />}
             label="Earned (accepted)"
-            value={formatCurrency(totalEarned ?? 0)}
+            value={formatCurrency(totalEarned)}
             tone="violet"
             sub=""
           />

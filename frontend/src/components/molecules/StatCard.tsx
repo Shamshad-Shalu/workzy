@@ -3,14 +3,14 @@ import { Card, CardContent } from '../ui/card';
 export default function StatCard({
   icon,
   label,
-  value,
-  sub,
+  value = 0,
+  sub = '',
   tone,
 }: {
   icon: React.ReactNode;
   label: string;
-  value: string | number;
-  sub: string;
+  value?: string | number;
+  sub?: string;
   tone: 'amber' | 'violet' | 'emerald' | 'sky';
 }) {
   const toneMap: Record<string, string> = {

@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { injectable } from "inversify";
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
@@ -583,5 +584,42 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
       .lean<{ reviewStats: IReviewStats }>();
 
     return worker?.reviewStats ?? null;
+  }
+
+  async getWorkerGrowthAnalytics(): Promise<{ month: number; workers: number }[]> {
+    const startOfYear = dayjs().startOf("year").toDate();
+    const endOfYear = dayjs().endOf("year").toDate();
+    return this.model.aggregate<{
+      month: number;
+      workers: number;
+    }>([
+      {
+        $match: {
+          createdAt: {
+            $gte: startOfYear,
+            $lte: endOfYear,
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            $month: "$createdAt",
+          },
+
+          workers: {
+            $sum: 1,
+          },
+        },
+      },
+
+      {
+        $project: {
+          month: "$_id",
+          workers: 1,
+        },
+      },
+    ]);
   }
 }

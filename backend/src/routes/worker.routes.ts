@@ -30,6 +30,8 @@ router.get("/:workerId", workerController.getWorkerProfile);
 
 router.use(authenticate([ROLE.WORKER]));
 
+router.get("/worker/dashboard", workerController.getWorkerDashboardAnalytics);
+
 router.patch(
   "/profile",
   validateDto(WorkerProfileRequestDto),

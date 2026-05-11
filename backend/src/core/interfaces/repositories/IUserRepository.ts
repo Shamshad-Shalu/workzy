@@ -9,4 +9,5 @@ export interface IUserRepository extends BaseRepository<IUser> {
   getUserByRoleAndId(role: string, id: string): Promise<IUser | null>;
   findByGoogleId(googleId: string): Promise<IUser | null>;
   listUsers(query: UserListQuery): Promise<PaginatedResult<UserListItem>>;
+  getUserGrowthAnalytics(): Promise<{ month: number; users: number }[]>;
 }

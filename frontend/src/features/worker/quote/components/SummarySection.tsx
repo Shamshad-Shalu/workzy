@@ -7,14 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import type { BookingDetails } from '@/types/booking';
 
 import type { QuoteFormType } from '../validation/quoteSchema';
+import { formatCurrency } from '@/utils/currency';
 
-function formatINR(n: number) {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(n);
-}
 
 function formatDayLabel(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {
@@ -73,7 +67,7 @@ export default function SummarySection({ booking, isSubmitting }: Props) {
           <Row
             icon={<Wallet className="h-3.5 w-3.5" />}
             label="Total"
-            value={totalPrice > 0 ? formatINR(totalPrice) : '—'}
+            value={totalPrice > 0 ? formatCurrency(totalPrice) : '—'}
           />
         </div>
 

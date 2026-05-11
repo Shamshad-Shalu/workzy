@@ -8,6 +8,7 @@ export const WORKER_API = {
   PROFILE: worker(`/profile`),
   PROFILE_IMAGE: worker(`/profile-url`),
   DETAILS: worker(`/details`),
+  DASHBOARD: worker(`/worker/dashboard`),
 
   JOIN: (id: string) => worker(`/joinUs/${id}`),
   PROFILE_ABOUT: (id: string) => worker(`/${id}/profile/about`),

@@ -4,6 +4,7 @@ import { injectable, inject } from "inversify";
 
 import { HTTPSTATUS, Role, StripeAccountStatus, WORKER } from "@/constants";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
+import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
@@ -15,7 +16,8 @@ import { WorkerStatusFilter } from "@/types/worker/worker.query";
 export class AdminController implements IAdminController {
   constructor(
     @inject(TYPES.UserService) private _userService: IUserService,
-    @inject(TYPES.WorkerService) private _workerService: IWorkerService
+    @inject(TYPES.WorkerService) private _workerService: IWorkerService,
+    @inject(TYPES.AdminService) private _adminService: IAdminService
   ) {}
 
   listUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -38,7 +40,7 @@ export class AdminController implements IAdminController {
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
     const message = await this._userService.toggleUserStatus(userId);
-    res.status(200).json({ message });
+    res.status(HTTPSTATUS.OK).json({ message });
   });
 
   listWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -56,7 +58,7 @@ export class AdminController implements IAdminController {
       stripStatus,
     });
 
-    res.json({
+    res.status(HTTPSTATUS.OK).json({
       workers: data,
       total,
     });
@@ -68,6 +70,11 @@ export class AdminController implements IAdminController {
       workerId,
       req.body as VerifyWorkerRequestDTO
     );
-    res.status(200).json({ message: WORKER.VERIFIED, worker: updatedWorker });
+    res.status(HTTPSTATUS.OK).json({ message: WORKER.VERIFIED, worker: updatedWorker });
+  });
+
+  getAdminDashboard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const stats = await this._adminService.getAdminDashboardAnalytics();  
+    res.status(HTTPSTATUS.OK).json(stats);
   });
 }

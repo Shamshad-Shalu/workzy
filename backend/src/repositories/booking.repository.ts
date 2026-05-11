@@ -10,10 +10,12 @@ import {
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import Booking from "@/models/booking.model";
+import { CategoryDistributionItem, RevenueChartItem, TopWorkerItem } from "@/types/admin.dashboard";
 import { IBooking } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import { MonthlyEarningStat, WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
@@ -121,6 +123,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       },
     });
   }
+
   async getBookingDetailById(bookingId: string): Promise<BookingDetails | null> {
     return await this.model
       .findById(bookingId)
@@ -128,5 +131,272 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       .populate("userId", "profileImage")
       .populate("categoryId", "iconUrl")
       .lean<BookingDetails>();
+  }
+
+  async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {
+    const startOfYear = dayjs().startOf("year").toDate();
+    const endOfYear = dayjs().endOf("year").toDate();
+
+    const analytics = await this.model.aggregate<{
+      _id: number;
+      totalAmount: number;
+      totalEarnings: number;
+      totalPlatformFee: number;
+      jobs: number;
+    }>([
+      {
+        $match: {
+          workerId: new Types.ObjectId(workerId),
+          status: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED] },
+          completedAt: {
+            $gte: startOfYear,
+            $lte: endOfYear,
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: "$updatedAt" },
+          totalAmount: { $sum: "$total" },
+          totalPlatformFee: { $sum: "$platformFee" },
+          totalEarnings: {
+            $sum: {
+              $subtract: ["$total", "$platformFee"],
+            },
+          },
+          jobs: { $sum: 1 },
+        },
+      },
+      { $sort: { _id: 1 } },
+    ]);
+
+    const monthLabels = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    const earningsData: MonthlyEarningStat[] = monthLabels.map((month, index) => {
+      const stat = analytics.find((item) => item._id === index + 1);
+
+      return {
+        month,
+        income: stat?.totalEarnings ?? 0,
+        jobs: stat?.jobs ?? 0,
+      };
+    });
+    const totalAmount = analytics.reduce((sum, item) => sum + item.totalAmount, 0);
+    const totalPlatformFee = analytics.reduce((sum, item) => sum + item.totalPlatformFee, 0);
+    const totalEarnings = analytics.reduce((sum, item) => sum + item.totalEarnings, 0);
+
+    console.log({
+      startOfYear,
+      endOfYear,
+      analytics,
+      totalAmount,
+      totalPlatformFee,
+      totalEarnings,
+      earningsData,
+    });
+    return {
+      totalAmount,
+      totalPlatformFee,
+      totalEarnings,
+      earningsData,
+    };
+  }
+
+  async getRevenueAnalytics(): Promise<RevenueChartItem[]> {
+    const startOfYear = dayjs().startOf("year").toDate();
+
+    const endOfYear = dayjs().endOf("year").toDate();
+
+    const analytics = await this.model.aggregate<{
+      _id: number;
+      revenue: number;
+      commission: number;
+    }>([
+      {
+        $match: {
+          status: {
+            $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED],
+          },
+
+          completedAt: {
+            $gte: startOfYear,
+            $lte: endOfYear,
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: {
+            $month: "$completedAt",
+          },
+
+          revenue: {
+            $sum: "$total",
+          },
+
+          commission: {
+            $sum: "$platformFee",
+          },
+        },
+      },
+    ]);
+
+    const months = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+
+    return months.map((month, index) => {
+      const stat = analytics.find((item) => item._id === index + 1);
+
+      return {
+        month,
+        revenue: stat?.revenue ?? 0,
+        commission: stat?.commission ?? 0,
+      };
+    });
+  }
+
+  async getCategoryDistribution(): Promise<CategoryDistributionItem[]> {
+    const analytics = await this.model.aggregate<{
+      name: string;
+      value: number;
+    }>([
+      {
+        $match: {
+          status: {
+            $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED],
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: "$categoryId",
+
+          count: {
+            $sum: 1,
+          },
+        },
+      },
+
+      {
+        $lookup: {
+          from: "categories",
+          localField: "_id",
+          foreignField: "_id",
+          as: "category",
+        },
+      },
+
+      {
+        $unwind: "$category",
+      },
+
+      {
+        $project: {
+          _id: 0,
+          name: "$category.name",
+          value: "$count",
+        },
+      },
+    ]);
+
+    const total = analytics.reduce((sum, item) => sum + item.value, 0);
+
+    return analytics.map((item) => ({
+      name: item.name,
+
+      value: total > 0 ? Math.round((item.value / total) * 100) : 0,
+    }));
+  }
+
+  async getTopWorkers(): Promise<TopWorkerItem[]> {
+    return this.model.aggregate<TopWorkerItem>([
+      {
+        $match: {
+          status: {
+            $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED],
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: "$workerId",
+
+          jobs: {
+            $sum: 1,
+          },
+
+          earnings: {
+            $sum: {
+              $subtract: ["$total", "$platformFee"],
+            },
+          },
+        },
+      },
+
+      {
+        $sort: {
+          jobs: -1,
+        },
+      },
+
+      {
+        $limit: 5,
+      },
+
+      {
+        $lookup: {
+          from: "workers",
+          localField: "_id",
+          foreignField: "_id",
+          as: "worker",
+        },
+      },
+
+      {
+        $unwind: "$worker",
+      },
+
+      {
+        $project: {
+          workerId: "$worker._id",
+
+          name: "$worker.displayName",
+
+          jobs: 1,
+
+          earnings: 1,
+
+          rating: "$worker.reviewStats.averageRating",
+        },
+      },
+    ]);
   }
 }

@@ -26,6 +26,7 @@ export const BOOKING_STATUS = {
   CANCELLED: 'cancelled',
   REJECTED: 'rejected',
   DISPUTED: 'disputed',
+  EXPIRED: 'expired',
 } as const;
 
 export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);

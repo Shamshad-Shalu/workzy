@@ -121,7 +121,6 @@ export default function AdminReviewsPage() {
                     Filters ({filters.activeFilterCount})
                   </Btn>
                 </PopoverTrigger>
-
                 <PopoverContent className="w-[320px] space-y-3">
                   <AdminReviewFilters {...filters} />
                 </PopoverContent>

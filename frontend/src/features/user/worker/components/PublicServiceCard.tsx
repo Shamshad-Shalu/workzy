@@ -41,13 +41,6 @@ export function PublicServiceCard({ service }: { service: PublicWorkerServiceIte
           <Badge variant={serviceType === SERVICE_TYPE.CONSULTATION ? 'secondary' : 'blue'}>
             {serviceType}
           </Badge>
-          {/* <span className={cn(
-            'shrink-0 inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold',
-            cfg.badge
-          )}>
-            <span className={cn('h-1.5 w-1.5 rounded-full', cfg.dot)} />
-            {svc.serviceType}
-          </span> */}
         </div>
         {description && (
           <p className="line-clamp-2 text-xs leading-relaxed text-muted-foreground">
@@ -59,15 +52,6 @@ export function PublicServiceCard({ service }: { service: PublicWorkerServiceIte
             <Clock className="h-3 w-3" />
             {formatDuration(estimatedDuration)}
           </span>
-          {/* <span className="flex items-center gap-1.5">
-            <SlidersHorizontal className="h-3 w-3" />
-            {svc.pricingMode === PRICING_MODE.PER_UNIT ? 'Per unit' : 'Fixed'}
-          </span>
-          {svc.allowSuddenBooking && (
-            <span className="flex items-center gap-1 rounded-full border border-green-500/20 bg-green-500/10 px-2 py-0.5 font-medium text-green-700 dark:text-green-400">
-              <Zap className="h-2.5 w-2.5" /> Instant
-            </span>
-          )} */}
         </div>
         {bulkDiscounts && bulkDiscounts?.length > 0 && (
           <div className="rounded-xl border border-dashed border-rose-500/20 bg-rose-500/[0.04] px-3 py-2">
@@ -98,7 +82,6 @@ export function PublicServiceCard({ service }: { service: PublicWorkerServiceIte
           <Button
             size="sm"
             className="shrink-0 opacity-90 transition-opacity group-hover:opacity-100"
-            // onClick={() => onBook(svc)}
           >
             Book now
           </Button>

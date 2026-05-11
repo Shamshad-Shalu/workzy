@@ -14,5 +14,5 @@ export interface IWorkerController {
   reSubmitWorkerDocument: RequestHandler;
   connectStripe: RequestHandler;
   getStripeStatus: RequestHandler;
-  // getWorkerAbout
+  getWorkerDashboardAnalytics: RequestHandler;
 }

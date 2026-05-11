@@ -20,4 +20,5 @@ export const ADMIN_API = {
   BOOKING: {
     ROOT: admin('/booking/'),
   },
+  DASHBOARD: admin('dashboard'),
 } as const;

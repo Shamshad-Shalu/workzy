@@ -6,7 +6,7 @@ import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
 
 import ProtectedRoute from './ProtectedRoute';
 
-const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/Dashboard'));
+const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const AdminLayout = lazy(() => import('@/layouts/admin/AdminLayout'));
 const UserManagementPage = lazy(() => import('@/features/admin/user/pages/UserMangementPage'));
 const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDetailsLayout'));

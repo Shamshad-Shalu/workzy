@@ -1,5 +1,6 @@
 import type { PricingMode, ServiceType, WorkerStatus } from '@/constants';
 
+import type { WorkerReviewStats } from './review';
 import type { BulkDiscountType } from './service';
 
 export interface TimeSlot {
@@ -33,32 +34,27 @@ export interface Worker {
   about?: string;
   coverImage?: string;
   status: WorkerStatus;
-  defaultRate?: number;
   documents: Document[];
-  skills: string[];
-  cities: string[];
   availability: AvailabilitySlots;
   rejectReason?: string;
 }
 
-export interface WorkerInfo {
-  id: string;
-  displayName: string;
-  tagline: string;
-  about: string;
-  profileImage: string;
-  coverImage: string;
-  experience: number;
-  rate: number;
-  skills: string[];
-  cities: string[];
-  address: string;
-  isPremium: boolean;
-  averageRating: number;
-  completionRate: number | null;
-  reviewCount: number;
-  worksCompleted: number;
-}
+// interface WorkerInfo {
+//   id: string;
+//   displayName: string;
+//   tagline: string;
+//   about: string;
+//   profileImage: string;
+//   coverImage: string;
+//   experience: number;
+//   rate: number;
+//   address: string;
+//   isPremium: boolean;
+//   averageRating: number;
+//   completionRate: number | null;
+//   reviewCount: number;
+//   worksCompleted: number;
+// }
 
 export interface ResubmitDocumentPayload {
   id: string;
@@ -106,10 +102,14 @@ export type WorkerProfile = {
   profileImage?: string;
   coverImage: string;
   addressLabel: string;
-  completedJobs: number;
-  complitionRate: number;
-  averageRating: number;
-  totalReviews: number;
+  reviewStats: WorkerReviewStats;
+  jobStats: {
+    offered: number;
+    accepted: number;
+    completed: number;
+    noResponse: number;
+    complitionRate: number;
+  };
 };
 
 export type WorkerProfileDetails = {

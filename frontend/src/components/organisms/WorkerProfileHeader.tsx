@@ -30,12 +30,10 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
     coverImage,
     tagline,
     experience,
-    averageRating,
-    totalReviews,
     profileImage,
     addressLabel,
-    completedJobs,
-    complitionRate,
+    jobStats,
+    reviewStats,
   } = worker;
   const isAvailableToday = true;
 
@@ -119,21 +117,21 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
         <StatCard
           icon={<Star className="h-4 w-4" />}
           label="Rating"
-          value={averageRating?.toFixed(1) ?? '—'}
-          sub={`${totalReviews} reviews`}
+          value={reviewStats.averageRating?.toFixed(1) ?? '—'}
+          sub={`${reviewStats.reviewCount} reviews`}
           tone="amber"
         />
         <StatCard
           icon={<Briefcase className="h-4 w-4" />}
           label="Jobs done"
-          value={String(completedJobs)}
+          value={String(jobStats.completed)}
           sub="Completed"
           tone="violet"
         />
         <StatCard
           icon={<CheckCircle2 className="h-4 w-4" />}
           label="Completion"
-          value={`${complitionRate}%`}
+          value={`${jobStats.complitionRate}%`}
           sub="On-time rate"
           tone="emerald"
         />

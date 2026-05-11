@@ -171,7 +171,7 @@ export interface BookingListingResponse {
 }
 
 export interface BookingListQuery {
-  status: BookingFilterStatus;
+  status?: BookingFilterStatus;
   search?: string;
   limit: number;
   cursor?: string | null;
@@ -179,7 +179,7 @@ export interface BookingListQuery {
 
 export interface AdminBookingListQuery extends BookingListQuery {
   userId?: string;
-  paymentStatus: BookingPaymentStatus | 'all';
+  paymentStatus?: BookingPaymentStatus | 'all';
   workerId?: string;
   fromDate?: string;
   toDate?: string;
