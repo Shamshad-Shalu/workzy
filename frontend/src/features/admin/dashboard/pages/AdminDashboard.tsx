@@ -7,6 +7,7 @@ import {
   Wallet,
   UserCheck,
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import {
   Area,
   AreaChart,
@@ -39,9 +40,8 @@ import { StatusBadge } from '@/features/booking/components/BookingCard';
 import { formatCurrency } from '@/utils/currency';
 
 import { useAdminBookings } from '../../booking/hooks/useAdminBooking';
-import { useAdminDashboard } from '../hooks/useAdminDashboard';
 import AdminDashboardSkeleton from '../components/AdminDashboardSkeleton';
-import { Link } from 'react-router-dom';
+import { useAdminDashboard } from '../hooks/useAdminDashboard';
 
 const PIE_COLORS = [
   'hsl(var(--chart-1))',
@@ -52,7 +52,7 @@ const PIE_COLORS = [
 ];
 
 export default function AdminDashboard() {
-  const { data , isLoading  } = useAdminDashboard();
+  const { data, isLoading } = useAdminDashboard();
   const { data: bookings, isLoading: bookingLoading } = useAdminBookings({});
   const revenueData = data?.revenueData ?? [];
   const userGrowth = data?.userGrowth ?? [];

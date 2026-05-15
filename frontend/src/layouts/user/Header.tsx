@@ -1,5 +1,4 @@
 import {
-  Bell,
   User,
   Users,
   Search,
@@ -23,7 +22,9 @@ import {
   LocationSearchModal,
   type SelectedLocation,
 } from '@/components/molecules/LocationSearchModal';
+import ProfileImage from '@/components/molecules/ProfileImage';
 import SearchInput from '@/components/molecules/SearchInput';
+import { NotificationsDropdown } from '@/components/organisms/NotificationsDropdown';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -145,7 +146,6 @@ export default function Header() {
       <header className="fixed left-0 right-0 top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 border-b border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
-            {/* Logo */}
             <Link
               to="/"
               onClick={() => handleNavClick('/')}
@@ -197,25 +197,16 @@ export default function Header() {
             )}
             <div className="flex items-center gap-2">
               {isAuthenticated && (
-                <button
-                  className="relative p-2 hover:bg-accent rounded-lg transition-colors"
-                  aria-label="Notifications"
-                >
-                  <Bell className="h-5 w-5 text-foreground" />
-                  <span className="absolute top-1.5 right-1.5 h-2 w-2 bg-destructive rounded-full"></span>
-                </button>
+                <div className="p-1 hover:bg-accent rounded-lg transition-colors">
+                  <NotificationsDropdown />
+                </div>
               )}
               <ModeToggle />
               {isAuthenticated ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <button className="hidden lg:flex items-center gap-2 p-1 pr-3 hover:bg-accent rounded-full transition-colors">
-                      <Avatar className="h-8 w-8 ring-2 ring-transparent hover:ring-primary/20 transition-all">
-                        <AvatarImage src={user?.profileImage} referrerPolicy="no-referrer" />
-                        <AvatarFallback>
-                          <User className="h-4 w-4" />
-                        </AvatarFallback>
-                      </Avatar>
+                      <ProfileImage src={user?.profileImage} size={35} name={user?.name} />
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </button>
                   </DropdownMenuTrigger>
@@ -252,9 +243,7 @@ export default function Header() {
                         Switch to Worker Mode
                       </DropdownMenuItem>
                     )}
-
                     <DropdownMenuSeparator />
-
                     <DropdownMenuItem
                       onClick={handleLogout}
                       className="text-destructive focus:text-destructive"

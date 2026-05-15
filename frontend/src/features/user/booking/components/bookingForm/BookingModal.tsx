@@ -28,7 +28,7 @@ interface BookingModalProps {
 }
 
 export default function BookingModal({ open, onClose, worker }: BookingModalProps) {
-  const isPerUnit = worker.PricingMode === PRICING_MODE.PER_UNIT;
+  const isPerUnit = worker.pricingMode === PRICING_MODE.PER_UNIT;
   const [stepIndex, setStepIndex] = useState(0);
   const [direction, setDirection] = useState(1);
 

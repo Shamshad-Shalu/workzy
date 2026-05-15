@@ -198,15 +198,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
     const totalPlatformFee = analytics.reduce((sum, item) => sum + item.totalPlatformFee, 0);
     const totalEarnings = analytics.reduce((sum, item) => sum + item.totalEarnings, 0);
 
-    console.log({
-      startOfYear,
-      endOfYear,
-      analytics,
-      totalAmount,
-      totalPlatformFee,
-      totalEarnings,
-      earningsData,
-    });
     return {
       totalAmount,
       totalPlatformFee,
@@ -217,9 +208,7 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
   async getRevenueAnalytics(): Promise<RevenueChartItem[]> {
     const startOfYear = dayjs().startOf("year").toDate();
-
     const endOfYear = dayjs().endOf("year").toDate();
-
     const analytics = await this.model.aggregate<{
       _id: number;
       revenue: number;
@@ -237,7 +226,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           },
         },
       },
-
       {
         $group: {
           _id: {
@@ -272,7 +260,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     return months.map((month, index) => {
       const stat = analytics.find((item) => item._id === index + 1);
-
       return {
         month,
         revenue: stat?.revenue ?? 0,
@@ -293,17 +280,14 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           },
         },
       },
-
       {
         $group: {
           _id: "$categoryId",
-
           count: {
             $sum: 1,
           },
         },
       },
-
       {
         $lookup: {
           from: "categories",
@@ -312,15 +296,26 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
           as: "category",
         },
       },
-
       {
         $unwind: "$category",
       },
-
+      {
+        $lookup: {
+          from: "categories",
+          localField: "category.parentId",
+          foreignField: "_id",
+          as: "parentCategory",
+        },
+      },
+      {
+        $unwind: { path: "$parentCategory", preserveNullAndEmptyArrays: true },
+      },
       {
         $project: {
           _id: 0,
-          name: "$category.name",
+          name: {
+            $ifNull: ["$parentCategory.name", "$category.name"],
+          },
           value: "$count",
         },
       },
@@ -330,7 +325,6 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
 
     return analytics.map((item) => ({
       name: item.name,
-
       value: total > 0 ? Math.round((item.value / total) * 100) : 0,
     }));
   }

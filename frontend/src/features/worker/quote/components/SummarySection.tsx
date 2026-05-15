@@ -5,10 +5,9 @@ import { useFormContext } from 'react-hook-form';
 import Button from '@/components/atoms/Button';
 import { Separator } from '@/components/ui/separator';
 import type { BookingDetails } from '@/types/booking';
-
-import type { QuoteFormType } from '../validation/quoteSchema';
 import { formatCurrency } from '@/utils/currency';
 
+import type { QuoteFormType } from '../validation/quoteSchema';
 
 function formatDayLabel(iso: string) {
   return new Date(iso).toLocaleDateString(undefined, {

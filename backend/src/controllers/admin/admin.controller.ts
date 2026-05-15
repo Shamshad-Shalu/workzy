@@ -74,7 +74,7 @@ export class AdminController implements IAdminController {
   });
 
   getAdminDashboard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const stats = await this._adminService.getAdminDashboardAnalytics();  
+    const stats = await this._adminService.getAdminDashboardAnalytics();
     res.status(HTTPSTATUS.OK).json(stats);
   });
 }

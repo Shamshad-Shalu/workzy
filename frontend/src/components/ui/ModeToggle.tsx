@@ -1,6 +1,6 @@
 import { Moon, Sun } from 'lucide-react';
 
-import { useTheme } from '@/context/use-theme';
+import { useTheme } from '@/context/theme/use-theme';
 
 import Button from '../atoms/Button';
 

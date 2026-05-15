@@ -1,11 +1,9 @@
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 
-
 export default function AdminDashboardSkeleton() {
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-      
       <div className="space-y-2">
         <Skeleton className="h-8 w-64" />
         <Skeleton className="h-4 w-96" />

@@ -82,7 +82,7 @@ export interface PublicWorkerListItem {
   bufferTime: number;
   categoryName: string;
   serviceType: ServiceType;
-  PricingMode: PricingMode;
+  pricingMode: PricingMode;
   bulkDiscounts: BulkDiscountType[] | null;
 
   averageRating: number;

@@ -6,7 +6,7 @@ export class PublicWorkerListResponseDto {
   id!: string;
   categoryName!: string;
   serviceType!: ServiceType;
-  PricingMode!: PricingMode;
+  pricingMode!: PricingMode;
 
   serviceId!: string;
   displayName!: string;
@@ -36,7 +36,7 @@ export class PublicWorkerListResponseDto {
     dto.profileImage = entity.profileImage;
     dto.experience = entity.experience;
     dto.serviceRate = entity.serviceRate;
-    dto.PricingMode = entity.PricingMode;
+    dto.pricingMode = entity.pricingMode;
     dto.estimatedDuration = entity.estimatedDuration;
     dto.bufferTime = entity.bufferTime;
     dto.averageRating = entity.averageRating;

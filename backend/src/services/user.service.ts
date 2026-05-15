@@ -5,10 +5,18 @@ import validator from "validator";
 
 import logger from "@/config/logger";
 import redisClient from "@/config/redisClient";
-import { AUTH, EMAIL, EMAIL_OTP_EXPIRY, HTTPSTATUS, USER } from "@/constants";
+import {
+  AUTH,
+  EMAIL,
+  EMAIL_OTP_EXPIRY,
+  HTTPSTATUS,
+  NOTIFICATION_TEMPLATES,
+  USER,
+} from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -36,7 +44,8 @@ export class UserService implements IUserService {
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
   async findByEmail(email: string): Promise<IUser | null> {
@@ -59,8 +68,16 @@ export class UserService implements IUserService {
 
     if (newStatus) {
       await this._redisService.set(`blocked_user:${userId}`, "1");
+      void this._notificationService.createNotification(
+        userId,
+        NOTIFICATION_TEMPLATES.ACCOUNT_BLOCKED()
+      );
     } else {
       await this._redisService.delete(`blocked_user:${userId}`);
+      void this._notificationService.createNotification(
+        userId,
+        NOTIFICATION_TEMPLATES.ACCOUNT_UNBLOCKED()
+      );
     }
     return newStatus ? USER.BLOCKEDSUCCESS : USER.UNBLOCKED;
   }

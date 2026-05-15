@@ -8,11 +8,13 @@ import { BookingController } from "@/controllers/booking.controller";
 import { CategoryController } from "@/controllers/category.controller";
 import { HomeController } from "@/controllers/home.controller";
 import { LeaveController } from "@/controllers/leave.controller";
+import { NotificationController } from "@/controllers/notification.controller";
 import { PaymentController } from "@/controllers/payment.controller";
 import { QuoteController } from "@/controllers/quote.controller";
 import { ReviewController } from "@/controllers/review.controller";
 import { ServiceController } from "@/controllers/service.controller";
 import { SlotController } from "@/controllers/slot.controller";
+import { SocketController } from "@/controllers/socket.controller";
 import { UploadController } from "@/controllers/upload.controller";
 import { UserController } from "@/controllers/user.controller";
 import { WorkerController } from "@/controllers/worker.controller";
@@ -24,6 +26,7 @@ import { IBookingController } from "@/core/interfaces/controllers/IBookingContro
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { ILeaveController } from "@/core/interfaces/controllers/ILeaveController";
+import { INotificationController } from "@/core/interfaces/controllers/INotificationController";
 import { IPaymentController } from "@/core/interfaces/controllers/IPaymentController";
 import { IQuoteController } from "@/core/interfaces/controllers/IQuoteController";
 import { IReviewController } from "@/core/interfaces/controllers/IReviewController";
@@ -37,6 +40,7 @@ import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRep
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepository";
+import { INotificationRepository } from "@/core/interfaces/repositories/INotificationRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
@@ -46,6 +50,7 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBookingService";
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
+import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
@@ -54,6 +59,7 @@ import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutServic
 import { IHomeSectionService } from "@/core/interfaces/services/IHomeSectionService";
 import { IHomeService } from "@/core/interfaces/services/IHomeService";
 import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
@@ -70,6 +76,7 @@ import { CategoryRepository } from "@/repositories/category.repository";
 import { HomeLayoutRepository } from "@/repositories/homeLayout..repository";
 import { HomeSectionRepository } from "@/repositories/homeSection.repository";
 import { LeaveRepository } from "@/repositories/leave.repository";
+import { NotificationRepository } from "@/repositories/notification.repository";
 import { PaymentRepository } from "@/repositories/payment.repository";
 import { QuoteRepository } from "@/repositories/quote.repository";
 import { ReviewRepository } from "@/repositories/review.repository";
@@ -77,6 +84,7 @@ import { ServiceRepository } from "@/repositories/service.repository";
 import { SlotRepository } from "@/repositories/slot.repository";
 import { UserRepository } from "@/repositories/user.repository";
 import { WorkerRepository } from "@/repositories/worker.repository";
+import { AdminService } from "@/services/admin/admin.service";
 import { AdminBookingService } from "@/services/admin/booking.service";
 import { CategoryManagementService } from "@/services/admin/category-management.service";
 import { HomeLayoutService } from "@/services/admin/home-layout.service";
@@ -89,6 +97,7 @@ import { BookingService } from "@/services/booking.service";
 import { CategoryService } from "@/services/category.service";
 import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
+import { NotificationService } from "@/services/notification.service";
 import { PaymentService } from "@/services/payment.service";
 import { QuoteService } from "@/services/quote.service";
 import { RedisService } from "@/services/redis.service";
@@ -119,6 +128,7 @@ container.bind<IWorkerService>(TYPES.WorkerService).to(WorkerService);
 container.bind<IWorkerController>(TYPES.WorkerController).to(WorkerController);
 
 container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
+container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
 
 // categories
 container.bind<ICategoryRepository>(TYPES.CategoryRepository).to(CategoryRepository);
@@ -171,5 +181,11 @@ container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
 
 container.bind<IAdminBookingController>(TYPES.AdminBookingController).to(AdminBookingController);
 container.bind<IAdminBookingService>(TYPES.AdminBookingService).to(AdminBookingService);
+
+container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository);
+container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
+container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
+
+container.bind<SocketController>(TYPES.SocketController).to(SocketController);
 
 export { container };

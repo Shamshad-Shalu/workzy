@@ -122,7 +122,7 @@ export function WorkerCard({ worker, index = 0, onBook }: WorkerCardProps) {
               </span>
             </div>
             <p className="text-[10px] text-muted-foreground mt-0.5">
-              {worker.PricingMode?.replace(/_/g, ' ').toLowerCase()}
+              {worker.pricingMode?.replace(/_/g, ' ').toLowerCase()}
             </p>
           </div>
 

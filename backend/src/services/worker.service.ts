@@ -4,14 +4,16 @@ import { Types } from "mongoose";
 import {
   DEFAULT_WORKER_COVER_IMAGE,
   HTTPSTATUS,
+  NOTIFICATION_TEMPLATES,
   ROLE,
   StripeAccountStatus,
   WORKER,
   WORKER_STATUS,
 } from "@/constants";
-import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
+import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -33,6 +35,7 @@ import {
   PublicWorkerListQuery,
   WorkerListQuery,
 } from "@/types/worker/worker.query";
+import { WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -41,14 +44,17 @@ import { extractKeyFromUrl } from "@/utils/upload";
 export class WorkerService implements IWorkerService {
   constructor(
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
+    @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
-    @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.PaymentService) private _paymentservice: IPaymentService
+    @inject(TYPES.PaymentService) private _paymentservice: IPaymentService,
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
+
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
     return this._workerRepository.findOne({ userId });
   };
+
   // worker listing - admin side
   async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListResponseDto>> {
     const { data, total } = await this._workerRepository.listWorkers(query);
@@ -185,6 +191,20 @@ export class WorkerService implements IWorkerService {
     }
     if (status === WORKER_STATUS.VERIFIED) {
       await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_VERIFIED()
+      );
+    } else if (status === WORKER_STATUS.NEEDS_REVISION) {
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_REVISION(reason ?? "No reason provided")
+      );
+    } else if (status === WORKER_STATUS.REJECTED) {
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_REJECTED(reason ?? "No reason provided")
+      );
     }
     return WorkerProfileResponseDTO.fromEntity(updatedWorker);
   }
@@ -248,5 +268,8 @@ export class WorkerService implements IWorkerService {
     }
 
     return this._paymentservice.createStripeConnectLink(worker);
+  }
+  async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {
+    return await this._bookingRepository.getWorkerDashboardAnalytics(workerId);
   }
 }

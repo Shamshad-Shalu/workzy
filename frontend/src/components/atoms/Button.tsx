@@ -13,8 +13,6 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   iconRight?: ReactNode;
 }
 
-
-
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {

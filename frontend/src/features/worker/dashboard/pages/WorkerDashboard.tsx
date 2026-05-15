@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { StatusBadge } from '@/features/booking/components/BookingCard';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
+import PageError from '@/pages/PageError';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import { formatCurrency } from '@/utils/currency';
@@ -31,17 +32,16 @@ import { formatDate, formatTime12 } from '@/utils/time.format';
 
 import { useWorkerBooking } from '../../booking/hooks/useWorkerBooking';
 import { useWorkerReviews } from '../../reviews/hooks/useWorkerReviews';
-import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 import WorkerDashboardSkeleton from '../components/WorkerDashboardSkeleton';
-import PageError from '@/pages/PageError';
+import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 
 export default function WorkerDashboard() {
   const { user } = useAppSelector((s: RootState) => s.auth);
 
-  const { data: reviews, isLoading:reviewsLoading , error } = useWorkerReviews();
-  const { data: bookings, isLoading:bookingLoading } = useWorkerBooking();
-  const { data: worker ,isLoading : profileLoading } = useWorkerProfile(user?.worker?.id);
-  const { data , isLoading : dashBoardLoading } = useWorkerDashboard();
+  const { data: reviews, isLoading: reviewsLoading, error } = useWorkerReviews();
+  const { data: bookings, isLoading: bookingLoading } = useWorkerBooking();
+  const { data: worker, isLoading: profileLoading } = useWorkerProfile(user?.worker?.id);
+  const { data, isLoading: dashBoardLoading } = useWorkerDashboard();
   const { earningsData, totalEarnings, totalAmount } = data ?? {};
 
   const { reviewStats, jobStats } = worker ?? {};
@@ -66,11 +66,11 @@ export default function WorkerDashboard() {
     },
   ];
 
-  if (reviewsLoading || bookingLoading || profileLoading || dashBoardLoading ) {
+  if (reviewsLoading || bookingLoading || profileLoading || dashBoardLoading) {
     return <WorkerDashboardSkeleton />;
   }
-  if(error){
-    return <PageError title={error.message}/>
+  if (error) {
+    return <PageError title={error.message} />;
   }
 
   return (

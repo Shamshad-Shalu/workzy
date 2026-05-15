@@ -1,7 +1,7 @@
 import { Bell, Sun, Moon, Menu } from 'lucide-react';
 
 import workzyLogo from '@/assets/icons/logo-icon.jpg';
-import { useTheme } from '@/context/use-theme';
+import { useTheme } from '@/context/theme/use-theme';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 
@@ -15,7 +15,7 @@ interface TopbarProps {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   const { theme, setTheme } = useTheme();
-  const { isAuthenticated } = useAppSelector((s: RootState) => s.auth);
+  const { isAuthenticated, user } = useAppSelector((s: RootState) => s.auth);
 
   return (
     <header className="sticky top-0 z-20 h-16 border-b bg-background/80 backdrop-blur flex items-center justify-between px-4 lg:px-6">
@@ -32,7 +32,7 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       <div className="flex items-center gap-3">
         {isAuthenticated ? (
           <div className="p-1">
-            <NotificationsDropdown />
+            <NotificationsDropdown role={user?.role} />
           </div>
         ) : (
           <Button variant="ghost" size="icon">

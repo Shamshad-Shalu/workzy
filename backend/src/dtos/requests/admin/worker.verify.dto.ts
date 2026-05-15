@@ -1,6 +1,6 @@
 import { IsEnum, IsString, Matches, MinLength, ValidateIf } from "class-validator";
 
-import { DESCRIPTION_REGEX, WORKER_STATUS, WORKER_STATUSES } from "@/constants";
+import { DESCRIPTION_REGEX, WORKER_STATUS, WorkerStatus } from "@/constants";
 
 export class VerifyWorkerRequestDTO {
   @ValidateIf((o) => o.status === "verified")
@@ -21,7 +21,7 @@ export class VerifyWorkerRequestDTO {
   @IsEnum(WORKER_STATUS, {
     message: "status is required",
   })
-  status!: WORKER_STATUSES;
+  status!: WorkerStatus;
 
   @IsString()
   @MinLength(1, { message: "docId is required" })

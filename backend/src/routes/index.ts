@@ -6,6 +6,7 @@ import bookingRoutes from "./booking.routes";
 import categoryRoutes from "./category.routes";
 import homeRoutes from "./home.routes";
 import leaveRoutes from "./leave.routes";
+import notificationRoutes from "./notification.routes";
 import paymentRoutes from "./payment.routes";
 import quoteRoutes from "./quote.routes";
 import reviewRoutes from "./review.routes";
@@ -31,5 +32,6 @@ router.use("/booking", bookingRoutes);
 router.use("/leave", leaveRoutes);
 router.use("/reviews", reviewRoutes);
 router.use("/quotes", quoteRoutes);
+router.use("/notifications", notificationRoutes);
 
 export default router;

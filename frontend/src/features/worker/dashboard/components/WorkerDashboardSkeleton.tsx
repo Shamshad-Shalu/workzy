@@ -1,12 +1,12 @@
 import { motion, type Variants } from 'framer-motion';
 
-import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const easeInOut = [0.22, 1, 0.36, 1] as const;
 
-export const pageVariants: Variants = {
+const pageVariants: Variants = {
   hidden: {},
   show: {
     transition: {
@@ -16,19 +16,19 @@ export const pageVariants: Variants = {
   },
 };
 
-export const sectionVariants: Variants = {
+const sectionVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { duration: 0.48, ease: easeInOut } },
 };
 
-export const listVariants: Variants = {
+const listVariants: Variants = {
   hidden: {},
   show: {
     transition: { staggerChildren: 0.07 },
   },
 };
 
-export const itemVariants: Variants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, y: 14, scale: 0.975 },
   show: {
     opacity: 1,
@@ -37,7 +37,8 @@ export const itemVariants: Variants = {
     transition: { duration: 0.4, ease: easeInOut },
   },
 };
-export const barVariants: Variants = {
+
+const barVariants: Variants = {
   hidden: { scaleY: 0, opacity: 0 },
   show: (i: number) => ({
     scaleY: 1,
@@ -130,10 +131,7 @@ export default function WorkerDashboardSkeleton() {
         <Skeleton className="h-4 w-64" />
       </motion.div>
       <motion.div variants={sectionVariants}>
-        <motion.div
-          variants={listVariants}
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        >
+        <motion.div variants={listVariants} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <SkeletonStatCard key={i} />
           ))}
@@ -166,14 +164,12 @@ export default function WorkerDashboardSkeleton() {
           </CardContent>
         </Card>
 
-        {/* donut card */}
         <Card>
           <CardHeader className="space-y-2">
             <Skeleton className="h-5 w-36" />
             <Skeleton className="h-3.5 w-28" />
           </CardHeader>
           <CardContent>
-            {/* slow-spinning donut ring */}
             <div className="flex h-[200px] items-center justify-center">
               <div className="relative flex h-40 w-40 items-center justify-center">
                 <motion.div

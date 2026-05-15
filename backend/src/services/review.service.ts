@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW, WORKER } from "@/constants";
+import { AUTH, BOOKING, BOOKING_STATUS, HTTPSTATUS, REVIEW } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -18,7 +18,7 @@ import {
   ReviewUserDTO,
   ReviewWorkerDTO,
 } from "@/dtos/responses/review.dto";
-import { AdminReviewListQueryInput, ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
+import { AdminReviewListQueryInput, ReviewListQueryInput } from "@/types/review";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -228,17 +228,5 @@ export class ReviewService implements IReviewService {
     };
     await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
     return response;
-  }
-
-  async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats> {
-    const reviewStats = await this._workerRepository.getWorkerReviewStats(workerId);
-    if (!reviewStats) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    return {
-      averageRating: reviewStats.averageRating,
-      ratingBreakdown: reviewStats.breakdown,
-      reviewCount: reviewStats.reviewCount,
-    };
   }
 }

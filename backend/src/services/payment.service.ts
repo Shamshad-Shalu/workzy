@@ -12,6 +12,7 @@ import {
   BOOKING_STATUS_MESSAGES,
   CLIENT_URL,
   HTTPSTATUS,
+  NOTIFICATION_TEMPLATES,
   PAYMENT,
   PAYMENT_PROVIDER,
   PAYMENT_STATUS,
@@ -26,6 +27,7 @@ import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepos
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
@@ -44,6 +46,7 @@ export class PaymentService implements IPaymentService {
     @inject(TYPES.PaymentRepository) private _paymentRepo: IPaymentRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.SlotService) private _slotService: ISlotService
@@ -313,6 +316,10 @@ export class PaymentService implements IPaymentService {
         }
       ),
     ]);
+    void this._notificationService.createNotification(
+      booking.workerId.toString(),
+      NOTIFICATION_TEMPLATES.EXTRA_CHARGE_PAID(booking.bookingId, booking?.extraCharge?.amount ?? 0)
+    );
   }
 
   private async handleBookingPaid(session: Stripe.Checkout.Session) {
@@ -362,6 +369,10 @@ export class PaymentService implements IPaymentService {
       ),
       this._workerRepository.findByIdAndUpdate(workerId, { $inc: { jobsOffered: 1 } }),
     ]);
+    void this._notificationService.createNotification(
+      workerId,
+      NOTIFICATION_TEMPLATES.NEW_BOOKING_REQUEST(booking?.snapshot.category.name ?? "a service")
+    );
   }
 
   async verifySession(sessionId: string): Promise<VerifySessionType> {
@@ -411,6 +422,10 @@ export class PaymentService implements IPaymentService {
         ),
         ...(slotId && userId ? [this._slotService.releaseSlot(slotId, userId)] : []),
       ]);
+      void this._notificationService.createNotification(
+        userId,
+        NOTIFICATION_TEMPLATES.PAYMENT_FAILED(bookingId)
+      );
       return;
     }
   }

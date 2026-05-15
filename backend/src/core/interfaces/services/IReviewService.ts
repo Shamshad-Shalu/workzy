@@ -1,6 +1,6 @@
 import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
 import { ReviewResponseDTO, ReviewUserDTO } from "@/dtos/responses/review.dto";
-import { AdminReviewListQueryInput, ReviewListQueryInput, WorkerReviewStats } from "@/types/review";
+import { AdminReviewListQueryInput, ReviewListQueryInput } from "@/types/review";
 
 import {
   ReviewAdminDTO,
@@ -35,6 +35,4 @@ export interface IReviewService {
     userId: string,
     input: ReviewListQueryInput
   ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }>;
-
-  getWorkerReviewStats(workerId: string): Promise<WorkerReviewStats>;
 }

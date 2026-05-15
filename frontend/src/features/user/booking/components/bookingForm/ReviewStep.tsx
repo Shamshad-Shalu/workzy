@@ -16,7 +16,7 @@ export default function ReviewStep({
   booking: BookingState;
   pricing: BookingPricing;
 }) {
-  const isPerUnit = worker.PricingMode === PRICING_MODE.PER_UNIT;
+  const isPerUnit = worker.pricingMode === PRICING_MODE.PER_UNIT;
 
   const rows = [
     {

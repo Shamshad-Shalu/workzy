@@ -46,3 +46,4 @@ export * from "./service";
 export * from "./payment";
 export * from "./booking";
 export * from "./worker";
+export * from "./notification";

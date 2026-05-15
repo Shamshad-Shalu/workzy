@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
-import { useTheme } from '@/context/use-theme';
+import { useTheme } from '@/context/theme/use-theme';
 
 import type React from 'react';
 

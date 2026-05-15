@@ -12,6 +12,7 @@ import {
   BookingStatus,
   CATEGORY,
   HTTPSTATUS,
+  NOTIFICATION_TEMPLATES,
   PRICING_MODE,
   PricingMode,
   Role,
@@ -33,6 +34,7 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -60,7 +62,8 @@ export class BookingService implements IBookingService {
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
@@ -199,6 +202,10 @@ export class BookingService implements IBookingService {
       reservedBy: new Types.ObjectId(userId),
       status: SLOT_STATUS.BOOKED,
     });
+    void this._notificationService.createNotification(
+      booking.workerId.toString(),
+      NOTIFICATION_TEMPLATES.BOOKING_CANCELLED(booking.bookingId)
+    );
   }
 
   async acceptBooking(bookingId: string, workerId: string): Promise<void> {
@@ -224,6 +231,10 @@ export class BookingService implements IBookingService {
       throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
     }
     await this._workerRepository.findOneAndUpdate({ _id: workerId }, { $inc: { jobsAccepted: 1 } });
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.BOOKING_ACCEPTED(booking.bookingId, booking.snapshot.worker.name)
+    );
   }
 
   async rejectBooking(data: {
@@ -257,6 +268,15 @@ export class BookingService implements IBookingService {
       reservedBy: new Types.ObjectId(booking.userId),
       status: SLOT_STATUS.BOOKED,
     });
+
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.BOOKING_REJECTED(
+        booking.bookingId,
+        booking.snapshot.worker.name,
+        reason
+      )
+    );
   }
 
   async markEnRoute(bookingId: string, workerId: string): Promise<void> {
@@ -280,6 +300,10 @@ export class BookingService implements IBookingService {
     if (!booking) {
       throw new CustomError(BOOKING.CANNOT_EN_ROUTE, HTTPSTATUS.BAD_REQUEST);
     }
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.WORKER_EN_ROUTE(booking.snapshot.worker.name, booking.bookingId)
+    );
   }
 
   async markReached(bookingId: string, workerId: string): Promise<void> {
@@ -311,6 +335,10 @@ export class BookingService implements IBookingService {
     }
     logger.info(`Generated OTP ${otp} for booking ${bookingId}`);
     await this._emailService.sendEmail(user.email, otp);
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.WORKER_REACHED(booking.snapshot.worker.name, booking.bookingId)
+    );
   }
 
   async startJob(bookingId: string, workerId: string, otp: string): Promise<void> {
@@ -333,6 +361,10 @@ export class BookingService implements IBookingService {
         ),
       },
     });
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.JOB_STARTED(booking.bookingId)
+    );
   }
 
   async completeJob(bookingId: string, workerId: string, data: CompleteBookingDTO): Promise<void> {
@@ -373,6 +405,10 @@ export class BookingService implements IBookingService {
       }),
       this._workerRepository.findByIdAndUpdate(workerId, { $inc: { jobsCompleted: 1 } }),
     ]);
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.JOB_COMPLETED(booking.bookingId, booking.snapshot.worker.name)
+    );
   }
 
   async approveBooking(bookingId: string, userId: string): Promise<void> {
@@ -389,7 +425,7 @@ export class BookingService implements IBookingService {
     if (booking.extraCharge?.status === "pending") {
       throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
     }
-    // await this._paymentService.releaseBookingPayment(booking);
+    await this._paymentService.releaseBookingPayment(booking);
     await this._bookingRepository.update(bookingId, {
       status: BOOKING_STATUS.APPROVED,
       paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
@@ -402,6 +438,10 @@ export class BookingService implements IBookingService {
         ),
       },
     });
+    void this._notificationService.createNotification(
+      booking.workerId.toString(),
+      NOTIFICATION_TEMPLATES.JOB_APPROVED(booking.bookingId, booking.snapshot.user.name)
+    );
   }
 
   async payExtraCharge(bookingId: string, userId: string): Promise<{ url: string }> {
@@ -438,6 +478,13 @@ export class BookingService implements IBookingService {
     if (!booking) {
       throw new CustomError(BOOKING.EXTRA_CHARGE_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
+    void this._notificationService.createNotification(
+      booking.workerId.toString(),
+      NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REJECTED(
+        booking.bookingId,
+        booking.extraCharge?.amount ?? 0
+      )
+    );
   }
 
   async requestExtraCharge(
@@ -468,6 +515,10 @@ export class BookingService implements IBookingService {
     if (!booking) {
       throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
     }
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REQUESTED(amount, booking.bookingId)
+    );
   }
 
   async expireBooking(): Promise<void> {
@@ -514,6 +565,10 @@ export class BookingService implements IBookingService {
           { $inc: { noResponses: 1 } }
         ),
       ]);
+      void this._notificationService.createNotification(
+        booking.userId.toString(),
+        NOTIFICATION_TEMPLATES.BOOKING_EXPIRED(booking.bookingId)
+      );
     } catch (error) {
       logger.error(`Failed to expire booking ${booking._id}:`, error);
       throw error;

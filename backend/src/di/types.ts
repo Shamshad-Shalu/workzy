@@ -14,6 +14,7 @@ const TYPES = {
   WorkerController: Symbol.for("WorkerController"),
 
   AdminController: Symbol.for("AdminController"),
+  AdminService: Symbol.for("AdminService"),
 
   //category
   CategoryController: Symbol.for("CategoryController"),
@@ -38,6 +39,12 @@ const TYPES = {
   ServiceController: Symbol.for("ServiceController"),
   ServiceManagement: Symbol.for("ServiceManagement"),
   ServiceRepository: Symbol.for("ServiceRepository"),
+
+  NotificationRepository: Symbol.for("NotificationRepository"),
+  NotificationService: Symbol.for("NotificationService"),
+  NotificationController: Symbol.for("NotificationController"),
+
+  SocketController: Symbol.for("SocketController"),
 
   // home
   HomeController: Symbol.for("HomeController"),
