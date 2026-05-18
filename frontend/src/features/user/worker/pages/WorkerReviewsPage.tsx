@@ -55,7 +55,7 @@ export default function WorkerReviewsPage() {
     useWorkerPublicReviews(workerId, { sortBy, sortOrder, rating: rating ?? undefined });
   const { data: reviewStats, isLoading: statsLoading } = useWorkerReviewStats(workerId);
 
-  const { averageRating, reviewCount, ratingBreakdown } = reviewStats ?? {};
+  const { averageRating, reviewCount, breakdown } = reviewStats ?? {};
   const reviews = data?.pages.flatMap(p => p.reviews) ?? [];
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
@@ -110,7 +110,7 @@ export default function WorkerReviewsPage() {
                   >
                     <RatingDistributionBar
                       star={star}
-                      count={ratingBreakdown![String(star) as keyof typeof ratingBreakdown]}
+                      count={breakdown![String(star) as keyof typeof breakdown]}
                       total={reviewCount!}
                     />
                   </motion.button>

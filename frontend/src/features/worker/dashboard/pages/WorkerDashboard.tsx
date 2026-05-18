@@ -90,25 +90,25 @@ export default function WorkerDashboard() {
           label="Total Works"
           value={formatCurrency(totalAmount ?? 0)}
           icon={<IndianRupee />}
-          tone="emerald"
+          tone="neutral"
         />
         <StatCard
           label="Total Earnings"
           value={formatCurrency(totalEarnings ?? 0)}
           icon={<IndianRupee />}
-          tone="emerald"
+          tone="neutral"
         />
         <StatCard
           label="Total Jobs"
           value={jobStats?.completed}
           icon={<Briefcase />}
-          tone="violet"
+          tone="primary"
         />
         <StatCard
           label="Completion Rate"
           value={jobStats?.complitionRate}
           icon={<CheckCircle2 />}
-          tone="amber"
+          tone="success"
         />
       </div>
       <div className="mt-6 grid gap-6 lg:grid-cols-3">

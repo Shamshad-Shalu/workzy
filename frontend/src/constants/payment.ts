@@ -14,3 +14,20 @@ export const PAYMENT_STATUS = {
   CANCELLED: 'cancelled',
 } as const;
 export type PaymentStatus = (typeof PAYMENT_STATUS)[keyof typeof PAYMENT_STATUS];
+
+export type BadgeVariant = 'green' | 'blue' | 'amber' | 'red' | 'slate' | 'secondary';
+
+export const PAYMENT_STATUS_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
+  succeeded: { label: 'Succeeded', variant: 'green' },
+  released: { label: 'Released', variant: 'blue' },
+  pending: { label: 'Pending', variant: 'amber' },
+  failed: { label: 'Failed', variant: 'red' },
+  refunded: { label: 'Refunded', variant: 'slate' },
+  cancelled: { label: 'Cancelled', variant: 'secondary' },
+};
+
+export const PAYMENT_BILL_TYPE_CONFIG: Record<string, { label: string; variant: BadgeVariant }> = {
+  booking: { label: 'Booking', variant: 'green' },
+  extra_charge: { label: 'Extra Charge', variant: 'amber' },
+  refund: { label: 'Refund', variant: 'red' },
+};

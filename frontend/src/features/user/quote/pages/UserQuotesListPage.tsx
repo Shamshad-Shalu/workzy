@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { Search } from 'lucide-react';
 import { useCallback, useState } from 'react';
+import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
 import EmptyState from '@/components/molecules/EmptyState';
@@ -46,7 +47,10 @@ export default function UserQuotesListPage() {
     if (!rejectQuote?.id) {
       return;
     }
-    await confirmReject(rejectQuote.id);
+    const { message } = await confirmReject(rejectQuote.id);
+    if (message) {
+      toast.success(message);
+    }
     setRejectQuote(null);
   };
 

@@ -134,7 +134,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
                       : 'bg-primary/10 text-primary hover:bg-primary/20'
                   }`}
                 >
-                  {unreadCount}
+                  {unreadCount > 9 ? '9+' : unreadCount}
                 </Badge>
               )}
             </Button>

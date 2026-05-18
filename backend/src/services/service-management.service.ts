@@ -13,7 +13,6 @@ import { PublicServiceListResponseDto, ServiceResponseDto } from "@/dtos/respons
 import { CategoryOption, ICategory } from "@/types/category";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { PublicServiceListQuery, ServiceListQuery } from "@/types/service/service.query";
-import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { formatDuration } from "@/utils/time.convert";
@@ -50,7 +49,7 @@ export class ServiceManagement implements IServiceManagement {
     if (!serviceData) {
       throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await clearRedisListCache(`worker:${workerId}:services`);
+    await this._redisService.clearPattern(`worker:${workerId}:services`);
     return ServiceResponseDto.fromEntity(serviceData);
   }
 
@@ -77,7 +76,7 @@ export class ServiceManagement implements IServiceManagement {
     if (!updatedService || !serviceData) {
       throw new CustomError(SERVICE.UPDATE_ERROR, HTTPSTATUS.NOT_FOUND);
     }
-    await clearRedisListCache(`worker:${workerId}:services`);
+    await this._redisService.clearPattern(`worker:${workerId}:services`);
     return ServiceResponseDto.fromEntity(serviceData);
   }
 
@@ -94,7 +93,7 @@ export class ServiceManagement implements IServiceManagement {
 
     await this._serviceRepository.update(service.id, { isAvailable: newStatus });
     const message = newStatus ? SERVICE.UNBLOCKED : SERVICE.BLOCKED;
-    await clearRedisListCache(`worker:${workerId}:services`);
+    await this._redisService.clearPattern(`worker:${workerId}:services`);
     return { newStatus, message };
   }
 

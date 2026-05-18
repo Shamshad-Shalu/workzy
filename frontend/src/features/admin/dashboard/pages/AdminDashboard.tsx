@@ -23,6 +23,7 @@ import {
   YAxis,
 } from 'recharts';
 
+import PageHeader from '@/components/molecules/PageHeader';
 import StatCard from '@/components/molecules/StatCard';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -68,50 +69,45 @@ export default function AdminDashboard() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6 p-4 md:p-8">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="mt-2 text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Overview of users, workers, jobs and revenue across the platform.
-          </p>
-        </div>
-      </div>
-
+      <PageHeader
+        title="Admin Dashboard"
+        description="Overview of users, workers, jobs and revenue across the platform."
+      />
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Total Users"
           value={data?.totalUsers.toLocaleString()}
           icon={<Users />}
-          tone="amber"
+          tone="info"
         />
         <StatCard
           label="Total Workers"
           value={data?.totalWorkers.toLocaleString()}
-          tone="emerald"
+          tone="primary"
           icon={<UserCheck />}
         />
         <StatCard
           label="Categories"
           value={String(data?.totalCategories)}
-          tone="violet"
+          tone="neutral"
           icon={<Layers />}
         />
         <StatCard
           label="Active Jobs"
           value={String(data?.activeJobs)}
-          tone="emerald"
+          tone="success"
           icon={<Briefcase />}
         />
         <StatCard
           label="Revenue"
           value={formatCurrency(data?.revenue ?? 0)}
-          tone="violet"
+          tone="warning"
           icon={<DollarSign />}
         />
         <StatCard
           label="Commission"
           value={formatCurrency(data?.commission ?? 0)}
-          tone="amber"
+          tone="info"
           icon={<Wallet />}
         />
       </div>

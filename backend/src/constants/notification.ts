@@ -47,22 +47,47 @@ export const NOTIFICATION_TEMPLATES = {
   EXTRA_CHARGE_REQUESTED: (amount: number, bookingId: string) => ({
     type: "extra_charge_requested",
     heading: "Extra Charge Requested",
-    message: `Your worker has requested an extra charge of **$${amount}** for booking **${bookingId}**.`,
+    message: `Your worker has requested an extra charge of **₹${amount}** for booking **${bookingId}**.`,
+  }),
+  EXTRA_CHARGE_UPDATED: (amount: number, bookingId: string) => ({
+    type: "extra_charge_updated",
+    heading: "Extra Charge Updated",
+    message: `Your worker has updated the extra charge request to **₹${amount}** for booking **${bookingId}**.`,
+  }),
+  QUOTE_SENT: (bookingId: string, amount: number) => ({
+    type: "quote_sent",
+    heading: "New Quote Received",
+    message: `Your worker has sent a quote of **₹${amount}** for booking **${bookingId}**.`,
+  }),
+  QUOTE_ACCEPTED: (bookingId: string, amount: number) => ({
+    type: "quote_accepted",
+    heading: "Quote Accepted & Paid",
+    message: `Customer has accepted and paid your quote of **₹${amount}** for booking **${bookingId}**.`,
+  }),
+  QUOTE_REJECTED: (bookingId: string) => ({
+    type: "quote_rejected",
+    heading: "Quote Rejected",
+    message: `Customer has rejected your quote for booking **${bookingId}**.`,
   }),
   EXTRA_CHARGE_PAID: (bookingId: string, amount: number) => ({
     type: "extra_charge_paid",
     heading: "Extra Charge Paid",
-    message: `Customer has paid the extra charge of **$${amount}** for booking **${bookingId}**. The booking is now ready to be approved.`,
+    message: `Customer has paid the extra charge of **₹${amount}** for booking **${bookingId}**. The booking is now ready to be approved.`,
   }),
   EXTRA_CHARGE_REJECTED: (bookingId: string, amount: number) => ({
     type: "extra_charge_rejected",
     heading: "Extra Charge Rejected",
-    message: `Customer has rejected the extra charge request of **$${amount}** for booking **${bookingId}**.`,
+    message: `Customer has rejected the extra charge request of **₹${amount}** for booking **${bookingId}**.`,
   }),
   PAYMENT_FAILED: (bookingId: string) => ({
     type: "payment_failed",
     heading: "Payment Failed",
     message: `Your payment for booking **${bookingId}** has failed. Please check your payment method.`,
+  }),
+  BOOKING_DISPUTED: (bookingId: string) => ({
+    type: "booking_disputed",
+    heading: "Booking Disputed",
+    message: `A dispute has been raised for booking **${bookingId}**. Our team is reviewing it.`,
   }),
   BOOKING_EXPIRED: (bookingId: string) => ({
     type: "booking_expired",

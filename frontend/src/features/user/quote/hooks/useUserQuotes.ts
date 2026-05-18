@@ -7,7 +7,7 @@ const LIMIT = 5;
 
 export function useUserQuotes(filter?: Omit<QuoteListQuery, 'cursor' | 'limit'>) {
   return useInfiniteQuery({
-    queryKey: ['worker-quotes', filter?.search ?? 'all', filter?.status],
+    queryKey: ['user-quotes', filter?.search ?? 'all', filter?.status],
     queryFn: ({ pageParam }) =>
       QuoteService.listUserQuotes({
         search: filter?.search,

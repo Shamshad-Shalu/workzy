@@ -76,7 +76,7 @@ export default function WorkerAcceptModal({
 
           <div className="flex justify-between items-center">
             <span className="text-sm text-muted-foreground">Date</span>
-            <span className="text-sm font-medium">{formatDate(dates[0].date)}</span>
+            <span className="text-sm font-medium">{formatDate(dates[0].date, 'calendar')}</span>
           </div>
 
           <div className="flex justify-between items-center">

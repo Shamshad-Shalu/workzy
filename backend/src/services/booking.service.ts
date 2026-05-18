@@ -230,7 +230,10 @@ export class BookingService implements IBookingService {
     if (!booking) {
       throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._workerRepository.findOneAndUpdate({ _id: workerId }, { $inc: { jobsAccepted: 1 } });
+    await this._workerRepository.findOneAndUpdate(
+      { _id: workerId },
+      { $inc: { "jobStats.accepted": 1 } }
+    );
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_ACCEPTED(booking.bookingId, booking.snapshot.worker.name)
@@ -403,7 +406,7 @@ export class BookingService implements IBookingService {
         reservedBy: new Types.ObjectId(booking.userId),
         status: SLOT_STATUS.BOOKED,
       }),
-      this._workerRepository.findByIdAndUpdate(workerId, { $inc: { jobsCompleted: 1 } }),
+      this._workerRepository.findByIdAndUpdate(workerId, { $inc: { "jobStats.completed": 1 } }),
     ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -500,24 +503,31 @@ export class BookingService implements IBookingService {
       evidenceUrl,
       requestedAt: new Date(),
     };
-    const booking = await this._bookingRepository.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(bookingId),
-        workerId: new Types.ObjectId(workerId),
-        status: { $in: [BOOKING_STATUS.IN_PROGRESS, BOOKING_STATUS.COMPLETED] },
-        $or: [
-          { extraCharge: { $exists: false } },
-          { "extraCharge.status": { $in: ["pending", "rejected"] } },
-        ],
-      },
-      { extraCharge }
-    );
-    if (!booking) {
+    const [booking, updated] = await Promise.all([
+      this._bookingRepository.findById(bookingId),
+      this._bookingRepository.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(bookingId),
+          workerId: new Types.ObjectId(workerId),
+          status: { $in: [BOOKING_STATUS.IN_PROGRESS, BOOKING_STATUS.COMPLETED] },
+          $or: [
+            { extraCharge: { $exists: false } },
+            { extraCharge: null },
+            { "extraCharge.status": { $in: ["pending", "rejected"] } },
+          ],
+        },
+        { extraCharge }
+      ),
+    ]);
+    const isEdit = !!booking?.extraCharge;
+    if (!updated) {
       throw new CustomError(BOOKING.EXTRA_CHARGE_INVALID_STATUS, HTTPSTATUS.BAD_REQUEST);
     }
     void this._notificationService.createNotification(
-      booking.userId.toString(),
-      NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REQUESTED(amount, booking.bookingId)
+      updated.userId.toString(),
+      isEdit
+        ? NOTIFICATION_TEMPLATES.EXTRA_CHARGE_UPDATED(amount, updated.bookingId)
+        : NOTIFICATION_TEMPLATES.EXTRA_CHARGE_REQUESTED(amount, updated.bookingId)
     );
   }
 

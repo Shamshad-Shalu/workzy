@@ -1,5 +1,6 @@
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IReview, IReviewPopulated } from "@/types/review";
+import { IReviewStats } from "@/types/worker/worker.entity";
 import { resolveS3Image } from "@/utils/s3.utils";
 
 export class ReviewResponseDTO {
@@ -222,5 +223,31 @@ export class ReviewPublicDTO extends ReviewBaseDTO {
     s3Service: IS3Service
   ): Promise<ReviewPublicDTO[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
+  }
+}
+
+export class WorkerReviewStatsDto {
+  averageRating!: number;
+  reviewCount!: number;
+  breakdown!: {
+    "1": number;
+    "2": number;
+    "3": number;
+    "4": number;
+    "5": number;
+  };
+
+  static fromEntity(entity: IReviewStats | null): WorkerReviewStatsDto {
+    const dto = new WorkerReviewStatsDto();
+    dto.averageRating = entity?.averageRating ?? 0;
+    dto.reviewCount = entity?.reviewCount ?? 0;
+    dto.breakdown = entity?.breakdown ?? {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 0,
+      "5": 0,
+    };
+    return dto;
   }
 }

@@ -1,5 +1,6 @@
 import { motion, type Variants } from 'framer-motion';
 
+import SkeletonStatCard from '@/components/molecules/SkeletonStatCard';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -50,22 +51,6 @@ const barVariants: Variants = {
     },
   }),
 };
-
-function SkeletonStatCard() {
-  return (
-    <motion.div variants={itemVariants}>
-      <Card className="p-5">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <Skeleton className="h-3.5 w-24" />
-            <Skeleton className="h-7 w-32" />
-          </div>
-          <Skeleton className="h-10 w-10 rounded-full" />
-        </div>
-      </Card>
-    </motion.div>
-  );
-}
 
 function SkeletonBookingRow() {
   return (

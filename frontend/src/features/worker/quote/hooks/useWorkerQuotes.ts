@@ -63,6 +63,7 @@ export function useCreateQuote() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['quotes-available-dates'] });
       queryClient.invalidateQueries({ queryKey: ['worker-quotes'] });
+      queryClient.invalidateQueries({ queryKey: ['bookings'] });
     },
   });
 

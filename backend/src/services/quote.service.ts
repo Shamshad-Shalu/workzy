@@ -5,6 +5,7 @@ import {
   BOOKING,
   CATEGORY,
   HTTPSTATUS,
+  NOTIFICATION_TEMPLATES,
   PRICING_MODE,
   QUOTE,
   QUOTE_STATUS,
@@ -16,6 +17,7 @@ import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepos
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -42,7 +44,8 @@ export class QuoteService implements IQuoteService {
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository
+    @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
   async createQuote(workerId: string, data: CreateQuoteDto): Promise<QuoteResponseDto> {
@@ -85,6 +88,10 @@ export class QuoteService implements IQuoteService {
     await this._bookingRepository.findByIdAndUpdate(bookingId, {
       quoteId: new Types.ObjectId(quote._id),
     });
+    void this._notificationService.createNotification(
+      booking.userId.toString(),
+      NOTIFICATION_TEMPLATES.QUOTE_SENT(booking.bookingId, totalPrice)
+    );
     return quote;
   }
 
@@ -178,7 +185,17 @@ export class QuoteService implements IQuoteService {
     if (!quote) {
       throw new CustomError(QUOTE.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._slotService.releaseQuoteSlots(quote.slotIds.map((v) => v.toString()));
+    const [_, booking] = await Promise.all([
+      this._slotService.releaseQuoteSlots(quote.slotIds.map((v) => v.toString())),
+      this._bookingRepository.findById(quote.bookingId),
+    ]);
+
+    if (booking) {
+      void this._notificationService.createNotification(
+        quote.workerId.toString(),
+        NOTIFICATION_TEMPLATES.QUOTE_REJECTED(booking.bookingId)
+      );
+    }
   }
 
   async listUserQuotes(

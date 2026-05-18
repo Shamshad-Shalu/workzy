@@ -9,7 +9,6 @@ import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { CategoryRequestDTO } from "@/dtos/requests/category.dto";
 import { CategoryResponseDTO } from "@/dtos/responses/admin/category.response.dto";
-import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -41,9 +40,7 @@ export class CategoryManagementService implements ICategoryManagementService {
       ...sanitizedData,
       parentId: parentObjectId,
     });
-
-    await clearRedisListCache("categories:list");
-
+    await this._redisService.clearPattern("categories:list");
     return CategoryResponseDTO.fromEntity(newCategory);
   }
 

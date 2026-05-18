@@ -28,8 +28,9 @@ export function useWorkerBooking(status: BookingFilterStatus = 'all', limit: num
       }),
     initialPageParam: undefined,
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 5000,
     gcTime: 1000 * 60 * 5,
+    refetchInterval: 10000,
   });
 }
 
@@ -99,6 +100,8 @@ export function useWorkerBookingHandler() {
   const { mutateAsync: requestExtraChargeMutate, isPending: isRequestingExtraCharge } =
     useExtraCharge();
   const { mutateAsync: replyToReview, isPending: isReplying } = useAddReviewReply();
+  const { mutateAsync: markEnRoute, isPending: isEnRoutePending } = useMarkEnRoute();
+  const { mutateAsync: markReached, isPending: isReachedPending } = useMarkReached();
 
   const [acceptBId, setAcceptBId] = useState<string | null>(null);
   const [rejectBId, setRejectBId] = useState<string | null>(null);
@@ -106,6 +109,8 @@ export function useWorkerBookingHandler() {
   const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
   const [startB, setStartB] = useState<BookingListItem | null>(null);
   const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
+  const [enRouteBId, setEnRouteBId] = useState<string | null>(null);
+  const [reachedBId, setReachedBId] = useState<string | null>(null);
 
   async function handleAcceptBooking(id: string) {
     const res = await accept(id);
@@ -161,6 +166,16 @@ export function useWorkerBookingHandler() {
     setReviewData(null);
   }
 
+  async function handleMarkEnRoute(id: string) {
+    await markEnRoute(id);
+    setEnRouteBId(null);
+  }
+
+  async function handleMarkReached(id: string) {
+    await markReached(id);
+    setReachedBId(null);
+  }
+
   return {
     accept: {
       acceptBId,
@@ -197,6 +212,18 @@ export function useWorkerBookingHandler() {
       setReviewData,
       handleReviewReply,
       isReplying,
+    },
+    enRoute: {
+      enRouteBId,
+      setEnRouteBId,
+      handleMarkEnRoute,
+      isEnRoutePending,
+    },
+    reached: {
+      reachedBId,
+      setReachedBId,
+      handleMarkReached,
+      isReachedPending,
     },
   };
 }

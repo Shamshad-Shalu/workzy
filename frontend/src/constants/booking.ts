@@ -92,6 +92,10 @@ export const BOOKING_EMPTY_MESSAGES: Record<BookingFilterStatus, { title: string
     title: 'No disputes',
     sub: 'Any raised disputes will appear here.',
   },
+  expired: {
+    title: 'No expired bookings',
+    sub: 'Bookings that have passed their expiry will appear here.',
+  },
   upcoming: {
     title: 'No upcoming bookings',
     sub: 'Confirmed future bookings appear here.',

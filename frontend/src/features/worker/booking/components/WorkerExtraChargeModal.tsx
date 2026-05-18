@@ -31,6 +31,7 @@ export default function WorkerExtraChargeModal({
 }: WorkerExtraChargeModalProps) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [hasInitialized, setHasInitialized] = useState(false);
   const { booking } = useBookingDetails(bookingId);
 
   const {
@@ -50,16 +51,30 @@ export default function WorkerExtraChargeModal({
   });
 
   useEffect(() => {
-    if (bookingId) {
-      if (booking?.extraCharge) {
+    if (!open) {
+      setHasInitialized(false);
+      return;
+    }
+
+    if (open && booking && !hasInitialized) {
+      if (booking.extraCharge) {
         reset({
           reason: booking.extraCharge.reason,
           amount: booking.extraCharge.amount,
           evidenceUrl: booking.extraCharge.evidenceUrl || '',
         });
+        setIsEditMode(false);
+      } else {
+        reset({
+          reason: '',
+          amount: 0,
+          evidenceUrl: '',
+        });
+        setIsEditMode(true);
       }
+      setHasInitialized(true);
     }
-  }, [booking, bookingId, reset]);
+  }, [open, booking, hasInitialized, reset]);
 
   const handleClose = () => {
     setIsEditMode(false);
@@ -71,7 +86,6 @@ export default function WorkerExtraChargeModal({
   const { extraCharge } = booking;
 
   const onFormSubmit = async (data: ExtraChargeFormType) => {
-    console.log('data::', data);
     await onSubmit(data);
     setIsEditMode(false);
   };

@@ -3,6 +3,7 @@ export const QUOTE = {
   EXPIRED: "Quote Expired",
   CREATED: "Quote created successfully.",
   UPDATED: "Quote updated successfully.",
+  REJECTED: "Quote rejected successfully.",
   UPDATE_ERROR: "Failed to update quote.",
   ALREADY_EXISTS: "A quote for this Booking already exists.",
 };

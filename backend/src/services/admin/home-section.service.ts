@@ -10,6 +10,7 @@ import {
   ListSectionsResult,
   ListType,
 } from "@/core/interfaces/services/IHomeSectionService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import {
@@ -19,7 +20,6 @@ import {
 import { HomeSectionResponseDTO } from "@/dtos/responses/admin/homeSection.response.dto";
 import { HomeSectionDataType } from "@/types/home";
 import { buildHomeSectionFilter } from "@/utils/admin/filters/homeSection.filter";
-import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -29,6 +29,7 @@ export class HomeSectionService implements IHomeSectionService {
   constructor(
     @inject(TYPES.HomeSectionRepository) private _homeSectionRepository: IHomeSectionRepository,
     @inject(TYPES.HomeLayoutRepository) private _homeLayoutRepository: IHomeLayoutRepository,
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
   async createSection(payload: HomeSectionRequestDTO): Promise<HomeSectionResponseDTO> {
@@ -46,7 +47,7 @@ export class HomeSectionService implements IHomeSectionService {
       type: payload.type,
       data,
     });
-    await clearRedisListCache("sections:list");
+    await this._redisService.clearPattern("sections:list");
     return HomeSectionResponseDTO.fromEntity(section);
   }
   async updateSection(
@@ -97,9 +98,9 @@ export class HomeSectionService implements IHomeSectionService {
     }
     await Promise.allSettled(removed.map((k) => this._s3Service.deleteFile(k)));
 
-    await clearRedisListCache("sections:list");
-    await clearRedisListCache("layout:admin");
-    await clearRedisListCache("home:public");
+    await this._redisService.clearPattern("sections:list");
+    await this._redisService.clearPattern("layout:admin");
+    await this._redisService.clearPattern("home:public");
     return HomeSectionResponseDTO.fromEntity(updated);
   }
 
@@ -118,7 +119,7 @@ export class HomeSectionService implements IHomeSectionService {
     if (!updated) {
       if (!updated) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await clearRedisListCache("sections:list");
+    await this._redisService.clearPattern("sections:list");
     return { message };
   }
 
@@ -135,7 +136,7 @@ export class HomeSectionService implements IHomeSectionService {
     if (!deleted) throw new CustomError(HOME_SECTION.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
 
     await Promise.allSettled(urlKeys.map((k) => this._s3Service.deleteFile(k)));
-    await clearRedisListCache("sections:list");
+    await this._redisService.clearPattern("sections:list");
     return HOME_SECTION.DELETED;
   }
   private async preventIfInLayout(

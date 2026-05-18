@@ -9,11 +9,13 @@ import {
   useCancelBooking,
   usePayExtraCharge,
 } from '@/features/booking/hooks/useBooking';
+import { useRaiseDispute } from '@/features/booking/hooks/useDispute';
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 
 import { useCreateBookingReview, useEditBookingReview } from './useReview';
 
+import type { DisputeFormType } from '../components/bookingActions/DisputeModal';
 import type { ReviewFormType } from '../validation/ReviewFormData';
 
 const LIMIT = 5;
@@ -35,8 +37,9 @@ export function useUserBookings(status: BookingFilterStatus) {
       }),
     initialPageParam: undefined,
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 5000,
     gcTime: 1000 * 60 * 5,
+    refetchInterval: 10000,
   });
 }
 
@@ -45,11 +48,13 @@ export function useUserBookingHandler() {
   const [approveBId, setApproveBId] = useState<string | null>(null);
   const [evidenceBId, setEvidenceBId] = useState<string | null>(null);
   const [payExtraBId, setPayExtraBId] = useState<string | null>(null);
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
 
   const { mutateAsync: cancel, isPending: isCancelling } = useCancelBooking();
   const { mutateAsync: approve, isPending: isApproving } = useApproveBooking();
   const { mutateAsync: payExtra, isPending: isPayingExtra } = usePayExtraCharge();
+  const { mutateAsync: raiseDispute, isPending: isRaisingDispute } = useRaiseDispute();
   const { mutateAsync: addReview } = useCreateBookingReview();
   const { mutateAsync: editReview } = useEditBookingReview();
 
@@ -60,8 +65,6 @@ export function useUserBookingHandler() {
     await cancel({ id: cancelB.id, reason });
     setCancelB(null);
   };
-
-  console.log({ reviewData });
 
   const handleApproveBooking = async () => {
     if (!approveBId) {
@@ -83,6 +86,14 @@ export function useUserBookingHandler() {
       window.location.href = res.url;
     }
     setPayExtraBId(null);
+  };
+
+  const handleRaiseDispute = async (data: DisputeFormType) => {
+    if (!disputeBId) {
+      return;
+    }
+    await raiseDispute({ bookingId: disputeBId, data });
+    setDisputeBId(null);
   };
 
   const handleSubmitReview = async (data: ReviewFormType) => {
@@ -126,6 +137,12 @@ export function useUserBookingHandler() {
       setPayExtraBId,
       handlePayExtra,
       isPayingExtra,
+    },
+    dispute: {
+      disputeBId,
+      setDisputeBId,
+      handleRaiseDispute,
+      isRaisingDispute,
     },
     evidence: {
       evidenceBId,

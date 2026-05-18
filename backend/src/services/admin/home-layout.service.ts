@@ -7,16 +7,17 @@ import { HomeSectionType, SINGLETON_HOME_TYPES } from "@/constants/home";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import { IHomeLayoutService, SaveItem } from "@/core/interfaces/services/IHomeLayoutService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { TYPES } from "@/di/types";
 import { HomeLayoutResponseDTO } from "@/dtos/responses/admin/homeLayout.response.dto";
-import { clearRedisListCache } from "@/utils/cache.util";
 import CustomError from "@/utils/customError";
 
 @injectable()
 export class HomeLayoutService implements IHomeLayoutService {
   constructor(
     @inject(TYPES.HomeLayoutRepository) private _layoutRepo: IHomeLayoutRepository,
-    @inject(TYPES.HomeSectionRepository) private _sectionRepo: IHomeSectionRepository
+    @inject(TYPES.HomeSectionRepository) private _sectionRepo: IHomeSectionRepository,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
   async getLayout(): Promise<HomeLayoutResponseDTO> {
     const cacheKey = "layout:admin";
@@ -58,8 +59,8 @@ export class HomeLayoutService implements IHomeLayoutService {
       }));
 
     await this._layoutRepo.findOneAndUpdate({ key: "HOME" }, { items: normalizedItems });
-    await clearRedisListCache("layout:admin");
-    await clearRedisListCache("home:public");
+    await this._redisService.clearPattern("layout:admin");
+    await this._redisService.clearPattern("home:public");
 
     const layout = await this._layoutRepo.getLayout();
     return HomeLayoutResponseDTO.fromEntity(layout);

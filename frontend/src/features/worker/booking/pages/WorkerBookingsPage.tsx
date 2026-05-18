@@ -7,23 +7,18 @@ import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTa
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
+import WorkerConfirmStatusModal from '../components/WorkerConfirmStatusModal';
 import WorkerExtraChargeModal from '../components/WorkerExtraChargeModal';
 import WorkerRejectModal from '../components/WorkerRejectModal';
 import WorkerReviewReplyModal from '../components/WorkerReviewModal';
 import WorkerStartJobModal from '../components/WorkerStartJobModal';
-import {
-  useMarkEnRoute,
-  useMarkReached,
-  useWorkerBooking,
-  useWorkerBookingHandler,
-} from '../hooks/useWorkerBooking';
+import { useWorkerBooking, useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 
 export default function WorkerBookingsPage() {
   const [status, setStatus] = useState<BookingFilterStatus>('all');
-  const { mutateAsync: markEnRoute } = useMarkEnRoute();
-  const { mutateAsync: markReached } = useMarkReached();
 
-  const { accept, start, reject, finish, extraCharge, review } = useWorkerBookingHandler();
+  const { accept, start, reject, finish, extraCharge, review, enRoute, reached } =
+    useWorkerBookingHandler();
   const { extraChargeBId, setExtraChargeBId, handleExtraCharge, isRequestingExtraCharge } =
     extraCharge;
   const { setFinishBId, finishBId, isCompleting, handleFinishJob } = finish;
@@ -31,6 +26,9 @@ export default function WorkerBookingsPage() {
   const { rejectBId, setRejectBId, handleRejectBooking, isRejecting } = reject;
   const { setStartB, startB, isStarting, handleStartJob } = start;
   const { reviewData, isReplying, setReviewData, handleReviewReply } = review;
+  const { enRouteBId, setEnRouteBId, handleMarkEnRoute, isEnRoutePending } = enRoute;
+  const { reachedBId, setReachedBId, handleMarkReached, isReachedPending } = reached;
+
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useWorkerBooking(status);
 
@@ -52,8 +50,8 @@ export default function WorkerBookingsPage() {
         refetch={refetch}
         role={ROLE.WORKER}
         onAccept={id => setAcceptBId(id)}
-        onEnRoute={id => markEnRoute(id)}
-        onReached={id => markReached(id)}
+        onEnRoute={id => setEnRouteBId(id)}
+        onReached={id => setReachedBId(id)}
         onStart={booking => setStartB(booking)}
         onReject={id => setRejectBId(id)}
         onComplete={id => setFinishBId(id)}
@@ -61,6 +59,28 @@ export default function WorkerBookingsPage() {
         // onCancel={id => reject(id)}
         onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
         detailBasePath="/worker/bookings"
+      />
+      <WorkerConfirmStatusModal
+        open={!!enRouteBId}
+        onClose={() => setEnRouteBId(null)}
+        onConfirm={async () => {
+          if (enRouteBId) {
+            await handleMarkEnRoute(enRouteBId);
+          }
+        }}
+        isSubmitting={isEnRoutePending}
+        type="en_route"
+      />
+      <WorkerConfirmStatusModal
+        open={!!reachedBId}
+        onClose={() => setReachedBId(null)}
+        onConfirm={async () => {
+          if (reachedBId) {
+            await handleMarkReached(reachedBId);
+          }
+        }}
+        isSubmitting={isReachedPending}
+        type="reached"
       />
       <WorkerAcceptModal
         isSubmitting={isAccepting}

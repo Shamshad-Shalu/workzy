@@ -46,7 +46,7 @@ export class QuoteController implements IQuoteController {
     const userId = this.requireUserId(req);
     const { quoteId } = req.params;
     await this._quoteService.rejectQuote(userId, quoteId);
-    res.status(HTTPSTATUS.OK).json({ message: QUOTE.UPDATED });
+    res.status(HTTPSTATUS.OK).json({ message: QUOTE.REJECTED });
   });
 
   listUserQuotes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -80,6 +80,7 @@ export class QuoteController implements IQuoteController {
     }
     return req.user.workerId;
   }
+
   private requireUserId(req: Request): string {
     if (!req.user?.id) {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);

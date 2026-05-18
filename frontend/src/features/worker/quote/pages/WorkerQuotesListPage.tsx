@@ -55,20 +55,19 @@ export default function WorkerQuotesListPage() {
             label="Quotes sent"
             value={counts?.all}
             sub=""
-            tone="amber"
           />
           <StatCard
             icon={<TrendingUp className="h-4 w-4" />}
             label="Acceptance rate"
             value={`${acceptRate}%`}
             sub=""
-            tone="emerald"
+            tone="info"
           />
           <StatCard
             icon={<Wallet className="h-4 w-4" />}
             label="Earned (accepted)"
             value={formatCurrency(totalEarned)}
-            tone="violet"
+            tone="success"
             sub=""
           />
         </div>

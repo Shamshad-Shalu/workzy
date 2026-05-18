@@ -224,7 +224,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
         >
           <span className="flex items-center gap-1.5">
             <Calendar size={11} className="flex-shrink-0" />
-            {formatDate(b.date)}
+            {formatDate(b.date, 'calendar')}
             {b.totalDays > 1 && (
               <span className="text-muted-foreground/60">
                 +{b.totalDays - 1} day{b.totalDays > 2 ? 's' : ''}

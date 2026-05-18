@@ -372,14 +372,18 @@ export class SlotService implements ISlotService {
   }
 
   async releaseQuoteSlots(slotIds: string[]): Promise<boolean> {
-    const slots = await this._slotRepository.findManyByIds(slotIds);
-    await this._slotRepository.deleteManyByIds(slotIds);
-    const lockKeys = slots.map(
-      (s) => `slot:${s.workerId}:${dayjs(s.date).format("YYYY-MM-DD")}:fullday`
-    );
-    await this._redisService.deleteMany(lockKeys);
-
-    return true;
+    try {
+      const slots = await this._slotRepository.findManyByIds(slotIds);
+      await this._slotRepository.deleteManyByIds(slotIds);
+      const lockKeys = slots.map(
+        (s) => `slot:${s.workerId}:${dayjs(s.date).format("YYYY-MM-DD")}:fullday`
+      );
+      await this._redisService.deleteMany(lockKeys);
+      return true;
+    } catch (err) {
+      console.error("Failed to release quote slots:", err);
+      return false;
+    }
   }
 
   async releaseSlot(slotId: string, userId: string): Promise<boolean> {

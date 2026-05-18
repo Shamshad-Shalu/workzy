@@ -10,19 +10,39 @@ import React, { useEffect, useState, type ReactNode } from 'react';
 import DataTableMobileCard from '@/components/data-table/DataTableMobileCard';
 import { DataTablePagination } from '@/components/data-table/DataTablePagination';
 import { DataTableSkeletonRow } from '@/components/data-table/TableSkeletonRow';
+import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import type { TableColumnDef, PaginationAdapter, RowWithAnyId } from '@/types/table.types';
 
 type DataListMode = 'table' | 'card';
 
-interface DataListProps<T extends RowWithAnyId> {
-  data: T[];
-  total: number;
+type DataListPaginationProps =
+  | {
+      paginationType?: 'offset';
+      total: number;
+      pageIndex: number;
+      pageSize: number;
+      pageCount: number;
+      onPageChange: (p: number) => void;
+      onPageSizeChange: (s: number) => void;
+      hasNextPage?: never;
+      fetchNextPage?: never;
+      isFetchingNextPage?: never;
+    }
+  | {
+      paginationType: 'cursor';
+      hasNextPage: boolean;
+      fetchNextPage: () => void;
+      isFetchingNextPage?: boolean;
+      total?: never;
+      pageIndex?: never;
+      pageSize?: never;
+      pageCount?: never;
+      onPageChange?: never;
+      onPageSizeChange?: never;
+    };
 
-  pageIndex: number;
-  pageSize: number;
-  pageCount: number;
-  onPageChange: (p: number) => void;
-  onPageSizeChange: (s: number) => void;
+type DataListProps<T extends RowWithAnyId> = {
+  data: T[];
   isLoading?: boolean;
   isError?: boolean;
   mode: DataListMode;
@@ -32,16 +52,10 @@ interface DataListProps<T extends RowWithAnyId> {
 
   emptyState?: ReactNode;
   errorState?: ReactNode;
-}
+} & DataListPaginationProps;
 
 export function DataList<T extends RowWithAnyId>({
   data,
-  total,
-  pageIndex,
-  pageSize,
-  pageCount,
-  onPageChange,
-  onPageSizeChange,
   isLoading = false,
   isError,
   mode,
@@ -50,6 +64,16 @@ export function DataList<T extends RowWithAnyId>({
   gridClassName = 'grid gap-5 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4',
   emptyState,
   errorState,
+  paginationType = 'offset',
+  total,
+  pageIndex,
+  pageSize,
+  pageCount,
+  onPageChange,
+  onPageSizeChange,
+  hasNextPage,
+  fetchNextPage,
+  isFetchingNextPage,
 }: DataListProps<T>) {
   const [isSmallScreen, setIsSmallScreen] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 1024 : false
@@ -63,22 +87,31 @@ export function DataList<T extends RowWithAnyId>({
     return () => window.removeEventListener('resize', resize);
   }, []);
 
+  const sentinelRef = useInfiniteScroll(
+    paginationType === 'cursor' && fetchNextPage ? fetchNextPage : () => {},
+    paginationType === 'cursor' ? !!hasNextPage : false,
+    paginationType === 'cursor' ? !!isFetchingNextPage : false
+  );
+
   const table = useReactTable({
     data,
     columns,
     state: {
       sorting,
-      pagination: { pageIndex, pageSize },
+      ...(paginationType === 'offset'
+        ? { pagination: { pageIndex: pageIndex!, pageSize: pageSize! } }
+        : {}),
     },
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    manualPagination: true,
-    pageCount,
+    manualPagination: paginationType === 'offset',
+    ...(paginationType === 'offset' ? { pageCount } : {}),
     meta: {
-      total,
+      total: paginationType === 'offset' ? total : data.length,
     },
   });
+
   const renderState = () => {
     if (isLoading) {
       return null;
@@ -107,25 +140,54 @@ export function DataList<T extends RowWithAnyId>({
 
   const uiState = renderState();
 
-  if (mode === 'card') {
-    const paginationAdapter: PaginationAdapter = {
-      getState: () => ({
-        pagination: { pageIndex, pageSize },
-      }),
-      getCanPreviousPage: () => pageIndex > 0,
-      getCanNextPage: () => pageIndex < pageCount - 1,
-      getPageCount: () => pageCount,
-      setPageSize: (size: number) => onPageSizeChange(size),
-      options: {
-        meta: { total },
-      },
-    };
+  const paginationAdapter: PaginationAdapter | null =
+    paginationType === 'offset'
+      ? {
+          getState: () => ({
+            pagination: { pageIndex: pageIndex!, pageSize: pageSize! },
+          }),
+          getCanPreviousPage: () => pageIndex! > 0,
+          getCanNextPage: () => pageIndex! < pageCount! - 1,
+          getPageCount: () => pageCount!,
+          setPageSize: (size: number) => onPageSizeChange!(size),
+          options: {
+            meta: { total },
+          },
+        }
+      : null;
 
+  const renderPagination = () => {
+    if (paginationType === 'offset') {
+      const tableAdapter = mode === 'card' ? paginationAdapter! : table;
+      return (
+        <DataTablePagination
+          table={tableAdapter}
+          onPageChange={onPageChange!}
+          onPageSizeChange={onPageSizeChange!}
+        />
+      );
+    }
+
+    if (hasNextPage || data.length === 0) {
+      return null;
+    }
+
+    return (
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-2 py-4">
+        <div className="text-md text-muted-foreground">
+          Showing <b>{data.length}</b> results
+        </div>
+        <div className="text-sm text-muted-foreground italic">All records loaded</div>
+      </div>
+    );
+  };
+
+  if (mode === 'card') {
     return (
       <div className="space-y-6">
         {isLoading ? (
           <div className={gridClassName}>
-            {Array.from({ length: pageSize }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <DataTableSkeletonRow key={i} isSmallScreen rowCount={1} />
             ))}
           </div>
@@ -138,16 +200,18 @@ export function DataList<T extends RowWithAnyId>({
                 {renderCard?.(item)}
               </React.Fragment>
             ))}
+            {paginationType === 'cursor' &&
+              isFetchingNextPage &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <DataTableSkeletonRow key={`skeleton-${i}`} isSmallScreen rowCount={1} />
+              ))}
           </div>
         )}
 
-        <div className="bg-card rounded-lg px-4">
-          <DataTablePagination
-            table={paginationAdapter}
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
-          />
-        </div>
+        {(!hasNextPage || paginationType === 'offset') && (
+          <div className="bg-card rounded-lg px-4">{renderPagination()}</div>
+        )}
+        {paginationType === 'cursor' && <div ref={sentinelRef} className="h-4" />}
       </div>
     );
   }
@@ -157,7 +221,7 @@ export function DataList<T extends RowWithAnyId>({
       <div className="space-y-6">
         {isLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: pageSize }).map((_, i) => (
+            {Array.from({ length: 4 }).map((_, i) => (
               <DataTableSkeletonRow key={i} isSmallScreen rowCount={1} />
             ))}
           </div>
@@ -172,16 +236,18 @@ export function DataList<T extends RowWithAnyId>({
                 columns={columns}
               />
             ))}
+            {paginationType === 'cursor' &&
+              isFetchingNextPage &&
+              Array.from({ length: 4 }).map((_, i) => (
+                <DataTableSkeletonRow key={`skeleton-${i}`} isSmallScreen rowCount={1} />
+              ))}
           </div>
         )}
 
-        <div className="bg-card rounded-lg px-4 @container">
-          <DataTablePagination
-            table={table}
-            onPageChange={onPageChange}
-            onPageSizeChange={onPageSizeChange}
-          />
-        </div>
+        {(!hasNextPage || paginationType === 'offset') && (
+          <div className="bg-card rounded-lg px-4 @container">{renderPagination()}</div>
+        )}
+        {paginationType === 'cursor' && <div ref={sentinelRef} className="h-4" />}
       </div>
     );
   }
@@ -203,7 +269,7 @@ export function DataList<T extends RowWithAnyId>({
           </thead>
           <tbody>
             {isLoading ? (
-              <DataTableSkeletonRow isSmallScreen={false} rowCount={pageSize} />
+              <DataTableSkeletonRow isSmallScreen={false} rowCount={5} />
             ) : isError ? (
               <tr>
                 <td colSpan={100}>
@@ -221,26 +287,28 @@ export function DataList<T extends RowWithAnyId>({
                 </td>
               </tr>
             ) : (
-              table.getRowModel().rows.map(row => (
-                <tr key={row.id} className="border-t hover:bg-secondary/50">
-                  {row.getVisibleCells().map(cell => (
-                    <td key={cell.id} className="px-6 py-4">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              <>
+                {table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className="border-t hover:bg-secondary/50">
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id} className="px-6 py-4">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+                {paginationType === 'cursor' && isFetchingNextPage && (
+                  <DataTableSkeletonRow isSmallScreen={false} rowCount={4} />
+                )}
+              </>
             )}
           </tbody>
         </table>
       </div>
-      <div className="bg-card rounded-lg px-4 @container">
-        <DataTablePagination
-          table={table}
-          onPageChange={onPageChange}
-          onPageSizeChange={onPageSizeChange}
-        />
-      </div>
+      {(!hasNextPage || paginationType === 'offset') && (
+        <div className="bg-card rounded-lg px-4 @container">{renderPagination()}</div>
+      )}
+      {paginationType === 'cursor' && <div ref={sentinelRef} className="h-4" />}
     </div>
   );
 }

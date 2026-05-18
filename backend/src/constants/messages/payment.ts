@@ -5,4 +5,5 @@ export const PAYMENT = {
   PAYMENT_NOT_FOUND: "Payment record not found for this booking",
   PAYMENT_INTENT_MISSING: "No payment intent found to refund",
   REFUND_FAILED: "Refund failed.",
+  WORKER_AMOUNT_MISSING: "Payment worker amount is missing",
 };

@@ -17,6 +17,7 @@ import {
   ReviewResponseDTO,
   ReviewUserDTO,
   ReviewWorkerDTO,
+  WorkerReviewStatsDto,
 } from "@/dtos/responses/review.dto";
 import { AdminReviewListQueryInput, ReviewListQueryInput } from "@/types/review";
 import CustomError from "@/utils/customError";
@@ -228,5 +229,10 @@ export class ReviewService implements IReviewService {
     };
     await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
     return response;
+  }
+
+  async getWorkerReviewStats(workerId: string): Promise<WorkerReviewStatsDto> {
+    const reviews = await this._workerRepository.getWorkerReviewStats(workerId);
+    return WorkerReviewStatsDto.fromEntity(reviews);
   }
 }

@@ -6,7 +6,6 @@ import type { AdminDashboardAnalytics } from '@/types/admin/dashboard';
 
 const getAdminDashboardAnalytics = async (): Promise<AdminDashboardAnalytics> => {
   const res = await api.get(ADMIN_API.DASHBOARD);
-  console.log('statsres:', res);
   return res.data;
 };
 

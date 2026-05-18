@@ -3,22 +3,23 @@ import BookingDetailsPage from '@/features/booking/page/Bookingdetailspage';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
+import WorkerConfirmStatusModal from '../components/WorkerConfirmStatusModal';
 import WorkerExtraChargeModal from '../components/WorkerExtraChargeModal';
 import WorkerRejectModal from '../components/WorkerRejectModal';
 import WorkerStartJobModal from '../components/WorkerStartJobModal';
-import { useMarkEnRoute, useMarkReached, useWorkerBookingHandler } from '../hooks/useWorkerBooking';
+import { useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 
 export default function WorkerBookingDetailsPage() {
-  const { mutateAsync: markEnRoute } = useMarkEnRoute();
-  const { mutateAsync: markReached } = useMarkReached();
-
-  const { accept, start, reject, finish, extraCharge } = useWorkerBookingHandler();
-  const { extraChargeBId, setExtraChargeBId, requestExtraCharge, isRequestingExtraCharge } =
+  const { accept, start, reject, finish, extraCharge, enRoute, reached } =
+    useWorkerBookingHandler();
+  const { extraChargeBId, setExtraChargeBId, handleExtraCharge, isRequestingExtraCharge } =
     extraCharge;
-  const { setFinishBId, finishBId, isCompleting, finishJob } = finish;
-  const { setAcceptBId, acceptBId, isAccepting, acceptBooking } = accept;
-  const { rejectBId, setRejectBId, rejectBooking, isRejecting } = reject;
-  const { setStartB, startB, isStarting, startJob } = start;
+  const { setFinishBId, finishBId, isCompleting, handleFinishJob } = finish;
+  const { setAcceptBId, acceptBId, isAccepting, handleAcceptBooking } = accept;
+  const { rejectBId, setRejectBId, handleRejectBooking, isRejecting } = reject;
+  const { setStartB, startB, isStarting, handleStartJob } = start;
+  const { enRouteBId, setEnRouteBId, handleMarkEnRoute, isEnRoutePending } = enRoute;
+  const { reachedBId, setReachedBId, handleMarkReached, isReachedPending } = reached;
 
   return (
     <div className="p-4">
@@ -27,42 +28,64 @@ export default function WorkerBookingDetailsPage() {
         handlers={{
           onAccept: id => accept.setAcceptBId(id),
           onReject: id => accept.setAcceptBId(id),
-          onEnRoute: id => markEnRoute(id),
-          onReached: id => markReached(id),
+          onEnRoute: id => setEnRouteBId(id),
+          onReached: id => setReachedBId(id),
           onStart: booking => start.setStartB(booking),
         }}
       />
+      <WorkerConfirmStatusModal
+        open={!!enRouteBId}
+        onClose={() => setEnRouteBId(null)}
+        onConfirm={async () => {
+          if (enRouteBId) {
+            await handleMarkEnRoute(enRouteBId);
+          }
+        }}
+        isSubmitting={isEnRoutePending}
+        type="en_route"
+      />
+      <WorkerConfirmStatusModal
+        open={!!reachedBId}
+        onClose={() => setReachedBId(null)}
+        onConfirm={async () => {
+          if (reachedBId) {
+            await handleMarkReached(reachedBId);
+          }
+        }}
+        isSubmitting={isReachedPending}
+        type="reached"
+      />
       <WorkerAcceptModal
         isSubmitting={isAccepting}
-        onSubmit={acceptBooking}
+        onSubmit={handleAcceptBooking}
         open={!!acceptBId}
         bookingId={acceptBId}
         onClose={() => setAcceptBId(null)}
       />
       <WorkerRejectModal
         isSubmitting={isRejecting}
-        onSubmit={rejectBooking}
+        onSubmit={handleRejectBooking}
         open={!!rejectBId}
         bookingId={rejectBId}
         onClose={() => setRejectBId(null)}
       />
       <WorkerCompleteModal
         isSubmitting={isCompleting}
-        onSubmit={finishJob}
+        onSubmit={handleFinishJob}
         open={!!finishBId}
         bookingId={finishBId}
         onClose={() => setFinishBId(null)}
       />
       <WorkerExtraChargeModal
         isSubmitting={isRequestingExtraCharge}
-        onSubmit={requestExtraCharge}
+        onSubmit={handleExtraCharge}
         open={!!extraChargeBId}
         bookingId={extraChargeBId}
         onClose={() => setExtraChargeBId(null)}
       />
       <WorkerStartJobModal
         isSubmitting={isStarting}
-        onSubmit={startJob}
+        onSubmit={handleStartJob}
         open={!!startB}
         booking={startB}
         onClose={() => setStartB(null)}

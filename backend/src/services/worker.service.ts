@@ -269,6 +269,7 @@ export class WorkerService implements IWorkerService {
 
     return this._paymentservice.createStripeConnectLink(worker);
   }
+
   async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {
     return await this._bookingRepository.getWorkerDashboardAnalytics(workerId);
   }

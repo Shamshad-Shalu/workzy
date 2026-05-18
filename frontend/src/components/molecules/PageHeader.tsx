@@ -5,9 +5,11 @@ type PageHeaderProps = {
 
 export default function PageHeader({ title, description = '' }: PageHeaderProps) {
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl sm:text-3xl font-bold text-foreground">{title}</h1>
-      <p className="text-muted-foreground mb-5">{description}</p>
+    <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-6">
+      <div>
+        <h1 className="my-1 text-3xl font-bold tracking-tight">{title}</h1>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
     </div>
   );
 }
