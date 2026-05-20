@@ -1,3 +1,4 @@
+import { Role } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { PaginatedResult } from "@/types/common/pagination";
 import { IUser } from "@/types/user/user.entity";
@@ -8,6 +9,7 @@ export interface IUserRepository extends BaseRepository<IUser> {
   findByEmail(email: string): Promise<IUser | null>;
   getUserByRoleAndId(role: string, id: string): Promise<IUser | null>;
   findByGoogleId(googleId: string): Promise<IUser | null>;
+  findByRole(role: Role): Promise<IUser | null>;
   listUsers(query: UserListQuery): Promise<PaginatedResult<UserListItem>>;
   getUserGrowthAnalytics(): Promise<{ month: number; users: number }[]>;
 }

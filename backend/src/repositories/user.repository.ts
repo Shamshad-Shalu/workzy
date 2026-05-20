@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { injectable } from "inversify";
 import { FilterQuery, Types } from "mongoose";
 
-import { ROLE } from "@/constants";
+import { Role, ROLE } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import User from "@/models/user.model";
@@ -34,6 +34,9 @@ export class UserRepository extends BaseRepository<IUser> implements IUserReposi
     return await User.findOne({ googleId });
   }
 
+  async findByRole(role: Role): Promise<IUser | null> {
+    return await this.model.findOne({ role }).exec();
+  }
   async listUsers(query: UserListQuery): Promise<PaginatedResult<UserListItem>> {
     const { page, limit, search, status, role } = query;
     const skip = (page - 1) * limit;

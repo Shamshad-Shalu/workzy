@@ -80,6 +80,10 @@ const TYPES = {
 
   AdminBookingController: Symbol.for("AdminBookingController"),
   AdminBookingService: Symbol.for("AdminBookingService"),
+
+  DisputeController: Symbol.for("DisputeController"),
+  DisputeService: Symbol.for("DisputeService"),
+  DisputeRepository: Symbol.for("DisputeRepository"),
 };
 
 export { TYPES };

@@ -89,6 +89,56 @@ export const NOTIFICATION_TEMPLATES = {
     heading: "Booking Disputed",
     message: `A dispute has been raised for booking **${bookingId}**. Our team is reviewing it.`,
   }),
+  DISPUTE_UNDER_REVIEW_CUSTOMER: (bookingId: string) => ({
+    type: "dispute_under_review",
+    heading: "Dispute Under Review",
+    message: `Your dispute for booking **${bookingId}** is now under review.`,
+  }),
+  DISPUTE_UNDER_REVIEW_WORKER: (bookingId: string) => ({
+    type: "dispute_under_review",
+    heading: "Dispute Under Review",
+    message: `The dispute for booking **${bookingId}** is now under review.`,
+  }),
+  DISPUTE_DISMISSED_CUSTOMER: (bookingId: string) => ({
+    type: "dispute_dismissed",
+    heading: "Dispute Dismissed",
+    message: `The dispute on booking **${bookingId}** has been dismissed by admin.`,
+  }),
+  DISPUTE_DISMISSED_WORKER: (bookingId: string) => ({
+    type: "dispute_dismissed",
+    heading: "Dispute Dismissed",
+    message: `The dispute on booking **${bookingId}** has been dismissed by admin. Payment has been released.`,
+  }),
+  DISPUTE_RESOLVED_FULL_REFUND_CUSTOMER: (bookingId: string, total: number) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Full refund of **₹${total}** was approved for booking **${bookingId}**.`,
+  }),
+  DISPUTE_RESOLVED_FULL_REFUND_WORKER: (bookingId: string) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Full refund to customer was approved for booking **${bookingId}**.`,
+  }),
+  DISPUTE_RESOLVED_PARTIAL_REFUND_CUSTOMER: (bookingId: string, refundedAmount: number) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Partial refund of **₹${refundedAmount}** was approved for booking **${bookingId}**.`,
+  }),
+  DISPUTE_RESOLVED_PARTIAL_REFUND_WORKER: (bookingId: string, refundedAmount: number) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Partial refund of **₹${refundedAmount}** was approved for booking **${bookingId}**. The rest has been released.`,
+  }),
+  DISPUTE_RESOLVED_PAYOUT_WORKER_CUSTOMER: (bookingId: string) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Full payout to worker was approved for booking **${bookingId}**.`,
+  }),
+  DISPUTE_RESOLVED_PAYOUT_WORKER_WORKER: (bookingId: string) => ({
+    type: "dispute_resolved",
+    heading: "Dispute Resolved",
+    message: `Dispute resolved: Full payout was approved for booking **${bookingId}**.`,
+  }),
   BOOKING_EXPIRED: (bookingId: string) => ({
     type: "booking_expired",
     heading: "Booking Expired",

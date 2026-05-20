@@ -77,6 +77,11 @@ export const PURPOSE_POLICY = {
     maxSizeMB: 50,
     allowedTypes: [...FILE_TYPES.IMAGES, ...FILE_TYPES.VIDEOS],
   },
+  DISPUTE_EVIDENCE: {
+    folder: "public/bookings/disputes",
+    maxSizeMB: 50,
+    allowedTypes: [...FILE_TYPES.IMAGES, ...FILE_TYPES.VIDEOS],
+  },
 } as const;
 
 export type UploadPurpose = keyof typeof PURPOSE_POLICY;

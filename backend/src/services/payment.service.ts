@@ -185,11 +185,11 @@ export class PaymentService implements IPaymentService {
     return session.url!;
   }
 
-  async releaseBookingPayment(booking: IBooking): Promise<void> {
+  async releaseBookingPayment(booking: IBooking, customAmount?: number): Promise<void> {
     const payment = await this._paymentRepo.findOne({
       bookingId: new Types.ObjectId(booking._id.toString()),
       billType: BILL_TYPE.BOOKING,
-      status: PAYMENT_STATUS.SUCCEEDED,
+      status: { $in: [PAYMENT_STATUS.SUCCEEDED, PAYMENT_STATUS.REFUNDED] },
     });
     if (!payment) {
       throw new CustomError(PAYMENT.PAYMENT_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
@@ -211,9 +211,9 @@ export class PaymentService implements IPaymentService {
     }
     const destinationAccount = await stripe.accounts.retrieve(workerStripeId);
     const transferCurrency = destinationAccount.default_currency || "inr";
-    let transferAmount = payment.workerAmount;
+    let transferAmount = customAmount !== undefined ? customAmount : payment.workerAmount;
     if (payment.currency === "inr" && transferCurrency === "aed") {
-      transferAmount = payment.workerAmount * 0.044;
+      transferAmount = transferAmount * 0.044;
     }
 
     try {
@@ -241,7 +241,10 @@ export class PaymentService implements IPaymentService {
 
     await this._paymentRepo.findOneAndUpdate(
       { _id: payment._id },
-      { status: PAYMENT_STATUS.RELEASED }
+      {
+        status: PAYMENT_STATUS.RELEASED,
+        workerAmount: transferAmount,
+      }
     );
   }
 
@@ -313,7 +316,7 @@ export class PaymentService implements IPaymentService {
     return link.url;
   }
 
-  async refundBookingPayment(bookingId: string): Promise<void> {
+  async refundBookingPayment(bookingId: string, amount?: number): Promise<void> {
     const payment = await this._paymentRepo.findOne({
       bookingId: new Types.ObjectId(bookingId),
       billType: BILL_TYPE.BOOKING,
@@ -326,13 +329,20 @@ export class PaymentService implements IPaymentService {
       throw new CustomError(PAYMENT.PAYMENT_INTENT_MISSING, HTTPSTATUS.BAD_REQUEST);
     }
 
-    await stripe.refunds.create({
+    const refundParams: Stripe.RefundCreateParams = {
       payment_intent: payment.paymentIntentId,
-    });
+    };
+    if (amount !== undefined) {
+      refundParams.amount = Math.round(amount * 100);
+    }
 
+    await stripe.refunds.create(refundParams);
     await this._paymentRepo.findOneAndUpdate(
       { _id: new Types.ObjectId(payment._id) },
-      { status: PAYMENT_STATUS.REFUNDED }
+      {
+        status: PAYMENT_STATUS.REFUNDED,
+        refundedAmount: amount !== undefined ? amount : payment.amount,
+      }
     );
   }
 

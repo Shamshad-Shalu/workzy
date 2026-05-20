@@ -9,6 +9,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUrl,
   Length,
   MaxLength,
   Min,
@@ -85,6 +86,7 @@ export class VerifyBookingOtpDTO {
 
 export class EvidenceItemDTO {
   @IsString()
+  @IsUrl()
   url!: string;
 
   @IsIn(["image", "video"])

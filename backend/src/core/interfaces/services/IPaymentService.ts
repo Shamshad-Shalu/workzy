@@ -11,13 +11,13 @@ export interface IPaymentService {
   verifySession(sessionId: string): Promise<VerifySessionType>;
   createBookingPaymentCheckout(data: BookingCheckoutParams): Promise<string>;
   createStripeConnectLink(worker: IWorker): Promise<string>;
-  refundBookingPayment(bookingId: string): Promise<void>;
+  refundBookingPayment(bookingId: string, amount?: number): Promise<void>;
   createExtraChargeCheckout(data: {
     userId: string;
     booking: IBooking;
     amount: number;
   }): Promise<string>;
-  releaseBookingPayment(booking: IBooking): Promise<void>;
+  releaseBookingPayment(booking: IBooking, customAmount?: number): Promise<void>;
 
   getPayments(
     input: PaymentListQueryInput

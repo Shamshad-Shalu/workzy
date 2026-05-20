@@ -6,6 +6,7 @@ import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
 import { BookingController } from "@/controllers/booking.controller";
 import { CategoryController } from "@/controllers/category.controller";
+import { DisputeController } from "@/controllers/dispute.controller";
 import { HomeController } from "@/controllers/home.controller";
 import { LeaveController } from "@/controllers/leave.controller";
 import { NotificationController } from "@/controllers/notification.controller";
@@ -24,6 +25,7 @@ import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminCont
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
+import { IDisputeController } from "@/core/interfaces/controllers/IDisputeController";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { ILeaveController } from "@/core/interfaces/controllers/ILeaveController";
 import { INotificationController } from "@/core/interfaces/controllers/INotificationController";
@@ -37,6 +39,7 @@ import { IUserController } from "@/core/interfaces/controllers/IUserController";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
+import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepository";
@@ -54,6 +57,7 @@ import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
+import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutService";
 import { IHomeSectionService } from "@/core/interfaces/services/IHomeSectionService";
@@ -73,6 +77,7 @@ import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { BookingRepository } from "@/repositories/booking.repository";
 import { CategoryRepository } from "@/repositories/category.repository";
+import { DisputeRepository } from "@/repositories/dispute.repository";
 import { HomeLayoutRepository } from "@/repositories/homeLayout..repository";
 import { HomeSectionRepository } from "@/repositories/homeSection.repository";
 import { LeaveRepository } from "@/repositories/leave.repository";
@@ -95,6 +100,7 @@ import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
 import { BookingService } from "@/services/booking.service";
 import { CategoryService } from "@/services/category.service";
+import { DisputeService } from "@/services/dispute.service";
 import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
 import { NotificationService } from "@/services/notification.service";
@@ -187,5 +193,9 @@ container.bind<INotificationService>(TYPES.NotificationService).to(NotificationS
 container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
 
 container.bind<SocketController>(TYPES.SocketController).to(SocketController);
+
+container.bind<IDisputeRepository>(TYPES.DisputeRepository).to(DisputeRepository);
+container.bind<IDisputeService>(TYPES.DisputeService).to(DisputeService);
+container.bind<IDisputeController>(TYPES.DisputeController).to(DisputeController);
 
 export { container };

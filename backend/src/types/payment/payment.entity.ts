@@ -18,6 +18,7 @@ export interface IPayment extends Document<string> {
   provider: PaymentProvider;
 
   paymentIntentId?: string;
+  refundedAmount?: number;
   sessionId?: string;
   failureReason?: string;
 

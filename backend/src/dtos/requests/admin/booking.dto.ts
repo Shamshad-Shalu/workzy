@@ -1,4 +1,4 @@
-import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsEnum, IsString, MaxLength, MinLength } from "class-validator";
 
 export class ResolveDisputeDTO {
   @IsEnum(["approve", "refund"])
@@ -22,11 +22,4 @@ export class AdminNoteDTO {
   @MinLength(1)
   @MaxLength(1000)
   note!: string;
-}
-
-export class AdminRefundDTO {
-  @IsOptional()
-  @IsString()
-  @MaxLength(500)
-  reason?: string;
 }

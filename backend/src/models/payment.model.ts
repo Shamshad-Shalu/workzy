@@ -37,6 +37,7 @@ const PaymentSchema: Schema<IPayment> = new Schema(
       default: PAYMENT_PROVIDER.STRIPE,
     },
     paymentIntentId: { type: String, sparse: true, unique: true },
+    refundedAmount: { type: Number, default: 0 },
     sessionId: { type: String, sparse: true, unique: true },
     userName: { type: String },
     workerName: { type: String },
