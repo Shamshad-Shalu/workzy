@@ -89,7 +89,7 @@ export function NotificationsDropdown({ role = ROLE.USER }: { role?: Role }) {
               <h3 className="text-lg font-bold tracking-tight">Notifications</h3>
               <p className="text-[13px] text-muted-foreground mt-0.5">
                 {unreadCount > 0
-                  ? `You have ${unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`
+                  ? `You have ${unreadCount > 9 ? '9+' : unreadCount} unread message${unreadCount !== 1 ? 's' : ''}`
                   : 'You are all caught up!'}
               </p>
             </div>

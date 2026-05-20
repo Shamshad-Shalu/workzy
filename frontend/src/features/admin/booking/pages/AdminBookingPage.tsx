@@ -1,6 +1,6 @@
 import dayjs from 'dayjs';
 import { CreditCard, Filter } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import { DatePicker } from '@/components/atoms/Datepicker';
@@ -15,6 +15,7 @@ import {
   type BookingPaymentStatus,
 } from '@/constants';
 import { BookingList } from '@/features/booking/components/BookingList';
+import DisputeModal from '@/features/dispute/components/DisputeModal';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { cn } from '@/lib/utils';
 
@@ -35,6 +36,7 @@ const formatDateForUrl = (date?: Date | null): string | null => {
 };
 
 export default function AdminBookingsPage() {
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const { search, status, updateParams, paymentStatus, fromDate, toDate } = useUrlFilterParams<{
     paymentStatus: string;
     fromDate: Date | null;
@@ -166,6 +168,12 @@ export default function AdminBookingsPage() {
           reviewId={reviewData?.reviewId}
         />
       )}
+      <DisputeModal
+        open={!!disputeBId}
+        role={ROLE.ADMIN}
+        onClose={() => setDisputeBId(null)}
+        bookingId={disputeBId}
+      />
     </div>
   );
 }

@@ -60,13 +60,18 @@ export const descriptionRuleOptional = z
     "Description cannot contain repeated characters like 'aaaa' or 'ssss'"
   );
 
-export const createDescriptionRule = (label: string = 'name', required: boolean = true) => {
+export const createDescriptionRule = (
+  label: string = 'name',
+  required: boolean = true,
+  min: number = 10,
+  max: number = 500
+) => {
   const schema = z
     .string()
     .trim()
     .min(1, `${label} is required`)
-    .min(10, `${label} must be at least 10 characters`)
-    .max(500, `${label} cannot exceed 500 characters`)
+    .min(min, `${label} must be at least ${min} characters`)
+    .max(max, `${label} cannot exceed ${max} characters`)
     .regex(DESCRIPTION_REGEX, `${label} contains invalid characters`);
 
   return required ? schema : schema.optional();

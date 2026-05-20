@@ -27,13 +27,14 @@ import {
   PlayCircle,
   XCircle,
   CheckCircle,
+  ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
+import ProfileImage from '@/components/molecules/ProfileImage';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
@@ -546,6 +547,23 @@ function ActionPanel({
           )}
         </>
       )}
+      {![
+        BOOKING_STATUS.PENDING,
+        BOOKING_STATUS.APPROVED,
+        BOOKING_STATUS.CANCELLED,
+        BOOKING_STATUS.REJECTED,
+        BOOKING_STATUS.EXPIRED as string,
+      ].includes(b.status) &&
+        !isAdmin && (
+          <Button
+            variant="red"
+            size="sm"
+            iconLeft={<ShieldAlert size={12} />}
+            onClick={() => handlers?.onDispute?.(b.id)}
+          >
+            {b.status === BOOKING_STATUS.DISPUTED ? 'View Dispute' : 'Dispute'}
+          </Button>
+        )}
 
       {isAdmin && b.status === BOOKING_STATUS.COMPLETED && (
         <ActionBtn
@@ -559,6 +577,7 @@ function ActionPanel({
     </div>
   );
 }
+
 function StatusTimeline({
   history,
 }: {
@@ -622,8 +641,6 @@ function StatusTimeline({
   );
 }
 
-// ─── Evidence Section with MediaViewer ───────────────────────────────────────
-
 function EvidenceSection({ label, items }: { label: string; items: EvidenceItem[] }) {
   const [viewerIdx, setViewerIdx] = useState<number | null>(null);
 
@@ -682,8 +699,6 @@ function EvidenceSection({ label, items }: { label: string; items: EvidenceItem[
     </>
   );
 }
-
-// ─── Primitive UI pieces ──────────────────────────────────────────────────────
 
 function GlassCard({
   title,
@@ -772,12 +787,7 @@ function PartyCard({
         {label}
       </p>
       <div className="flex items-center gap-3">
-        <Avatar className="h-11 w-11 ring-1 ring-border">
-          <AvatarImage src={avatar} />
-          <AvatarFallback className="bg-muted text-sm font-bold text-muted-foreground">
-            {name?.[0]}
-          </AvatarFallback>
-        </Avatar>
+        <ProfileImage src={avatar} name={name} size={50} />
         <div className="min-w-0">
           <p className="truncate text-sm font-bold text-foreground">{name}</p>
           <p className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground">

@@ -4,6 +4,7 @@ import PageHeader from '@/components/molecules/PageHeader';
 import { ROLE, type BookingFilterStatus } from '@/constants';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
+import DisputeModal from '@/features/dispute/components/DisputeModal';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
@@ -15,6 +16,7 @@ import WorkerStartJobModal from '../components/WorkerStartJobModal';
 import { useWorkerBooking, useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 
 export default function WorkerBookingsPage() {
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const [status, setStatus] = useState<BookingFilterStatus>('all');
 
   const { accept, start, reject, finish, extraCharge, review, enRoute, reached } =
@@ -59,6 +61,7 @@ export default function WorkerBookingsPage() {
         // onCancel={id => reject(id)}
         onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
         detailBasePath="/worker/bookings"
+        onDispute={id => setDisputeBId(id)}
       />
       <WorkerConfirmStatusModal
         open={!!enRouteBId}
@@ -127,6 +130,13 @@ export default function WorkerBookingsPage() {
           isReplying={isReplying}
         />
       )}
+
+      <DisputeModal
+        open={!!disputeBId}
+        role={ROLE.WORKER}
+        onClose={() => setDisputeBId(null)}
+        bookingId={disputeBId}
+      />
     </div>
   );
 }

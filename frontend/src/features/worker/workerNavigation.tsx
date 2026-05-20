@@ -22,6 +22,7 @@ export const workerMenuItems: MenuItem[] = [
   { icon: <Wallet />, label: 'Payments', to: '/worker/payments' },
   { icon: <Star />, label: 'Reviews', to: '/worker/reviews' },
   { icon: <FileText />, label: 'Quotes', to: '/worker/quotes' },
+  { icon: <FileText />, label: 'Disputes', to: '/worker/disputes' },
   { icon: <MessageSquare />, label: 'Chats', to: '/worker/chats' },
   { icon: <Bell />, label: 'Notifications', to: '/worker/notifications' },
 ];

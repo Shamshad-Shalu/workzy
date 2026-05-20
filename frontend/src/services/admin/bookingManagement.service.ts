@@ -1,12 +1,13 @@
 import { ADMIN_API } from '@/constants';
 import api from '@/lib/api/axios';
-import { type BookingCard, type AdminBookingListParams } from '@/types/booking';
 
 const BookingManagementService = {
-  getAllBookings: async (
-    params: AdminBookingListParams
-  ): Promise<{ bookings: BookingCard[]; total: number }> => {
-    const res = await api.get(ADMIN_API.BOOKING.ROOT, { params });
+  addAdminNote: async (bookingId: string, note: string): Promise<{ message: string }> => {
+    const res = await api.patch(ADMIN_API.BOOKING.BY_ID(bookingId), { note });
+    return res.data;
+  },
+  cancelBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
+    const res = await api.patch(ADMIN_API.BOOKING.BY_ID(bookingId), { reason });
     return res.data;
   },
 };

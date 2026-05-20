@@ -236,6 +236,10 @@ export default function Header() {
                       <CreditCard className="h-4 w-4 mr-2" />
                       My Payments
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/disputes')}>
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Support
+                    </DropdownMenuItem>
 
                     {user?.role === ROLE.WORKER && (
                       <DropdownMenuItem onClick={handleSwitchMode}>

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { LocationSchema } from '@/features/profile/validation/profileSchema';
 import { mongoId } from '@/lib/validation/rules';
+
+import { LocationSchema } from '../../profile/validation/profileSchema';
 
 const AddressSchema = z.object({
   label: z.string().min(1),

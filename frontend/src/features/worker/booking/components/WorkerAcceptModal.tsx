@@ -23,7 +23,6 @@ export default function WorkerAcceptModal({
   isSubmitting = false,
 }: WorkerAcceptModalProps) {
   const { booking, error, isLoading } = useBookingDetails(bookingId);
-  console.log(booking);
 
   if (isLoading) {
     return (

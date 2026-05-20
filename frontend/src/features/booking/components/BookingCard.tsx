@@ -311,19 +311,6 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                     Pay Extra
                   </Button>
                 )}
-
-                {(b.status === BOOKING_STATUS.IN_PROGRESS ||
-                  b.status === BOOKING_STATUS.DISPUTED ||
-                  b.status === BOOKING_STATUS.COMPLETED) && (
-                  <Button
-                    variant="red"
-                    size="sm"
-                    iconLeft={<ShieldAlert size={12} />}
-                    onClick={() => handlers?.onDispute?.(b.id)}
-                  >
-                    Dispute
-                  </Button>
-                )}
               </>
             )}
 
@@ -441,6 +428,24 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                 Show Review
               </Button>
             )}
+
+            {![
+              BOOKING_STATUS.PENDING,
+              BOOKING_STATUS.APPROVED,
+              BOOKING_STATUS.CANCELLED,
+              BOOKING_STATUS.REJECTED,
+              BOOKING_STATUS.EXPIRED as string,
+            ].includes(b.status) &&
+              !isAdmin && (
+                <Button
+                  variant="red"
+                  size="sm"
+                  iconLeft={<ShieldAlert size={12} />}
+                  onClick={() => handlers?.onDispute?.(b.id)}
+                >
+                  {b.status === BOOKING_STATUS.DISPUTED ? 'View Dispute' : 'Dispute'}
+                </Button>
+              )}
           </div>
         </div>
       </div>

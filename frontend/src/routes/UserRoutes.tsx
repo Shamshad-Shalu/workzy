@@ -37,6 +37,7 @@ const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBo
 const UserBookingDetailsPage = lazy(
   () => import('@/features/user/booking/pages/UserBookingDetailsPage')
 );
+const UserDisputesPage = lazy(() => import('@/features/user/disputes/pages/UserDisputesPage'));
 
 export default function UserRoutes() {
   return (
@@ -60,6 +61,7 @@ export default function UserRoutes() {
             <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
+            <Route path="/disputes" element={<UserDisputesPage />} />
 
             <Route path="/payments" element={<UserPaymentsPage />} />
             <Route path="/quotes" element={<UserQuotesListPage />} />

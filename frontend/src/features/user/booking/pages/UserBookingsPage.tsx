@@ -4,6 +4,7 @@ import PageHeader from '@/components/molecules/PageHeader';
 import { ROLE, type BookingFilterStatus } from '@/constants';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
+import DisputeModal from '@/features/dispute/components/DisputeModal';
 
 import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
@@ -13,6 +14,7 @@ import { useUserBookingHandler, useUserBookings } from '../hooks/useUserBooking'
 
 export default function UserBookingsPage() {
   const [status, setStatus] = useState<BookingFilterStatus>('all');
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useUserBookings(status);
@@ -43,6 +45,7 @@ export default function UserBookingsPage() {
         onApprove={id => setApproveBId(id)}
         onPayExtra={id => setPayExtraBId(id)}
         onReview={data => setReviewData({ id: data.id, reviewId: data.reviewId })}
+        onDispute={id => setDisputeBId(id)}
         detailBasePath="/bookings"
       />
       <CancelModal
@@ -72,6 +75,13 @@ export default function UserBookingsPage() {
         open={true}
         reviewId={reviewData?.reviewId}
         onSubmit={handleSubmitReview}
+      />
+      <DisputeModal
+        open={!!disputeBId}
+        role={ROLE.USER}
+        // onSubmit={handleRaiseDispute}
+        onClose={() => setDisputeBId(null)}
+        bookingId={disputeBId}
       />
     </div>
   );

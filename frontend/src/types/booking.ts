@@ -128,7 +128,7 @@ export interface Booking {
   userNote?: string;
   workerNote?: string;
   adminNote?: string;
-  completedAt?: Date;
+  completedAt: Date | null;
 
   createdAt: Date;
   updatedAt: Date;

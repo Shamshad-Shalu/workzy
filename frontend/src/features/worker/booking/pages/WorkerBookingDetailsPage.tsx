@@ -1,5 +1,8 @@
+import { useState } from 'react';
+
 import { ROLE } from '@/constants';
 import BookingDetailsPage from '@/features/booking/page/Bookingdetailspage';
+import DisputeModal from '@/features/dispute/components/DisputeModal';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
@@ -10,6 +13,7 @@ import WorkerStartJobModal from '../components/WorkerStartJobModal';
 import { useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 
 export default function WorkerBookingDetailsPage() {
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const { accept, start, reject, finish, extraCharge, enRoute, reached } =
     useWorkerBookingHandler();
   const { extraChargeBId, setExtraChargeBId, handleExtraCharge, isRequestingExtraCharge } =
@@ -30,6 +34,7 @@ export default function WorkerBookingDetailsPage() {
           onReject: id => accept.setAcceptBId(id),
           onEnRoute: id => setEnRouteBId(id),
           onReached: id => setReachedBId(id),
+          onDispute: id => setDisputeBId(id),
           onStart: booking => start.setStartB(booking),
         }}
       />
@@ -89,6 +94,12 @@ export default function WorkerBookingDetailsPage() {
         open={!!startB}
         booking={startB}
         onClose={() => setStartB(null)}
+      />
+      <DisputeModal
+        open={!!disputeBId}
+        onClose={() => setDisputeBId(null)}
+        bookingId={disputeBId}
+        role={ROLE.WORKER}
       />
     </div>
   );

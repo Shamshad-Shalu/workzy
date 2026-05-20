@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
 
 import ProtectedRoute from './ProtectedRoute';
@@ -43,6 +44,7 @@ export default function AdminRoutes() {
 
             <Route path="payments" element={<AdminPaymentsPage />} />
             <Route path="reviews" element={<AdminReviewsPage />} />
+            <Route path="disputes" element={<AdminDisputesPage />} />
 
             <Route path="categories" element={<CategoryManagementPage />} />
             <Route path="bookings" element={<AdminBookingPage />} />

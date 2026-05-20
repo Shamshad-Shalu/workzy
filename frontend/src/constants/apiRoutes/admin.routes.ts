@@ -18,7 +18,8 @@ export const ADMIN_API = {
     STATUS_CHANGE: (id: string) => admin(`/workers/status/${id}`),
   },
   BOOKING: {
-    ROOT: admin('/booking/'),
+    ROOT: admin('/bookings/'),
+    BY_ID: (id: string) => admin(`/bookings/${id}`),
   },
   DASHBOARD: admin('dashboard'),
 } as const;

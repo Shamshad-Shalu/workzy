@@ -1,18 +1,20 @@
+import { useState } from 'react';
+
 import { ROLE } from '@/constants';
 import BookingDetailsPage from '@/features/booking/page/Bookingdetailspage';
+import DisputeModal from '@/features/dispute/components/DisputeModal';
 
 import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
-import DisputeModal from '../components/bookingActions/DisputeModal';
 import ExtraChargeModal from '../components/bookingActions/ExtraChargeModal';
 import { useUserBookingHandler } from '../hooks/useUserBooking';
 
 export default function UserBookingDetailsPage() {
-  const { cancel, approve, payExtra, dispute } = useUserBookingHandler();
+  const [disputeBId, setDisputeBId] = useState<string | null>(null);
+  const { cancel, approve, payExtra } = useUserBookingHandler();
   const { cancelB, handleCancelBooking, setCancelB, isCancelling } = cancel;
   const { approveBId, handleApproveBooking, setApproveBId, isApproving } = approve;
   const { payExtraBId, handlePayExtra, setPayExtraBId, isPayingExtra } = payExtra;
-  const { disputeBId, handleRaiseDispute, setDisputeBId, isRaisingDispute } = dispute;
 
   return (
     <div className="p-4">
@@ -50,8 +52,6 @@ export default function UserBookingDetailsPage() {
         open={!!disputeBId}
         bookingId={disputeBId}
         onClose={() => setDisputeBId(null)}
-        onSubmit={handleRaiseDispute}
-        isSubmitting={isRaisingDispute}
       />
     </div>
   );
