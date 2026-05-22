@@ -2,11 +2,11 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { AUTH, HTTPSTATUS, SLOT } from "@/constants";
+import { AUTH, HTTPSTATUS, Role, ROLE, SLOT } from "@/constants";
 import { ISlotController } from "@/core/interfaces/controllers/ISlotController";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
-import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
+import { CreateQuoteSlotsDTO, CreateSlotDTO, RescheduleSlotDto } from "@/dtos/requests/slot.dto";
 import { GetQuoteAvailableDatesDTO } from "@/types/slot";
 import CustomError from "@/utils/customError";
 
@@ -35,11 +35,8 @@ export class SlotController implements ISlotController {
   });
 
   getAvailableDatesForQuotes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
+    const workerId = this.requireWorkerId(req);
     const { serviceId } = req.params;
-    if (!workerId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
-    }
     const query = this.parseQuery(req);
     const dates = await this._slotService.getAvailableDatesForQuotes({
       ...query,
@@ -88,33 +85,84 @@ export class SlotController implements ISlotController {
   });
 
   reserveSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
-    }
+    const userId = this.requireUserId(req);
     const data = req.body as CreateSlotDTO;
     const { slotId, reservedUntil } = await this._slotService.reserveSlot(userId, data);
     res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotId, reservedUntil });
   });
 
   releaseSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.user?.id;
-    if (!userId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
-    }
+    const userId = this.requireUserId(req);
     const { slotId } = req.params;
     await this._slotService.releaseSlot(slotId, userId);
     res.status(HTTPSTATUS.OK).json({ message: SLOT.RELEASED });
   });
 
   reserveQuoteSlots = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = req.user?.workerId;
-    if (!workerId) {
-      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
-    }
+    const workerId = this.requireWorkerId(req);
     const data = req.body as CreateQuoteSlotsDTO;
 
     const { slotIds, reservedUntil } = await this._slotService.reserveQuoteSlots(workerId, data);
     res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotIds, reservedUntil });
   });
+
+  getRescheduleDates = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const { dates, isFullDay } = await this._slotService.getRescheduleDates(bookingId);
+    res.status(HTTPSTATUS.OK).json({ dates, isFullDay });
+  });
+
+  getRescheduleSlots = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const date = req.query.date as string;
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+      throw new CustomError(SLOT.INVALID_DATE, HTTPSTATUS.BAD_REQUEST);
+    }
+    const slots = await this._slotService.getRescheduleSlots(bookingId, parsedDate);
+    res.status(HTTPSTATUS.OK).json({ slots });
+  });
+
+  getRescheduleSlotOptions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const slots = await this._slotService.getRescheduleSlotOptions(bookingId);
+    res.status(HTTPSTATUS.OK).json({ slots });
+  });
+  reserveRescheduleSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as RescheduleSlotDto;
+    const initiatorId =
+      data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
+    const { slotId, reservedUntil } = await this._slotService.reserveRescheduleSlot({
+      bookingId,
+      initiatorId,
+      data,
+    });
+    res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotId, reservedUntil });
+  });
+  releaseRescheduleSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const bookingId = req.query.bookingId as string;
+    const role = req.query.role as Role;
+    if (!bookingId && !role) {
+      throw new CustomError(SLOT.RELEASE_ERROR);
+    }
+    const { slotId } = req.params;
+    const initiatorId = role === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
+    await this._slotService.releaseRescheduleSlot(slotId, initiatorId, role);
+
+    res.status(HTTPSTATUS.OK).json({ message: SLOT.RELEASED });
+  });
+
+  private requireUserId(req: Request): string {
+    if (!req.user?.id) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    return req.user.id;
+  }
+  private requireWorkerId(req: Request): string {
+    if (!req.user?.workerId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    return req.user.workerId;
+  }
 }

@@ -23,7 +23,7 @@ const SlotSchema: Schema<ISlot> = new Schema(
     travelFromPrev: { type: Number, default: 0 },
     bookingId: { type: Schema.Types.ObjectId, ref: "Booking", default: null },
     quoteId: { type: Schema.Types.ObjectId, ref: "Quote", default: null },
-    reservedBy: { type: Schema.Types.ObjectId, ref: "User", default: null },
+    reservedBy: { type: Schema.Types.ObjectId, default: null },
     reservedUntil: { type: Date, default: null },
   },
   { timestamps: true }

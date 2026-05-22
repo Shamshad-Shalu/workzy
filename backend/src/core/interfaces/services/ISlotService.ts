@@ -1,4 +1,6 @@
-import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
+import { Role } from "@/constants";
+import { CreateQuoteSlotsDTO, CreateSlotDTO, RescheduleSlotDto } from "@/dtos/requests/slot.dto";
+import { SlotOptionResponseDto } from "@/dtos/responses/slot.dto";
 import { IBookingSlot } from "@/types/booking/booking.entity";
 import {
   AvailableSlot,
@@ -22,4 +24,19 @@ export interface ISlotService {
   releaseSlot(slotId: string, userId: string): Promise<boolean>;
   releaseQuoteSlots(slotIds: string[]): Promise<boolean>;
   cleanupExpired(): Promise<number>;
+  getRescheduleDates(
+    bookingId: string
+  ): Promise<{ dates: Record<string, boolean>; isFullDay: boolean }>;
+  getRescheduleSlots(bookingId: string, date: Date): Promise<AvailableSlot[]>;
+  reserveRescheduleSlot({
+    bookingId,
+    data,
+    initiatorId,
+  }: {
+    bookingId: string;
+    initiatorId: string;
+    data: RescheduleSlotDto;
+  }): Promise<{ slotId: string; reservedUntil: Date }>;
+  getRescheduleSlotOptions(bookingId: string): Promise<SlotOptionResponseDto[]>;
+  releaseRescheduleSlot(slotId: string, initiatorId: string, role: Role): Promise<void>;
 }

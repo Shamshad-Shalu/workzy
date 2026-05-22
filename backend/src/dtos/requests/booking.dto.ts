@@ -3,6 +3,7 @@ import {
   ArrayMaxSize,
   ArrayMinSize,
   IsArray,
+  IsEnum,
   IsIn,
   IsInt,
   IsMongoId,
@@ -11,11 +12,14 @@ import {
   IsString,
   IsUrl,
   Length,
+  Matches,
   MaxLength,
   Min,
   MinLength,
   ValidateNested,
 } from "class-validator";
+
+import { DESCRIPTION_REGEX, Role, ROLE } from "@/constants";
 
 import { LocationDto } from "./profile.dto";
 
@@ -132,4 +136,34 @@ export class ExtraChargeDTO {
   @IsOptional()
   @IsString()
   evidenceUrl?: string;
+}
+
+export class RequestRescheduleDto {
+  @IsMongoId()
+  oldSlotId!: string;
+
+  @IsMongoId()
+  newSlotId!: string;
+
+  @IsString()
+  @MinLength(10, { message: "Please provide a reason (min 5 chars)" })
+  @MaxLength(500)
+  @Matches(DESCRIPTION_REGEX, { message: "Invalid description format." })
+  reason!: string;
+
+  @IsEnum(ROLE)
+  requestedBy!: Role;
+}
+
+export class RespondRescheduleDto {
+  @IsIn(["accepted", "rejected"])
+  status!: "accepted" | "rejected";
+
+  @IsEnum(ROLE)
+  role!: Role;
+}
+
+export class CancelRescheduleDto {
+  @IsEnum(ROLE)
+  requestedBy!: Role;
 }

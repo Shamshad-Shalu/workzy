@@ -170,4 +170,24 @@ export const NOTIFICATION_TEMPLATES = {
     heading: "Account Unblocked",
     message: "Your account has been **unblocked** successfully. Welcome back!",
   }),
+  RESCHEDULE_REQUESTED: (bookingId: string, requestedBy: string, dateStr: string) => ({
+    type: "reschedule_requested",
+    heading: "Reschedule Requested",
+    message: `A reschedule request has been submitted for booking **${bookingId}** by the **${requestedBy}** for **${dateStr}**.`,
+  }),
+  RESCHEDULE_ACCEPTED: (bookingId: string, responderName: string, dateStr: string) => ({
+    type: "reschedule_accepted",
+    heading: "Reschedule Accepted",
+    message: `Your reschedule request for booking **${bookingId}** has been accepted by **${responderName}**. New date: **${dateStr}**.`,
+  }),
+  RESCHEDULE_REJECTED: (bookingId: string, responderName: string) => ({
+    type: "reschedule_rejected",
+    heading: "Reschedule Rejected",
+    message: `Your reschedule request for booking **${bookingId}** has been rejected by **${responderName}**.`,
+  }),
+  RESCHEDULE_CANCELLED: (bookingId: string) => ({
+    type: "reschedule_cancelled",
+    heading: "Reschedule Request Cancelled",
+    message: `The pending reschedule request for booking **${bookingId}** has been cancelled.`,
+  }),
 };

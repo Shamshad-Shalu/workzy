@@ -1,7 +1,9 @@
 import { Type } from "class-transformer";
 import {
   IsArray,
+  IsBoolean,
   IsDate,
+  IsEnum,
   IsInt,
   IsMongoId,
   IsNumber,
@@ -9,6 +11,8 @@ import {
   IsString,
   Min,
 } from "class-validator";
+
+import { ROLE, Role } from "@/constants";
 
 export class CreateSlotDTO {
   @IsMongoId()
@@ -53,4 +57,18 @@ export class CreateQuoteSlotsDTO {
 
   @IsNumber()
   lng!: number;
+}
+export class RescheduleSlotDto {
+  @IsEnum(ROLE)
+  requestedBy!: Role;
+
+  @Type(() => Date)
+  @IsDate({ message: "date must be a valid date" })
+  date!: Date;
+
+  @IsBoolean()
+  isFullDay!: boolean;
+
+  @IsString()
+  startTime?: string;
 }

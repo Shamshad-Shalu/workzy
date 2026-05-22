@@ -9,4 +9,5 @@ export const SLOT = {
   NOT_AVAILABLE: "This slot is no longer available",
   UNAUTHORIZED: "Unauthorized user for this slot",
   WORKER_NEED: "workerId and serviceId are required",
+  EXPIRED: "This slot is no longer available. Please select another slot.",
 };

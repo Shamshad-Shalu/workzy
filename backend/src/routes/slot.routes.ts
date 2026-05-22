@@ -11,12 +11,18 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const controller = container.get<ISlotController>(TYPES.SlotController);
 
+router.get("/reschedule-dates/:bookingId", controller.getRescheduleDates);
+router.get("/reschedule-slots/:bookingId", controller.getRescheduleSlots);
+router.get("/reschedule-options/:bookingId", controller.getRescheduleSlotOptions);
+
 router.use(authenticate([ROLE.USER, ROLE.WORKER]));
 
 router.get("/", controller.getAvailableSlots);
 router.get("/available-dates", controller.getAvailableDates);
 router.get("/quotes/available-dates/:serviceId", controller.getAvailableDatesForQuotes);
 router.post("/reserve", validateDto(CreateSlotDTO), controller.reserveSlot);
+router.post("/reserve-reschedule/:bookingId", controller.reserveRescheduleSlot);
+router.delete("/reschedule-slots/:slotId", controller.releaseRescheduleSlot);
 router.delete("/:slotId", controller.releaseSlot);
 
 export default router;

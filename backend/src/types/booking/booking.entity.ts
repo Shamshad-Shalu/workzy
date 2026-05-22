@@ -60,6 +60,18 @@ export interface IEvidence {
   uploadedAt?: Date;
 }
 
+export interface IRescheduleRequest {
+  requestedBy: "user" | "worker";
+  oldSlotId: Types.ObjectId;
+  newSlotId: Types.ObjectId;
+  newDate: Date;
+  newStartTime: string;
+  newEndTime: string;
+  status: "pending" | "accepted" | "rejected" | "expired";
+  reason: string;
+  requestedAt: Date;
+}
+
 export interface IBooking extends Document<string> {
   bookingId: string;
   userId: Types.ObjectId;
@@ -95,6 +107,7 @@ export interface IBooking extends Document<string> {
   paymentStatus: BookingPaymentStatus;
   status: BookingStatus;
   statusHistory: IBookingStatusHistory[];
+  rescheduleRequest?: IRescheduleRequest;
 
   reviewId?: Types.ObjectId;
   hasVisibleReview: boolean;

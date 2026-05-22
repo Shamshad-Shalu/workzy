@@ -1,4 +1,11 @@
-import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
+import {
+  CancelRescheduleDto,
+  CompleteBookingDTO,
+  CreatebookingDTO,
+  ExtraChargeDTO,
+  RequestRescheduleDto,
+  RespondRescheduleDto,
+} from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
@@ -19,4 +26,20 @@ export interface IBookingService {
   approveBooking(bookingId: string, userId: string): Promise<void>;
   payExtraCharge(bookingId: string, userId: string): Promise<{ url: string }>;
   rejectExtraCharge(bookingId: string, userId: string): Promise<void>;
+
+  requestReschedule(
+    bookingId: string,
+    initiatorId: string,
+    data: RequestRescheduleDto
+  ): Promise<void>;
+  respondReschedule(
+    bookingId: string,
+    responderId: string,
+    data: RespondRescheduleDto
+  ): Promise<string>;
+  cancelReschedule(
+    bookingId: string,
+    initiatorId: string,
+    data: CancelRescheduleDto
+  ): Promise<void>;
 }

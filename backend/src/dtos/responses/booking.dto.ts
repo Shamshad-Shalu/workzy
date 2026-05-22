@@ -6,6 +6,7 @@ import {
   IBookingStatusHistory,
   IEvidence,
   IExtraCharge,
+  IRescheduleRequest,
 } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
 import { resolveS3Image } from "@/utils/s3.utils";
@@ -53,7 +54,7 @@ export class BookingListItemDTO {
     amount: number;
     status: ExtraChargeStatus;
   };
-
+  isRescheduleRequested!: boolean;
   createdAt!: Date;
   completedAt!: Date | null;
 
@@ -98,6 +99,7 @@ export class BookingListItemDTO {
     dto.duration = entity.duration;
     dto.itemCount = entity.itemCount;
 
+    dto.isRescheduleRequested = entity.rescheduleRequest?.status === "pending";
     dto.totalDays = dates.length;
     dto.status = entity.status;
     dto.paymentStatus = entity.paymentStatus;
@@ -158,7 +160,6 @@ export class BookingResponseDTO {
   startTime!: string;
   endTime!: string;
   address!: IBookingLocation;
-
   rate!: number;
   subtotal!: number;
   discountPercent!: number;
@@ -175,6 +176,10 @@ export class BookingResponseDTO {
   paymentStatus!: BookingPaymentStatus;
   statusHistory!: IBookingStatusHistory[];
   hasVisibleReview!: boolean;
+  rescheduleRequest?: Omit<IRescheduleRequest, "oldSlotId" | "newSlotId"> & {
+    oldSlotId: string;
+    newSlotId: string;
+  };
   reviewId?: string;
   userNote?: string;
   createdAt!: Date;
@@ -237,6 +242,13 @@ export class BookingResponseDTO {
     dto.evidence = entity.evidence;
     dto.paymentStatus = entity.paymentStatus;
     dto.status = entity.status;
+    dto.rescheduleRequest = entity.rescheduleRequest
+      ? {
+          ...entity.rescheduleRequest,
+          oldSlotId: entity.rescheduleRequest?.oldSlotId?.toString() || "",
+          newSlotId: entity.rescheduleRequest?.newSlotId?.toString() || "",
+        }
+      : undefined;
     dto.statusHistory = entity.statusHistory;
     dto.hasVisibleReview = entity.hasVisibleReview;
     dto.reviewId = entity.reviewId ? entity.reviewId.toString() : undefined;

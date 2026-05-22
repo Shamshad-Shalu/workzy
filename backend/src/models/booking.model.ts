@@ -142,6 +142,26 @@ const BookingSnapshotSchema = new Schema<IBookingSnapshot>(
   { _id: false }
 );
 
+const RescheduleRequestSchema = new Schema(
+  {
+    requestedBy: { type: String, enum: ["user", "worker"], required: true },
+    oldSlotId: { type: Schema.Types.ObjectId, ref: "Slot", required: true },
+    newSlotId: { type: Schema.Types.ObjectId, ref: "Slot", required: true },
+    newDate: { type: Date, required: true },
+    newStartTime: { type: String, required: true },
+    newEndTime: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["pending", "accepted", "rejected", "expired"],
+      default: "pending",
+      required: true,
+    },
+    reason: { type: String, required: true },
+    requestedAt: { type: Date, default: Date.now, required: true },
+  },
+  { _id: false }
+);
+
 const BookingSchema: Schema<IBooking> = new Schema(
   {
     bookingId: {
@@ -286,6 +306,7 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: String,
       trim: true,
     },
+    rescheduleRequest: { type: RescheduleRequestSchema, default: null },
     completedAt: { type: Date },
   },
   { timestamps: true }

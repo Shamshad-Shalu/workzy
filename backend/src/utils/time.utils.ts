@@ -22,3 +22,10 @@ export function getMonthRange(date?: Date) {
     end: base.endOf("month").toDate(),
   };
 }
+
+export function formatTime12(time: string): string {
+  return dayjs(`2000-01-01 ${time}`).format("h:mm A");
+}
+
+export const formatTimeRange = (start: string, end: string) =>
+  `${formatTime12(start)} → ${formatTime12(end)}`;

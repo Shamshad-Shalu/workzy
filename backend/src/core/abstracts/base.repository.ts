@@ -46,6 +46,10 @@ export abstract class BaseRepository<T extends Document> implements IBaseReposit
     return this.model.deleteOne(filter);
   }
 
+  async deleteMany(filter: FilterQuery<T>): Promise<DeleteResult> {
+    return this.model.deleteMany(filter);
+  }
+
   async find(filter: FilterQuery<T>): Promise<T[]> {
     return await this.model.find(filter);
   }

@@ -5,7 +5,7 @@ import { SLOT_STATUS } from "@/constants/booking";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import SlotModel from "@/models/slot.model";
-import { ISlot } from "@/types/slot";
+import { ISlot, SlotOption } from "@/types/slot";
 
 @injectable()
 export class SlotRepository extends BaseRepository<ISlot> implements ISlotRepository {
@@ -58,5 +58,16 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
       status: { $in: [SLOT_STATUS.BOOKED, SLOT_STATUS.RESERVED] },
     });
     return count > 0;
+  }
+
+  async getRescheduleSlotOptions(bookingId: string): Promise<SlotOption[]> {
+    return await this.model
+      .find({
+        bookingId: new Types.ObjectId(bookingId),
+        status: SLOT_STATUS.BOOKED,
+      })
+      .select("_id date startTime endTime isFullDay duration")
+      .lean()
+      .exec();
   }
 }

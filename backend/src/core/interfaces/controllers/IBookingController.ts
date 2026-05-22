@@ -19,4 +19,8 @@ export interface IBookingController {
   startJob: RequestHandler;
   completeJob: RequestHandler;
   requestExtraCharge: RequestHandler;
+
+  requestReschedule: RequestHandler;
+  respondReschedule: RequestHandler;
+  cancelReschedule: RequestHandler;
 }

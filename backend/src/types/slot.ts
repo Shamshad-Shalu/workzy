@@ -22,6 +22,11 @@ export interface ISlot extends Document<string> {
   createdAt?: Date;
 }
 
+export type SlotOption = Pick<
+  ISlot,
+  "_id" | "date" | "startTime" | "endTime" | "isFullDay" | "duration" | "status"
+>;
+
 export interface TimeSlot {
   startTime: string;
   endTime: string;

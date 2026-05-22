@@ -11,6 +11,9 @@ import {
   ExtraChargeDTO,
   RejectBookingDTO,
   VerifyBookingOtpDTO,
+  RequestRescheduleDto,
+  RespondRescheduleDto,
+  CancelRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
@@ -64,6 +67,25 @@ router.patch(
   authenticate([ROLE.WORKER]),
   validateDto(ExtraChargeDTO),
   controller.requestExtraCharge
+);
+
+// Reschedule Routes
+router.patch(
+  "/:bookingId/reschedule",
+  validateDto(RequestRescheduleDto),
+  controller.requestReschedule
+);
+
+router.patch(
+  "/:bookingId/reschedule/respond",
+  validateDto(RespondRescheduleDto),
+  controller.respondReschedule
+);
+
+router.delete(
+  "/:bookingId/reschedule",
+  validateDto(CancelRescheduleDto),
+  controller.cancelReschedule
 );
 
 export default router;

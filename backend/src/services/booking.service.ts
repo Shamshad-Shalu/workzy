@@ -28,6 +28,7 @@ import {
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
+import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
@@ -37,11 +38,26 @@ import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
-import { CompleteBookingDTO, CreatebookingDTO, ExtraChargeDTO } from "@/dtos/requests/booking.dto";
+import {
+  CancelRescheduleDto,
+  CompleteBookingDTO,
+  CreatebookingDTO,
+  ExtraChargeDTO,
+  RequestRescheduleDto,
+  RespondRescheduleDto,
+} from "@/dtos/requests/booking.dto";
 import { BookingListItemDTO, BookingResponseDTO } from "@/dtos/responses/booking.dto";
-import { BookingContext, IBooking, IEvidence, IExtraCharge } from "@/types/booking/booking.entity";
+import {
+  BookingContext,
+  IBooking,
+  IBookingSlot,
+  IEvidence,
+  IExtraCharge,
+} from "@/types/booking/booking.entity";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { BulkDiscountType } from "@/types/service/service.entity";
@@ -49,6 +65,7 @@ import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 import { calculateDistanceKm } from "@/utils/geo";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
+import { formatTimeRange } from "@/utils/time.utils";
 
 @injectable()
 export class BookingService implements IBookingService {
@@ -56,6 +73,7 @@ export class BookingService implements IBookingService {
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
+    @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
@@ -63,7 +81,9 @@ export class BookingService implements IBookingService {
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.NotificationService) private _notificationService: INotificationService
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+    @inject(TYPES.SlotService) private _slotService: ISlotService,
+    @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
@@ -197,7 +217,7 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
       },
     });
-    await this._slotRepository.findOneAndDelete({
+    await this._slotRepository.deleteMany({
       bookingId: new Types.ObjectId(bookingId),
       reservedBy: new Types.ObjectId(userId),
       status: SLOT_STATUS.BOOKED,
@@ -266,7 +286,7 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
       },
     });
-    await this._slotRepository.findOneAndDelete({
+    await this._slotRepository.deleteMany({
       bookingId: new Types.ObjectId(bookingId),
       reservedBy: new Types.ObjectId(booking.userId),
       status: SLOT_STATUS.BOOKED,
@@ -401,7 +421,7 @@ export class BookingService implements IBookingService {
       throw new CustomError(BOOKING.CANNOT_COMPLETE, HTTPSTATUS.BAD_REQUEST);
     }
     await Promise.all([
-      this._slotRepository.findOneAndDelete({
+      this._slotRepository.deleteMany({
         bookingId: new Types.ObjectId(bookingId),
         reservedBy: new Types.ObjectId(booking.userId),
         status: SLOT_STATUS.BOOKED,
@@ -673,5 +693,251 @@ export class BookingService implements IBookingService {
       distanceKm,
       travelCost,
     };
+  }
+
+  async requestReschedule(
+    bookingId: string,
+    initiatorId: string,
+    data: RequestRescheduleDto
+  ): Promise<void> {
+    const { newSlotId, oldSlotId, reason, requestedBy } = data;
+    const booking = await this.getBookingOrThrow(bookingId);
+    const { userId, workerId, serviceId, rescheduleRequest, status } = booking;
+
+    if (
+      (requestedBy === ROLE.USER && initiatorId !== userId.toString()) ||
+      (requestedBy === ROLE.WORKER && initiatorId !== workerId.toString())
+    ) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+
+    const isPendingStage = BOOKING_STATUS.PENDING === status || BOOKING_STATUS.CONFIRMED === status;
+    const workerAllowStages =
+      BOOKING_STATUS.EN_ROUTE === status ||
+      BOOKING_STATUS.REACHED === status ||
+      BOOKING_STATUS.IN_PROGRESS === status;
+
+    if (rescheduleRequest && rescheduleRequest.status === "pending") {
+      throw new CustomError(BOOKING.RESCHEDULE_ALREADY_PENDING, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    if (
+      (requestedBy === ROLE.USER && !isPendingStage) ||
+      (requestedBy === ROLE.WORKER && !isPendingStage && !workerAllowStages)
+    ) {
+      throw new CustomError(
+        BOOKING.RESCHEDULE_NOT_ALLOWED(status, requestedBy),
+        HTTPSTATUS.BAD_REQUEST
+      );
+    }
+    const [oldSlot, newSlot] = await Promise.all([
+      this._slotRepository.findById(oldSlotId),
+      this._slotRepository.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(newSlotId),
+          workerId: new Types.ObjectId(workerId),
+          serviceId: new Types.ObjectId(serviceId),
+          status: SLOT_STATUS.RESERVED,
+        },
+        {
+          bookingId: new Types.ObjectId(bookingId),
+          status: SLOT_STATUS.BOOKED,
+        }
+      ),
+    ]);
+
+    if (!oldSlot || oldSlot.bookingId?.toString() !== bookingId) {
+      throw new CustomError(BOOKING.RESCHEDULE_OLD_SLOT_MISMATCH, HTTPSTATUS.BAD_REQUEST);
+    }
+    // if (dayjs(oldSlot.date).isBefore(dayjs().startOf("day"))) {
+    //    throw new CustomError(BOOKING.RESCHEDULE_SLOT_PASSED, HTTPSTATUS.BAD_REQUEST);
+    // }
+
+    if (!newSlot) {
+      throw new CustomError(SLOT.EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const newDateStr = `${dayjs(newSlot.date).format("YYYY-MM-DD")} - ${newSlot.isFullDay ? "" : formatTimeRange(newSlot.startTime, newSlot.endTime)}`;
+    const oldDateStr = `${dayjs(oldSlot.date).format("YYYY-MM-DD")} - ${oldSlot.isFullDay ? "" : formatTimeRange(oldSlot.startTime, oldSlot.endTime)}`;
+    const responderId = requestedBy === ROLE.USER ? workerId : userId;
+
+    const updated = await this._bookingRepository.update(bookingId, {
+      rescheduleRequest: {
+        requestedBy,
+        oldSlotId: new Types.ObjectId(oldSlotId),
+        newSlotId: new Types.ObjectId(newSlotId),
+        newDate: newSlot.date,
+        newStartTime: newSlot.startTime,
+        newEndTime: newSlot.endTime,
+        status: "pending",
+        reason,
+        requestedAt: new Date(),
+      },
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          booking.status,
+          requestedBy,
+          BOOKING_STATUS_MESSAGES.RESCHEDULED(requestedBy, oldDateStr, newDateStr)
+        ),
+      },
+    });
+
+    if (!updated) {
+      throw new CustomError(BOOKING.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    void this._notificationService.createNotification(
+      responderId.toString(),
+      NOTIFICATION_TEMPLATES.RESCHEDULE_REQUESTED(booking.bookingId, requestedBy, newDateStr)
+    );
+  }
+
+  async respondReschedule(
+    bookingId: string,
+    responderId: string,
+    data: RespondRescheduleDto
+  ): Promise<string> {
+    const { role, status } = data;
+    const booking = await this.getBookingOrThrow(bookingId);
+    const { userId, workerId, snapshot, rescheduleRequest, dates } = booking;
+
+    if (
+      (role === ROLE.USER && responderId !== userId.toString()) ||
+      (role === ROLE.WORKER && responderId !== workerId.toString())
+    ) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+
+    if (!rescheduleRequest || rescheduleRequest.status !== "pending") {
+      throw new CustomError(BOOKING.RESCHEDULE_NO_PENDING, HTTPSTATUS.BAD_REQUEST);
+    }
+    const { requestedBy, newSlotId, oldSlotId, newDate, newStartTime, newEndTime } =
+      rescheduleRequest;
+    if (requestedBy === role) {
+      throw new CustomError(BOOKING.RESCHEDULE_OWN_REQUEST, HTTPSTATUS.BAD_REQUEST);
+    }
+    const initiatorId = requestedBy === ROLE.WORKER ? workerId : userId;
+    const otherPartyName = requestedBy === ROLE.USER ? snapshot.worker.name : snapshot.user.name;
+
+    if (status === "accepted") {
+      const [oldSlot, newSlot] = await Promise.all([
+        this._slotRepository.findById(oldSlotId),
+        this._slotRepository.findById(newSlotId),
+      ]);
+
+      if (!newSlot) {
+        throw new CustomError("coun't find slot.connect the worker and cancel and try again");
+      }
+      if (!oldSlot) {
+        throw new CustomError("count find the slot");
+      }
+
+      const newDateStr = `${dayjs(newDate).format("YYYY-MM-DD")} - ${newSlot?.isFullDay ? "Full day" : formatTimeRange(newStartTime, newEndTime)}`;
+      const isSingleSlot = dates.length === 1;
+      const newStatus = isSingleSlot
+        ? booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD &&
+          booking.status !== BOOKING_STATUS.PENDING
+          ? BOOKING_STATUS.CONFIRMED
+          : BOOKING_STATUS.PENDING
+        : booking.status;
+
+      const newBookingSlot: IBookingSlot = {
+        date: newSlot.date,
+        startTime: newSlot.startTime,
+        endTime: newSlot.endTime,
+      };
+      await this._bookingRepository.update(bookingId, {
+        $pull: { dates: { date: oldSlot.date } },
+      });
+
+      await Promise.all([
+        this._bookingRepository.update(bookingId, {
+          $push: {
+            dates: newBookingSlot,
+            statusHistory: this.createStatusHistoryEntry(
+              booking.status,
+              role,
+              BOOKING_STATUS_MESSAGES.RESCHEDULE_ACCEPTED(otherPartyName, newDateStr)
+            ),
+          },
+          status: newStatus,
+          $unset: { rescheduleRequest: 1 },
+        }),
+        this._slotRepository.delete(oldSlotId.toString()),
+        booking.quoteId
+          ? this._quoteRepository.update(booking.quoteId, {
+              $pull: { slotIds: new Types.ObjectId(oldSlotId), dates: { date: oldSlot.date } },
+              $push: { slotIds: new Types.ObjectId(newSlotId), dates: newBookingSlot },
+            })
+          : Promise.resolve(),
+      ]);
+
+      void this._notificationService.createNotification(
+        initiatorId.toString(),
+        NOTIFICATION_TEMPLATES.RESCHEDULE_ACCEPTED(booking.bookingId, otherPartyName, newDateStr)
+      );
+    } else {
+      await Promise.all([
+        this._slotRepository.delete(newSlotId.toString()),
+        this._bookingRepository.update(bookingId, {
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              booking.status,
+              role,
+              BOOKING_STATUS_MESSAGES.RESCHEDULE_REJECTED(otherPartyName)
+            ),
+          },
+          $unset: { rescheduleRequest: 1 },
+        }),
+      ]);
+
+      void this._notificationService.createNotification(
+        initiatorId.toString(),
+        NOTIFICATION_TEMPLATES.RESCHEDULE_REJECTED(booking.bookingId, otherPartyName)
+      );
+    }
+    return BOOKING.RESCHEDULE_RESPONSE_SUCCESS;
+  }
+
+  async cancelReschedule(
+    bookingId: string,
+    initiatorId: string,
+    data: CancelRescheduleDto
+  ): Promise<void> {
+    const { requestedBy } = data;
+    const booking = await this.getBookingOrThrow(bookingId);
+    const { userId, workerId, rescheduleRequest } = booking;
+
+    if (
+      (requestedBy === ROLE.USER && initiatorId !== userId.toString()) ||
+      (requestedBy === ROLE.WORKER && initiatorId !== workerId.toString())
+    ) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+
+    if (!rescheduleRequest || rescheduleRequest.status !== "pending") {
+      throw new CustomError(BOOKING.RESCHEDULE_CANCEL_NO_PENDING, HTTPSTATUS.BAD_REQUEST);
+    }
+    const responderId = requestedBy === ROLE.USER ? workerId : userId;
+
+    const [updated, newSLot] = await Promise.all([
+      this._bookingRepository.update(bookingId, {
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            booking.status,
+            requestedBy,
+            "Reschedule request cancelled by requester"
+          ),
+        },
+        $unset: { rescheduleRequest: 1 },
+      }),
+      this._slotRepository.delete(rescheduleRequest.newSlotId.toString()),
+    ]);
+    if (!updated) {
+      throw new CustomError(BOOKING.RESCHEDULE_CANCEL_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+    void this._notificationService.createNotification(
+      responderId.toString(),
+      NOTIFICATION_TEMPLATES.RESCHEDULE_CANCELLED(booking.bookingId)
+    );
   }
 }

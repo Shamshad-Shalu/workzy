@@ -2,8 +2,9 @@ import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { CATEGORY, HTTPSTATUS, PRICING_MODE, SERVICE, SLOT, WORKER } from "@/constants";
+import { CATEGORY, HTTPSTATUS, PRICING_MODE, Role, ROLE, SERVICE, SLOT, WORKER } from "@/constants";
 import { SLOT_STATUS } from "@/constants/booking";
+import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
@@ -12,7 +13,8 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
-import { CreateQuoteSlotsDTO, CreateSlotDTO } from "@/dtos/requests/slot.dto";
+import { CreateQuoteSlotsDTO, CreateSlotDTO, RescheduleSlotDto } from "@/dtos/requests/slot.dto";
+import { SlotOptionResponseDto } from "@/dtos/responses/slot.dto";
 import { IBookingSlot } from "@/types/booking/booking.entity";
 import { ICategory } from "@/types/category";
 import { IService } from "@/types/service/service.entity";
@@ -26,6 +28,7 @@ import {
 import { Day, IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { calculateDistanceKm } from "@/utils/geo";
+import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
@@ -38,6 +41,7 @@ export class SlotService implements ISlotService {
     @inject(TYPES.ServiceRepository) private _serviceRepository: IServiceRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
+    @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.LeaveRepository) private _leaveRepository: ILeaveRepository,
     @inject(TYPES.RedisService) private _redisService: IRedisService
   ) {}
@@ -268,7 +272,7 @@ export class SlotService implements ISlotService {
 
     const lockKey = `slot:${workerId}:${dayjs(date).format("YYYY-MM-DD")}:${startTime}`;
     const existing = await this._redisService.get(lockKey);
-    if (existing) throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
+    // if (existing) throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
 
     const [{ service, category }, availableSlots] = await Promise.all([
       this.getSlotContext(workerId, serviceId),
@@ -302,7 +306,7 @@ export class SlotService implements ISlotService {
       reservedBy: new Types.ObjectId(userId),
       reservedUntil,
     });
-    await this._redisService.setWithTTL(lockKey, workerId, RESERVATION_TTL_SECONDS);
+    await this._redisService.setWithTTL(lockKey, workerId, 60);
     return {
       slotId: newSlot._id.toString(),
       reservedUntil,
@@ -354,7 +358,7 @@ export class SlotService implements ISlotService {
           reservedUntil,
         });
 
-        await this._redisService.setWithTTL(lockKey, workerId, QUOTE_TTL_SECONDS);
+        await this._redisService.setWithTTL(lockKey, workerId, 60);
         acquiredLocks.push(lockKey);
         createdIds.push(newSlot._id.toString());
         createdSlots.push({
@@ -544,5 +548,113 @@ export class SlotService implements ISlotService {
         lng: s.location.coordinates[0],
       },
     }));
+  }
+
+  async getRescheduleDates(
+    bookingId: string
+  ): Promise<{ dates: Record<string, boolean>; isFullDay: boolean }> {
+    const booking = await getEntityOrThrow(this._bookingRepository, bookingId);
+    const { serviceId, workerId, address, itemCount, dates } = booking;
+    const isFullDay = dates.length > 1;
+    let result: Record<string, boolean> = {};
+    if (isFullDay) {
+      result = await this.getAvailableDatesForQuotes({
+        serviceId: serviceId.toString(),
+        workerId: workerId.toString(),
+        itemCount: itemCount,
+      });
+    } else {
+      result = await this.getAvailableDates({
+        serviceId: serviceId.toString(),
+        workerId: workerId.toString(),
+        itemCount: itemCount,
+        lat: address.location.coordinates[1],
+        lng: address.location.coordinates[0],
+      });
+    }
+    return { dates: result, isFullDay };
+  }
+
+  async getRescheduleSlots(bookingId: string, date: Date): Promise<AvailableSlot[]> {
+    const booking = await getEntityOrThrow(this._bookingRepository, bookingId);
+    const { serviceId, workerId, address, itemCount } = booking;
+    return await this.getAvailableSlots({
+      serviceId: serviceId.toString(),
+      workerId: workerId.toString(),
+      itemCount: itemCount,
+      lat: address.location.coordinates[1],
+      lng: address.location.coordinates[0],
+      date,
+    });
+  }
+
+  async getRescheduleSlotOptions(bookingId: string): Promise<SlotOptionResponseDto[]> {
+    const slots = await this._slotRepository.getRescheduleSlotOptions(bookingId);
+    return SlotOptionResponseDto.fromEntities(slots);
+  }
+
+  async reserveRescheduleSlot({
+    bookingId,
+    data,
+    initiatorId,
+  }: {
+    bookingId: string;
+    initiatorId: string;
+    data: RescheduleSlotDto;
+  }): Promise<{ slotId: string; reservedUntil: Date }> {
+    const { date, isFullDay, requestedBy, startTime } = data;
+    const booking = await getEntityOrThrow(this._bookingRepository, bookingId);
+    const { serviceId, workerId, userId, address, itemCount, dates } = booking;
+
+    if ((!isFullDay && !startTime) || (dates.length > 1 && !isFullDay)) {
+      throw new CustomError("");
+    }
+    if (
+      (requestedBy == ROLE.WORKER && initiatorId !== workerId.toString()) ||
+      (requestedBy == ROLE.USER && initiatorId !== userId.toString())
+    ) {
+      throw new CustomError("");
+    }
+    let slotId: string;
+    let reservedUntil: Date;
+
+    if (isFullDay) {
+      const res = await this.reserveQuoteSlots(initiatorId, {
+        bookingId,
+        dates: [date],
+        lat: address.location.coordinates[1],
+        lng: address.location.coordinates[0],
+        serviceId: serviceId.toString(),
+      });
+      reservedUntil = res.reservedUntil;
+      slotId = res.slotIds[0];
+    } else {
+      if (!startTime) {
+        throw new CustomError("");
+      }
+      const res = await this.reserveSlot(initiatorId, {
+        date,
+        startTime,
+        workerId: workerId.toString(),
+        itemCount,
+        lat: address.location.coordinates[1],
+        lng: address.location.coordinates[0],
+        serviceId: serviceId.toString(),
+      });
+      slotId = res.slotId;
+      reservedUntil = res.reservedUntil;
+    }
+    return {
+      slotId,
+      reservedUntil,
+    };
+  }
+
+  async releaseRescheduleSlot(slotId: string, initiatorId: string, role: Role): Promise<void> {
+    if (role === ROLE.USER) {
+      await this.releaseSlot(slotId, initiatorId);
+    } else if (role === ROLE.WORKER) {
+      await this.releaseQuoteSlots([slotId]);
+    }
   }
 }

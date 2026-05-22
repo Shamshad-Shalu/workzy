@@ -1,3 +1,5 @@
+import { Role } from "../roles";
+
 export const BOOKING_STATUS_MESSAGES = {
   PENDING: "Booking confirmed, waiting for worker to accept",
   CONFIRMED: "Worker accepted your booking",
@@ -10,6 +12,11 @@ export const BOOKING_STATUS_MESSAGES = {
   REJECTED: "Booking rejected by worker",
   DISPUTED: "Dispute raised",
   EXPIRED: "Booking expired — worker did not respond before the scheduled time.",
+  RESCHEDULED: (role: Role, oldDate: string, newDate: string) =>
+    `${role} requested a reschedule from ${oldDate} to ${newDate}.`,
+  RESCHEDULE_ACCEPTED: (name: string, date: string) =>
+    `Reschedule request accepted by ${name}. Moved slot to ${date}`,
+  RESCHEDULE_REJECTED: (name: string) => `Reschedule request rejected by ${name}`,
 };
 
 export const BOOKING = {
@@ -31,6 +38,24 @@ export const BOOKING = {
   CANNOT_REJECT: (s: string) => `Cannot reject booking with status: ${s}`,
   CANNOT_START: (s: string) => `Cannot start job from status: ${s}`,
   CANNOT_APPROVE: (s: string) => `Cannot approve booking with status: ${s}`,
+  UPDATE_FAILED: "Failed to process booking.",
+  // Reschedule
+  RESCHEDULE_ALREADY_PENDING: "A reschedule request is already pending for this booking.",
+  RESCHEDULE_NOT_ALLOWED: (status: string, requestedBy: string) =>
+    `Rescheduling is not allowed when the booking is "${status}". ${
+      requestedBy === "user"
+        ? "You can only reschedule pending or confirmed bookings."
+        : "Workers can reschedule pending, confirmed, en-route, reached, or in-progress bookings."
+    }`,
+  RESCHEDULE_OLD_SLOT_MISMATCH: "The specified old slot does not belong to this booking.",
+  RESCHEDULE_SLOT_PASSED: "Cannot reschedule a slot that has already passed.",
+  RESCHEDULE_NO_PENDING: "No pending reschedule request found.",
+  RESCHEDULE_OWN_REQUEST: "You cannot respond to your own reschedule request.",
+  RESCHEDULE_CANCEL_NO_PENDING: "No pending reschedule request found to cancel.",
+  RESCHEDULE_CANCEL_FAILED: "Error while cancelling reschedule.",
+  RESCHEDULE_RESPONSE_SUCCESS: "Reschedule response handled successfully",
+  RESCHEDULE_REQUESTED_SUCCESS: "Reschedule request submitted successfully.",
+  RESCHEDULE_CANCELLED_SUCCESS: "Reschedule request cancelled successfully.",
 };
 
 // export const BOOKING = {

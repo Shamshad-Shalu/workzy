@@ -3,7 +3,14 @@ import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 import { isValidObjectId } from "mongoose";
 
-import { AUTH, BOOKING_STATUS_MESSAGES, BookingPaymentStatus, HTTPSTATUS } from "@/constants";
+import {
+  AUTH,
+  BOOKING,
+  BOOKING_STATUS_MESSAGES,
+  BookingPaymentStatus,
+  HTTPSTATUS,
+  ROLE,
+} from "@/constants";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { TYPES } from "@/di/types";
@@ -14,6 +21,9 @@ import {
   ExtraChargeDTO,
   RejectBookingDTO,
   VerifyBookingOtpDTO,
+  RequestRescheduleDto,
+  RespondRescheduleDto,
+  CancelRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { BookingListQuery, ListingStatus } from "@/types/booking/booking.query";
 import CustomError from "@/utils/customError";
@@ -147,6 +157,33 @@ export class BookingController implements IBookingController {
     const data = req.body as ExtraChargeDTO;
     await this._bookingService.requestExtraCharge(bookingId, workerId, data);
     res.status(HTTPSTATUS.OK).json({ message: "Extra charge request sent to client" });
+  });
+
+  requestReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as RequestRescheduleDto;
+    const initiatorId =
+      data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
+    await this._bookingService.requestReschedule(bookingId, initiatorId, data);
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING.RESCHEDULE_REQUESTED_SUCCESS });
+  });
+
+  respondReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as RespondRescheduleDto;
+    const responderId =
+      data.role === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
+    const message = await this._bookingService.respondReschedule(bookingId, responderId, data);
+    res.status(HTTPSTATUS.OK).json({ message });
+  });
+
+  cancelReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { bookingId } = req.params;
+    const data = req.body as CancelRescheduleDto;
+    const initiatorId =
+      data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
+    await this._bookingService.cancelReschedule(bookingId, initiatorId, data);
+    res.status(HTTPSTATUS.OK).json({ message: BOOKING.RESCHEDULE_CANCELLED_SUCCESS });
   });
 
   private parseQuery(req: Request): BookingListQuery {
