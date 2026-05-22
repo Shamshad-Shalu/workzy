@@ -88,6 +88,15 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
   const cfg = BOOKING_STATUS_META[b.status];
   const pc = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
 
+  const isPendingStage =
+    b.status === BOOKING_STATUS.PENDING || b.status === BOOKING_STATUS.CONFIRMED;
+  const isConfirmedStage =
+    b.status === BOOKING_STATUS.EN_ROUTE ||
+    b.status === BOOKING_STATUS.REACHED ||
+    b.status === BOOKING_STATUS.IN_PROGRESS;
+
+  const isPendingReschedule = b.isRescheduleRequested && (isPendingStage || isConfirmedStage);
+
   const isAdmin = role === ROLE.ADMIN;
   const isWorker = role === ROLE.WORKER;
   const isUser = role === ROLE.USER;
@@ -205,7 +214,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
               </div>
             )}
           </div>
-          {b.isRescheduleRequested ? (
+          {isPendingReschedule ? (
             <Badge variant="amber">Reschedule Requested</Badge>
           ) : (
             <StatusBadge status={b.status} />

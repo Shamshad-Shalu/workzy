@@ -31,6 +31,11 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
 
   const { requestedBy, newDate, newStartTime, newEndTime, reason, requestedAt, status } =
     rescheduleRequest;
+
+  const oldSlot = booking.dates.find(d => d.date);
+  const oldDateStr = oldSlot ? dayjs(oldSlot.date).format('dddd, MMM DD YYYY') : 'Unknown';
+  const oldTimeStr = oldSlot ? formatTimeRange(oldSlot.startTime, oldSlot.endTime) : 'Unknown';
+
   const isRequester = requestedBy === role;
   const isResponder = !isRequester && role !== ROLE.ADMIN;
   const isLoading = isResponding || isCancelling;
@@ -92,17 +97,33 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-4 flex flex-col gap-3">
-        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-          Requested New Schedule
-        </p>
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <CalendarDays className="w-4 h-4 text-muted-foreground" />
-          {newDateStr}
+      <div className="grid grid-cols-2 gap-3">
+        <div className="rounded-xl border border-border bg-muted/30 p-4 flex flex-col gap-3">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+            Current Schedule
+          </p>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <CalendarDays className="w-4 h-4 text-muted-foreground" />
+            {oldDateStr}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Clock className="w-4 h-4" />
+            {oldTimeStr}
+          </div>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Clock className="w-4 h-4" />
-          {timeStr}
+
+        <div className="rounded-xl border border-border bg-blue-500/10 border-blue-200 dark:border-blue-900/40 p-4 flex flex-col gap-3">
+          <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">
+            Proposed Schedule
+          </p>
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <CalendarDays className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            {newDateStr}
+          </div>
+          <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
+            <Clock className="w-4 h-4" />
+            {timeStr}
+          </div>
         </div>
       </div>
 

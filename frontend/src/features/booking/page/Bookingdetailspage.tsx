@@ -35,6 +35,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
+import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
@@ -43,7 +44,7 @@ import { cn } from '@/lib/utils';
 import PageError from '@/pages/PageError';
 import type { BookingDetails, EvidenceItem, ExtraChargeStatus } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
-import { formatDuration } from '@/utils/time.format';
+import { formatDuration, formatSmartDateTime, formatTime12 } from '@/utils/time.format';
 
 import { StatusBadge } from '../components/BookingCard';
 import RescheduleModal from '../components/RescheduleModal';
@@ -131,9 +132,6 @@ export default function BookingDetailsPage({
   const isWorker = role === ROLE.WORKER;
   const isUser = role === ROLE.USER;
 
-  const isPendingReschedule = b.rescheduleRequest?.status === 'pending';
-  const isRequester = b.rescheduleRequest?.requestedBy === (role === ROLE.USER ? 'user' : 'worker');
-
   const isPendingStage =
     b.status === BOOKING_STATUS.PENDING || b.status === BOOKING_STATUS.CONFIRMED;
   const isConfirmedStage =
@@ -142,6 +140,10 @@ export default function BookingDetailsPage({
     b.status === BOOKING_STATUS.IN_PROGRESS;
   const allowReschedule =
     (isUser && isPendingStage) || (isWorker && (isConfirmedStage || isPendingStage));
+
+  const isPendingReschedule =
+    b.rescheduleRequest?.status === 'pending' && (isPendingStage || isConfirmedStage);
+  const isRequester = b.rescheduleRequest?.requestedBy === (role === ROLE.USER ? 'user' : 'worker');
   return (
     <div className="min-h-screen bg-background">
       <motion.header
@@ -187,7 +189,11 @@ export default function BookingDetailsPage({
               </motion.div>
 
               <motion.div variants={fadeUp} className="flex flex-wrap items-center gap-2">
-                <StatusBadge status={b.status} />
+                {isPendingReschedule ? (
+                  <Badge variant="amber">Reschedule Requested</Badge>
+                ) : (
+                  <StatusBadge status={b.status} />
+                )}
                 <span
                   className={cn(
                     'inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[11px] font-medium whitespace-nowrap',
@@ -290,7 +296,7 @@ export default function BookingDetailsPage({
                       </p>
                       <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
-                        {slot.startTime} — {slot.endTime}
+                        {formatTime12(slot.startTime)} — {formatTime12(slot.endTime)}
                       </p>
                     </div>
                   </div>
@@ -687,7 +693,7 @@ function StatusTimeline({
                   {cfg.label}
                 </span>
                 <time className="flex-shrink-0 font-mono text-[11px] text-muted-foreground">
-                  {dayjs(h.changedAt).format('DD MMM, HH:mm')}
+                  {formatSmartDateTime(h.changedAt)}
                 </time>
               </div>
 

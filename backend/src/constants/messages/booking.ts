@@ -12,8 +12,8 @@ export const BOOKING_STATUS_MESSAGES = {
   REJECTED: "Booking rejected by worker",
   DISPUTED: "Dispute raised",
   EXPIRED: "Booking expired — worker did not respond before the scheduled time.",
-  RESCHEDULED: (role: Role, oldDate: string, newDate: string) =>
-    `${role} requested a reschedule from ${oldDate} to ${newDate}.`,
+  RESCHEDULED: (role: Role, oldDate: string, newDate: string, reason?: string) =>
+    `${role} requested a reschedule from ${oldDate} to ${newDate}. -${reason}`,
   RESCHEDULE_ACCEPTED: (name: string, date: string) =>
     `Reschedule request accepted by ${name}. Moved slot to ${date}`,
   RESCHEDULE_REJECTED: (name: string) => `Reschedule request rejected by ${name}`,
@@ -56,6 +56,10 @@ export const BOOKING = {
   RESCHEDULE_RESPONSE_SUCCESS: "Reschedule response handled successfully",
   RESCHEDULE_REQUESTED_SUCCESS: "Reschedule request submitted successfully.",
   RESCHEDULE_CANCELLED_SUCCESS: "Reschedule request cancelled successfully.",
+  RESCHEDULE_NEW_SLOT_NOT_FOUND:
+    "The new slot was not found or has expired. Please try requesting reschedule again.",
+  RESCHEDULE_OLD_SLOT_NOT_FOUND:
+    "The original slot could not be found. The booking may have been modified.",
 };
 
 // export const BOOKING = {

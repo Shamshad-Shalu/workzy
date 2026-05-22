@@ -776,7 +776,7 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(
           booking.status,
           requestedBy,
-          BOOKING_STATUS_MESSAGES.RESCHEDULED(requestedBy, oldDateStr, newDateStr)
+          BOOKING_STATUS_MESSAGES.RESCHEDULED(requestedBy, oldDateStr, newDateStr, reason)
         ),
       },
     });
@@ -825,10 +825,10 @@ export class BookingService implements IBookingService {
       ]);
 
       if (!newSlot) {
-        throw new CustomError("coun't find slot.connect the worker and cancel and try again");
+        throw new CustomError(BOOKING.RESCHEDULE_NEW_SLOT_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
       }
       if (!oldSlot) {
-        throw new CustomError("count find the slot");
+        throw new CustomError(BOOKING.RESCHEDULE_OLD_SLOT_NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
       }
 
       const newDateStr = `${dayjs(newDate).format("YYYY-MM-DD")} - ${newSlot?.isFullDay ? "Full day" : formatTimeRange(newStartTime, newEndTime)}`;
@@ -863,13 +863,16 @@ export class BookingService implements IBookingService {
           $unset: { rescheduleRequest: 1 },
         }),
         this._slotRepository.delete(oldSlotId.toString()),
-        booking.quoteId
-          ? this._quoteRepository.update(booking.quoteId, {
-              $pull: { slotIds: new Types.ObjectId(oldSlotId), dates: { date: oldSlot.date } },
-              $push: { slotIds: new Types.ObjectId(newSlotId), dates: newBookingSlot },
-            })
-          : Promise.resolve(),
       ]);
+
+      if (booking.quoteId) {
+        await this._quoteRepository.update(booking.quoteId, {
+          $pull: { slotIds: new Types.ObjectId(oldSlotId), dates: { date: oldSlot.date } },
+        });
+        await this._quoteRepository.update(booking.quoteId, {
+          $push: { slotIds: new Types.ObjectId(newSlotId), dates: newBookingSlot },
+        });
+      }
 
       void this._notificationService.createNotification(
         initiatorId.toString(),
@@ -919,7 +922,7 @@ export class BookingService implements IBookingService {
     }
     const responderId = requestedBy === ROLE.USER ? workerId : userId;
 
-    const [updated, newSLot] = await Promise.all([
+    const [updated] = await Promise.all([
       this._bookingRepository.update(bookingId, {
         $push: {
           statusHistory: this.createStatusHistoryEntry(

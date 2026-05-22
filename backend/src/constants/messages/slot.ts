@@ -10,4 +10,9 @@ export const SLOT = {
   UNAUTHORIZED: "Unauthorized user for this slot",
   WORKER_NEED: "workerId and serviceId are required",
   EXPIRED: "This slot is no longer available. Please select another slot.",
+  // Reschedule
+  RESCHEDULE_INVALID_PARAMS:
+    "Invalid reschedule parameters: startTime is required for single-day bookings",
+  RESCHEDULE_UNAUTHORIZED:
+    "Unauthorized: Only the party initiating the reschedule can reserve the new slot",
 };

@@ -24,8 +24,10 @@ interface Props {
 const PERIODS = ['Morning', 'Afternoon', 'Evening'] as const;
 
 function groupSlots(slots: AvailableSlot[]): Record<string, AvailableSlot[]> {
+  const uniqueSlots = Array.from(new Map(slots.map(s => [s.startTime, s])).values());
+
   const g: Record<string, AvailableSlot[]> = { Morning: [], Afternoon: [], Evening: [] };
-  slots.forEach(s => {
+  uniqueSlots.forEach(s => {
     const h = parseInt(s.startTime.split(':')[0], 10);
     if (h < 12) {
       g['Morning'].push(s);

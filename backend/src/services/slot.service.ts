@@ -2,7 +2,17 @@ import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { CATEGORY, HTTPSTATUS, PRICING_MODE, Role, ROLE, SERVICE, SLOT, WORKER } from "@/constants";
+import {
+  CATEGORY,
+  HTTPSTATUS,
+  PRICING_MODE,
+  Role,
+  ROLE,
+  SERVICE,
+  SERVICE_TYPE,
+  SLOT,
+  WORKER,
+} from "@/constants";
 import { SLOT_STATUS } from "@/constants/booking";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
@@ -272,7 +282,10 @@ export class SlotService implements ISlotService {
 
     const lockKey = `slot:${workerId}:${dayjs(date).format("YYYY-MM-DD")}:${startTime}`;
     const existing = await this._redisService.get(lockKey);
-    // if (existing) throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
+    if (existing) {
+      console.error(SLOT.EXISTS);
+      // throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
+    }
 
     const [{ service, category }, availableSlots] = await Promise.all([
       this.getSlotContext(workerId, serviceId),
@@ -554,8 +567,8 @@ export class SlotService implements ISlotService {
     bookingId: string
   ): Promise<{ dates: Record<string, boolean>; isFullDay: boolean }> {
     const booking = await getEntityOrThrow(this._bookingRepository, bookingId);
-    const { serviceId, workerId, address, itemCount, dates } = booking;
-    const isFullDay = dates.length > 1;
+    const { serviceId, workerId, address, itemCount, snapshot } = booking;
+    const isFullDay = snapshot.category.serviceType === SERVICE_TYPE.MAJOR_PROJECT;
     let result: Record<string, boolean> = {};
     if (isFullDay) {
       result = await this.getAvailableDatesForQuotes({
@@ -607,19 +620,19 @@ export class SlotService implements ISlotService {
     const { serviceId, workerId, userId, address, itemCount, dates } = booking;
 
     if ((!isFullDay && !startTime) || (dates.length > 1 && !isFullDay)) {
-      throw new CustomError("");
+      throw new CustomError(SLOT.RESCHEDULE_INVALID_PARAMS, HTTPSTATUS.BAD_REQUEST);
     }
     if (
-      (requestedBy == ROLE.WORKER && initiatorId !== workerId.toString()) ||
-      (requestedBy == ROLE.USER && initiatorId !== userId.toString())
+      (requestedBy === ROLE.WORKER && initiatorId !== workerId.toString()) ||
+      (requestedBy === ROLE.USER && initiatorId !== userId.toString())
     ) {
-      throw new CustomError("");
+      throw new CustomError(SLOT.RESCHEDULE_UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
     }
     let slotId: string;
     let reservedUntil: Date;
 
     if (isFullDay) {
-      const res = await this.reserveQuoteSlots(initiatorId, {
+      const res = await this.reserveQuoteSlots(workerId.toString(), {
         bookingId,
         dates: [date],
         lat: address.location.coordinates[1],

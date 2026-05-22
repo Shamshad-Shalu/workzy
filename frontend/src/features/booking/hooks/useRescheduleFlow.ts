@@ -72,15 +72,15 @@ export function useRescheduleFlow(booking: BookingDetails, role: Role) {
     setFlow({ ...INITIAL_FLOW_STATE, isFullDay: datesData?.isFullDay ?? false });
   }, [datesData?.isFullDay]);
 
-  const { dates, isFullDay } = datesData ?? {};
+  const { dates } = datesData ?? {};
 
   const steps = useMemo<RescheduleStep[]>(
     () => [
       RESCHEDULE_STEPS.DATE,
-      ...(!isFullDay ? [RESCHEDULE_STEPS.SLOTS] : []),
+      ...(!flow.isFullDay ? [RESCHEDULE_STEPS.SLOTS] : []),
       RESCHEDULE_STEPS.PREVIEW,
     ],
-    [isFullDay]
+    [flow.isFullDay]
   );
   const step = steps[stepIndex];
 
@@ -147,7 +147,7 @@ export function useRescheduleFlow(booking: BookingDetails, role: Role) {
 
   const handleContinue = async () => {
     try {
-      if (step === RESCHEDULE_STEPS.DATE && isFullDay) {
+      if (step === RESCHEDULE_STEPS.DATE && flow.isFullDay) {
         await handleReserveSlot();
         goTo(stepIndex + 1);
         return;
@@ -183,7 +183,7 @@ export function useRescheduleFlow(booking: BookingDetails, role: Role) {
     steps,
     stepIndex,
     direction,
-    isFullDay,
+    isFullDay: flow.isFullDay,
     isLoading,
     dates: dates ?? {},
     datesError,
