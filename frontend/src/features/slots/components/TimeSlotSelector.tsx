@@ -78,7 +78,7 @@ export default function TimeSlotSelector({
           ))}
         </div>
       ) : error ? (
-        <ErrorState description="Failed to load time slots." onRetry={refetch} />
+        <ErrorState description={error.message} onRetry={refetch} />
       ) : !slots.length ? (
         <EmptyState
           icon={<Clock className="w-5 h-5" />}

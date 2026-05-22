@@ -119,30 +119,35 @@ export function useRescheduleFlow(booking: BookingDetails, role: Role) {
 
   const handleSlotSelect = async (slot: AvailableSlot) => {
     try {
-      await handleReleaseSlot();
-      setFlow(f => ({ ...f, slot, newSlotId: null, reservedUntil: null }));
+      setFlow(f => ({ ...f, slot }));
     } catch (err) {
       toast.error(handleApiError(err));
     }
   };
+
   const handleReserveSlot = async () => {
     const { date, isFullDay, slot } = flow;
-    await handleReleaseSlot();
-    const result = await reserveSlot({
-      bookingId: booking.id,
-      data: {
-        date,
-        isFullDay,
-        requestedBy: role,
-        startTime: slot?.startTime,
-      },
-    });
-    setFlow(f => ({
-      ...f,
-      newSlotId: result.slotId,
-      reservedUntil: result.reservedUntil,
-    }));
-    form.setValue('newSlotId', result.slotId, { shouldValidate: true });
+    try {
+      await handleReleaseSlot();
+      const result = await reserveSlot({
+        bookingId: booking.id,
+        data: {
+          date,
+          isFullDay,
+          requestedBy: role,
+          startTime: slot?.startTime,
+        },
+      });
+      setFlow(f => ({
+        ...f,
+        newSlotId: result.slotId,
+        reservedUntil: result.reservedUntil,
+      }));
+      form.setValue('newSlotId', result.slotId, { shouldValidate: true });
+    } catch (err) {
+      toast.error(handleApiError(err));
+      throw err;
+    }
   };
 
   const handleContinue = async () => {
@@ -163,19 +168,22 @@ export function useRescheduleFlow(booking: BookingDetails, role: Role) {
     }
   };
 
-  const reset = useCallback(async () => {
-    try {
-      if (flow.newSlotId) {
-        await releaseSlot({ slotId: flow.newSlotId, bookingId: booking.id, role });
+  const reset = useCallback(
+    async (skipRelease = false) => {
+      try {
+        if (flow.newSlotId && !skipRelease) {
+          await releaseSlot({ slotId: flow.newSlotId, bookingId: booking.id, role });
+        }
+      } catch (err) {
+        console.error(handleApiError(err));
+      } finally {
+        setFlow(INITIAL_FLOW_STATE);
+        resetForm();
+        setStepIndex(0);
       }
-    } catch (err) {
-      console.error(handleApiError(err));
-    } finally {
-      setFlow(INITIAL_FLOW_STATE);
-      resetForm();
-      setStepIndex(0);
-    }
-  }, [flow.newSlotId, booking.id, role, releaseSlot, resetForm]);
+    },
+    [flow.newSlotId, booking.id, role, releaseSlot, resetForm]
+  );
 
   return {
     flow,

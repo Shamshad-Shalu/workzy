@@ -42,7 +42,6 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
 
   const requesterLabel = requestedBy === ROLE.USER ? 'Customer' : 'Worker';
   const newDateStr = dayjs(newDate).format('dddd, MMM DD YYYY');
-  const timeStr = newStartTime ? formatTimeRange(newStartTime, newEndTime) : 'Full day';
 
   const handleRespond = async () => {
     if (!selected) {
@@ -122,7 +121,7 @@ export default function ReschedulePendingView({ booking, role, onClose }: Props)
           </div>
           <div className="flex items-center gap-2 text-sm text-blue-600 dark:text-blue-400">
             <Clock className="w-4 h-4" />
-            {timeStr}
+            {formatTimeRange(newStartTime, newEndTime)}
           </div>
         </div>
       </div>

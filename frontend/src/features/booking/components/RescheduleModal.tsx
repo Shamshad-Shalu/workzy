@@ -34,7 +34,8 @@ export default function RescheduleModal({ isOpen, onClose, booking, role = ROLE.
       if (message) {
         toast.success(message);
       }
-      onCloseModal();
+      await ctx.reset(true);
+      onClose();
     } catch (err) {
       toast.error(handleApiError(err));
     }
