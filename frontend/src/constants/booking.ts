@@ -101,3 +101,10 @@ export const BOOKING_EMPTY_MESSAGES: Record<BookingFilterStatus, { title: string
     sub: 'Confirmed future bookings appear here.',
   },
 };
+
+export const RESCHEDULE_STEPS = {
+  DATE: 'date',
+  SLOTS: 'slots',
+  PREVIEW: 'preview',
+} as const;
+export type RescheduleStep = (typeof RESCHEDULE_STEPS)[keyof typeof RESCHEDULE_STEPS];

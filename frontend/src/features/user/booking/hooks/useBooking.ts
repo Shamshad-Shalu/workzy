@@ -1,14 +1,13 @@
 import { useState, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
+import { useReleaseSlot, useReserveSlot } from '@/features/slots/hooks/useSlot';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import type { BulkDiscountType } from '@/types/service';
 import type { AvailableSlot, BookingState } from '@/types/slot';
 import type { PublicWorkerListItem } from '@/types/worker';
 import { handleApiError } from '@/utils/handleApiError';
-
-import { useReleaseSlot, useReserveSlot } from '../../slot/hooks/useSlot';
 
 import { useCreateBooking } from './useBookingQuery';
 

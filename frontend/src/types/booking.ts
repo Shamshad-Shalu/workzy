@@ -72,6 +72,15 @@ interface BookingStatusHistory {
   reason?: string;
 }
 
+export interface RequestRescheduleDTO {
+  oldSlotId: string;
+  newSlotId: string;
+}
+
+export interface RespondRescheduleDTO {
+  status: 'accepted' | 'rejected';
+}
+
 export interface EvidenceItem {
   url: string;
   type: 'image' | 'video';
@@ -88,6 +97,17 @@ export interface BookingAddress {
   location: Location;
 }
 
+export interface RescheduleRequest {
+  requestedBy: 'user' | 'worker';
+  oldSlotId: string;
+  newSlotId: string;
+  newDate: Date;
+  newStartTime: string;
+  newEndTime: string;
+  status: 'pending' | 'accepted' | 'rejected' | 'expired';
+  reason: string;
+  requestedAt: Date;
+}
 export interface Booking {
   id: string;
   bookingId: string;
@@ -115,6 +135,7 @@ export interface Booking {
 
   extraCharge?: ExtraCharge;
   evidence?: Evidence;
+  rescheduleRequest?: RescheduleRequest;
 
   chatId?: string;
   snapshot: BookingSnapshot;
@@ -149,7 +170,7 @@ export type BookingListItem = {
   endTime: string;
   duration: number;
   itemCount: number;
-
+  isRescheduleRequested: boolean;
   totalDays: number;
   status: BookingStatus;
   paymentStatus: BookingPaymentStatus;

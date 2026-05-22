@@ -92,3 +92,6 @@ export function formatDateForUrl(date: Date | null | undefined): string | undefi
   }
   return dayjs(date).startOf('day').format('YYYY-MM-DD');
 }
+
+export const formatTimeRange = (start: string, end: string) =>
+  `${formatTime12(start)} → ${formatTime12(end)}`;

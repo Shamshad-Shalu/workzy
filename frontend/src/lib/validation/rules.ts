@@ -6,7 +6,9 @@ export const DESCRIPTION_REGEX =
 export const SERVICE_NAME_REGEX =
   /^(?!.*(.)\1{2})(?=.{3,40}$)(?=(?:.*[A-Za-z]){2,})[A-Za-z0-9][A-Za-z0-9/&.'\- ]*[A-Za-z0-9]$/;
 
-export const mongoId = z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId');
+export const mongoId = z
+  .string('Please Select option')
+  .regex(/^[0-9a-fA-F]{24}$/, 'Invalid MongoDB ObjectId');
 
 export const nameRule = z
   .string()
@@ -67,7 +69,7 @@ export const createDescriptionRule = (
   max: number = 500
 ) => {
   const schema = z
-    .string()
+    .string(`${label} is required`)
     .trim()
     .min(1, `${label} is required`)
     .min(min, `${label} must be at least ${min} characters`)

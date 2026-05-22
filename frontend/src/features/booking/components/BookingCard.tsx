@@ -19,10 +19,11 @@ import { Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
+import { Badge } from '@/components/ui/badge';
 import { BOOKING_STATUS, ROLE, SERVICE_TYPE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
 import { cn } from '@/lib/utils';
-import type { BookingListItem } from '@/types/booking';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
@@ -30,8 +31,8 @@ import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatu
 
 export interface BookingCardHandlers {
   onAccept?: (id: string) => void;
-  onStart?: (booking: BookingListItem) => void;
-  onCancel?: (booking: BookingListItem) => void;
+  onStart?: (booking: BookingListItem | BookingDetails) => void;
+  onCancel?: (booking: BookingListItem | BookingDetails) => void;
   onReview?: (data: { id: string; reviewId?: string }) => void;
   onReject?: (id: string) => void;
   onReached?: (id: string) => void;
@@ -41,7 +42,7 @@ export interface BookingCardHandlers {
   onPayExtra?: (id: string) => void;
   onApprove?: (id: string) => void;
   onDispute?: (id: string) => void;
-  // onSendQuote?: (booking: BookingListItem) => void;
+  onReschedule?: (id: string) => void;
 }
 
 export function StatusBadge({ status }: { status: BookingStatus }) {
@@ -110,6 +111,9 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
   const to = detailPath ?? `/bookings/${b.id}`;
 
   const quotePath = b.quoteId ? `/worker/quotes` : `/worker/quotes/${b.id}`;
+
+  // const isReschedulePending = b.isRescheduleRequested &&
+  //   [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED , BOOKING_STATUS.EN_ROUTE , BOOKING_STATUS.REACHED , BOOKING_STATUS.IN_PROGRESS].includes(b.status);
 
   return (
     <motion.div
@@ -201,7 +205,11 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
               </div>
             )}
           </div>
-          <StatusBadge status={b.status} />
+          {b.isRescheduleRequested ? (
+            <Badge variant="amber">Reschedule Requested</Badge>
+          ) : (
+            <StatusBadge status={b.status} />
+          )}
         </div>
 
         {isAdmin && (
@@ -316,7 +324,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
 
             {isWorker && (
               <>
-                {b.status === BOOKING_STATUS.PENDING && (
+                {b.status === BOOKING_STATUS.PENDING && !b.isRescheduleRequested && (
                   <>
                     <Button
                       variant="green"
@@ -337,7 +345,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                   </>
                 )}
 
-                {b.status === BOOKING_STATUS.CONFIRMED && (
+                {b.status === BOOKING_STATUS.CONFIRMED && !b.isRescheduleRequested && (
                   <Button
                     variant="blue"
                     size="sm"
@@ -348,7 +356,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
                   </Button>
                 )}
 
-                {b.status === BOOKING_STATUS.EN_ROUTE && (
+                {b.status === BOOKING_STATUS.EN_ROUTE && !b.isRescheduleRequested && (
                   <Button
                     variant="blue"
                     size="sm"

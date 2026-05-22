@@ -1,7 +1,19 @@
+import type { Role } from '@/constants';
+
 export interface AvailableSlot {
   startTime: string;
   endTime: string;
   travelFromPrev: number;
+}
+
+export interface SlotOption {
+  id: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  isFullDay: boolean;
+  duration: number;
+  status: 'reserved' | 'booked';
 }
 
 export interface BookingLocation {
@@ -24,7 +36,7 @@ export type DateRangeFilter = {
   endDate?: string;
 };
 
-export type GetWorkerSlotsQuery = DateRangeFilter & {
+export type WorkerSlotDatesQuery = DateRangeFilter & {
   lat: number;
   lng: number;
   workerId: string;
@@ -49,4 +61,11 @@ export interface SlotFormData {
   lng?: number;
   itemCount?: number;
   startTime: string;
+}
+
+export interface RescheduleSlotData {
+  requestedBy: Role;
+  date: string;
+  isFullDay: boolean;
+  startTime?: string;
 }

@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
-import { BOOKING_STEPS, PRICING_MODE, type BookingStep } from '@/constants';
+import { BOOKING_STEPS, PRICING_MODE, STEP_LABELS, type BookingStep } from '@/constants';
 import type { PublicWorkerListItem } from '@/types/worker';
 
 import { useBooking } from '../../hooks/useBooking';
@@ -154,7 +154,7 @@ export default function BookingModal({ open, onClose, worker }: BookingModalProp
       footer={footer}
       className="md:max-w-md"
     >
-      <StepIndicator steps={steps} current={step} />
+      <StepIndicator steps={steps} current={step} labels={STEP_LABELS} />
       <AnimatePresence mode="wait" custom={direction}>
         <motion.div
           key={step}

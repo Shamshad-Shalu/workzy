@@ -1,4 +1,6 @@
+import type { Role } from '@/constants';
 import { BOOKING_API } from '@/constants/apiRoutes/booking.routes';
+import type { bookingRescheduleFormType } from '@/features/booking/validation/bookingRescheduleFormData';
 import type { bookingFormData } from '@/features/user/booking/validation/bookingFormData';
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
@@ -91,6 +93,27 @@ const BookingService = {
   },
   disputeBooking: async (bookingId: string, reason: string): Promise<{ message: string }> => {
     const res = await api.patch(BOOKING_API.DISPUTE(bookingId), { reason });
+    return res.data;
+  },
+  requestReschedule: async (
+    bookingId: string,
+    data: bookingRescheduleFormType
+  ): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.RESCHEDULE(bookingId), data);
+    return res.data;
+  },
+  respondReschedule: async (
+    bookingId: string,
+    data: { status: 'accepted' | 'rejected'; role: Role }
+  ): Promise<{ message: string }> => {
+    const res = await api.patch(BOOKING_API.RESCHEDULE_RESPOND(bookingId), data);
+    return res.data;
+  },
+  cancelReschedule: async (
+    bookingId: string,
+    data: { requestedBy: Role }
+  ): Promise<{ message: string }> => {
+    const res = await api.delete(BOOKING_API.RESCHEDULE(bookingId), { data });
     return res.data;
   },
 };

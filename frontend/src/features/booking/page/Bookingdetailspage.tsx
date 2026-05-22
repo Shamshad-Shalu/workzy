@@ -46,6 +46,7 @@ import { formatCurrency } from '@/utils/currency';
 import { formatDuration } from '@/utils/time.format';
 
 import { StatusBadge } from '../components/BookingCard';
+import RescheduleModal from '../components/RescheduleModal';
 import { BOOKING_STATUS_META, PAYMENT_STATUS_META } from '../helper/bookingStatus.config';
 
 import type { BookingCardHandlers } from '../components/BookingCard';
@@ -111,6 +112,7 @@ export default function BookingDetailsPage({
   const id = propBookingId ?? paramId ?? '';
 
   const { booking, isLoading, error, refetch } = useBookingDetails(id);
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
 
   if (isLoading) {
     return <BookingDetailsSkeleton />;
@@ -125,12 +127,21 @@ export default function BookingDetailsPage({
   const b = booking;
   const primaryDate = b.dates[0];
   const pCfg = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
-  // const sCfg = BOOKING_STATUS_META[b.status] ?? BOOKING_STATUS_META.pending;
 
-  // const isAdmin = role === ROLE.ADMIN;
-  // const isWorker = role === ROLE.WORKER;
-  // const isUser = role === ROLE.USER;
+  const isWorker = role === ROLE.WORKER;
+  const isUser = role === ROLE.USER;
 
+  const isPendingReschedule = b.rescheduleRequest?.status === 'pending';
+  const isRequester = b.rescheduleRequest?.requestedBy === (role === ROLE.USER ? 'user' : 'worker');
+
+  const isPendingStage =
+    b.status === BOOKING_STATUS.PENDING || b.status === BOOKING_STATUS.CONFIRMED;
+  const isConfirmedStage =
+    b.status === BOOKING_STATUS.EN_ROUTE ||
+    b.status === BOOKING_STATUS.REACHED ||
+    b.status === BOOKING_STATUS.IN_PROGRESS;
+  const allowReschedule =
+    (isUser && isPendingStage) || (isWorker && (isConfirmedStage || isPendingStage));
   return (
     <div className="min-h-screen bg-background">
       <motion.header
@@ -212,6 +223,40 @@ export default function BookingDetailsPage({
           </motion.div>
         </div>
       </motion.header>
+      <AnimatePresence>
+        {isPendingReschedule && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="border-b border-amber-500/30 bg-amber-500/10 relative overflow-hidden"
+          >
+            <div className="section-container py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-start gap-3 text-amber-600 dark:text-amber-400">
+                <Calendar className="h-5 w-5 mt-0.5" />
+                <div>
+                  <h3 className="text-sm font-bold">Reschedule Requested</h3>
+                  <p className="text-xs opacity-80 mt-0.5">
+                    {isRequester
+                      ? 'Waiting for the other party to approve your reschedule request.'
+                      : 'The other party has requested to reschedule a slot for this booking.'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="border-amber-500/30 text-amber-600 hover:bg-amber-500/20"
+                  onClick={() => setIsRescheduleOpen(true)}
+                >
+                  Preview Request
+                </Button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
       <div className="section-container space-y-5 py-8">
@@ -398,7 +443,12 @@ export default function BookingDetailsPage({
 
           <motion.div variants={fadeUp} className="flex flex-col gap-5">
             <GlassCard title="Actions" icon={Zap}>
-              <ActionPanel booking={b} role={role} handlers={handlers} />
+              <ActionPanel
+                booking={b}
+                role={role}
+                allowReschedule={allowReschedule}
+                handlers={{ ...handlers, onReschedule: () => setIsRescheduleOpen(true) }}
+              />
             </GlassCard>
             <GlassCard title="Extra Charge" icon={Receipt}>
               {b.extraCharge ? (
@@ -453,6 +503,13 @@ export default function BookingDetailsPage({
           </motion.div>
         </motion.div>
       </div>
+
+      <RescheduleModal
+        isOpen={isRescheduleOpen}
+        onClose={() => setIsRescheduleOpen(false)}
+        booking={b}
+        role={role}
+      />
     </div>
   );
 }
@@ -461,10 +518,12 @@ function ActionPanel({
   booking: b,
   role,
   handlers,
+  allowReschedule = false,
 }: {
   booking: BookingDetails;
   role: Role;
   handlers?: BookingCardHandlers;
+  allowReschedule?: boolean;
 }) {
   const isAdmin = role === ROLE.ADMIN;
   const isUser = role === ROLE.USER;
@@ -472,6 +531,15 @@ function ActionPanel({
 
   return (
     <div className="flex flex-col gap-2">
+      {allowReschedule && (
+        <ActionBtn
+          icon={Calendar}
+          label="Reschedule"
+          accent="sky"
+          onClick={() => handlers?.onReschedule?.(b.id)}
+          full
+        />
+      )}
       <div className="grid grid-cols-2 gap-2">
         <ActionBtn icon={Phone} label="Call Worker" accent="violet" />
         <ActionBtn icon={MessageCircle} label="Open Chat" accent="sky" />

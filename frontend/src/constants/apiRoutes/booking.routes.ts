@@ -22,4 +22,7 @@ export const BOOKING_API = {
   EXTRA_CHARGE: (id: string) => booking(`/${id}/extra-charge`),
   EXTRA_CHARGE_PAY: (id: string) => booking(`/${id}/extra-charge/pay`),
   EXTRA_CHARGE_REJECT: (id: string) => booking(`/${id}/extra-charge/reject`),
+
+  RESCHEDULE: (id: string) => booking(`/${id}/reschedule`),
+  RESCHEDULE_RESPOND: (id: string) => booking(`/${id}/reschedule/respond`),
 } as const;
