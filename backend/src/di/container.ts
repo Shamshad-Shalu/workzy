@@ -9,6 +9,7 @@ import { CategoryController } from "@/controllers/category.controller";
 import { DisputeController } from "@/controllers/dispute.controller";
 import { HomeController } from "@/controllers/home.controller";
 import { LeaveController } from "@/controllers/leave.controller";
+import { MessageController } from "@/controllers/message.controller";
 import { NotificationController } from "@/controllers/notification.controller";
 import { PaymentController } from "@/controllers/payment.controller";
 import { QuoteController } from "@/controllers/quote.controller";
@@ -28,6 +29,7 @@ import { ICategoryController } from "@/core/interfaces/controllers/ICategoryCont
 import { IDisputeController } from "@/core/interfaces/controllers/IDisputeController";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { ILeaveController } from "@/core/interfaces/controllers/ILeaveController";
+import { IMessageController } from "@/core/interfaces/controllers/IMessageController";
 import { INotificationController } from "@/core/interfaces/controllers/INotificationController";
 import { IPaymentController } from "@/core/interfaces/controllers/IPaymentController";
 import { IQuoteController } from "@/core/interfaces/controllers/IQuoteController";
@@ -43,6 +45,7 @@ import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepos
 import { IHomeLayoutRepository } from "@/core/interfaces/repositories/IHomeLayoutRepository";
 import { IHomeSectionRepository } from "@/core/interfaces/repositories/IHomeSectionRepository";
 import { ILeaveRepository } from "@/core/interfaces/repositories/ILeaveRepository";
+import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { INotificationRepository } from "@/core/interfaces/repositories/INotificationRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
@@ -63,6 +66,7 @@ import { IHomeLayoutService } from "@/core/interfaces/services/IHomeLayoutServic
 import { IHomeSectionService } from "@/core/interfaces/services/IHomeSectionService";
 import { IHomeService } from "@/core/interfaces/services/IHomeService";
 import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
+import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
@@ -81,6 +85,7 @@ import { DisputeRepository } from "@/repositories/dispute.repository";
 import { HomeLayoutRepository } from "@/repositories/homeLayout..repository";
 import { HomeSectionRepository } from "@/repositories/homeSection.repository";
 import { LeaveRepository } from "@/repositories/leave.repository";
+import { MessageRepository } from "@/repositories/message.repository";
 import { NotificationRepository } from "@/repositories/notification.repository";
 import { PaymentRepository } from "@/repositories/payment.repository";
 import { QuoteRepository } from "@/repositories/quote.repository";
@@ -103,6 +108,7 @@ import { CategoryService } from "@/services/category.service";
 import { DisputeService } from "@/services/dispute.service";
 import { HomeService } from "@/services/home.service";
 import { LeaveService } from "@/services/leave.service";
+import { MessageService } from "@/services/message.service";
 import { NotificationService } from "@/services/notification.service";
 import { PaymentService } from "@/services/payment.service";
 import { QuoteService } from "@/services/quote.service";
@@ -197,5 +203,9 @@ container.bind<SocketController>(TYPES.SocketController).to(SocketController);
 container.bind<IDisputeRepository>(TYPES.DisputeRepository).to(DisputeRepository);
 container.bind<IDisputeService>(TYPES.DisputeService).to(DisputeService);
 container.bind<IDisputeController>(TYPES.DisputeController).to(DisputeController);
+
+container.bind<IMessageRepository>(TYPES.MessageRepository).to(MessageRepository);
+container.bind<IMessageService>(TYPES.MessageService).to(MessageService);
+container.bind<IMessageController>(TYPES.MessageController).to(MessageController);
 
 export { container };

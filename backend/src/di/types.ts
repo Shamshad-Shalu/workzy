@@ -84,6 +84,10 @@ const TYPES = {
   DisputeController: Symbol.for("DisputeController"),
   DisputeService: Symbol.for("DisputeService"),
   DisputeRepository: Symbol.for("DisputeRepository"),
+
+  MessageController: Symbol.for("MessageController"),
+  MessageService: Symbol.for("MessageService"),
+  MessageRepository: Symbol.for("MessageRepository"),
 };
 
 export { TYPES };
