@@ -2,7 +2,7 @@ import { DisputeReason, DisputeResolution, DisputeStatus, Role } from "@/constan
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IEvidenceItem } from "@/types/booking/booking.entity";
 import { DisputeDetails, DisputeListItem } from "@/types/dispute/dispute.projection";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
 export class DisputeListItemDto {
   id!: string;
@@ -37,12 +37,12 @@ export class DisputeListItemDto {
     dto.user = {
       id: userId._id.toString(),
       name: userId.name,
-      profileImage: await resolveS3Image(userId.profileImage, s3Service),
+      profileImage: await resolveS3Url(userId.profileImage, s3Service),
     };
     dto.worker = {
       id: workerId._id.toString(),
       name: workerId.displayName,
-      profileImage: await resolveS3Image(workerId.profileImage, s3Service),
+      profileImage: await resolveS3Url(workerId.profileImage, s3Service),
     };
     dto.raisedBy = raisedBy;
     dto.status = status;
@@ -120,13 +120,13 @@ export class DisputeResponseDto {
       id: userId._id.toString(),
       name: userId.name,
       phone: userId.phone,
-      profileImage: await resolveS3Image(userId.profileImage, s3Service),
+      profileImage: await resolveS3Url(userId.profileImage, s3Service),
     };
     dto.worker = {
       id: workerId._id.toString(),
       name: workerId.displayName,
       phone: workerId.phone,
-      profileImage: await resolveS3Image(workerId.profileImage, s3Service),
+      profileImage: await resolveS3Url(workerId.profileImage, s3Service),
     };
     dto.raisedBy = raisedBy;
     dto.status = status;

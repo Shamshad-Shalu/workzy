@@ -119,28 +119,27 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
           label="Rating"
           value={reviewStats.averageRating?.toFixed(1) ?? '—'}
           sub={`${reviewStats.reviewCount} reviews`}
-          tone="amber"
+          tone="warning"
         />
         <StatCard
           icon={<Briefcase className="h-4 w-4" />}
           label="Jobs done"
           value={String(jobStats.completed)}
           sub="Completed"
-          tone="violet"
         />
         <StatCard
           icon={<CheckCircle2 className="h-4 w-4" />}
           label="Completion"
           value={`${jobStats.complitionRate}%`}
           sub="On-time rate"
-          tone="emerald"
+          tone="neutral"
         />
         <StatCard
           icon={<ShieldCheck className="h-4 w-4" />}
           label="Verified"
           value="ID + Skill"
           sub="KYC complete"
-          tone="sky"
+          tone="info"
         />
       </section>
     </>

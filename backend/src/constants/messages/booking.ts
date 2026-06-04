@@ -21,6 +21,7 @@ export const BOOKING_STATUS_MESSAGES = {
 
 export const BOOKING = {
   NOT_FOUND: "Booking not found",
+  INVALID_BOOKING_ID: " Invalid BookingId",
   PAYMENT_NOT_HELD: "Payment is not in held state",
   EXTRA_CHARGE_PENDING: "Resolve pending extra charge before approving",
   EXTRA_CHARGE_INVALID_STATUS: "Extra charge can only be requested during or after job",

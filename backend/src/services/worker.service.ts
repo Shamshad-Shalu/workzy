@@ -59,14 +59,14 @@ export class WorkerService implements IWorkerService {
   async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListResponseDto>> {
     const { data, total } = await this._workerRepository.listWorkers(query);
     return {
-      data: await WorkerListResponseDto.fromEntities(data, this._s3Service),
+      data: WorkerListResponseDto.fromEntities(data),
       total,
     };
   }
 
   async listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerResponseDTO[]> {
     const workers = await this._workerRepository.listNearbyWorkers(query);
-    return await NearbyWorkerResponseDTO.fromEntities(workers, this._s3Service);
+    return NearbyWorkerResponseDTO.fromEntities(workers);
   }
 
   async listPublicWorkers(
@@ -93,7 +93,7 @@ export class WorkerService implements IWorkerService {
     if (!worker) {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    return await WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(worker);
   }
 
   async updateWorkerProfile(
@@ -113,7 +113,7 @@ export class WorkerService implements IWorkerService {
     if (worker?.coverImage && coverImage !== worker.coverImage) {
       await this._s3Service.deleteFile(worker.coverImage);
     }
-    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker);
   }
 
   async updateWorkerPhone(workerId: string, phone: string): Promise<boolean> {
