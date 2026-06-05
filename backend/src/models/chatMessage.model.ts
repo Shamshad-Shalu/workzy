@@ -5,17 +5,10 @@ import { IChatMessage } from "@/types/chat/chatMessage.entity";
 
 const ChatMessageSchema = new Schema<IChatMessage>(
   {
-    bookingId: {
+    chatId: {
       type: Schema.Types.ObjectId,
-      ref: "Booking",
+      ref: "Chat",
       required: true,
-      index: true,
-    },
-    senderId: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
     },
     role: {
       type: String,
@@ -29,11 +22,13 @@ const ChatMessageSchema = new Schema<IChatMessage>(
     },
     content: {
       type: String,
+      trim: true,
       validate: {
-        validator: function (v: string | undefined) {
-          if (this.type === "text" && !v) return false;
-          if (this.type !== "text") return true;
-          return v !== undefined;
+        validator: function (this: IChatMessage, value?: string) {
+          if (this.type === "text") {
+            return !!value?.trim();
+          }
+          return true;
         },
         message: "Text messages must have content",
       },
@@ -41,17 +36,18 @@ const ChatMessageSchema = new Schema<IChatMessage>(
     mediaUrl: {
       type: String,
       validate: {
-        validator: function (v: string | undefined) {
-          if (["audio", "video", "image"].includes(this.type) && !v) return false;
+        validator: function (this: IChatMessage, value?: string) {
+          if (["audio", "video", "image"].includes(this.type)) {
+            return !!value;
+          }
           return true;
         },
         message: "Media messages must have mediaUrl",
       },
     },
-    isRead: {
-      type: Boolean,
-      default: false,
-      index: true,
+    readByRoles: {
+      type: [{ type: String, enum: SENDER_ROLE_VALUES }],
+      default: [],
     },
     isDeleted: {
       type: Boolean,
@@ -63,8 +59,6 @@ const ChatMessageSchema = new Schema<IChatMessage>(
   }
 );
 
-ChatMessageSchema.index({ bookingId: 1, createdAt: -1 });
-ChatMessageSchema.index({ senderId: 1 });
-ChatMessageSchema.index({ createdAt: 1 });
+ChatMessageSchema.index({ chatId: 1, isDeleted: 1, createdAt: -1, _id: -1 });
 
 export const ChatMessage = mongoose.model<IChatMessage>("ChatMessage", ChatMessageSchema);

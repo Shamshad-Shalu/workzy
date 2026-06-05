@@ -1,77 +1,90 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { ROLE } from "@/constants";
+import { BOOKING, CHAT, HTTPSTATUS, ROLE } from "@/constants";
+import { MessageType, SenderRole } from "@/constants/chat";
+import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
-import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
+import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
-import { ChatMessageResponseDTO, ChatMessageWithSender } from "@/dtos/responses/chat.dto";
+import { ChatMessageResponseDTO } from "@/dtos/responses/chatMessage.dto";
 import { MessageQuery } from "@/types/chat/chat.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import CustomError from "@/utils/customError";
+import { extractKeyFromUrl } from "@/utils/upload";
 
 @injectable()
 export class MessageService implements IMessageService {
   constructor(
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
-    @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
-    @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
+    @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
+    @inject(TYPES.ChatService) private _chatService: IChatService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
   async getMessages(input: MessageQuery): Promise<CursorPaginatedResult<ChatMessageResponseDTO>> {
     const { data, nextCursor } = await this._messageRepository.getMessages(input);
-
-    const workerIds = new Set<Types.ObjectId>();
-    const userIds = new Set<Types.ObjectId>();
-
-    for (const msg of data) {
-      if (msg.role === ROLE.WORKER) {
-        workerIds.add(msg.senderId);
-      } else {
-        userIds.add(msg.senderId);
-      }
-    }
-
-    const [workers, users] = await Promise.all([
-      workerIds.size > 0
-        ? this._workerRepository.find({ _id: { $in: [...workerIds] } })
-        : Promise.resolve([]),
-      userIds.size > 0
-        ? this._userRepository.find({ _id: { $in: [...userIds] } })
-        : Promise.resolve([]),
-    ]);
-
-    const workerMap = new Map(workers.map((w) => [w._id.toString(), w]));
-    const userMap = new Map(users.map((u) => [u._id.toString(), u]));
-
-    const mapedData: ChatMessageWithSender[] = data.map((msg) => {
-      const senderId = msg.senderId.toString();
-
-      if (msg.role === ROLE.WORKER) {
-        const worker = workerMap.get(senderId);
-        return Object.assign(msg, {
-          senderInfo: {
-            name: worker?.displayName ?? "Unknown Worker",
-            profileImage: worker?.profileImage,
-          },
-        });
-      } else {
-        const user = userMap.get(senderId);
-        return Object.assign(msg, {
-          senderInfo: {
-            name: user?.name ?? "Unknown User",
-            profileImage: user?.profileImage,
-          },
-        });
-      }
-    });
-
     return {
-      data: await ChatMessageResponseDTO.fromEntities(mapedData, this._s3Service),
+      data: await ChatMessageResponseDTO.fromEntities(data, this._s3Service, input.role),
       nextCursor,
     };
+  }
+
+  async saveMessage(data: {
+    chatId: string;
+    senderId: string;
+    role: SenderRole;
+    type: MessageType;
+    content?: string;
+    mediaUrl?: string;
+  }): Promise<ChatMessageResponseDTO> {
+    const { chatId, senderId, role, type, content, mediaUrl } = data;
+    const chat = await this._chatService.getChatRoomById({ chatId, participantId: senderId, role });
+    if (!chat.isActive) {
+      throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
+    }
+    if (!Types.ObjectId.isValid(chatId)) {
+      throw new CustomError(BOOKING.INVALID_BOOKING_ID);
+    }
+    const mediaUrlKey = mediaUrl ? extractKeyFromUrl(mediaUrl) : undefined;
+    const messageDoc = await this._messageRepository.create({
+      chatId: new Types.ObjectId(chatId),
+      role,
+      type,
+      content,
+      mediaUrl: mediaUrlKey,
+      isDeleted: false,
+    });
+
+    return await ChatMessageResponseDTO.fromEntity(messageDoc, this._s3Service, role);
+  }
+
+  async markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<void> {
+    await this._messageRepository.markRoomMessagesAsRead(chatId, role);
+  }
+  async deleteMessage(data: {
+    participantId: string;
+    role: SenderRole;
+    chatId: string;
+    messageId: string;
+  }): Promise<void> {
+    const { chatId, role, messageId, participantId } = data;
+    const chat = await this._chatRepository.findById(chatId);
+    if (!chat) {
+      throw new CustomError(CHAT.NOT_FOUND);
+    }
+    if (
+      !chat.isActive ||
+      (role === ROLE.WORKER && chat.workerId.toString() !== participantId) ||
+      (role === ROLE.USER && chat.userId.toString() !== participantId)
+    ) {
+      throw new CustomError(CHAT.UNAUTHORIZED);
+    }
+    const message = await this._messageRepository.findByIdAndUpdate(messageId, { isDeleted: true });
+    if (!message) {
+      throw new CustomError(CHAT.MESSAGE_NOT_FOUND);
+    }
   }
 }

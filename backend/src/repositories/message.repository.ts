@@ -1,9 +1,11 @@
 import { injectable } from "inversify";
 import { FilterQuery, Types } from "mongoose";
 
+import { SenderRole } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { ChatMessage } from "@/models/chatMessage.model";
+import { LatestMessageResult, UnreadCountResult } from "@/types/chat/chat.projection";
 import { MessageQuery } from "@/types/chat/chat.query";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
@@ -15,15 +17,12 @@ export class MessageRepository extends BaseRepository<IChatMessage> implements I
   }
 
   async getMessages(filter: MessageQuery): Promise<CursorPaginatedResult<IChatMessage>> {
-    const { bookingId, limit, cursor, isDeleted } = filter;
+    const { chatId, limit, cursor } = filter;
 
     const andConditions: FilterQuery<IChatMessage>[] = [];
     const query: FilterQuery<IChatMessage> = {
-      bookingId: new Types.ObjectId(bookingId),
+      chatId: new Types.ObjectId(chatId),
     };
-    if (isDeleted !== undefined) {
-      query.isDeleted = isDeleted;
-    }
 
     if (cursor) {
       andConditions.push({
@@ -63,5 +62,63 @@ export class MessageRepository extends BaseRepository<IChatMessage> implements I
       data: docs,
       nextCursor: nextCursor,
     };
+  }
+
+  async getLatestMessages(chatIds: string[]): Promise<LatestMessageResult[]> {
+    return this.model.aggregate<LatestMessageResult>([
+      {
+        $match: {
+          chatId: { $in: chatIds.map((id) => new Types.ObjectId(id)) },
+          isDeleted: false,
+        },
+      },
+      {
+        $sort: {
+          chatId: 1,
+          createdAt: -1,
+        },
+      },
+      {
+        $group: {
+          _id: "$chatId",
+          message: {
+            $first: "$$ROOT",
+          },
+        },
+      },
+    ]);
+  }
+
+  async getUnreadCounts(chatIds: string[], role: SenderRole): Promise<UnreadCountResult[]> {
+    return this.model.aggregate<UnreadCountResult>([
+      {
+        $match: {
+          chatId: { $in: chatIds.map((id) => new Types.ObjectId(id)) },
+          isDeleted: false,
+          role: { $ne: role },
+          readByRoles: { $ne: role },
+        },
+      },
+      {
+        $group: {
+          _id: "$chatId",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+  }
+
+  async markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<void> {
+    await this.model.updateMany(
+      {
+        chatId: new Types.ObjectId(chatId),
+        role: { $ne: role },
+        readByRoles: { $ne: role },
+        isDeleted: false,
+      },
+      {
+        $addToSet: { readByRoles: role },
+      }
+    );
   }
 }
