@@ -340,7 +340,7 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
           }}
         />
       </div>
-      <MessageInput chatId={chat.id} role={role} />
+      <MessageInput chatId={chat.id} role={role} disabled={!chat.isActive} />
     </main>
   );
 }

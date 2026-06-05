@@ -18,6 +18,7 @@ import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepos
 import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
+import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
@@ -46,6 +47,7 @@ export class DisputeService implements IDisputeService {
     @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
 
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.ChatService) private _chatService: IChatService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
@@ -240,6 +242,9 @@ export class DisputeService implements IDisputeService {
       await Promise.all([
         this._disputeRepository.update(disputeId, disputeUpdate),
         this._bookingRepository.update(booking._id.toString(), bookingUpdate),
+        booking.chatId
+          ? this._chatService.disableChatRoom(booking.chatId.toString())
+          : Promise.resolve(),
       ]);
 
       void this._notificationService.createNotification(
@@ -280,6 +285,9 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
+            booking.chatId
+              ? this._chatService.disableChatRoom(booking.chatId.toString())
+              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(
@@ -343,6 +351,9 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
+            booking.chatId
+              ? this._chatService.disableChatRoom(booking.chatId.toString())
+              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(
@@ -381,6 +392,9 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
+            booking.chatId
+              ? this._chatService.disableChatRoom(booking.chatId.toString())
+              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(

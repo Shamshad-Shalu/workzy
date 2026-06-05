@@ -47,7 +47,8 @@ export default function MessageBubble({ message, currentRole, chat }: Props) {
         : 'sent';
   const StatusIcon = messageStatus === 'sent' ? Check : CheckCheck;
   const showDeletedPlaceholder = isDeleted && !(isAdmin && revealDeleted);
-  const canDelete = isOwn && !isDeleted && dayjs().diff(dayjs(createdAt), 'hour') < 2;
+  const canDelete =
+    isOwn && !isDeleted && chat.isActive && dayjs().diff(dayjs(createdAt), 'hour') < 2;
 
   const handleConfirmDelete = () => {
     socket?.emit('deleteMessage', { messageId: id, chatId: chat.id });

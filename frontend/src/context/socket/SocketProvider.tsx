@@ -67,7 +67,9 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
-          if (!old) {return old;}
+          if (!old) {
+            return old;
+          }
           let targetChat: ChatRoom | undefined;
           const pagesWithoutChat = old.pages.map(page => ({
             ...page,
@@ -79,7 +81,9 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
               return true;
             }),
           }));
-          if (!targetChat) {return old;}
+          if (!targetChat) {
+            return old;
+          }
           const updatedChat: ChatRoom = {
             ...targetChat,
             lastMessage: {
@@ -112,12 +116,16 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         createdAt: Date;
       };
     }) => {
-      if (payload.chatId === activeChatIdRef.current) {return;}
+      if (payload.chatId === activeChatIdRef.current) {
+        return;
+      }
 
       queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
-          if (!old) {return old;}
+          if (!old) {
+            return old;
+          }
           let targetChat: ChatRoom | undefined;
           const pagesWithoutChat = old.pages.map(page => ({
             ...page,
@@ -129,7 +137,9 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
               return true;
             }),
           }));
-          if (!targetChat) {return old;}
+          if (!targetChat) {
+            return old;
+          }
           const updatedChat: ChatRoom = {
             ...targetChat,
             lastMessage: {
@@ -157,14 +167,20 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
-          if (!old) {return old;}
+          if (!old) {
+            return old;
+          }
           return {
             ...old,
             pages: old.pages.map(page => ({
               ...page,
               chats: page.chats.map(c => {
-                if (c.id !== deletedInChatId) {return c;}
-                if (!c.lastMessage) {return c;}
+                if (c.id !== deletedInChatId) {
+                  return c;
+                }
+                if (!c.lastMessage) {
+                  return c;
+                }
                 return { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } };
               }),
             })),
