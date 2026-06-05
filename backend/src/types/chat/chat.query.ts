@@ -1,8 +1,25 @@
+import { SenderRole } from "@/constants";
+
 import { Cursor } from "../common/query";
 
 export interface MessageQuery {
-  bookingId: string;
+  role: SenderRole;
+  chatId: string;
   limit: number;
   cursor?: Cursor | null;
-  isDeleted?: boolean;
+}
+
+interface ChatCursor {
+  updatedAt: Date;
+  _id: string;
+}
+
+export interface ChatQuery {
+  workerId?: string;
+  userId?: string;
+  search?: string;
+  role: SenderRole;
+  limit: number;
+  cursor?: ChatCursor | null;
+  isActive?: boolean;
 }

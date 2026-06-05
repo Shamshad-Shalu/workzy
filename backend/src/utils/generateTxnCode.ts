@@ -1,4 +1,4 @@
-export function generateTxnCode(prefix: "DSP" | "BKG" | "TXN") {
+export function generateTxnCode(prefix: "DSP" | "BKG" | "TXN" | "CHT") {
   const d = new Date();
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");

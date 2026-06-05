@@ -34,13 +34,12 @@ import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository"
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
+import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
-import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import {
   CancelRescheduleDto,
@@ -80,10 +79,9 @@ export class BookingService implements IBookingService {
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.OTPService) private _otpService: IOTPService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
+    @inject(TYPES.ChatService) private _chatService: IChatService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.NotificationService) private _notificationService: INotificationService,
-    @inject(TYPES.SlotService) private _slotService: ISlotService,
-    @inject(TYPES.RedisService) private _redisService: IRedisService
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
@@ -217,11 +215,16 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
       },
     });
-    await this._slotRepository.deleteMany({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(userId),
-      status: SLOT_STATUS.BOOKED,
-    });
+    await Promise.all([
+      this._slotRepository.deleteMany({
+        bookingId: new Types.ObjectId(bookingId),
+        reservedBy: new Types.ObjectId(userId),
+        status: SLOT_STATUS.BOOKED,
+      }),
+      booking.chatId
+        ? this._chatService.disableChatRoom(booking.chatId.toString())
+        : Promise.resolve(),
+    ]);
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_CANCELLED(booking.bookingId)
@@ -286,11 +289,16 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
       },
     });
-    await this._slotRepository.deleteMany({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(booking.userId),
-      status: SLOT_STATUS.BOOKED,
-    });
+    await Promise.all([
+      this._slotRepository.deleteMany({
+        bookingId: new Types.ObjectId(bookingId),
+        reservedBy: new Types.ObjectId(booking.userId),
+        status: SLOT_STATUS.BOOKED,
+      }),
+      booking.chatId
+        ? this._chatService.disableChatRoom(booking.chatId.toString())
+        : Promise.resolve(),
+    ]);
 
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -461,6 +469,9 @@ export class BookingService implements IBookingService {
         ),
       },
     });
+    if (booking.chatId) {
+      await this._chatService.disableChatRoom(booking.chatId.toString());
+    }
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.JOB_APPROVED(booking.bookingId, booking.snapshot.user.name)
@@ -594,6 +605,9 @@ export class BookingService implements IBookingService {
           { _id: booking.workerId },
           { $inc: { noResponses: 1 } }
         ),
+        booking.chatId
+          ? this._chatService.disableChatRoom(booking.chatId.toString())
+          : Promise.resolve(),
       ]);
       void this._notificationService.createNotification(
         booking.userId.toString(),

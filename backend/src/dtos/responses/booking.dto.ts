@@ -253,7 +253,7 @@ export class BookingResponseDTO {
     dto.statusHistory = entity.statusHistory;
     dto.hasVisibleReview = entity.hasVisibleReview;
     dto.reviewId = entity.reviewId ? entity.reviewId.toString() : undefined;
-    dto.chatId = entity.chatId;
+    dto.chatId = entity.chatId ? entity.chatId.toString() : undefined;
     dto.userNote = entity.userNote;
 
     dto.completedAt = entity.completedAt || null;

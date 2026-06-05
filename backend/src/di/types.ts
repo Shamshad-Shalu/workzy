@@ -88,6 +88,10 @@ const TYPES = {
   MessageController: Symbol.for("MessageController"),
   MessageService: Symbol.for("MessageService"),
   MessageRepository: Symbol.for("MessageRepository"),
+
+  ChatController: Symbol.for("ChatController"),
+  ChatService: Symbol.for("ChatService"),
+  ChatRepository: Symbol.for("ChatRepository"),
 };
 
 export { TYPES };

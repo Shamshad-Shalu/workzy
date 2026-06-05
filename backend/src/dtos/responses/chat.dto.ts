@@ -1,59 +1,78 @@
-import { ROLE } from "@/constants";
-import { type MessageType, type SenderRole } from "@/constants/chat";
+import { MessageType, SenderRole } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { ChatListItem } from "@/types/chat/chat.projection";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
-interface SenderInfo {
-  name: string;
-  profileImage?: string;
+export interface ChatRoomListItem {
+  chat: ChatListItem;
+  message?: IChatMessage;
+  unread?: number;
 }
 
-export type ChatMessageWithSender = IChatMessage & { senderInfo: SenderInfo };
-
-export class ChatMessageResponseDTO {
+export class ChatResponseDTO {
   id!: string;
-  type!: MessageType;
-  role!: SenderRole;
-  sender!: {
-    id: string;
-    name: string;
-    profileImage?: string;
-  };
-  content?: string;
-  mediaUrl?: string;
-  isRead!: boolean;
-  isDeleted!: boolean;
-  createdAt!: Date;
-
-  static async fromEntity(
-    entity: ChatMessageWithSender,
-    s3Service: IS3Service
-  ): Promise<ChatMessageResponseDTO> {
-    const dto = new ChatMessageResponseDTO();
-
-    dto.id = entity._id.toString();
-    dto.type = entity.type;
-    dto.role = entity.role;
-    dto.sender = {
-      id: entity.senderId.toString(),
-      name: entity.senderInfo.name,
-      profileImage:
-        entity.role === ROLE.WORKER
-          ? entity.senderInfo.profileImage
-          : await resolveS3Image(entity.senderInfo.profileImage, s3Service),
+  chatId!: string;
+  bookingId!: string;
+  participants!: {
+    user: {
+      id: string;
+      name: string;
+      profileImage?: string;
     };
-    dto.content = entity.content;
-    dto.mediaUrl = entity.mediaUrl;
-    dto.isRead = entity.isRead;
-    dto.isDeleted = entity.isDeleted;
-    dto.createdAt = entity.createdAt;
+    worker: {
+      id: string;
+      name: string;
+      profileImage?: string;
+    };
+  };
+  isActive!: boolean;
+  unread?: number;
+  lastMessage?: {
+    type: MessageType;
+    role: SenderRole;
+    content?: string;
+    createdAt: Date;
+  };
+  static async fromEntity(
+    { chat, message, unread }: ChatRoomListItem,
+    s3Service: IS3Service
+  ): Promise<ChatResponseDTO> {
+    const dto = new ChatResponseDTO();
+
+    dto.id = chat._id.toString();
+    dto.chatId = chat.chatId;
+    dto.bookingId = chat.bookingId.bookingId;
+
+    dto.participants = {
+      user: {
+        id: chat.userId._id.toString(),
+        name: chat.userId.name,
+        profileImage: await resolveS3Url(chat.userId.profileImage, s3Service),
+      },
+      worker: {
+        id: chat.workerId._id.toString(),
+        name: chat.workerId.displayName,
+        profileImage: chat.workerId.profileImage,
+      },
+    };
+    dto.isActive = chat.isActive;
+    dto.unread = unread;
+    dto.lastMessage = message
+      ? {
+          role: message.role,
+          type: message.type,
+          content: message.content,
+          createdAt: message.createdAt,
+        }
+      : undefined;
     return dto;
   }
+
   static async fromEntities(
-    entities: ChatMessageWithSender[],
+    entities: ChatRoomListItem[],
     s3Service: IS3Service
-  ): Promise<ChatMessageResponseDTO[]> {
+  ): Promise<ChatResponseDTO[]> {
     return await Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }

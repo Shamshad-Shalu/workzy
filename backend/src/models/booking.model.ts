@@ -199,6 +199,10 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Review",
     },
+    chatId: {
+      type: Schema.Types.ObjectId,
+      ref: "Chat",
+    },
     snapshot: {
       type: BookingSnapshotSchema,
       required: true,
@@ -269,9 +273,6 @@ const BookingSchema: Schema<IBooking> = new Schema(
     },
     total: { type: Number, required: true, min: 0 },
     otp: {
-      type: String,
-    },
-    chatId: {
       type: String,
     },
     extraCharge: { type: ExtraChargeSchema, default: null },
