@@ -1,12 +1,10 @@
 import { MessageType, SenderRole } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ChatListItem } from "@/types/chat/chat.projection";
-import { IChatMessage } from "@/types/chat/chatMessage.entity";
 import { resolveS3Url } from "@/utils/s3.utils";
 
 export interface ChatRoomListItem {
   chat: ChatListItem;
-  message?: IChatMessage;
   unread?: number;
 }
 
@@ -35,10 +33,11 @@ export class ChatResponseDTO {
     createdAt: Date;
   };
   static async fromEntity(
-    { chat, message, unread }: ChatRoomListItem,
+    { chat, unread }: ChatRoomListItem,
     s3Service: IS3Service
   ): Promise<ChatResponseDTO> {
     const dto = new ChatResponseDTO();
+    const { lastMessage } = chat;
 
     dto.id = chat._id.toString();
     dto.chatId = chat.chatId;
@@ -58,12 +57,10 @@ export class ChatResponseDTO {
     };
     dto.isActive = chat.isActive;
     dto.unread = unread;
-    dto.lastMessage = message
+    dto.lastMessage = lastMessage
       ? {
-          role: message.role,
-          type: message.type,
-          content: message.content,
-          createdAt: message.createdAt,
+          ...lastMessage,
+          content: lastMessage.isDeleted ? undefined : lastMessage.content,
         }
       : undefined;
     return dto;

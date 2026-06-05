@@ -1,7 +1,7 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { BOOKING, CHAT, HTTPSTATUS, ROLE } from "@/constants";
+import { CHAT } from "@/constants";
 import { MessageType, SenderRole } from "@/constants/chat";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
@@ -40,14 +40,8 @@ export class MessageService implements IMessageService {
     content?: string;
     mediaUrl?: string;
   }): Promise<ChatMessageResponseDTO> {
-    const { chatId, senderId, role, type, content, mediaUrl } = data;
-    const chat = await this._chatService.getChatRoomById({ chatId, participantId: senderId, role });
-    if (!chat.isActive) {
-      throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
-    }
-    if (!Types.ObjectId.isValid(chatId)) {
-      throw new CustomError(BOOKING.INVALID_BOOKING_ID);
-    }
+    const { chatId, role, type, content, mediaUrl } = data;
+
     const mediaUrlKey = mediaUrl ? extractKeyFromUrl(mediaUrl) : undefined;
     const messageDoc = await this._messageRepository.create({
       chatId: new Types.ObjectId(chatId),
@@ -56,6 +50,14 @@ export class MessageService implements IMessageService {
       content,
       mediaUrl: mediaUrlKey,
       isDeleted: false,
+    });
+    await this._chatRepository.findByIdAndUpdate(chatId, {
+      lastMessage: {
+        type,
+        role,
+        content,
+        createdAt: messageDoc.createdAt,
+      },
     });
 
     return await ChatMessageResponseDTO.fromEntity(messageDoc, this._s3Service, role);
@@ -70,21 +72,17 @@ export class MessageService implements IMessageService {
     chatId: string;
     messageId: string;
   }): Promise<void> {
-    const { chatId, role, messageId, participantId } = data;
-    const chat = await this._chatRepository.findById(chatId);
-    if (!chat) {
-      throw new CustomError(CHAT.NOT_FOUND);
-    }
-    if (
-      !chat.isActive ||
-      (role === ROLE.WORKER && chat.workerId.toString() !== participantId) ||
-      (role === ROLE.USER && chat.userId.toString() !== participantId)
-    ) {
-      throw new CustomError(CHAT.UNAUTHORIZED);
-    }
+    const { chatId, messageId } = data;
     const message = await this._messageRepository.findByIdAndUpdate(messageId, { isDeleted: true });
     if (!message) {
       throw new CustomError(CHAT.MESSAGE_NOT_FOUND);
     }
+    await this._chatRepository.findOneAndUpdate(
+      {
+        _id: new Types.ObjectId(chatId),
+        "lastMessage.createdAt": message.createdAt,
+      },
+      { "lastMessage.isDeleted": true }
+    );
   }
 }

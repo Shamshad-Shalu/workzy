@@ -1,11 +1,10 @@
 import { Types } from "mongoose";
 
 import { IChat } from "./chat.entity";
-import { IChatMessage } from "./chatMessage.entity";
 
 export type ChatListItem = Pick<
   IChat,
-  "_id" | "chatId" | "isActive" | "updatedAt" | "createdAt"
+  "_id" | "chatId" | "isActive" | "updatedAt" | "createdAt" | "lastMessage"
 > & {
   workerId: {
     _id: Types.ObjectId;
@@ -22,11 +21,6 @@ export type ChatListItem = Pick<
     bookingId: string;
   };
 };
-
-export interface LatestMessageResult {
-  _id: Types.ObjectId;
-  message: IChatMessage;
-}
 
 export interface UnreadCountResult {
   _id: Types.ObjectId;

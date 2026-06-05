@@ -2,11 +2,12 @@ import { inject, injectable } from "inversify";
 import { Server as SocketIOServer, Socket } from "socket.io";
 
 import logger from "@/config/logger";
-import { ROLE } from "@/constants";
+import { CHAT, HTTPSTATUS, ROLE } from "@/constants";
 import { MessageType, SenderRole } from "@/constants/chat";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { TYPES } from "@/di/types";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class SocketController {
@@ -62,6 +63,15 @@ export class SocketController {
           mediaUrl?: string;
         }) => {
           try {
+            const chat = await this._chatService.getChatRoomById({
+              chatId,
+              participantId,
+              role,
+            });
+            if (!chat.isActive) {
+              throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
+            }
+
             const savedMsg = await this._messageService.saveMessage({
               chatId,
               senderId: participantId,
@@ -72,6 +82,21 @@ export class SocketController {
             });
 
             io.to(chatId).emit("newMessage", savedMsg);
+
+            const chatUpdatedPayload = {
+              chatId,
+              senderId: participantId,
+              lastMessage: {
+                type: savedMsg.type,
+                role: savedMsg.role,
+                content: savedMsg.content,
+                createdAt: savedMsg.createdAt,
+              },
+            };
+            const { user, worker } = chat.participants;
+
+            io.to(user.id).emit("chatUpdated", chatUpdatedPayload);
+            io.to(worker.id).emit("chatUpdated", chatUpdatedPayload);
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : "Failed to send message";
             socket.emit("error", { message: msg });
@@ -83,13 +108,23 @@ export class SocketController {
         "deleteMessage",
         async ({ messageId, chatId }: { messageId: string; chatId: string }) => {
           try {
+            const chat = await this._chatService.getChatRoomById({
+              chatId,
+              participantId,
+              role,
+            });
+            if (!chat.isActive) {
+              throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
+            }
             await this._messageService.deleteMessage({
               messageId,
               chatId,
               participantId,
               role,
             });
-            io.to(chatId).emit("messageDeleted", { messageId });
+            const { user, worker } = chat.participants;
+            io.to(user.id).emit("messageDeleted", { messageId, chatId });
+            io.to(worker.id).emit("messageDeleted", { messageId, chatId });
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : "Failed to delete message";
             socket.emit("error", { message: msg });

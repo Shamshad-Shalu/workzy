@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
+import { MESSAGE_TYPE_VALUES, ROLE_VALUES } from "@/constants";
 import { IChat } from "@/types/chat/chat.entity";
 import { generateTxnCode } from "@/utils/generateTxnCode";
 
@@ -34,6 +35,22 @@ const ChatSchema = new Schema<IChat>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    lastMessage: {
+      type: {
+        type: String,
+        enum: MESSAGE_TYPE_VALUES,
+      },
+      role: {
+        type: String,
+        enum: ROLE_VALUES,
+      },
+      content: { type: String },
+      createdAt: { type: Date },
+      isDeleted: {
+        type: Boolean,
+        default: false,
+      },
     },
   },
   {

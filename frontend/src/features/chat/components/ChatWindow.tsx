@@ -161,6 +161,7 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
               role: msg.role,
               content: msg.content,
               createdAt: msg.createdAt,
+              isDeleted: msg.isDeleted,
             },
             unread: 0,
           };

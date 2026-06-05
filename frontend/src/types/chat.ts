@@ -23,6 +23,7 @@ export interface ChatRoom {
     role: Role;
     content?: string;
     createdAt: Date;
+    isDeleted: boolean;
   };
 }
 

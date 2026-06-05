@@ -81,9 +81,15 @@ function formatDuration(seconds: number) {
 
 function resolveMediaType(file: File): MessageType | null {
   const mime = normalizeMimeType(file.type);
-  if (mime.startsWith('video/')) {return MESSAGE_TYPE.VIDEO;}
-  if (mime.startsWith('image/')) {return MESSAGE_TYPE.IMAGE;}
-  if (mime.startsWith('audio/')) {return MESSAGE_TYPE.AUDIO;}
+  if (mime.startsWith('video/')) {
+    return MESSAGE_TYPE.VIDEO;
+  }
+  if (mime.startsWith('image/')) {
+    return MESSAGE_TYPE.IMAGE;
+  }
+  if (mime.startsWith('audio/')) {
+    return MESSAGE_TYPE.AUDIO;
+  }
   return null;
 }
 
@@ -207,19 +213,25 @@ export default function MessageInput({
 
   const clearPendingAttachment = useCallback(() => {
     setPendingAttachment(prev => {
-      if (prev?.previewUrl) {URL.revokeObjectURL(prev.previewUrl);}
+      if (prev?.previewUrl) {
+        URL.revokeObjectURL(prev.previewUrl);
+      }
       return null;
     });
   }, []);
 
   useEffect(() => {
     return () => {
-      if (pendingAttachment?.previewUrl) {URL.revokeObjectURL(pendingAttachment.previewUrl);}
+      if (pendingAttachment?.previewUrl) {
+        URL.revokeObjectURL(pendingAttachment.previewUrl);
+      }
     };
   }, [pendingAttachment?.previewUrl]);
 
   useEffect(() => {
-    if (!recording) {return;}
+    if (!recording) {
+      return;
+    }
     setRecordSeconds(0);
     recordSecondsRef.current = 0;
     const id = setInterval(() => {
@@ -256,7 +268,9 @@ export default function MessageInput({
 
   const handleSend = async (values: MessageInputFormValues) => {
     const caption = values.content.trim();
-    if (!caption && !pendingAttachment) {return;}
+    if (!caption && !pendingAttachment) {
+      return;
+    }
 
     setSending(true);
     try {
@@ -283,7 +297,9 @@ export default function MessageInput({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = Array.from(e.target.files ?? [])[0];
     e.target.value = '';
-    if (!file) {return;}
+    if (!file) {
+      return;
+    }
 
     const type = resolveMediaType(file);
     if (!type || (type !== MESSAGE_TYPE.IMAGE && type !== MESSAGE_TYPE.VIDEO)) {
@@ -304,7 +320,9 @@ export default function MessageInput({
   const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = Array.from(e.target.files ?? [])[0];
     e.target.value = '';
-    if (!file) {return;}
+    if (!file) {
+      return;
+    }
 
     const type = resolveMediaType(file);
     if (type !== MESSAGE_TYPE.AUDIO) {
@@ -334,7 +352,9 @@ export default function MessageInput({
       audioChunksRef.current = [];
 
       recorder.ondataavailable = ev => {
-        if (ev.data.size > 0) {audioChunksRef.current.push(ev.data);}
+        if (ev.data.size > 0) {
+          audioChunksRef.current.push(ev.data);
+        }
       };
 
       mediaRecorderRef.current = recorder;

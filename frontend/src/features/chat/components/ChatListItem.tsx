@@ -1,3 +1,5 @@
+import { Ban } from 'lucide-react';
+
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { MESSAGE_TYPE, ROLE, type Role } from '@/constants';
 import { useSocket } from '@/context/socket/use-socket';
@@ -18,14 +20,6 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
   const isAdmin = role === ROLE.ADMIN;
   const profilePart =
     role === ROLE.WORKER ? participants.user : role === ROLE.USER ? participants.worker : null;
-  const lastMessageContent =
-    lastMessage?.type === MESSAGE_TYPE.VIDEO
-      ? '🎥 Video'
-      : lastMessage?.type === MESSAGE_TYPE.IMAGE
-        ? '📷 Photo'
-        : lastMessage?.type === MESSAGE_TYPE.AUDIO
-          ? '🎵 Audio'
-          : lastMessage?.content?.substring(0, 20);
 
   const otherUserId = role === ROLE.USER ? chat.participants.worker.id : chat.participants.user.id;
 
@@ -62,15 +56,41 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
           )}
         </div>
         <div className="flex items-center justify-between gap-2">
-          <p className="truncate text-sm text-muted-foreground">
-            {isAdmin
-              ? `${participants.user.name} ↔ ${participants.worker.name}`
-              : lastMessage
-                ? lastMessage?.role === role
-                  ? `You: ${lastMessageContent}`
-                  : `${lastMessage?.role}: ${lastMessageContent}`
-                : 'No messages yet'}
-          </p>
+          <div className="truncate text-sm text-muted-foreground flex items-center gap-1">
+            {isAdmin ? (
+              <span>
+                {participants.user.name} ↔ {participants.worker.name}
+              </span>
+            ) : lastMessage ? (
+              lastMessage.isDeleted ? (
+                <span className="flex items-center italic text-xs opacity-70 gap-1">
+                  <Ban className="size-3" />
+                  {lastMessage.role === role
+                    ? 'You deleted this message'
+                    : 'This message was deleted'}
+                </span>
+              ) : (
+                <>
+                  <span className="font-medium text-foreground/80">
+                    {lastMessage.role === role ? 'You:' : `${lastMessage.role}:`}
+                  </span>
+
+                  {lastMessage.type === MESSAGE_TYPE.VIDEO ? (
+                    '🎥 Video'
+                  ) : lastMessage.type === MESSAGE_TYPE.IMAGE ? (
+                    '📷 Photo'
+                  ) : lastMessage.type === MESSAGE_TYPE.AUDIO ? (
+                    '🎵 Audio'
+                  ) : (
+                    <span className="truncate">{lastMessage.content?.substring(0, 20)}</span>
+                  )}
+                </>
+              )
+            ) : (
+              'No messages yet'
+            )}
+          </div>
+
           {!active && role !== ROLE.ADMIN && unread > 0 && (
             <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
               {unread}

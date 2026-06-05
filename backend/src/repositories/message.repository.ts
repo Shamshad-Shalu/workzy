@@ -5,7 +5,7 @@ import { SenderRole } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { ChatMessage } from "@/models/chatMessage.model";
-import { LatestMessageResult, UnreadCountResult } from "@/types/chat/chat.projection";
+import { UnreadCountResult } from "@/types/chat/chat.projection";
 import { MessageQuery } from "@/types/chat/chat.query";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
@@ -62,31 +62,6 @@ export class MessageRepository extends BaseRepository<IChatMessage> implements I
       data: docs,
       nextCursor: nextCursor,
     };
-  }
-
-  async getLatestMessages(chatIds: string[]): Promise<LatestMessageResult[]> {
-    return this.model.aggregate<LatestMessageResult>([
-      {
-        $match: {
-          chatId: { $in: chatIds.map((id) => new Types.ObjectId(id)) },
-          isDeleted: false,
-        },
-      },
-      {
-        $sort: {
-          chatId: 1,
-          createdAt: -1,
-        },
-      },
-      {
-        $group: {
-          _id: "$chatId",
-          message: {
-            $first: "$$ROOT",
-          },
-        },
-      },
-    ]);
   }
 
   async getUnreadCounts(chatIds: string[], role: SenderRole): Promise<UnreadCountResult[]> {

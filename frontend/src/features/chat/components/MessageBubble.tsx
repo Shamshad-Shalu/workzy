@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { Ban, Check, CheckCheck, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -46,6 +47,7 @@ export default function MessageBubble({ message, currentRole, chat }: Props) {
         : 'sent';
   const StatusIcon = messageStatus === 'sent' ? Check : CheckCheck;
   const showDeletedPlaceholder = isDeleted && !(isAdmin && revealDeleted);
+  const canDelete = isOwn && !isDeleted && dayjs().diff(dayjs(createdAt), 'hour') < 2;
 
   const handleConfirmDelete = () => {
     socket?.emit('deleteMessage', { messageId: id, chatId: chat.id });
@@ -200,10 +202,13 @@ export default function MessageBubble({ message, currentRole, chat }: Props) {
               </>
             )}
           </div>
-          {isOwn && !isDeleted && (
+          {canDelete && (
             <button
               onClick={() => setAskDelete(true)}
-              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-destructive/10"
+              className={cn(
+                'opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-full hover:bg-destructive/10',
+                isOwn ? 'order-first' : 'order-last'
+              )}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </button>

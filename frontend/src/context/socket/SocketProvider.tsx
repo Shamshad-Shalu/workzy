@@ -2,7 +2,7 @@ import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { io } from 'socket.io-client';
 
-import { HOST, MODE } from '@/constants';
+import { HOST, MODE, type MessageType, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 import type { ChatRoom } from '@/types/chat';
@@ -20,7 +20,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
   const queryClient = useQueryClient();
-
   const activeChatIdRef = useRef<string | null>(null);
 
   const socket = useMemo(() => {
@@ -48,26 +47,18 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socket.on('disconnect', reason => console.log('Socket disconnected:', reason));
     socket.on('error', error => console.error('Socket error:', error));
 
-    socket.on('onlineUsers', (users: string[]) => {
-      setOnlineUsers(new Set(users));
-    });
-
-    socket.on('userOnline', ({ userId }: { userId: string }) => {
-      setOnlineUsers(prev => new Set(prev).add(userId));
-    });
-
-    socket.on('userOffline', ({ userId }: { userId: string }) => {
+    socket.on('onlineUsers', (users: string[]) => setOnlineUsers(new Set(users)));
+    socket.on('userOnline', ({ userId }: { userId: string }) =>
+      setOnlineUsers(prev => new Set(prev).add(userId))
+    );
+    socket.on('userOffline', ({ userId }: { userId: string }) =>
       setOnlineUsers(prev => {
-        const next = new Set(prev);
-        next.delete(userId);
-        return next;
-      });
-    });
+        const n = new Set(prev);
+        n.delete(userId);
+        return n;
+      })
+    );
 
-    // FIX — Global newMessage handler for BACKGROUND chats.
-    // ChatWindow handles the active chat (increments messages in cache, keeps
-    // unread at 0). This handler only fires for chats that are NOT open,
-    // incrementing their unread badge in the sidebar.
     const handleGlobalNewMessage = (msg: ChatMessage) => {
       if (msg.chatId === activeChatIdRef.current) {
         return;
@@ -76,12 +67,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
-          if (!old) {
-            return old;
-          }
-
+          if (!old) {return old;}
           let targetChat: ChatRoom | undefined;
-
           const pagesWithoutChat = old.pages.map(page => ({
             ...page,
             chats: page.chats.filter(c => {
@@ -92,10 +79,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
               return true;
             }),
           }));
-          if (!targetChat) {
-            return old;
-          }
-
+          if (!targetChat) {return old;}
           const updatedChat: ChatRoom = {
             ...targetChat,
             lastMessage: {
@@ -103,6 +87,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
               role: msg.role,
               content: msg.content,
               createdAt: msg.createdAt,
+              isDeleted: msg.isDeleted,
             },
             unread: (targetChat.unread ?? 0) + 1,
           };
@@ -117,7 +102,80 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       );
     };
 
+    const handleChatUpdated = (payload: {
+      chatId: string;
+      senderId: string;
+      lastMessage: {
+        type: MessageType;
+        role: Role;
+        content?: string;
+        createdAt: Date;
+      };
+    }) => {
+      if (payload.chatId === activeChatIdRef.current) {return;}
+
+      queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
+        { queryKey: ['chats'], exact: false },
+        old => {
+          if (!old) {return old;}
+          let targetChat: ChatRoom | undefined;
+          const pagesWithoutChat = old.pages.map(page => ({
+            ...page,
+            chats: page.chats.filter(c => {
+              if (c.id === payload.chatId) {
+                targetChat = c;
+                return false;
+              }
+              return true;
+            }),
+          }));
+          if (!targetChat) {return old;}
+          const updatedChat: ChatRoom = {
+            ...targetChat,
+            lastMessage: {
+              ...payload.lastMessage,
+              isDeleted: false,
+            },
+            unread: (targetChat.unread ?? 0) + 1,
+          };
+          return {
+            ...old,
+            pages: pagesWithoutChat.map((page, i) =>
+              i === 0 ? { ...page, chats: [updatedChat, ...page.chats] } : page
+            ),
+          };
+        }
+      );
+    };
+
+    const handleGlobalMessageDeleted = ({
+      chatId: deletedInChatId,
+    }: {
+      messageId: string;
+      chatId: string;
+    }) => {
+      queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
+        { queryKey: ['chats'], exact: false },
+        old => {
+          if (!old) {return old;}
+          return {
+            ...old,
+            pages: old.pages.map(page => ({
+              ...page,
+              chats: page.chats.map(c => {
+                if (c.id !== deletedInChatId) {return c;}
+                if (!c.lastMessage) {return c;}
+                return { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } };
+              }),
+            })),
+          };
+        }
+      );
+    };
+
+    socket.on('messageDeleted', handleGlobalMessageDeleted);
     socket.on('newMessage', handleGlobalNewMessage);
+    socket.on('chatUpdated', handleChatUpdated);
 
     return () => {
       socket.off('connect');
@@ -127,6 +185,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       socket.off('userOnline');
       socket.off('userOffline');
       socket.off('newMessage', handleGlobalNewMessage);
+      socket.off('chatUpdated', handleChatUpdated);
+      socket.off('messageDeleted', handleGlobalMessageDeleted);
       socket.disconnect();
     };
   }, [socket, queryClient]);

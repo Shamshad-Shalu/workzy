@@ -75,7 +75,7 @@ export class ChatService implements IChatService {
     if (!chat) {
       throw new CustomError(CHAT.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    this.authorizeAccess({ participantId, role, chat });
+    this.authorizeChatAccess({ participantId, role, chat });
     return await ChatResponseDTO.fromEntity({ chat }, this._s3Service);
   }
 
@@ -87,19 +87,11 @@ export class ChatService implements IChatService {
     }
     const chatIds = data.map((chat) => chat._id.toString());
 
-    const [latestMessages, unreadCounts] = await Promise.all([
-      this._messageRepository.getLatestMessages(chatIds),
-      this._messageRepository.getUnreadCounts(chatIds, input.role),
-    ]);
-
-    const latestMessageMap = new Map(
-      latestMessages.map((item) => [item._id.toString(), item.message])
-    );
+    const unreadCounts = await this._messageRepository.getUnreadCounts(chatIds, input.role);
     const unreadCountMap = new Map(unreadCounts.map((item) => [item._id.toString(), item.count]));
 
     const chatRooms: ChatRoomListItem[] = data.map((chat) => ({
       chat,
-      message: latestMessageMap.get(chat._id.toString()),
       unread: unreadCountMap.get(chat._id.toString()) ?? 0,
     }));
 
@@ -109,7 +101,11 @@ export class ChatService implements IChatService {
     };
   }
 
-  private authorizeAccess(data: { chat: ChatListItem; participantId: string; role: string }): void {
+  private authorizeChatAccess(data: {
+    chat: ChatListItem;
+    participantId: string;
+    role: string;
+  }): void {
     const { participantId, role, chat } = data;
     if (role === ROLE.ADMIN) {
       return;
