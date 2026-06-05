@@ -8,3 +8,4 @@ export * from './apiRoutes/index';
 export * from './upload';
 export * from './booking';
 export * from './worker';
+export * from './chat';

@@ -8,6 +8,7 @@ import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesList
 
 import ProtectedRoute from './ProtectedRoute';
 
+const WorkerChatPage = lazy(() => import('@/features/worker/chat/pages/WorkerChatPage'));
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDisputesPage = lazy(
   () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
@@ -48,6 +49,10 @@ export default function WorkerRoutes() {
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
           <Route path="quotes" element={<WorkerQuotesListPage />} />
+          <Route path="messages">
+            <Route index element={<WorkerChatPage />} />
+            <Route path=":chatId" element={<WorkerChatPage />} />
+          </Route>
           <Route path="disputes" element={<WorkerDisputesPage />} />
           <Route path="quotes/:bookingId" element={<WorkerQuotePage />} />
           <Route path="profile" element={<WorkerProfileRouteLayout />}>

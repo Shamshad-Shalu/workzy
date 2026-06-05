@@ -19,7 +19,7 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
-  const socket = useSocket();
+  const { socket } = useSocket();
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count', user?.id],

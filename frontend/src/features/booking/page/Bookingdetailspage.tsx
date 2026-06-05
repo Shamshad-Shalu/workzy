@@ -30,15 +30,16 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, useNavigate } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { BOOKING_STATUS, ROLE } from '@/constants';
+import { BOOKING_STATUS, CHAT_BLOCKED_STATUSES, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
+import { useCreateChatRoom } from '@/features/chat/hooks/useChats';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
 import PageError from '@/pages/PageError';
@@ -534,6 +535,26 @@ function ActionPanel({
   const isAdmin = role === ROLE.ADMIN;
   const isUser = role === ROLE.USER;
   const isWorker = role === ROLE.WORKER;
+  const navigate = useNavigate();
+  const { mutateAsync: createChatRoom, isPending } = useCreateChatRoom();
+
+  const isChatAllowedStage = !CHAT_BLOCKED_STATUSES.has(b.status);
+  const handleNavigateToChat = async () => {
+    if (b.chatId) {
+      if (role === ROLE.USER) {
+        navigate(`/messages/${b.chatId}`);
+      } else {
+        navigate(`/${role}/messages/${b.chatId}`);
+      }
+      return;
+    }
+    const chat = await createChatRoom({ bookingId: b.id });
+    if (role === ROLE.USER) {
+      navigate(`/messages/${chat.id}`);
+    } else {
+      navigate(`/${role}/messages/${chat.id}`);
+    }
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -548,7 +569,16 @@ function ActionPanel({
       )}
       <div className="grid grid-cols-2 gap-2">
         <ActionBtn icon={Phone} label="Call Worker" accent="violet" />
-        <ActionBtn icon={MessageCircle} label="Open Chat" accent="sky" />
+
+        {(isChatAllowedStage || !!b.chatId) && (
+          <ActionBtn
+            icon={MessageCircle}
+            label={isPending ? 'Starting...' : b.chatId ? 'Open Chat' : 'Start Chat'}
+            accent="sky"
+            onClick={handleNavigateToChat}
+            disabled={isPending}
+          />
+        )}
       </div>
 
       {isUser && (
@@ -956,12 +986,14 @@ function ActionBtn({
   accent,
   onClick,
   full = false,
+  disabled = false,
 }: {
   icon: React.ElementType;
   label: string;
   accent: 'violet' | 'sky' | 'amber' | 'green' | 'red';
   onClick?: () => void;
   full?: boolean;
+  disabled?: boolean;
 }) {
   const cls: Record<string, string> = {
     violet:
@@ -976,8 +1008,9 @@ function ActionBtn({
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        'flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200',
+        'flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200 disabled:pointer-events-none disabled:opacity-55',
         cls[accent],
         full && 'col-span-2 w-full'
       )}

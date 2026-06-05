@@ -108,3 +108,10 @@ export const RESCHEDULE_STEPS = {
   PREVIEW: 'preview',
 } as const;
 export type RescheduleStep = (typeof RESCHEDULE_STEPS)[keyof typeof RESCHEDULE_STEPS];
+
+export const CHAT_BLOCKED_STATUSES = new Set<BookingStatus>([
+  BOOKING_STATUS.APPROVED,
+  BOOKING_STATUS.CANCELLED,
+  BOOKING_STATUS.REJECTED,
+  BOOKING_STATUS.EXPIRED,
+]);

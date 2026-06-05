@@ -14,6 +14,7 @@ import {
   ChevronDown,
   CreditCard,
   FileText,
+  MessageSquare,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -239,6 +240,10 @@ export default function Header() {
                     <DropdownMenuItem onClick={() => navigate('/disputes')}>
                       <CreditCard className="h-4 w-4 mr-2" />
                       Support
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/messages')}>
+                      <MessageSquare className="h-4 w-4 mr-2" />
+                      Messages
                     </DropdownMenuItem>
 
                     {user?.role === ROLE.WORKER && (
