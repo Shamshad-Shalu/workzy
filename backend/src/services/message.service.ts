@@ -53,9 +53,11 @@ export class MessageService implements IMessageService {
     });
     await this._chatRepository.findByIdAndUpdate(chatId, {
       lastMessage: {
+        messageId: messageDoc._id,
         type,
         role,
         content,
+        isDeleted: false,
         createdAt: messageDoc.createdAt,
       },
     });
@@ -80,7 +82,7 @@ export class MessageService implements IMessageService {
     await this._chatRepository.findOneAndUpdate(
       {
         _id: new Types.ObjectId(chatId),
-        "lastMessage.createdAt": message.createdAt,
+        "lastMessage.messageId": new Types.ObjectId(message._id),
       },
       { "lastMessage.isDeleted": true }
     );

@@ -1,10 +1,13 @@
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
-import { ArrowLeft, Loader2, MoreVertical } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Loader2, MoreVertical } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 
+import ProfileImage from '@/components/molecules/ProfileImage';
 import { ROLE, type Role } from '@/constants';
 import { useSocket } from '@/context/socket/use-socket';
+import { cn } from '@/lib/utils';
 import type { ChatRoom } from '@/types/chat';
 import type { ChatMessage, MessagesResponse } from '@/types/chatMessage';
 import { formatChatDate } from '@/utils/time.format';
@@ -157,6 +160,7 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
           const updatedChat: ChatRoom = {
             ...targetChat,
             lastMessage: {
+              messageId: msg.id,
               type: msg.type,
               role: msg.role,
               content: msg.content,
@@ -263,6 +267,18 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
     };
   }, [socket, chat.id, handleNewMessage, handleMessageDeleted, handleMessagesRead]);
 
+  const bookingHref =
+    role === ROLE.USER
+      ? `/bookings/${chat.bookingMongoId}`
+      : `/${role}/bookings/${chat.bookingMongoId}`;
+  const isAdmin = role === ROLE.ADMIN;
+  const profilePart =
+    role === ROLE.WORKER
+      ? chat.participants.user
+      : role === ROLE.USER
+        ? chat.participants.worker
+        : null;
+
   return (
     <main className="flex flex-1 flex-col h-full bg-muted/30">
       <header className="flex items-center justify-between border-b border-border bg-card px-6 py-3">
@@ -270,30 +286,61 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
           <button className="rounded-full p-1 hover:bg-accent md:hidden">
             <ArrowLeft className="h-5 w-5" />
           </button>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-bold text-primary">
-            {chat.chatId.slice(-4)}
+
+          <div className="flex-shrink-0">
+            {!isAdmin && profilePart ? (
+              <div className="relative">
+                <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={40} />
+                {isOnline && (
+                  <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-500" />
+                )}
+              </div>
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-bold text-primary">
+                {chat.chatId.slice(-4)}
+              </div>
+            )}
           </div>
+
           <div className="min-w-0">
-            <p className="truncate font-mono text-sm font-semibold tracking-tight">{chat.chatId}</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {role === ROLE.ADMIN ? (
-                <>
-                  Booking {chat.bookingId} · {chat.participants.user.name} ↔{' '}
-                  {chat.participants.worker.name}
-                </>
+            <p className="truncate text-sm font-semibold">{chat.chatId}</p>
+
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Link
+                to={bookingHref}
+                className="inline-flex items-center gap-0.5 text-primary/80 transition-colors hover:text-primary hover:underline underline-offset-2"
+              >
+                #{chat.bookingId}
+                <ExternalLink className="h-2.5 w-2.5" />
+              </Link>
+
+              <span className="opacity-40">·</span>
+
+              {isAdmin ? (
+                <span className="truncate">
+                  {chat.participants.user.name} ↔ {chat.participants.worker.name}
+                </span>
               ) : (
-                <>
-                  Booking {chat.bookingId} ·{' '}
-                  <span className={isOnline ? 'text-emerald-500' : 'text-muted-foreground'}>
-                    {isOnline ? 'Online' : 'Offline'}
-                  </span>
-                </>
+                <span className={cn(isOnline ? 'text-emerald-500' : 'text-muted-foreground')}>
+                  {isOnline ? 'Online' : 'Offline'}
+                </span>
               )}
-            </p>
+            </div>
           </div>
         </div>
+
         <div className="flex items-center gap-1">
-          {role !== ROLE.ADMIN && (
+          {isAdmin && (
+            <Link
+              to={bookingHref}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            >
+              <ExternalLink className="h-3.5 w-3.5" />
+              Booking
+            </Link>
+          )}
+
+          {!isAdmin && (
             <button className="rounded-full p-2 hover:bg-accent">
               <MoreVertical className="h-5 w-5" />
             </button>
@@ -340,7 +387,18 @@ export default function ChatWindow({ chat, role = ROLE.ADMIN }: ChatWindowProps)
           }}
         />
       </div>
-      <MessageInput chatId={chat.id} role={role} disabled={!chat.isActive} />
+      {chat.isActive ? (
+        <MessageInput chatId={chat.id} role={role} />
+      ) : (
+        <div className="border-t bg-card p-4">
+          <div className="rounded-xl bg-muted p-4 text-center">
+            <p className="font-medium">Conversation closed</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              This booking is no longer active. Messaging has been disabled.
+            </p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

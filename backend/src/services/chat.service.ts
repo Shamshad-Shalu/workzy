@@ -53,6 +53,7 @@ export class ChatService implements IChatService {
       workerId: new Types.ObjectId(workerId),
       searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
       isActive: true,
+      lastMessage: undefined,
     });
 
     const [chatResponse] = await Promise.all([

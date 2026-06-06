@@ -13,13 +13,15 @@ import type { NotificationListingResponse } from '@/types/notification';
 interface SocketNotificationPayload {
   heading?: string;
   message?: string;
+  chatId?: string;
+  profileImage?: string;
 }
 
 export const useNotificationCount = (role: Role = ROLE.USER) => {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
-  const { socket } = useSocket();
+  const { socket, activeChatIdRef } = useSocket();
 
   const { data: unreadData } = useQuery({
     queryKey: ['notifications', 'unread-count', user?.id],
@@ -45,6 +47,10 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
     }
 
     const handleNewNotification = (payload: SocketNotificationPayload) => {
+      if (payload.chatId && payload.chatId === activeChatIdRef.current) {
+        return;
+      }
+
       const cleanMessage = payload.message?.replace(/\*\*(.*?)\*\*/g, '$1');
 
       if (payload.heading ?? payload.message) {
@@ -59,12 +65,29 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
         Notification.permission === 'granted' &&
         document.hidden
       ) {
-        new window.Notification(payload.heading ?? 'Workzy Notification', {
+        const notification = new window.Notification(payload.heading ?? 'Workzy Notification', {
           body: cleanMessage ?? 'You have a new notification',
-          icon: '/vite.svg',
-        });
+          icon: payload.profileImage ?? '/logo.png',
+          tag: payload.chatId ? `chat-${payload.chatId}` : 'workzy-system',
+          renotify: true,
+        } as NotificationOptions & { renotify?: boolean });
+
+        notification.onclick = e => {
+          e.preventDefault();
+          notification.close();
+          window.focus();
+          if (payload.chatId) {
+            const targetUrl =
+              role === ROLE.WORKER
+                ? `/worker/messages/${payload.chatId}`
+                : `/messages/${payload.chatId}`;
+            window.location.href = targetUrl;
+          }
+        };
       }
-      void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      if (!payload.chatId) {
+        void queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      }
     };
 
     socket.on('new_notification', handleNewNotification);
@@ -80,7 +103,7 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
     return () => {
       socket.off('new_notification', handleNewNotification);
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, activeChatIdRef ,role ]);
 };
 
 export const useNotifications = (role: Role = ROLE.USER, filterRead?: string) => {

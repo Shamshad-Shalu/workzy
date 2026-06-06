@@ -3,7 +3,7 @@ import { Server as SocketIOServer, Socket } from "socket.io";
 
 import logger from "@/config/logger";
 import { CHAT, HTTPSTATUS, ROLE } from "@/constants";
-import { MessageType, SenderRole } from "@/constants/chat";
+import { MESSAGE_TYPE, MessageType, SenderRole } from "@/constants/chat";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { TYPES } from "@/di/types";
@@ -97,6 +97,18 @@ export class SocketController {
 
             io.to(user.id).emit("chatUpdated", chatUpdatedPayload);
             io.to(worker.id).emit("chatUpdated", chatUpdatedPayload);
+
+            const recipientId = role === ROLE.WORKER ? user.id : worker.id;
+            const senderName = role === ROLE.WORKER ? worker.name : user.name;
+            const senderImage = role === ROLE.WORKER ? worker.profileImage : user.profileImage;
+            const notificationMessage = this.getMessagePreview(type, content);
+
+            io.to(recipientId).emit("new_notification", {
+              heading: `New Message from ${senderName}`,
+              message: notificationMessage,
+              chatId: chat.id,
+              profileImage: senderImage,
+            });
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : "Failed to send message";
             socket.emit("error", { message: msg });
@@ -157,5 +169,20 @@ export class SocketController {
     const workerId = socket.handshake.query.workerId as string | undefined;
 
     return role === ROLE.WORKER ? workerId : userId;
+  }
+
+  private getMessagePreview(type: MessageType, content?: string): string {
+    switch (type) {
+      case MESSAGE_TYPE.TEXT:
+        return content || "";
+      case MESSAGE_TYPE.AUDIO:
+        return "🎵 Sent an audio";
+      case MESSAGE_TYPE.VIDEO:
+        return "🎥 Sent a video";
+      case MESSAGE_TYPE.IMAGE:
+        return "📷 Sent an image";
+      default:
+        return "Sent a message";
+    }
   }
 }

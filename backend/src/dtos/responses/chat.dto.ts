@@ -12,6 +12,7 @@ export class ChatResponseDTO {
   id!: string;
   chatId!: string;
   bookingId!: string;
+  bookingMongoId!: string;
   participants!: {
     user: {
       id: string;
@@ -27,6 +28,7 @@ export class ChatResponseDTO {
   isActive!: boolean;
   unread?: number;
   lastMessage?: {
+    messageId: string;
     type: MessageType;
     role: SenderRole;
     content?: string;
@@ -42,6 +44,7 @@ export class ChatResponseDTO {
     dto.id = chat._id.toString();
     dto.chatId = chat.chatId;
     dto.bookingId = chat.bookingId.bookingId;
+    dto.bookingMongoId = chat.bookingId._id.toString();
 
     dto.participants = {
       user: {
@@ -60,6 +63,7 @@ export class ChatResponseDTO {
     dto.lastMessage = lastMessage
       ? {
           ...lastMessage,
+          messageId: lastMessage.messageId.toString(),
           content: lastMessage.isDeleted ? undefined : lastMessage.content,
         }
       : undefined;

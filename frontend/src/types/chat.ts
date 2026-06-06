@@ -4,6 +4,8 @@ export interface ChatRoom {
   id: string;
   chatId: string;
   bookingId: string;
+  bookingMongoId: string;
+
   participants: {
     user: {
       id: string;
@@ -19,6 +21,7 @@ export interface ChatRoom {
   isActive: boolean;
   unread?: number;
   lastMessage?: {
+    messageId: string;
     type: MessageType;
     role: Role;
     content?: string;

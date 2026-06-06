@@ -37,6 +37,11 @@ const ChatSchema = new Schema<IChat>(
       default: true,
     },
     lastMessage: {
+      _id: false,
+      messageId: {
+        type: Schema.Types.ObjectId,
+        ref: "ChatMessage",
+      },
       type: {
         type: String,
         enum: MESSAGE_TYPE_VALUES,

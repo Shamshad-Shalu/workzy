@@ -1,4 +1,5 @@
 import { Ban } from 'lucide-react';
+import { Receipt } from 'lucide-react';
 
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { MESSAGE_TYPE, ROLE, type Role } from '@/constants';
@@ -18,81 +19,96 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
   const { onlineUsers } = useSocket();
   const { participants, chatId, lastMessage, unread = 0 } = chat;
   const isAdmin = role === ROLE.ADMIN;
+
   const profilePart =
     role === ROLE.WORKER ? participants.user : role === ROLE.USER ? participants.worker : null;
 
-  const otherUserId = role === ROLE.USER ? chat.participants.worker.id : chat.participants.user.id;
+  const otherUserId = role === ROLE.USER ? participants.worker.id : participants.user.id;
 
   const isOnline = onlineUsers.has(otherUserId);
+
   return (
     <button
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-accent',
-        {
-          'bg-accent': active,
-        }
+        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent',
+        active && 'bg-accent',
+        !chat.isActive && 'opacity-70'
       )}
     >
-      {profilePart ? (
-        <div className="relative">
-          <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={40} />
-          {isOnline && (
-            <span className="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-card bg-emerald-500" />
-          )}
-        </div>
-      ) : (
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary">
-          {chatId.slice(-4)}
-        </div>
-      )}
+      <div className="relative flex-shrink-0">
+        {profilePart ? (
+          <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={42} />
+        ) : (
+          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary">
+            {chatId.slice(-4)}
+          </div>
+        )}
+        {isOnline && (
+          <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-500" />
+        )}
+      </div>
       <div className="min-w-0 flex-1">
-        <div className="flex items-center justify-between gap-2">
-          <p className="truncate font-semibold">{isAdmin ? chatId : profilePart?.name}</p>
+        <div className="flex items-center justify-between gap-2 mb-0.5">
+          <div className="flex min-w-0 items-center gap-1.5">
+            <span className="truncate text-sm font-medium text-foreground">
+              {isAdmin ? chatId : profilePart?.name}
+            </span>
+            {!chat.isActive && (
+              <span className="shrink-0 rounded-full bg-destructive/10 px-1.5 py-px text-[10px] font-medium text-destructive">
+                Closed
+              </span>
+            )}
+          </div>
           {lastMessage?.createdAt && (
-            <span className="shrink-0 text-xs text-muted-foreground">
-              {formatChatDate(lastMessage?.createdAt, 'smart')}
+            <span className="shrink-0 text-[11px] text-muted-foreground">
+              {formatChatDate(lastMessage.createdAt, 'smart')}
             </span>
           )}
         </div>
+
+        <div className="mb-1 flex items-center gap-1">
+          <Receipt className="h-3 w-3 shrink-0 text-muted-foreground/60" />
+          <span className="truncate text-[11px] text-muted-foreground/70">{chat.chatId}</span>
+        </div>
+
         <div className="flex items-center justify-between gap-2">
-          <div className="truncate text-sm text-muted-foreground flex items-center gap-1">
+          <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
             {isAdmin ? (
-              <span>
+              <span className="truncate">
                 {participants.user.name} ↔ {participants.worker.name}
               </span>
             ) : lastMessage ? (
               lastMessage.isDeleted ? (
-                <span className="flex items-center italic text-xs opacity-70 gap-1">
-                  <Ban className="size-3" />
+                <span className="flex items-center gap-1 italic opacity-60">
+                  <Ban className="h-3 w-3 shrink-0" />
                   {lastMessage.role === role
                     ? 'You deleted this message'
                     : 'This message was deleted'}
                 </span>
               ) : (
                 <>
-                  <span className="font-medium text-foreground/80">
+                  <span className="shrink-0 font-medium text-foreground/70">
                     {lastMessage.role === role ? 'You:' : `${lastMessage.role}:`}
                   </span>
-
-                  {lastMessage.type === MESSAGE_TYPE.VIDEO ? (
-                    '🎥 Video'
-                  ) : lastMessage.type === MESSAGE_TYPE.IMAGE ? (
-                    '📷 Photo'
-                  ) : lastMessage.type === MESSAGE_TYPE.AUDIO ? (
-                    '🎵 Audio'
-                  ) : (
-                    <span className="truncate">{lastMessage.content?.substring(0, 20)}</span>
-                  )}
+                  <span className="truncate">
+                    {lastMessage.type === MESSAGE_TYPE.VIDEO
+                      ? '🎥 Video'
+                      : lastMessage.type === MESSAGE_TYPE.IMAGE
+                        ? '📷 Photo'
+                        : lastMessage.type === MESSAGE_TYPE.AUDIO
+                          ? '🎵 Audio'
+                          : lastMessage.content}
+                  </span>
                 </>
               )
             ) : (
-              'No messages yet'
+              <span className="italic opacity-50">No messages yet</span>
             )}
           </div>
 
           {!active && role !== ROLE.ADMIN && unread > 0 && (
-            <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-semibold text-primary-foreground">
+            <span className="ml-1 inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
               {unread}
             </span>
           )}

@@ -87,6 +87,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
           const updatedChat: ChatRoom = {
             ...targetChat,
             lastMessage: {
+              messageId: msg.id,
               type: msg.type,
               role: msg.role,
               content: msg.content,
@@ -110,6 +111,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       chatId: string;
       senderId: string;
       lastMessage: {
+        messageId: string;
         type: MessageType;
         role: Role;
         content?: string;
@@ -159,7 +161,8 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     };
 
     const handleGlobalMessageDeleted = ({
-      chatId: deletedInChatId,
+      messageId,
+      chatId,
     }: {
       messageId: string;
       chatId: string;
@@ -175,12 +178,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
             pages: old.pages.map(page => ({
               ...page,
               chats: page.chats.map(c => {
-                if (c.id !== deletedInChatId) {
+                if (c.id !== chatId) {
                   return c;
                 }
                 if (!c.lastMessage) {
                   return c;
                 }
+                if (c.lastMessage.messageId !== messageId) {return c;}
                 return { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } };
               }),
             })),

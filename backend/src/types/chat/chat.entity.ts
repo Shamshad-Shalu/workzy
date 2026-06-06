@@ -10,6 +10,7 @@ export interface IChat extends Document<string> {
   isActive: boolean;
   searchText: string;
   lastMessage?: {
+    messageId: Types.ObjectId;
     type: MessageType;
     role: SenderRole;
     content?: string;
