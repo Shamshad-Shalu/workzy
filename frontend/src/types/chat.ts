@@ -1,11 +1,8 @@
 import type { MessageType, Role } from '@/constants';
 
-export interface ChatRoom {
+export interface Chat {
   id: string;
   chatId: string;
-  bookingId: string;
-  bookingMongoId: string;
-
   participants: {
     user: {
       id: string;
@@ -18,7 +15,8 @@ export interface ChatRoom {
       profileImage?: string;
     };
   };
-  isActive: boolean;
+  isBlocked: boolean;
+  blockedBy?: Role;
   unread?: number;
   lastMessage?: {
     messageId: string;
@@ -30,8 +28,8 @@ export interface ChatRoom {
   };
 }
 
-export interface ChatRoomResponse {
-  chats: ChatRoom[];
+export interface ChatResponse {
+  chats: Chat[];
   nextCursor: string | null;
 }
 
@@ -39,5 +37,4 @@ export interface ChatListQuery {
   limit: number;
   cursor?: string | null;
   search?: string;
-  isActive?: string;
 }

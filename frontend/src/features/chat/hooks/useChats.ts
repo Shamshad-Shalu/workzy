@@ -1,16 +1,24 @@
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { bookingKeys } from '@/features/booking/hooks/useBooking';
 import ChatService from '@/services/chat.service';
-import type { ChatListQuery, ChatRoom } from '@/types/chat';
+import type { Chat, ChatListQuery } from '@/types/chat';
 
 const LIMIT = 8;
 
 export function useChats(filters: Omit<ChatListQuery, 'limit' | 'cursor'>) {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteQuery({
-    queryKey: ['chats', filters.search, filters.isActive] as const,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['chats', filters.search] as const,
     queryFn: ({ pageParam }) =>
-      ChatService.getChatRooms({
+      ChatService.getChats({
         ...filters,
         limit: LIMIT,
         cursor: pageParam ?? null,
@@ -30,16 +38,19 @@ export function useChats(filters: Omit<ChatListQuery, 'limit' | 'cursor'>) {
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
+    isError,
+    error,
+    refetch,
   };
 }
 
-export function useCreateChatRoom() {
+export function useGetOrCreateChat() {
   const qc = useQueryClient();
-  return useMutation<ChatRoom, Error, { bookingId: string }>({
-    mutationFn: ({ bookingId }: { bookingId: string }) => ChatService.createChatRoom(bookingId),
-    onSuccess: (_data, { bookingId }) => {
+  return useMutation<Chat, Error, { participantId: string }>({
+    mutationFn: ({ participantId }: { participantId: string }) =>
+      ChatService.getOrCreateChat(participantId),
+    onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['chats'] });
-      qc.invalidateQueries({ queryKey: bookingKeys.detail(bookingId) });
     },
   });
 }

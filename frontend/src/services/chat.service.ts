@@ -1,18 +1,18 @@
 import { CHAT_API } from '@/constants/apiRoutes/chat.routes';
 import api from '@/lib/api/axios';
-import type { ChatListQuery, ChatRoom, ChatRoomResponse } from '@/types/chat';
+import type { ChatListQuery, Chat, ChatResponse } from '@/types/chat';
 
 const ChatService = {
-  getChatRooms: async (params: ChatListQuery): Promise<ChatRoomResponse> => {
-    const res = await api.get(CHAT_API.GET_CHAT_ROOMS, { params });
+  getChats: async (params: ChatListQuery): Promise<ChatResponse> => {
+    const res = await api.get(CHAT_API.GET_CHATS, { params });
     return res.data;
   },
-  getRoomById: async (chatId: string): Promise<ChatRoom> => {
-    const res = await api.get(CHAT_API.GET_ROOM_BY_ID(chatId));
+  getById: async (chatId: string): Promise<Chat> => {
+    const res = await api.get(CHAT_API.BY_ID(chatId));
     return res.data;
   },
-  createChatRoom: async (bookingId: string): Promise<ChatRoom> => {
-    const res = await api.post(CHAT_API.CREATE_ROOM, { bookingId });
+  getOrCreateChat: async (participantId: string): Promise<Chat> => {
+    const res = await api.post(CHAT_API.CREATE, { participantId });
     return res.data;
   },
 };

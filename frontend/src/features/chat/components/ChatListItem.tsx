@@ -1,15 +1,14 @@
 import { Ban } from 'lucide-react';
-import { Receipt } from 'lucide-react';
 
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { MESSAGE_TYPE, ROLE, type Role } from '@/constants';
 import { useSocket } from '@/context/socket/use-socket';
 import { cn } from '@/lib/utils';
-import type { ChatRoom } from '@/types/chat';
+import type { Chat } from '@/types/chat';
 import { formatChatDate } from '@/utils/time.format';
 
 interface ChatListItemProps {
-  chat: ChatRoom;
+  chat: Chat;
   role: Role;
   active: boolean;
   onClick: () => void;
@@ -17,7 +16,7 @@ interface ChatListItemProps {
 
 export default function ChatListItem({ chat, role, active, onClick }: ChatListItemProps) {
   const { onlineUsers } = useSocket();
-  const { participants, chatId, lastMessage, unread = 0 } = chat;
+  const { participants, chatId, lastMessage, unread = 0, isBlocked } = chat;
   const isAdmin = role === ROLE.ADMIN;
 
   const profilePart =
@@ -25,38 +24,41 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
 
   const otherUserId = role === ROLE.USER ? participants.worker.id : participants.user.id;
 
-  const isOnline = onlineUsers.has(otherUserId);
+  const isOnline = !isAdmin && onlineUsers.has(otherUserId);
 
   return (
     <button
       onClick={onClick}
       className={cn(
-        'flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-accent',
-        active && 'bg-accent',
-        !chat.isActive && 'opacity-70'
+        'flex items-center gap-3 px-4 py-3 w-full text-left transition-colors border-b border-border/40',
+        'hover:bg-muted/60',
+        active && 'bg-accent border-l-2 border-l-primary',
+        isBlocked && 'opacity-60'
       )}
     >
-      <div className="relative flex-shrink-0">
+      <div className="relative shrink-0">
         {profilePart ? (
-          <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={42} />
+          <ProfileImage src={profilePart.profileImage} name={profilePart.name} size={43} />
         ) : (
-          <div className="flex h-[42px] w-[42px] items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 font-mono text-[10px] font-bold text-primary uppercase">
             {chatId.slice(-4)}
           </div>
         )}
         {isOnline && (
-          <span className="absolute bottom-0.5 right-0.5 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-500" />
+          <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-card bg-emerald-500" />
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2 mb-0.5">
           <div className="flex min-w-0 items-center gap-1.5">
             <span className="truncate text-sm font-medium text-foreground">
-              {isAdmin ? chatId : profilePart?.name}
+              {isAdmin
+                ? `${participants.user.name} ↔ ${participants.worker.name}`
+                : (profilePart?.name ?? chatId)}
             </span>
-            {!chat.isActive && (
+            {isBlocked && (
               <span className="shrink-0 rounded-full bg-destructive/10 px-1.5 py-px text-[10px] font-medium text-destructive">
-                Closed
+                Blocked
               </span>
             )}
           </div>
@@ -66,50 +68,37 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
             </span>
           )}
         </div>
-
-        <div className="mb-1 flex items-center gap-1">
-          <Receipt className="h-3 w-3 shrink-0 text-muted-foreground/60" />
-          <span className="truncate text-[11px] text-muted-foreground/70">{chat.chatId}</span>
-        </div>
-
         <div className="flex items-center justify-between gap-2">
-          <div className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+          <div className="min-w-0 flex-1 text-xs text-muted-foreground">
             {isAdmin ? (
-              <span className="truncate">
-                {participants.user.name} ↔ {participants.worker.name}
-              </span>
+              <span className="truncate opacity-60">{chatId}</span>
             ) : lastMessage ? (
               lastMessage.isDeleted ? (
                 <span className="flex items-center gap-1 italic opacity-60">
                   <Ban className="h-3 w-3 shrink-0" />
-                  {lastMessage.role === role
-                    ? 'You deleted this message'
-                    : 'This message was deleted'}
+                  {lastMessage.role === role ? 'You deleted this message' : 'Message deleted'}
                 </span>
               ) : (
-                <>
-                  <span className="shrink-0 font-medium text-foreground/70">
-                    {lastMessage.role === role ? 'You:' : `${lastMessage.role}:`}
+                <span className="font-semibold truncate">
+                  <span className="font-medium text-foreground/70 mr-1">
+                    {lastMessage.role === role ? 'You:' : ''}
                   </span>
-                  <span className="truncate">
-                    {lastMessage.type === MESSAGE_TYPE.VIDEO
-                      ? '🎥 Video'
-                      : lastMessage.type === MESSAGE_TYPE.IMAGE
-                        ? '📷 Photo'
-                        : lastMessage.type === MESSAGE_TYPE.AUDIO
-                          ? '🎵 Audio'
-                          : lastMessage.content}
-                  </span>
-                </>
+                  {lastMessage.type === MESSAGE_TYPE.VIDEO
+                    ? '🎥 Video'
+                    : lastMessage.type === MESSAGE_TYPE.IMAGE
+                      ? '📷 Photo'
+                      : lastMessage.type === MESSAGE_TYPE.AUDIO
+                        ? '🎵 Audio'
+                        : lastMessage.content}
+                </span>
               )
             ) : (
-              <span className="italic opacity-50">No messages yet</span>
+              <span className="italic opacity-40">No messages yet</span>
             )}
           </div>
-
-          {!active && role !== ROLE.ADMIN && unread > 0 && (
+          {!active && !isAdmin && unread > 0 && (
             <span className="ml-1 inline-flex h-[18px] min-w-[18px] shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[11px] font-semibold text-primary-foreground">
-              {unread}
+              {unread > 99 ? '99+' : unread}
             </span>
           )}
         </div>

@@ -7,6 +7,16 @@ const MessageService = {
     const res = await api.get(MESSAGE_API.GET_MESSAGES(chatId), { params });
     return res.data;
   },
+  getMessageContext: async (
+    chatId: string,
+    messageId: string,
+    limit = 20
+  ): Promise<MessagesResponse> => {
+    const res = await api.get(`${MESSAGE_API.GET_MESSAGES(chatId)}/${messageId}/context`, {
+      params: { limit },
+    });
+    return res.data;
+  },
 };
 
 export default MessageService;

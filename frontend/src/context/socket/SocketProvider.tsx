@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import { HOST, MODE, type MessageType, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type { ChatRoom } from '@/types/chat';
+import type { Chat } from '@/types/chat';
 import type { ChatMessage } from '@/types/chatMessage';
 
 import { SocketContext } from './socket-context';
@@ -64,13 +64,15 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         return;
       }
 
-      queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
+      const isMsgFromMe = msg.role === user?.role;
+
+      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
           if (!old) {
             return old;
           }
-          let targetChat: ChatRoom | undefined;
+          let targetChat: Chat | undefined;
           const pagesWithoutChat = old.pages.map(page => ({
             ...page,
             chats: page.chats.filter(c => {
@@ -82,9 +84,10 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
             }),
           }));
           if (!targetChat) {
+            queryClient.invalidateQueries({ queryKey: ['chats'] });
             return old;
           }
-          const updatedChat: ChatRoom = {
+          const updatedChat: Chat = {
             ...targetChat,
             lastMessage: {
               messageId: msg.id,
@@ -94,7 +97,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
               createdAt: msg.createdAt,
               isDeleted: msg.isDeleted,
             },
-            unread: (targetChat.unread ?? 0) + 1,
+            unread: isMsgFromMe ? (targetChat.unread ?? 0) : (targetChat.unread ?? 0) + 1,
           };
 
           return {
@@ -109,7 +112,6 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
 
     const handleChatUpdated = (payload: {
       chatId: string;
-      senderId: string;
       lastMessage: {
         messageId: string;
         type: MessageType;
@@ -122,13 +124,27 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         return;
       }
 
-      queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
+      const oldData = queryClient.getQueryData<
+        InfiniteData<{ chats: Chat[]; nextCursor: string | null }>
+      >(['chats']);
+      const hasChatInCache = oldData?.pages.some(page =>
+        page.chats.some(c => c.id === payload.chatId)
+      );
+
+      if (!hasChatInCache) {
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+        return;
+      }
+
+      const isMsgFromMe = payload.lastMessage.role === user?.role;
+
+      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
           if (!old) {
             return old;
           }
-          let targetChat: ChatRoom | undefined;
+          let targetChat: Chat | undefined;
           const pagesWithoutChat = old.pages.map(page => ({
             ...page,
             chats: page.chats.filter(c => {
@@ -142,13 +158,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
           if (!targetChat) {
             return old;
           }
-          const updatedChat: ChatRoom = {
+          const updatedChat: Chat = {
             ...targetChat,
             lastMessage: {
               ...payload.lastMessage,
               isDeleted: false,
             },
-            unread: (targetChat.unread ?? 0) + 1,
+            unread: isMsgFromMe ? (targetChat.unread ?? 0) : (targetChat.unread ?? 0) + 1,
           };
           return {
             ...old,
@@ -167,7 +183,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       messageId: string;
       chatId: string;
     }) => {
-      queryClient.setQueriesData<InfiniteData<{ chats: ChatRoom[]; nextCursor: string | null }>>(
+      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
         { queryKey: ['chats'], exact: false },
         old => {
           if (!old) {
@@ -184,7 +200,9 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
                 if (!c.lastMessage) {
                   return c;
                 }
-                if (c.lastMessage.messageId !== messageId) {return c;}
+                if (c.lastMessage.messageId !== messageId) {
+                  return c;
+                }
                 return { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } };
               }),
             })),
@@ -209,7 +227,7 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       socket.off('messageDeleted', handleGlobalMessageDeleted);
       socket.disconnect();
     };
-  }, [socket, queryClient]);
+  }, [socket, queryClient, user?.role]);
 
   return (
     <SocketContext.Provider value={{ socket, onlineUsers, activeChatIdRef }}>
