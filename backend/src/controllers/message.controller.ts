@@ -15,6 +15,7 @@ export class MessageController implements IMessageController {
   getMessages = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { chatId } = req.params;
     const role = req.user?.role;
+    const search = (req.query.search as string) ?? "";
     const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 50);
     const parsedCursor = req.query.cursor
       ? JSON.parse(Buffer.from(req.query.cursor as string, "base64url").toString("utf8"))
@@ -25,9 +26,26 @@ export class MessageController implements IMessageController {
     const { data, nextCursor } = await this._messageService.getMessages({
       chatId,
       limit,
+      search,
       cursor: parsedCursor,
       role: role as SenderRole,
     });
     res.status(HTTPSTATUS.OK).json({ messages: data, nextCursor: nextCursor });
+  });
+  getMessageContext = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { chatId, messageId } = req.params;
+    const role = req.user?.role;
+    const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 20, 5), 50);
+
+    if (!chatId || !messageId) throw new CustomError(CHAT.NOT_FOUND);
+
+    const { data, nextCursor } = await this._messageService.getMessageContext({
+      chatId,
+      messageId,
+      limit,
+      role: role as SenderRole,
+    });
+
+    res.status(HTTPSTATUS.OK).json({ messages: data, nextCursor });
   });
 }

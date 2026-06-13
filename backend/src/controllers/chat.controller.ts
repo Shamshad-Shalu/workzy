@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
 
-import { AUTH, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
+import { AUTH, CHAT, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
 import { IChatController } from "@/core/interfaces/controllers/IChatController";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { TYPES } from "@/di/types";
@@ -34,7 +34,6 @@ export class ChatController implements IChatController {
 
     const isWorker = role === ROLE.WORKER;
     const isAdmin = role === ROLE.ADMIN;
-    const isActive = req.query.isActive as string | undefined;
 
     let userId: string | undefined = undefined;
     let workerId: string | undefined = undefined;
@@ -61,18 +60,26 @@ export class ChatController implements IChatController {
       search,
       role,
       cursor: parsedCursor,
-      isActive: isActive !== undefined ? isActive === "true" : undefined,
     });
-
     res.status(HTTPSTATUS.OK).json({ chats: data, nextCursor });
   });
 
-  createChatRoom = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { bookingId } = req.body;
+  getOrCreateChat = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const role = req.user?.role as SenderRole;
     const creatorId = role === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
 
-    const chat = await this._chatService.createChatRoom(bookingId, creatorId, role);
+    if (role === ROLE.ADMIN) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+    const { participantId } = req.body;
+    if (!participantId) {
+      throw new CustomError(CHAT.INVALID_INPUT, HTTPSTATUS.BAD_REQUEST);
+    }
+    const chat = await this._chatService.getOrCreateChat({
+      creatorId,
+      creatorRole: role,
+      participantId,
+    });
     res.status(HTTPSTATUS.CREATED).json(chat);
   });
 

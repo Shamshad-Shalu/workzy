@@ -1,15 +1,14 @@
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { AUTH, BOOKING, CHAT, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
-import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
+import { CHAT, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { ChatResponseDTO, ChatRoomListItem } from "@/dtos/responses/chat.dto";
-import { ChatListItem } from "@/types/chat/chat.projection";
+import { IChat } from "@/types/chat/chat.entity";
 import { ChatQuery } from "@/types/chat/chat.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import CustomError from "@/utils/customError";
@@ -19,51 +18,84 @@ export class ChatService implements IChatService {
   constructor(
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
-    @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
-  async createChatRoom(
-    bookingId: string,
-    creatorId: string,
-    role: SenderRole
-  ): Promise<ChatResponseDTO> {
-    if (!Types.ObjectId.isValid(bookingId)) {
-      throw new CustomError(BOOKING.INVALID_BOOKING_ID);
-    }
-    const existing = await this._chatRepository.findByBookingId(bookingId);
+  async getOrCreateChat(data: {
+    creatorId: string;
+    creatorRole: SenderRole;
+    participantId: string;
+  }): Promise<ChatResponseDTO> {
+    const { creatorId, creatorRole, participantId } = data;
+    const userId = creatorRole === ROLE.USER ? creatorId : participantId;
+    const workerId = creatorRole === ROLE.WORKER ? creatorId : participantId;
+
+    const existing = await this._chatRepository.findByParticipants(userId, workerId);
     if (existing) {
       return await ChatResponseDTO.fromEntity({ chat: existing }, this._s3Service);
     }
-    const booking = await this._bookingRepository.findById(bookingId);
-    if (!booking) {
-      throw new CustomError(BOOKING.NOT_FOUND);
-    }
-    const userId = booking.userId.toString();
-    const workerId = booking.workerId.toString();
-    if (
-      (role === ROLE.WORKER && creatorId !== workerId) ||
-      (role === ROLE.USER && creatorId !== userId)
-    ) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-    const chat = await this._chatRepository.create({
-      bookingId: new Types.ObjectId(bookingId),
+    const newChat = await this._chatRepository.create({
       userId: new Types.ObjectId(userId),
       workerId: new Types.ObjectId(workerId),
-      searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
-      isActive: true,
-      lastMessage: undefined,
+      isBlocked: false,
     });
+    const populated = await this._chatRepository.findByChatId(newChat._id.toString());
+    if (!populated) throw new CustomError(CHAT.NOT_FOUND);
 
-    const [chatResponse] = await Promise.all([
-      this._chatRepository.findByChatId(chat._id),
-      this._bookingRepository.findByIdAndUpdate(bookingId, { chatId: chat._id.toString() }),
-    ]);
-    if (!chatResponse) {
+    return await ChatResponseDTO.fromEntity({ chat: populated }, this._s3Service);
+  }
+
+  async authorizeChat(data: {
+    chatId: string;
+    participantId: string;
+    role: SenderRole;
+  }): Promise<IChat> {
+    const { chatId, participantId, role } = data;
+    const chat = await this._chatRepository.findById(chatId);
+    if (!chat) {
+      throw new CustomError(CHAT.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    if (chat.isBlocked && role !== ROLE.ADMIN) {
+      throw new CustomError(CHAT.BLOCKED, HTTPSTATUS.FORBIDDEN);
+    }
+    this.authorizeChatAccess({
+      participantId,
+      role,
+      userId: chat.userId.toString(),
+      workerId: chat.workerId.toString(),
+    });
+    return chat;
+  }
+
+  async toggleChatStatus(data: {
+    chatId: string;
+    participantId: string;
+    role: SenderRole;
+  }): Promise<IChat> {
+    const { chatId, participantId, role } = data;
+    const chat = await this._chatRepository.findById(chatId);
+    if (!chat) {
+      throw new CustomError(CHAT.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    this.authorizeChatAccess({
+      participantId,
+      role,
+      workerId: chat.workerId.toString(),
+      userId: chat.userId.toString(),
+    });
+    if (chat.isBlocked && chat.blockedBy !== role && role !== ROLE.ADMIN) {
+      throw new CustomError(CHAT.CANNOT_UNBLOCK, HTTPSTATUS.FORBIDDEN);
+    }
+    const newStatus = !chat.isBlocked;
+    const blockedBy = newStatus ? role : null;
+    const updated = await this._chatRepository.findByIdAndUpdate(chatId, {
+      isBlocked: newStatus,
+      blockedBy,
+    });
+    if (!updated) {
       throw new CustomError(CHAT.NOT_FOUND);
     }
-    return await ChatResponseDTO.fromEntity({ chat: chatResponse }, this._s3Service);
+    return updated;
   }
 
   async getChatRoomById(data: {
@@ -76,7 +108,12 @@ export class ChatService implements IChatService {
     if (!chat) {
       throw new CustomError(CHAT.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    this.authorizeChatAccess({ participantId, role, chat });
+    this.authorizeChatAccess({
+      participantId,
+      role,
+      userId: chat.userId._id.toString(),
+      workerId: chat.workerId._id.toString(),
+    });
     return await ChatResponseDTO.fromEntity({ chat }, this._s3Service);
   }
 
@@ -103,30 +140,20 @@ export class ChatService implements IChatService {
   }
 
   private authorizeChatAccess(data: {
-    chat: ChatListItem;
+    userId: string;
+    workerId: string;
     participantId: string;
-    role: string;
+    role: SenderRole;
   }): void {
-    const { participantId, role, chat } = data;
+    const { participantId, role, userId, workerId } = data;
     if (role === ROLE.ADMIN) {
       return;
     }
     if (
-      (role === ROLE.WORKER && participantId !== chat.workerId._id.toString()) ||
-      (role === ROLE.USER && participantId !== chat.userId._id.toString())
+      (role === ROLE.WORKER && participantId !== workerId) ||
+      (role === ROLE.USER && participantId !== userId)
     ) {
       throw new CustomError(CHAT.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
-    }
-  }
-
-  async disableChatRoom(chatId: string): Promise<void> {
-    const chat = await this._chatRepository.findOneAndUpdate(
-      { _id: chatId, isActive: true },
-      { isActive: false }
-    );
-
-    if (!chat) {
-      throw new CustomError(CHAT.UNABLE_TO_DISABLE);
     }
   }
 }

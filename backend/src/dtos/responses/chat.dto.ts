@@ -11,8 +11,6 @@ export interface ChatRoomListItem {
 export class ChatResponseDTO {
   id!: string;
   chatId!: string;
-  bookingId!: string;
-  bookingMongoId!: string;
   participants!: {
     user: {
       id: string;
@@ -25,7 +23,8 @@ export class ChatResponseDTO {
       profileImage?: string;
     };
   };
-  isActive!: boolean;
+  isBlocked!: boolean;
+  blockedBy?: SenderRole;
   unread?: number;
   lastMessage?: {
     messageId: string;
@@ -33,6 +32,7 @@ export class ChatResponseDTO {
     role: SenderRole;
     content?: string;
     createdAt: Date;
+    isDeleted: boolean;
   };
   static async fromEntity(
     { chat, unread }: ChatRoomListItem,
@@ -43,9 +43,6 @@ export class ChatResponseDTO {
 
     dto.id = chat._id.toString();
     dto.chatId = chat.chatId;
-    dto.bookingId = chat.bookingId.bookingId;
-    dto.bookingMongoId = chat.bookingId._id.toString();
-
     dto.participants = {
       user: {
         id: chat.userId._id.toString(),
@@ -58,7 +55,8 @@ export class ChatResponseDTO {
         profileImage: chat.workerId.profileImage,
       },
     };
-    dto.isActive = chat.isActive;
+    dto.isBlocked = chat.isBlocked;
+    dto.blockedBy = chat.blockedBy;
     dto.unread = unread;
     dto.lastMessage = lastMessage
       ? {

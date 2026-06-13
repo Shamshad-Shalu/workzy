@@ -4,11 +4,10 @@ import { MessageType, SenderRole } from "@/constants";
 
 export interface IChat extends Document<string> {
   chatId: string;
-  bookingId: Types.ObjectId;
   userId: Types.ObjectId;
   workerId: Types.ObjectId;
-  isActive: boolean;
-  searchText: string;
+  isBlocked: boolean;
+  blockedBy?: SenderRole;
   lastMessage?: {
     messageId: Types.ObjectId;
     type: MessageType;

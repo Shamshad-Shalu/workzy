@@ -1,4 +1,4 @@
-import { ROLE } from "@/constants";
+import { Role, ROLE } from "@/constants";
 import { type MessageType, type SenderRole } from "@/constants/chat";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
@@ -8,9 +8,20 @@ export class ChatMessageResponseDTO {
   id!: string;
   chatId!: string;
   type!: MessageType;
-  role!: SenderRole;
+  role!: Role;
   content?: string;
   mediaUrl?: string;
+  bookingId?: string;
+
+  replyTo?: {
+    messageId: string;
+    content?: string;
+    type: MessageType;
+    role: SenderRole;
+  };
+
+  isEdited!: boolean;
+
   readByRoles!: SenderRole[];
   isDeleted!: boolean;
   createdAt!: Date;
@@ -28,9 +39,18 @@ export class ChatMessageResponseDTO {
     dto.chatId = entity.chatId.toString();
     dto.type = entity.type;
     dto.role = entity.role;
+
     dto.content = isHideDeleted ? undefined : entity.content;
     dto.mediaUrl = isHideDeleted ? undefined : await resolveS3Url(entity.mediaUrl, s3Service);
+    dto.bookingId = entity.bookingId?.toString();
+    dto.replyTo = entity.replyTo
+      ? {
+          ...entity.replyTo,
+          messageId: entity.replyTo.messageId.toString(),
+        }
+      : undefined;
     dto.readByRoles = isHideDeleted ? [] : entity.readByRoles;
+    dto.isEdited = entity.isEdited;
     dto.isDeleted = entity.isDeleted;
     dto.createdAt = entity.createdAt;
     return dto;

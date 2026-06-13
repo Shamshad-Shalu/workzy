@@ -17,20 +17,34 @@ export class MessageRepository extends BaseRepository<IChatMessage> implements I
   }
 
   async getMessages(filter: MessageQuery): Promise<CursorPaginatedResult<IChatMessage>> {
-    const { chatId, limit, cursor } = filter;
+    const { chatId, limit, cursor, search, messageId } = filter;
 
-    const andConditions: FilterQuery<IChatMessage>[] = [];
     const query: FilterQuery<IChatMessage> = {
       chatId: new Types.ObjectId(chatId),
     };
+    if (search?.trim()) {
+      query.content = { $regex: search.trim(), $options: "i" };
+      query.isDeleted = false;
+    }
+    let resolvedCursor = cursor;
 
-    if (cursor) {
+    if (messageId && !cursor) {
+      const target = await this.model
+        .findOne({ _id: new Types.ObjectId(messageId), chatId: new Types.ObjectId(chatId) })
+        .select("createdAt _id")
+        .lean<IChatMessage>();
+      if (target) {
+        resolvedCursor = { createdAt: target.createdAt, _id: target._id.toString() };
+      }
+    }
+    const andConditions: FilterQuery<IChatMessage>[] = [];
+    if (resolvedCursor) {
       andConditions.push({
         $or: [
-          { createdAt: { $lt: new Date(cursor.createdAt) } },
+          { createdAt: { $lt: new Date(resolvedCursor.createdAt) } },
           {
-            createdAt: new Date(cursor.createdAt),
-            _id: { $lt: new Types.ObjectId(cursor._id) },
+            createdAt: new Date(resolvedCursor.createdAt),
+            _id: { $lte: new Types.ObjectId(resolvedCursor._id) },
           },
         ],
       });

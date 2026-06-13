@@ -4,7 +4,7 @@ import { IChat } from "./chat.entity";
 
 export type ChatListItem = Pick<
   IChat,
-  "_id" | "chatId" | "isActive" | "updatedAt" | "createdAt" | "lastMessage"
+  "_id" | "chatId" | "isBlocked" | "blockedBy" | "lastMessage" | "createdAt" | "updatedAt"
 > & {
   workerId: {
     _id: Types.ObjectId;
@@ -15,10 +15,6 @@ export type ChatListItem = Pick<
     _id: Types.ObjectId;
     name: string;
     profileImage?: string;
-  };
-  bookingId: {
-    _id: Types.ObjectId;
-    bookingId: string;
   };
 };
 

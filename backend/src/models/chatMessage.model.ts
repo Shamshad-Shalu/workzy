@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
+import { ROLE_VALUES } from "@/constants";
 import { MESSAGE_TYPE_VALUES, SENDER_ROLE_VALUES } from "@/constants/chat";
 import { IChatMessage } from "@/types/chat/chatMessage.entity";
 
@@ -12,7 +13,7 @@ const ChatMessageSchema = new Schema<IChatMessage>(
     },
     role: {
       type: String,
-      enum: SENDER_ROLE_VALUES,
+      enum: ROLE_VALUES,
       required: true,
     },
     type: {
@@ -44,6 +45,26 @@ const ChatMessageSchema = new Schema<IChatMessage>(
         },
         message: "Media messages must have mediaUrl",
       },
+    },
+    bookingId: {
+      type: Schema.Types.ObjectId,
+      ref: "Booking",
+      default: null,
+    },
+    replyTo: {
+      _id: false,
+      messageId: {
+        type: Schema.Types.ObjectId,
+        ref: "ChatMessage",
+      },
+      content: { type: String },
+      type: { type: String, enum: MESSAGE_TYPE_VALUES },
+      role: { type: String, enum: SENDER_ROLE_VALUES },
+    },
+
+    isEdited: {
+      type: Boolean,
+      default: false,
     },
     readByRoles: {
       type: [{ type: String, enum: SENDER_ROLE_VALUES }],

@@ -2,20 +2,16 @@ import { inject, injectable } from "inversify";
 import { Server as SocketIOServer, Socket } from "socket.io";
 
 import logger from "@/config/logger";
-import { CHAT, HTTPSTATUS, ROLE } from "@/constants";
-import { MESSAGE_TYPE, MessageType, SenderRole } from "@/constants/chat";
-import { IChatService } from "@/core/interfaces/services/IChatService";
-import { IMessageService } from "@/core/interfaces/services/IMessageService";
+import { ROLE } from "@/constants";
+import { MessageType, SenderRole } from "@/constants/chat";
+import { ISocketService } from "@/core/interfaces/services/ISocketService";
 import { TYPES } from "@/di/types";
-import CustomError from "@/utils/customError";
 
 @injectable()
 export class SocketController {
   private onlineUsers = new Set<string>();
-  constructor(
-    @inject(TYPES.ChatService) private _chatService: IChatService,
-    @inject(TYPES.MessageService) private _messageService: IMessageService
-  ) {}
+
+  constructor(@inject(TYPES.SocketService) private _socketService: ISocketService) {}
 
   public initializeSocket(io: SocketIOServer): void {
     io.on("connection", (socket: Socket) => {
@@ -35,14 +31,13 @@ export class SocketController {
 
       socket.on("joinRoom", async ({ chatId }: { chatId: string }) => {
         try {
-          const chat = await this._chatService.getChatRoomById({
+          const result = await this._socketService.handleJoinRoom({
             chatId,
             participantId,
             role,
           });
-          socket.join(chat.id);
-          socket.emit("joinedRoom", { chatId: chat.id });
-          logger.info(`${participantId} joined room ${chat.id}`);
+          socket.join(result.chatId);
+          socket.emit("joinedRoom", { chatId: result.chatId });
         } catch (error: unknown) {
           const msg = error instanceof Error ? error.message : "Failed to join room";
           socket.emit("error", { message: msg });
@@ -56,58 +51,23 @@ export class SocketController {
           type,
           content,
           mediaUrl,
+          replyToMessageId,
         }: {
           chatId: string;
           type: MessageType;
           content?: string;
           mediaUrl?: string;
+          replyToMessageId?: string;
         }) => {
           try {
-            const chat = await this._chatService.getChatRoomById({
+            await this._socketService.handleSendMessage({
               chatId,
               participantId,
-              role,
-            });
-            if (!chat.isActive) {
-              throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
-            }
-
-            const savedMsg = await this._messageService.saveMessage({
-              chatId,
-              senderId: participantId,
               role,
               type,
               content,
               mediaUrl,
-            });
-
-            io.to(chatId).emit("newMessage", savedMsg);
-
-            const chatUpdatedPayload = {
-              chatId,
-              senderId: participantId,
-              lastMessage: {
-                type: savedMsg.type,
-                role: savedMsg.role,
-                content: savedMsg.content,
-                createdAt: savedMsg.createdAt,
-              },
-            };
-            const { user, worker } = chat.participants;
-
-            io.to(user.id).emit("chatUpdated", chatUpdatedPayload);
-            io.to(worker.id).emit("chatUpdated", chatUpdatedPayload);
-
-            const recipientId = role === ROLE.WORKER ? user.id : worker.id;
-            const senderName = role === ROLE.WORKER ? worker.name : user.name;
-            const senderImage = role === ROLE.WORKER ? worker.profileImage : user.profileImage;
-            const notificationMessage = this.getMessagePreview(type, content);
-
-            io.to(recipientId).emit("new_notification", {
-              heading: `New Message from ${senderName}`,
-              message: notificationMessage,
-              chatId: chat.id,
-              profileImage: senderImage,
+              replyToMessageId,
             });
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : "Failed to send message";
@@ -120,23 +80,16 @@ export class SocketController {
         "deleteMessage",
         async ({ messageId, chatId }: { messageId: string; chatId: string }) => {
           try {
-            const chat = await this._chatService.getChatRoomById({
-              chatId,
-              participantId,
-              role,
-            });
-            if (!chat.isActive) {
-              throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
-            }
-            await this._messageService.deleteMessage({
+            const result = await this._socketService.handleDeleteMessage({
               messageId,
               chatId,
               participantId,
               role,
             });
-            const { user, worker } = chat.participants;
-            io.to(user.id).emit("messageDeleted", { messageId, chatId });
-            io.to(worker.id).emit("messageDeleted", { messageId, chatId });
+            io.to(chatId).emit("messageDeleted", {
+              messageId: result.messageId,
+              chatId: result.chatId,
+            });
           } catch (error: unknown) {
             const msg = error instanceof Error ? error.message : "Failed to delete message";
             socket.emit("error", { message: msg });
@@ -144,11 +97,79 @@ export class SocketController {
         }
       );
 
+      socket.on(
+        "editMessage",
+        async ({
+          messageId,
+          chatId,
+          content,
+        }: {
+          messageId: string;
+          chatId: string;
+          content: string;
+        }) => {
+          try {
+            const result = await this._socketService.handleEditMessage({
+              messageId,
+              chatId,
+              participantId,
+              role,
+              content,
+            });
+            io.to(chatId).emit("messageEdited", {
+              messageId: result.messageId,
+              chatId: result.chatId,
+              content: result.content,
+            });
+          } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : "Failed to edit message";
+            socket.emit("error", { message: msg });
+          }
+        }
+      );
+
+      socket.on("toggleChatStatus", async ({ chatId }: { chatId: string }) => {
+        try {
+          const { blockedBy, userId, workerId, isBlocked } =
+            await this._socketService.handleToggleChatStatus({
+              chatId,
+              participantId,
+              role,
+            });
+
+          io.to(chatId).emit("chatToggled", {
+            chatId: chatId,
+            isBlocked: isBlocked,
+            blockedBy: blockedBy,
+          });
+
+          io.to(userId.toString()).emit("chatUpdated", {
+            chatId: chatId,
+            isBlocked: isBlocked,
+            blockedBy: blockedBy,
+          });
+          io.to(workerId.toString()).emit("chatUpdated", {
+            chatId: chatId,
+            isBlocked: isBlocked,
+            blockedBy: blockedBy,
+          });
+        } catch (error: unknown) {
+          const msg = error instanceof Error ? error.message : "Failed to toggle chat status";
+          socket.emit("error", { message: msg });
+        }
+      });
+
       socket.on("markMessagesAsRead", async ({ chatId }: { chatId: string }) => {
         try {
-          await this._chatService.getChatRoomById({ chatId, participantId, role });
-          await this._messageService.markRoomMessagesAsRead(chatId, role);
-          socket.to(chatId).emit("messagesRead", { chatId, readerId: participantId });
+          const result = await this._socketService.handleMarkMessagesAsRead({
+            chatId,
+            participantId,
+            role,
+          });
+          socket.to(result.chatId).emit("messagesRead", {
+            chatId: result.chatId,
+            readerId: result.readerId,
+          });
         } catch (error: unknown) {
           logger.error(
             `markMessagesAsRead error: ${error instanceof Error ? error.message : "unknown"}`
@@ -169,20 +190,5 @@ export class SocketController {
     const workerId = socket.handshake.query.workerId as string | undefined;
 
     return role === ROLE.WORKER ? workerId : userId;
-  }
-
-  private getMessagePreview(type: MessageType, content?: string): string {
-    switch (type) {
-      case MESSAGE_TYPE.TEXT:
-        return content || "";
-      case MESSAGE_TYPE.AUDIO:
-        return "🎵 Sent an audio";
-      case MESSAGE_TYPE.VIDEO:
-        return "🎥 Sent a video";
-      case MESSAGE_TYPE.IMAGE:
-        return "📷 Sent an image";
-      default:
-        return "Sent a message";
-    }
   }
 }

@@ -4,9 +4,11 @@ import { Cursor } from "../common/query";
 
 export interface MessageQuery {
   role: SenderRole;
+  search?: string;
   chatId: string;
   limit: number;
   cursor?: Cursor | null;
+  messageId?: string;
 }
 
 interface ChatCursor {
@@ -21,5 +23,4 @@ export interface ChatQuery {
   role: SenderRole;
   limit: number;
   cursor?: ChatCursor | null;
-  isActive?: boolean;
 }

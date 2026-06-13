@@ -1,8 +1,32 @@
 import mongoose, { Schema } from "mongoose";
 
-import { MESSAGE_TYPE_VALUES, ROLE_VALUES } from "@/constants";
+import { MESSAGE_TYPE_VALUES, ROLE_VALUES, SENDER_ROLE_VALUES } from "@/constants";
 import { IChat } from "@/types/chat/chat.entity";
 import { generateTxnCode } from "@/utils/generateTxnCode";
+
+const LastMessageSchema = new Schema(
+  {
+    messageId: {
+      type: Schema.Types.ObjectId,
+      ref: "ChatMessage",
+    },
+    type: {
+      type: String,
+      enum: MESSAGE_TYPE_VALUES,
+    },
+    role: {
+      type: String,
+      enum: ROLE_VALUES,
+    },
+    content: String,
+    createdAt: Date,
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+  },
+  { _id: false }
+);
 
 const ChatSchema = new Schema<IChat>(
   {
@@ -12,12 +36,6 @@ const ChatSchema = new Schema<IChat>(
       trim: true,
       unique: true,
       default: () => generateTxnCode("CHT"),
-    },
-    bookingId: {
-      type: Schema.Types.ObjectId,
-      ref: "Booking",
-      required: true,
-      unique: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
@@ -29,33 +47,18 @@ const ChatSchema = new Schema<IChat>(
       ref: "Worker",
       required: true,
     },
-    searchText: {
-      type: String,
-    },
-    isActive: {
+    isBlocked: {
       type: Boolean,
-      default: true,
+      default: false,
+    },
+    blockedBy: {
+      type: String,
+      enum: SENDER_ROLE_VALUES,
+      default: null,
     },
     lastMessage: {
-      _id: false,
-      messageId: {
-        type: Schema.Types.ObjectId,
-        ref: "ChatMessage",
-      },
-      type: {
-        type: String,
-        enum: MESSAGE_TYPE_VALUES,
-      },
-      role: {
-        type: String,
-        enum: ROLE_VALUES,
-      },
-      content: { type: String },
-      createdAt: { type: Date },
-      isDeleted: {
-        type: Boolean,
-        default: false,
-      },
+      type: LastMessageSchema,
+      default: undefined,
     },
   },
   {
@@ -63,8 +66,9 @@ const ChatSchema = new Schema<IChat>(
   }
 );
 
-ChatSchema.index({ userId: 1, isActive: 1, updatedAt: -1 });
-ChatSchema.index({ workerId: 1, isActive: 1, updatedAt: -1 });
+ChatSchema.index({ userId: 1, workerId: 1 }, { unique: true });
+ChatSchema.index({ userId: 1, updatedAt: -1 });
+ChatSchema.index({ workerId: 1, updatedAt: -1 });
 ChatSchema.index({ updatedAt: -1, _id: -1 });
 
 export const Chat = mongoose.model<IChat>("Chat", ChatSchema);

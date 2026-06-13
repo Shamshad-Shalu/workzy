@@ -12,7 +12,7 @@ const controller = container.get<IChatController>(TYPES.ChatController);
 router.use(authenticate([ROLE.USER, ROLE.WORKER, ROLE.ADMIN]));
 
 router.get("/rooms", controller.getChatRooms);
-router.post("/room", controller.createChatRoom);
+router.post("/room", controller.getOrCreateChat);
 router.get("/room/:chatId", controller.getChatRoomById);
 
 export default router;
