@@ -45,6 +45,7 @@ const TYPES = {
   NotificationController: Symbol.for("NotificationController"),
 
   SocketController: Symbol.for("SocketController"),
+  SocketService: Symbol.for("SocketService"),
 
   // home
   HomeController: Symbol.for("HomeController"),
@@ -73,6 +74,7 @@ const TYPES = {
   BookingController: Symbol.for("BookingController"),
   BookingService: Symbol.for("BookingService"),
   BookingRepository: Symbol.for("BookingRepository"),
+  BookingPaymentHandler: Symbol.for("BookingPaymentHandler"),
 
   ReviewController: Symbol.for("ReviewController"),
   ReviewService: Symbol.for("ReviewService"),

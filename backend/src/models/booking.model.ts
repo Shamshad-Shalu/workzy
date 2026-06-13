@@ -199,10 +199,6 @@ const BookingSchema: Schema<IBooking> = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Review",
     },
-    chatId: {
-      type: Schema.Types.ObjectId,
-      ref: "Chat",
-    },
     snapshot: {
       type: BookingSnapshotSchema,
       required: true,

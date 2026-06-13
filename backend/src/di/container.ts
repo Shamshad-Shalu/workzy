@@ -61,6 +61,7 @@ import { IAdminBookingService } from "@/core/interfaces/services/admin/IAdminBoo
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
+import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { IChatService } from "@/core/interfaces/services/IChatService";
@@ -80,6 +81,7 @@ import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
+import { ISocketService } from "@/core/interfaces/services/ISocketService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -108,6 +110,7 @@ import { AuthService } from "@/services/auth/auth.service";
 import { EmailService } from "@/services/auth/email.service";
 import { OTPService } from "@/services/auth/otp.service";
 import { TokenService } from "@/services/auth/token.service";
+import { BookingPaymentHandlerService } from "@/services/booking-payment-handler.service";
 import { BookingService } from "@/services/booking.service";
 import { CategoryService } from "@/services/category.service";
 import { ChatService } from "@/services/chat.service";
@@ -123,6 +126,7 @@ import { ReviewService } from "@/services/review.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
+import { SocketService } from "@/services/socket.service";
 import { UserService } from "@/services/user.service";
 import { WorkerService } from "@/services/worker.service";
 
@@ -190,8 +194,11 @@ container.bind<ILeaveService>(TYPES.LeaveService).to(LeaveService);
 container.bind<ILeaveRepository>(TYPES.LeaveRepository).to(LeaveRepository);
 
 container.bind<IBookingController>(TYPES.BookingController).to(BookingController);
-container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
 container.bind<IBookingRepository>(TYPES.BookingRepository).to(BookingRepository);
+container.bind<IBookingService>(TYPES.BookingService).to(BookingService);
+container
+  .bind<IBookingPaymentHandler>(TYPES.BookingPaymentHandler)
+  .to(BookingPaymentHandlerService);
 
 container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
@@ -205,6 +212,7 @@ container.bind<INotificationService>(TYPES.NotificationService).to(NotificationS
 container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
 
 container.bind<SocketController>(TYPES.SocketController).to(SocketController);
+container.bind<ISocketService>(TYPES.SocketService).to(SocketService);
 
 container.bind<IDisputeRepository>(TYPES.DisputeRepository).to(DisputeRepository);
 container.bind<IDisputeService>(TYPES.DisputeService).to(DisputeService);

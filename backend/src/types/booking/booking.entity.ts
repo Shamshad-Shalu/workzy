@@ -100,7 +100,6 @@ export interface IBooking extends Document<string> {
   evidence?: IEvidence;
 
   otp?: string;
-  chatId?: Types.ObjectId;
 
   snapshot: IBookingSnapshot;
 

@@ -29,11 +29,11 @@ export class AdminBookingService implements IAdminBookingService {
   ) {}
 
   async addAdminNote(bookingId: string, data: AdminNoteDTO): Promise<void> {
-    const booking = await this._bookingRepository.update(bookingId, {
+    const booking = await this._bookingRepository.findByIdAndUpdate(bookingId, {
       adminNote: data.note,
     });
-    if (booking) {
-      throw new CustomError("Error while updating booking", HTTPSTATUS.BAD_REQUEST);
+    if (!booking) {
+      throw new CustomError(BOOKING.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
     }
   }
 
@@ -54,7 +54,7 @@ export class AdminBookingService implements IAdminBookingService {
     }
 
     await Promise.all([
-      this._bookingRepository.update(bookingId, {
+      this._bookingRepository.findByIdAndUpdate(bookingId, {
         status: BOOKING_STATUS.CANCELLED,
         paymentStatus:
           booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD

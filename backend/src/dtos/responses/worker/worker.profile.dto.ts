@@ -6,6 +6,7 @@ import {
   IWorker,
 } from "@/types/worker/worker.entity";
 import { WorkerProfile } from "@/types/worker/worker.projection";
+import { getTodayKey } from "@/utils/time.utils";
 
 export class WorkerProfileResponseDTO {
   id!: string;
@@ -17,6 +18,7 @@ export class WorkerProfileResponseDTO {
   coverImage!: string;
   addressLabel!: string;
   reviewStats!: Omit<IReviewStats, "totalRating">;
+  isAvailableToday!: boolean;
   jobStats!: {
     offered: number;
     accepted: number;
@@ -45,6 +47,7 @@ export class WorkerProfileResponseDTO {
       offered,
       complitionRate: accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0,
     };
+    dto.isAvailableToday = entity.availability[getTodayKey()].length > 0;
     dto.reviewStats = {
       averageRating: Math.round((averageRating ?? 0) * 10) / 10,
       breakdown,

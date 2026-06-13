@@ -18,8 +18,8 @@ import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepos
 import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
-import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
+import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -47,7 +47,7 @@ export class DisputeService implements IDisputeService {
     @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
 
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
-    @inject(TYPES.ChatService) private _chatService: IChatService,
+    @inject(TYPES.MessageService) private _messageService: IMessageService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
@@ -90,7 +90,8 @@ export class DisputeService implements IDisputeService {
       evidence,
       searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
     });
-    const [_, disputeResponse] = await Promise.all([
+    const [disputeResponse] = await Promise.all([
+      this.getDisputeByBookingId(bookingId),
       this._bookingRepository.update(bookingId, {
         status: BOOKING_STATUS.DISPUTED,
         $push: {
@@ -102,7 +103,12 @@ export class DisputeService implements IDisputeService {
           },
         },
       }),
-      this.getDisputeByBookingId(bookingId),
+      this._messageService.saveBookingEvent({
+        workerId: booking.workerId.toString(),
+        userId: booking.userId.toString(),
+        bookingId: bookingId,
+        content: `A dispute has been raised for booking ${booking.bookingId}`,
+      }),
     ]);
     if (!disputeResponse || !dispute) {
       throw new CustomError(DISPUTE.FAILED, HTTPSTATUS.INTERNAL_SERVER_ERROR);
@@ -242,9 +248,6 @@ export class DisputeService implements IDisputeService {
       await Promise.all([
         this._disputeRepository.update(disputeId, disputeUpdate),
         this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-        booking.chatId
-          ? this._chatService.disableChatRoom(booking.chatId.toString())
-          : Promise.resolve(),
       ]);
 
       void this._notificationService.createNotification(
@@ -285,9 +288,6 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-            booking.chatId
-              ? this._chatService.disableChatRoom(booking.chatId.toString())
-              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(
@@ -351,9 +351,6 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-            booking.chatId
-              ? this._chatService.disableChatRoom(booking.chatId.toString())
-              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(
@@ -392,9 +389,6 @@ export class DisputeService implements IDisputeService {
           await Promise.all([
             this._disputeRepository.update(disputeId, disputeUpdate),
             this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-            booking.chatId
-              ? this._chatService.disableChatRoom(booking.chatId.toString())
-              : Promise.resolve(),
           ]);
 
           void this._notificationService.createNotification(
