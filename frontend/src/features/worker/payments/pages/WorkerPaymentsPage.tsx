@@ -62,7 +62,7 @@ export default function WorkerPaymentsPage() {
   const payments = data?.pages.flatMap(p => p.payments) ?? [];
   const isHideButton = fromDate || toDate || status !== 'all' || search;
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-4 lg:p-6">
       <motion.div
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}

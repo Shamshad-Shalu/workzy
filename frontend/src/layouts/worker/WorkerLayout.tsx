@@ -32,7 +32,7 @@ export default function WorkerLayout() {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 no-scrollbar bg-background">
+        <main className="flex-1 overflow-y-auto  no-scrollbar bg-background">
           <Suspense fallback={<div className="opacity-50" />}>
             <Outlet />
           </Suspense>

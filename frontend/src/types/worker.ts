@@ -103,6 +103,7 @@ export type WorkerProfile = {
   coverImage: string;
   addressLabel: string;
   reviewStats: WorkerReviewStats;
+  isAvailableToday: boolean;
   jobStats: {
     offered: number;
     accepted: number;

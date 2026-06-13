@@ -103,7 +103,7 @@ export const useNotificationCount = (role: Role = ROLE.USER) => {
     return () => {
       socket.off('new_notification', handleNewNotification);
     };
-  }, [socket, queryClient, activeChatIdRef ,role ]);
+  }, [socket, queryClient, activeChatIdRef, role]);
 };
 
 export const useNotifications = (role: Role = ROLE.USER, filterRead?: string) => {

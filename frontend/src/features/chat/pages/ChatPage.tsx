@@ -14,7 +14,7 @@ export default function ChatPage({ role = ROLE.ADMIN }: { role?: Role }) {
   const { data: chat, isLoading, isError, error, refetch } = useActiveChat(chatId);
 
   return (
-    <div className="flex h-full w-full bg-background text-foreground  overflow-hidden">
+    <div className="flex h-full w-full bg-background text-foreground overflow-hidden">
       <ChatSidebar activeChatId={chatId} role={role} />
       <main className="flex flex-1 flex-col bg-muted/30 h-full">
         {isLoading ? (

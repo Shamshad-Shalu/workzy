@@ -56,7 +56,7 @@ export default function UserManagementPage() {
   }, [updateParams]);
 
   return (
-    <div>
+    <main className="p-4 lg:p-6">
       <PageHeader title="User Management" description="Manage your platform users" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">
@@ -131,6 +131,6 @@ export default function UserManagementPage() {
         loading={isToggling}
         name={selectedUser?.name}
       />
-    </div>
+    </main>
   );
 }

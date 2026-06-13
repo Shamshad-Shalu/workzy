@@ -37,7 +37,7 @@ export default function WorkerBookingsPage() {
   const bookings = data?.pages.flatMap(p => p.bookings) ?? [];
 
   return (
-    <div className="py-6">
+    <div className="py-6 p-4 lg:p-6">
       <div className="flex items-center justify-between mb-6">
         <PageHeader title="My Jobs" description="Manage your service bookings" />
       </div>

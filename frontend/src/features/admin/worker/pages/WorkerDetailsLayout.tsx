@@ -4,5 +4,5 @@ export default function WorkerDetailsLayout() {
   const { workerId } = useParams();
   console.log(workerId);
 
-  return <div>WorkerDetailsLayout</div>;
+  return <main className="p-4 lg:p-6">WorkerDetailsLayout</main>;
 }

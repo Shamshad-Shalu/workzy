@@ -3,16 +3,17 @@ import {
   Award,
   BadgeCheck,
   Briefcase,
-  CalendarDays,
   CheckCircle2,
   Clock,
   MapPin,
+  MessageCircle,
   ShieldCheck,
   Star,
 } from 'lucide-react';
 
 import type { WorkerProfile } from '@/types/worker';
 
+import Button from '../atoms/Button';
 import ProfileImage from '../molecules/ProfileImage';
 import StatCard from '../molecules/StatCard';
 import { Badge } from '../ui/badge';
@@ -22,9 +23,16 @@ import type React from 'react';
 interface Props {
   worker: WorkerProfile;
   workerAction?: React.ReactNode;
+  onStartChat?: () => void;
+  isChatLoading?: boolean;
 }
 
-export default function WorkerProfileHeader({ worker, workerAction }: Props) {
+export default function WorkerProfileHeader({
+  worker,
+  workerAction,
+  onStartChat,
+  isChatLoading,
+}: Props) {
   const {
     displayName,
     coverImage,
@@ -34,8 +42,8 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
     addressLabel,
     jobStats,
     reviewStats,
+    isAvailableToday,
   } = worker;
-  const isAvailableToday = true;
 
   return (
     <>
@@ -55,7 +63,7 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
         <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/10 via-transparent to-background sm:h-60" />
 
         <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end pb-6">
+          <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between pb-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               {workerAction ? (
                 workerAction
@@ -88,14 +96,6 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
                     <Award className="h-3.5 w-3.5" />
                     {experience} yrs experience
                   </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <CalendarDays className="h-3.5 w-3.5 text-primary" />
-                    Next: Mon, 5 May
-                  </span>
-                  <span className="inline-flex items-center gap-1.5">
-                    <Clock className="h-3.5 w-3.5 text-amber-500" />
-                    Responds ~1 hr
-                  </span>
                   {isAvailableToday ? (
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-2 py-0.5 text-emerald-700 dark:text-emerald-300">
                       <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
@@ -110,6 +110,16 @@ export default function WorkerProfileHeader({ worker, workerAction }: Props) {
                 </div>
               </div>
             </div>
+            {onStartChat && (
+              <Button
+                onClick={onStartChat}
+                loading={isChatLoading}
+                iconLeft={<MessageCircle className="h-4 w-4" />}
+                className="self-start sm:self-end"
+              >
+                Start chat
+              </Button>
+            )}
           </div>
         </div>
       </motion.section>
