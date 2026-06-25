@@ -6,4 +6,11 @@ export const REDIS = {
   DELETE_MANY_ERROR: "Redis DELETE MANY error:",
   CLEAR_PATTERN_SUCCESS: (prefix: string) => `Redis: Cleared keys for prefix "${prefix}"`,
   CLEAR_PATTERN_ERROR: (prefix: string) => `Redis CLEAR PATTERN error for ${prefix}:`,
+  HINCRBY_ERROR: (key: string) => `Redis hash increment error for key ${key}:`,
+
+  HGET_ERROR: (key: string) => `Redis hash get error for key ${key}:`,
+
+  HDEL_ERROR: (key: string) => `Redis hash delete field error for key ${key}:`,
+
+  HGETALL_ERROR: (key: string) => `Redis hash get all fields error for key ${key}:`,
 };

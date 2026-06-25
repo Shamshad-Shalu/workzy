@@ -39,40 +39,6 @@ export class RedisService implements IRedisService {
       logger.error(REDIS.DELETE_ERROR(key), error);
     }
   }
-  // async clearPattern(prefix: string): Promise<void> {
-  //   try {
-  //     if (!prefix) return;
-
-  //     const stream = redisClient.scanIterator({
-  //       MATCH: `${prefix}:*`,
-  //       COUNT: 100,
-  //     });
-
-  //     let pipeline = redisClient.multi();
-  //     let pending = 0;
-
-  //     for await (const key of stream) {
-  //       if (!key) continue;
-
-  //       pipeline.unlink(key);
-  //       pending++;
-
-  //       if (pending >= 100) {
-  //         await pipeline.exec();
-  //         pipeline = redisClient.multi();
-  //         pending = 0;
-  //       }
-  //     }
-
-  //     if (pending > 0) {
-  //       await pipeline.exec();
-  //     }
-
-  //     logger.info(REDIS.CLEAR_PATTERN_SUCCESS(prefix));
-  //   } catch (error) {
-  //     logger.error(REDIS.CLEAR_PATTERN_ERROR(prefix), error);
-  //   }
-  // }
   async clearPattern(prefix: string): Promise<void> {
     try {
       await redisClient.del(prefix);
@@ -93,6 +59,42 @@ export class RedisService implements IRedisService {
       await redisClient.del(keys);
     } catch (error) {
       logger.error(REDIS.DELETE_MANY_ERROR, error);
+    }
+  }
+  /** automaticaly increments field on a hash key, creating both if missing. Returns the new value. */
+  async hIncrBy(key: string, field: string, incrementBy: number): Promise<number> {
+    try {
+      return await redisClient.hIncrBy(key, field, incrementBy);
+    } catch (error) {
+      logger.error(REDIS.HINCRBY_ERROR(key), error);
+      throw error;
+    }
+  }
+  /** Reads one field from a hash. Returns null if the key or field doesn't exist. */
+  async hGet(key: string, field: string): Promise<string | null> {
+    try {
+      const value = await redisClient.hGet(key, field);
+      return value ?? null;
+    } catch (error) {
+      logger.error(REDIS.HGET_ERROR(key), error);
+      return null;
+    }
+  }
+  /** Removes one field from a hash. */
+  async hDel(key: string, field: string): Promise<void> {
+    try {
+      await redisClient.hDel(key, field);
+    } catch (error) {
+      logger.error(REDIS.HDEL_ERROR(key), error);
+    }
+  }
+  /** Returns the whole hash as a plain object (used sparingly — avoid on hot paths). */
+  async hGetAll(key: string): Promise<Record<string, string>> {
+    try {
+      return await redisClient.hGetAll(key);
+    } catch (error) {
+      logger.error(REDIS.HGETALL_ERROR(key), error);
+      return {};
     }
   }
 }
