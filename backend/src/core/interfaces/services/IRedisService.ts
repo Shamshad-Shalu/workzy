@@ -6,6 +6,7 @@ export interface IRedisService {
   clearPattern(pattern: string): Promise<void>;
   deleteMany(keys: string[]): Promise<void>;
   hIncrBy(key: string, field: string, incrementBy: number): Promise<number>;
+  hSet(key: string, field: string, value: string): Promise<void>;
   hGet(key: string, field: string): Promise<string | null>;
   hDel(key: string, field: string): Promise<void>;
   hGetAll(key: string): Promise<Record<string, string>>;

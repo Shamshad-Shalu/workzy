@@ -61,6 +61,15 @@ export class RedisService implements IRedisService {
       logger.error(REDIS.DELETE_MANY_ERROR, error);
     }
   }
+
+  async hSet(key: string, field: string, value: string): Promise<void> {
+    try {
+      await redisClient.hSet(key, field, value);
+    } catch (error) {
+      logger.error(REDIS.HSET_ERROR(key), error);
+    }
+  }
+
   /** automaticaly increments field on a hash key, creating both if missing. Returns the new value. */
   async hIncrBy(key: string, field: string, incrementBy: number): Promise<number> {
     try {

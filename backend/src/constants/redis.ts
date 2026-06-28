@@ -2,8 +2,7 @@ export const REDIS_KEYS = {
   // Presence
   PRESENCE: {
     ONLINE: "presence:online",
-
-    LAST_SEEN: (participantId: string) => `presence:lastSeen:${participantId}`,
+    LAST_SEEN: "presence:lastSeen",
   },
 
   // Categories
