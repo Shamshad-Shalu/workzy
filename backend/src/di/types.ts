@@ -45,7 +45,8 @@ const TYPES = {
   NotificationController: Symbol.for("NotificationController"),
 
   SocketController: Symbol.for("SocketController"),
-  SocketService: Symbol.for("SocketService"),
+  PresenceService: Symbol.for("PresenceService"),
+  ChatSocketController: Symbol.for("ChatSocketController"),
 
   // home
   HomeController: Symbol.for("HomeController"),

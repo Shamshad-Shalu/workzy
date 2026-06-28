@@ -16,11 +16,13 @@ export class ChatResponseDTO {
       id: string;
       name: string;
       profileImage?: string;
+      lastSeen?: string | null;
     };
     worker: {
       id: string;
       name: string;
       profileImage?: string;
+      lastSeen?: string | null;
     };
   };
   isBlocked!: boolean;
@@ -36,7 +38,8 @@ export class ChatResponseDTO {
   };
   static async fromEntity(
     { chat, unread }: ChatRoomListItem,
-    s3Service: IS3Service
+    s3Service: IS3Service,
+    presence?: { userLastSeen?: string | null; workerLastSeen?: string | null }
   ): Promise<ChatResponseDTO> {
     const dto = new ChatResponseDTO();
     const { lastMessage } = chat;
@@ -48,11 +51,13 @@ export class ChatResponseDTO {
         id: chat.userId._id.toString(),
         name: chat.userId.name,
         profileImage: await resolveS3Url(chat.userId.profileImage, s3Service),
+        ...(presence?.userLastSeen !== undefined ? { lastSeen: presence.userLastSeen } : {}),
       },
       worker: {
         id: chat.workerId._id.toString(),
         name: chat.workerId.displayName,
         profileImage: chat.workerId.profileImage,
+        ...(presence?.workerLastSeen !== undefined ? { lastSeen: presence.workerLastSeen } : {}),
       },
     };
     dto.isBlocked = chat.isBlocked;

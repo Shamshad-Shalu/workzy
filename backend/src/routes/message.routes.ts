@@ -12,5 +12,4 @@ const controller = container.get<IMessageController>(TYPES.MessageController);
 router.use(authenticate([ROLE.USER, ROLE.WORKER, ROLE.ADMIN]));
 
 router.get("/:chatId", controller.getMessages);
-router.get("/:chatId/:messageId/context", controller.getMessageContext);
 export default router;

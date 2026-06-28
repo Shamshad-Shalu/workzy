@@ -1,6 +1,7 @@
 import { injectable } from "inversify";
-import { PipelineStage, Types } from "mongoose";
+import { FilterQuery, PipelineStage, Types } from "mongoose";
 
+import { HTTPSTATUS, ROLE } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { Chat } from "@/models/chat.model";
@@ -8,6 +9,7 @@ import { IChat } from "@/types/chat/chat.entity";
 import { ChatListItem } from "@/types/chat/chat.projection";
 import { ChatQuery } from "@/types/chat/chat.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import CustomError from "@/utils/customError";
 
 @injectable()
 export class ChatRepository extends BaseRepository<IChat> implements IChatRepository {
@@ -27,11 +29,18 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
   }
 
   async findByChatId(chatId: string): Promise<ChatListItem | null> {
-    return this.model
+    if (!Types.ObjectId.isValid(chatId)) {
+      throw new CustomError("Invalid chat ID format.", HTTPSTATUS.BAD_REQUEST);
+    }
+    const chat = this.model
       .findById(chatId)
       .populate("workerId", "profileImage displayName")
       .populate("userId", "profileImage name")
       .lean<ChatListItem>();
+    if (!chat) {
+      throw new CustomError("Chat not found.", HTTPSTATUS.NOT_FOUND);
+    }
+    return chat;
   }
 
   async getChatRooms(filter: ChatQuery): Promise<CursorPaginatedResult<ChatListItem>> {
@@ -57,7 +66,38 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
   }
 
   private async searchChatRooms(filter: ChatQuery): Promise<CursorPaginatedResult<ChatListItem>> {
-    const { limit, search = "" } = filter;
+    const { limit, search = "", role } = filter;
+
+    type ChatSearchFields = {
+      chatId: string;
+      "user.name": string;
+      "worker.displayName": string;
+    };
+
+    const searchConditions: FilterQuery<ChatSearchFields>[] = [
+      {
+        chatId: { $regex: search, $options: "i" },
+      },
+    ];
+
+    if (role === ROLE.ADMIN) {
+      searchConditions.push(
+        { "user.name": { $regex: search, $options: "i" } },
+        { "worker.displayName": { $regex: search, $options: "i" } }
+      );
+    }
+
+    if (role === ROLE.WORKER) {
+      searchConditions.push({
+        "user.name": { $regex: search, $options: "i" },
+      });
+    }
+
+    if (role === ROLE.USER) {
+      searchConditions.push({
+        "worker.displayName": { $regex: search, $options: "i" },
+      });
+    }
 
     const pipeline: PipelineStage[] = [
       {
@@ -108,26 +148,7 @@ export class ChatRepository extends BaseRepository<IChat> implements IChatReposi
 
       {
         $match: {
-          $or: [
-            {
-              chatId: {
-                $regex: search,
-                $options: "i",
-              },
-            },
-            {
-              "user.name": {
-                $regex: search,
-                $options: "i",
-              },
-            },
-            {
-              "worker.displayName": {
-                $regex: search,
-                $options: "i",
-              },
-            },
-          ],
+          $or: searchConditions,
         },
       },
 

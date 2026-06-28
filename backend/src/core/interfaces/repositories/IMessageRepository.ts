@@ -9,5 +9,7 @@ import { IBaseRepository } from "./IBaseRepository";
 export interface IMessageRepository extends IBaseRepository<IChatMessage> {
   getMessages(filter: MessageQuery): Promise<CursorPaginatedResult<IChatMessage>>;
   getUnreadCounts(chatIds: string[], role: SenderRole): Promise<UnreadCountResult[]>;
-  markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<void>;
+  markRoomMessagesAsDelivered(chatId: string, role: SenderRole): Promise<number>;
+  markMessageAsDelivered(messageId: string, role: SenderRole): Promise<IChatMessage | null>;
+  markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<number>;
 }

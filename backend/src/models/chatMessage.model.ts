@@ -70,6 +70,7 @@ const ChatMessageSchema = new Schema<IChatMessage>(
       type: [{ type: String, enum: SENDER_ROLE_VALUES }],
       default: [],
     },
+    deliveredToRoles: { type: [String], enum: SENDER_ROLE_VALUES, default: [] },
     isDeleted: {
       type: Boolean,
       default: false,

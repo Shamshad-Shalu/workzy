@@ -5,13 +5,13 @@ import { CHAT, HTTPSTATUS, ROLE } from "@/constants";
 import { MESSAGE_TYPE, MessageType, SenderRole } from "@/constants/chat";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
-import { IChatService } from "@/core/interfaces/services/IChatService";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { ChatMessageResponseDTO } from "@/dtos/responses/chatMessage.dto";
 import { getIO } from "@/socket/socket";
 import { MessageQuery } from "@/types/chat/chat.query";
+import { IMessageReplySnapshot } from "@/types/chat/chatMessage.entity";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import CustomError from "@/utils/customError";
 import { extractKeyFromUrl } from "@/utils/upload";
@@ -21,33 +21,15 @@ export class MessageService implements IMessageService {
   constructor(
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
-    @inject(TYPES.ChatService) private _chatService: IChatService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service
   ) {}
 
   async getMessages(input: MessageQuery): Promise<CursorPaginatedResult<ChatMessageResponseDTO>> {
-    const { data, nextCursor } = await this._messageRepository.getMessages(input);
+    const { data, nextCursor, prevCursor } = await this._messageRepository.getMessages(input);
     return {
       data: await ChatMessageResponseDTO.fromEntities(data, this._s3Service, input.role),
       nextCursor,
-    };
-  }
-  async getMessageContext(input: {
-    chatId: string;
-    messageId: string;
-    limit: number;
-    role: SenderRole;
-  }): Promise<{ data: ChatMessageResponseDTO[]; nextCursor: string | null }> {
-    const { chatId, messageId, limit, role } = input;
-    const { data, nextCursor } = await this._messageRepository.getMessages({
-      chatId,
-      messageId,
-      limit,
-      role,
-    });
-    return {
-      data: await ChatMessageResponseDTO.fromEntities(data, this._s3Service, role),
-      nextCursor,
+      prevCursor,
     };
   }
 
@@ -63,11 +45,8 @@ export class MessageService implements IMessageService {
     const { chatId, role, type, content, mediaUrl, replyToMessageId } = data;
     const mediaUrlKey = mediaUrl ? extractKeyFromUrl(mediaUrl) : undefined;
 
-    let replyToSnapshot:
-      | { messageId: Types.ObjectId; content?: string; type: MessageType; role: SenderRole }
-      | undefined;
-
-    if (replyToMessageId) {
+    let replyToSnapshot: IMessageReplySnapshot | undefined;
+    if (replyToMessageId && Types.ObjectId.isValid(replyToMessageId)) {
       const replyMsg = await this._messageRepository.findById(replyToMessageId);
       if (!replyMsg || replyMsg.isDeleted) {
         throw new CustomError(CHAT.MESSAGE_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
@@ -103,29 +82,34 @@ export class MessageService implements IMessageService {
     return await ChatMessageResponseDTO.fromEntity(messageDoc, this._s3Service, role);
   }
 
-  async markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<void> {
-    await this._messageRepository.markRoomMessagesAsRead(chatId, role);
+  async markMessageAsDelivered(
+    messageId: string,
+    role: SenderRole
+  ): Promise<ChatMessageResponseDTO | null> {
+    const updated = await this._messageRepository.markMessageAsDelivered(messageId, role);
+    if (!updated) return null;
+    return await ChatMessageResponseDTO.fromEntity(updated, this._s3Service, role);
   }
+
+  async markRoomMessagesAsDelivered(chatId: string, role: SenderRole): Promise<number> {
+    return await this._messageRepository.markRoomMessagesAsDelivered(chatId, role);
+  }
+
+  async markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<number> {
+    return await this._messageRepository.markRoomMessagesAsRead(chatId, role);
+  }
+
   async deleteMessage(data: {
-    participantId: string;
-    role: SenderRole;
-    chatId: string;
     messageId: string;
+    chatId: string;
+    lastMessageId?: string;
   }): Promise<void> {
-    const { chatId, messageId, participantId, role } = data;
-    const chat = await this._chatService.authorizeChat({
-      chatId,
-      participantId,
-      role,
-    });
-    if (chat.isBlocked) {
-      throw new CustomError(CHAT.MESSAGE_CANNOT_BE_SENT, HTTPSTATUS.FORBIDDEN);
-    }
+    const { chatId, messageId, lastMessageId } = data;
     const message = await this._messageRepository.findByIdAndUpdate(messageId, { isDeleted: true });
     if (!message) {
       throw new CustomError(CHAT.MESSAGE_NOT_FOUND);
     }
-    if (chat.lastMessage?.messageId.toString() === message._id.toString()) {
+    if (lastMessageId === message._id.toString()) {
       await this._chatRepository.findOneAndUpdate(
         {
           _id: new Types.ObjectId(chatId),
@@ -141,8 +125,9 @@ export class MessageService implements IMessageService {
     chatId: string;
     role: SenderRole;
     content: string;
+    lastMessageId?: string;
   }): Promise<void> {
-    const { chatId, messageId, role, content } = data;
+    const { chatId, messageId, role, content, lastMessageId } = data;
     const message = await this._messageRepository.findOneAndUpdate(
       {
         _id: new Types.ObjectId(messageId),
@@ -159,15 +144,17 @@ export class MessageService implements IMessageService {
     if (!message) {
       throw new CustomError(CHAT.MESSAGE_NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await this._chatRepository.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(chatId),
-        "lastMessage.messageId": new Types.ObjectId(messageId),
-      },
-      {
-        "lastMessage.content": content,
-      }
-    );
+    if (lastMessageId === messageId) {
+      await this._chatRepository.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(chatId),
+          "lastMessage.messageId": new Types.ObjectId(messageId),
+        },
+        {
+          "lastMessage.content": content,
+        }
+      );
+    }
   }
 
   async saveBookingEvent(input: {
@@ -194,14 +181,15 @@ export class MessageService implements IMessageService {
     chatId: string;
     participantIds: { userId: string; workerId: string };
     senderRole: SenderRole;
-    senderName: string;
     savedMsg: ChatMessageResponseDTO;
+    tempId?: string;
   }): Promise<void> {
-    const { chatId, participantIds, senderRole, senderName, savedMsg } = data;
+    const { chatId, participantIds, senderRole, savedMsg, tempId } = data;
     const io = getIO();
 
-    io.to(chatId).emit("newMessage", savedMsg);
-    io.to(participantIds.userId).emit("chatUpdated", {
+    io.to(chatId).emit("newMessage", { ...savedMsg, tempId });
+
+    const chatUpdatedPayload = {
       chatId,
       lastMessage: {
         messageId: savedMsg.id,
@@ -211,24 +199,16 @@ export class MessageService implements IMessageService {
         createdAt: savedMsg.createdAt,
         isDeleted: savedMsg.isDeleted,
       },
-    });
-    io.to(participantIds.workerId).emit("chatUpdated", {
-      chatId,
-      lastMessage: {
-        messageId: savedMsg.id,
-        type: savedMsg.type,
-        role: savedMsg.role,
-        content: savedMsg.content,
-        createdAt: savedMsg.createdAt,
-        isDeleted: savedMsg.isDeleted,
-      },
-    });
+    };
+
+    io.to(participantIds.userId).emit("chatUpdated", chatUpdatedPayload);
+    io.to(participantIds.workerId).emit("chatUpdated", chatUpdatedPayload);
 
     const recipientId =
       senderRole === ROLE.WORKER ? participantIds.userId : participantIds.workerId;
 
     io.to(recipientId).emit("new_notification", {
-      heading: `New Message from ${senderName}`,
+      heading: `New Message from ${senderRole}`,
       message: this.getMessagePreview(savedMsg.type, savedMsg.content),
       chatId,
     });

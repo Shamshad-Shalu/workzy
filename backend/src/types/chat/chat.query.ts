@@ -2,6 +2,8 @@ import { SenderRole } from "@/constants";
 
 import { Cursor } from "../common/query";
 
+export type MessagePaginationDirection = "older" | "newer" | "around";
+
 export interface MessageQuery {
   role: SenderRole;
   search?: string;
@@ -9,6 +11,7 @@ export interface MessageQuery {
   limit: number;
   cursor?: Cursor | null;
   messageId?: string;
+  direction?: MessagePaginationDirection;
 }
 
 interface ChatCursor {

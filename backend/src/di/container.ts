@@ -6,6 +6,7 @@ import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
 import { BookingController } from "@/controllers/booking.controller";
 import { CategoryController } from "@/controllers/category.controller";
+import { ChatSocketController } from "@/controllers/chat-socket.controller";
 import { ChatController } from "@/controllers/chat.controller";
 import { DisputeController } from "@/controllers/dispute.controller";
 import { HomeController } from "@/controllers/home.controller";
@@ -28,6 +29,7 @@ import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
 import { IChatController } from "@/core/interfaces/controllers/IChatController";
+import { IChatSocketController } from "@/core/interfaces/controllers/IChatSocketController";
 import { IDisputeController } from "@/core/interfaces/controllers/IDisputeController";
 import { IHomeController } from "@/core/interfaces/controllers/IHomeController";
 import { ILeaveController } from "@/core/interfaces/controllers/ILeaveController";
@@ -75,13 +77,13 @@ import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
-import { ISocketService } from "@/core/interfaces/services/ISocketService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -120,13 +122,13 @@ import { LeaveService } from "@/services/leave.service";
 import { MessageService } from "@/services/message.service";
 import { NotificationService } from "@/services/notification.service";
 import { PaymentService } from "@/services/payment.service";
+import { PresenceService } from "@/services/presence.service";
 import { QuoteService } from "@/services/quote.service";
 import { RedisService } from "@/services/redis.service";
 import { ReviewService } from "@/services/review.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
-import { SocketService } from "@/services/socket.service";
 import { UserService } from "@/services/user.service";
 import { WorkerService } from "@/services/worker.service";
 
@@ -212,7 +214,9 @@ container.bind<INotificationService>(TYPES.NotificationService).to(NotificationS
 container.bind<INotificationController>(TYPES.NotificationController).to(NotificationController);
 
 container.bind<SocketController>(TYPES.SocketController).to(SocketController);
-container.bind<ISocketService>(TYPES.SocketService).to(SocketService);
+container.bind<IChatSocketController>(TYPES.ChatSocketController).to(ChatSocketController);
+
+container.bind<IPresenceService>(TYPES.PresenceService).to(PresenceService);
 
 container.bind<IDisputeRepository>(TYPES.DisputeRepository).to(DisputeRepository);
 container.bind<IDisputeService>(TYPES.DisputeService).to(DisputeService);

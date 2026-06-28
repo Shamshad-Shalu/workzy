@@ -5,12 +5,6 @@ import { CursorPaginatedResult } from "@/types/common/pagination";
 
 export interface IMessageService {
   getMessages(input: MessageQuery): Promise<CursorPaginatedResult<ChatMessageResponseDTO>>;
-  getMessageContext(input: {
-    chatId: string;
-    messageId: string;
-    limit: number;
-    role: SenderRole;
-  }): Promise<{ data: ChatMessageResponseDTO[]; nextCursor: string | null }>;
   saveMessage(data: {
     chatId: string;
     senderId: string;
@@ -20,13 +14,13 @@ export interface IMessageService {
     mediaUrl?: string;
     replyToMessageId?: string;
   }): Promise<ChatMessageResponseDTO>;
-  markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<void>;
-  deleteMessage(data: {
-    participantId: string;
-    role: SenderRole;
-    chatId: string;
-    messageId: string;
-  }): Promise<void>;
+  markRoomMessagesAsDelivered(chatId: string, role: SenderRole): Promise<number>;
+  markRoomMessagesAsRead(chatId: string, role: SenderRole): Promise<number>;
+  markMessageAsDelivered(
+    messageId: string,
+    role: SenderRole
+  ): Promise<ChatMessageResponseDTO | null>;
+  deleteMessage(data: { messageId: string; chatId: string; lastMessageId?: string }): Promise<void>;
   editMessage(data: {
     messageId: string;
     chatId: string;
@@ -43,7 +37,7 @@ export interface IMessageService {
     chatId: string;
     participantIds: { userId: string; workerId: string };
     senderRole: SenderRole;
-    senderName: string;
     savedMsg: ChatMessageResponseDTO;
+    tempId?: string;
   }): Promise<void>;
 }

@@ -5,6 +5,7 @@ import { CHAT, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
 import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IMessageRepository } from "@/core/interfaces/repositories/IMessageRepository";
 import { IChatService } from "@/core/interfaces/services/IChatService";
+import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { ChatResponseDTO, ChatRoomListItem } from "@/dtos/responses/chat.dto";
@@ -18,7 +19,8 @@ export class ChatService implements IChatService {
   constructor(
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
     @inject(TYPES.MessageRepository) private _messageRepository: IMessageRepository,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.PresenceService) private _presenceService: IPresenceService
   ) {}
 
   async getOrCreateChat(data: {
@@ -114,7 +116,22 @@ export class ChatService implements IChatService {
       userId: chat.userId._id.toString(),
       workerId: chat.workerId._id.toString(),
     });
-    return await ChatResponseDTO.fromEntity({ chat }, this._s3Service);
+    let presence: { userLastSeen?: string | null; workerLastSeen?: string | null } | undefined;
+    if (role === ROLE.USER) {
+      const workerLastSeen = await this._presenceService.getLastSeen(chat.workerId._id.toString());
+      presence = { workerLastSeen };
+    } else if (role === ROLE.WORKER) {
+      const userLastSeen = await this._presenceService.getLastSeen(chat.userId._id.toString());
+      presence = { userLastSeen };
+    } else if (role === ROLE.ADMIN) {
+      const [userLastSeen, workerLastSeen] = await Promise.all([
+        this._presenceService.getLastSeen(chat.userId._id.toString()),
+        this._presenceService.getLastSeen(chat.workerId._id.toString()),
+      ]);
+      presence = { userLastSeen, workerLastSeen };
+    }
+
+    return await ChatResponseDTO.fromEntity({ chat }, this._s3Service, presence);
   }
 
   async getChatRooms(input: ChatQuery): Promise<CursorPaginatedResult<ChatResponseDTO>> {
