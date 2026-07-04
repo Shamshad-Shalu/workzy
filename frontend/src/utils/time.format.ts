@@ -130,3 +130,10 @@ export function formatChatDate(
 
   return d.format('DD/MM/YYYY');
 }
+
+export function formatLastSeen(lastSeen: string | Date | null | undefined): string {
+  if (!lastSeen) {
+    return '';
+  }
+  return dayjs(lastSeen).fromNow();
+}

@@ -2,10 +2,10 @@ import { useQueryClient, type InfiniteData } from '@tanstack/react-query';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { io } from 'socket.io-client';
 
-import { HOST, MODE, type MessageType, type Role } from '@/constants';
+import { HOST, MODE, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
-import type { Chat } from '@/types/chat';
+import type { Chat, LastMessage } from '@/types/chat';
 import type { ChatMessage } from '@/types/chatMessage';
 
 import { SocketContext } from './socket-context';
@@ -16,10 +16,43 @@ interface SocketProviderProps {
   children: ReactNode;
 }
 
+type ChatsPage = InfiniteData<{ chats: Chat[]; nextCursor: string | null }>;
+
+function upsertChatToTop(old: ChatsPage, updated: Chat): ChatsPage {
+  const pages = old.pages.map(page => ({
+    ...page,
+    chats: page.chats.filter(chat => chat.id !== updated.id),
+  }));
+
+  pages[0] = {
+    ...pages[0],
+    chats: [updated, ...pages[0].chats],
+  };
+
+  return {
+    ...old,
+    pages,
+  };
+}
+
+function findChat(old: ChatsPage | undefined, chatId: string): Chat | undefined {
+  if (!old) {
+    return undefined;
+  }
+  for (const page of old.pages) {
+    const found = page.chats.find(c => c.id === chatId);
+    if (found) {
+      return found;
+    }
+  }
+}
+
 export const SocketProvider = ({ children }: SocketProviderProps) => {
   const { user, isAuthenticated } = useAppSelector((s: RootState) => s.auth);
   const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+  const [lastSeenMap, setLastSeenMap] = useState<Map<string, string | null>>(new Map());
   const queryClient = useQueryClient();
+
   const activeChatIdRef = useRef<string | null>(null);
 
   const socket = useMemo(() => {
@@ -48,15 +81,25 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
     socket.on('error', error => console.error('Socket error:', error));
 
     socket.on('onlineUsers', (users: string[]) => setOnlineUsers(new Set(users)));
-    socket.on('userOnline', ({ userId }: { userId: string }) =>
-      setOnlineUsers(prev => new Set(prev).add(userId))
-    );
-    socket.on('userOffline', ({ userId }: { userId: string }) =>
-      setOnlineUsers(prev => {
-        const n = new Set(prev);
-        n.delete(userId);
-        return n;
-      })
+    socket.on('userOnline', ({ userId }: { userId: string }) => {
+      setOnlineUsers(prev => new Set(prev).add(userId));
+      setLastSeenMap(prev => {
+        const next = new Map(prev);
+        next.delete(userId);
+        return next;
+      });
+    });
+
+    socket.on(
+      'userOffline',
+      ({ userId, lastSeen }: { userId: string; lastSeen: string | null }) => {
+        setOnlineUsers(prev => {
+          const next = new Set(prev);
+          next.delete(userId);
+          return next;
+        });
+        setLastSeenMap(prev => new Map(prev).set(userId, lastSeen));
+      }
     );
 
     const handleGlobalNewMessage = (msg: ChatMessage) => {
@@ -64,116 +107,87 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
         return;
       }
 
-      const isMsgFromMe = msg.role === user?.role;
+      const isMine = msg.role === user?.role;
+      let found = false;
 
-      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
-        { queryKey: ['chats'], exact: false },
-        old => {
-          if (!old) {
-            return old;
-          }
-          let targetChat: Chat | undefined;
-          const pagesWithoutChat = old.pages.map(page => ({
-            ...page,
-            chats: page.chats.filter(c => {
-              if (c.id === msg.chatId) {
-                targetChat = c;
-                return false;
-              }
-              return true;
-            }),
-          }));
-          if (!targetChat) {
-            queryClient.invalidateQueries({ queryKey: ['chats'] });
-            return old;
-          }
-          const updatedChat: Chat = {
-            ...targetChat,
-            lastMessage: {
-              messageId: msg.id,
-              type: msg.type,
-              role: msg.role,
-              content: msg.content,
-              createdAt: msg.createdAt,
-              isDeleted: msg.isDeleted,
-            },
-            unread: isMsgFromMe ? (targetChat.unread ?? 0) : (targetChat.unread ?? 0) + 1,
-          };
-
-          return {
-            ...old,
-            pages: pagesWithoutChat.map((page, i) =>
-              i === 0 ? { ...page, chats: [updatedChat, ...page.chats] } : page
-            ),
-          };
+      queryClient.setQueriesData<ChatsPage>({ queryKey: ['chats'], exact: false }, old => {
+        if (!old) {
+          return old;
         }
-      );
+        const target = findChat(old, msg.chatId);
+        if (!target) {
+          return old;
+        }
+        found = true;
+        return upsertChatToTop(old, {
+          ...target,
+          lastMessage: {
+            messageId: msg.id,
+            type: msg.type,
+            role: msg.role,
+            content: msg.content,
+            createdAt: msg.createdAt,
+            isDeleted: msg.isDeleted,
+          },
+          unread: isMine ? (target.unread ?? 0) : (target.unread ?? 0) + 1,
+        });
+      });
+
+      if (!found) {
+        queryClient.invalidateQueries({ queryKey: ['chats'] });
+      }
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', msg.chatId] });
     };
 
     const handleChatUpdated = (payload: {
       chatId: string;
-      lastMessage: {
-        messageId: string;
-        type: MessageType;
-        role: Role;
-        content?: string;
-        createdAt: Date;
-      };
+      lastMessage?: LastMessage;
+      isBlocked?: boolean;
+      blockedBy?: Role | null;
     }) => {
       if (payload.chatId === activeChatIdRef.current) {
         return;
       }
 
-      const oldData = queryClient.getQueryData<
-        InfiniteData<{ chats: Chat[]; nextCursor: string | null }>
-      >(['chats']);
-      const hasChatInCache = oldData?.pages.some(page =>
-        page.chats.some(c => c.id === payload.chatId)
-      );
+      let notFound = false;
 
-      if (!hasChatInCache) {
+      queryClient.setQueriesData<ChatsPage>({ queryKey: ['chats'], exact: false }, old => {
+        if (!old) {
+          notFound = true;
+          return old;
+        }
+        const target = findChat(old, payload.chatId);
+        if (!target) {
+          notFound = true;
+          return old;
+        }
+
+        const isMine = payload.lastMessage?.role === user?.role;
+        const isEditOrDelete = !!(
+          payload.lastMessage &&
+          target.lastMessage &&
+          payload.lastMessage.messageId === target.lastMessage.messageId
+        );
+
+        return upsertChatToTop(old, {
+          ...target,
+          ...(payload.lastMessage && { lastMessage: payload.lastMessage }),
+          ...(payload.isBlocked !== undefined && { isBlocked: payload.isBlocked }),
+          ...(payload.blockedBy !== undefined && { blockedBy: payload.blockedBy ?? undefined }),
+          unread: payload.lastMessage
+            ? isMine || isEditOrDelete
+              ? (target.unread ?? 0)
+              : (target.unread ?? 0) + 1
+            : (target.unread ?? 0),
+        });
+      });
+
+      if (notFound) {
         queryClient.invalidateQueries({ queryKey: ['chats'] });
-        return;
       }
 
-      const isMsgFromMe = payload.lastMessage.role === user?.role;
-
-      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
-        { queryKey: ['chats'], exact: false },
-        old => {
-          if (!old) {
-            return old;
-          }
-          let targetChat: Chat | undefined;
-          const pagesWithoutChat = old.pages.map(page => ({
-            ...page,
-            chats: page.chats.filter(c => {
-              if (c.id === payload.chatId) {
-                targetChat = c;
-                return false;
-              }
-              return true;
-            }),
-          }));
-          if (!targetChat) {
-            return old;
-          }
-          const updatedChat: Chat = {
-            ...targetChat,
-            lastMessage: {
-              ...payload.lastMessage,
-              isDeleted: false,
-            },
-            unread: isMsgFromMe ? (targetChat.unread ?? 0) : (targetChat.unread ?? 0) + 1,
-          };
-          return {
-            ...old,
-            pages: pagesWithoutChat.map((page, i) =>
-              i === 0 ? { ...page, chats: [updatedChat, ...page.chats] } : page
-            ),
-          };
-        }
-      );
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', payload.chatId] });
     };
 
     const handleGlobalMessageDeleted = ({
@@ -183,37 +197,59 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       messageId: string;
       chatId: string;
     }) => {
-      queryClient.setQueriesData<InfiniteData<{ chats: Chat[]; nextCursor: string | null }>>(
-        { queryKey: ['chats'], exact: false },
-        old => {
-          if (!old) {
-            return old;
-          }
-          return {
-            ...old,
-            pages: old.pages.map(page => ({
-              ...page,
-              chats: page.chats.map(c => {
-                if (c.id !== chatId) {
-                  return c;
-                }
-                if (!c.lastMessage) {
-                  return c;
-                }
-                if (c.lastMessage.messageId !== messageId) {
-                  return c;
-                }
-                return { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } };
-              }),
-            })),
-          };
+      queryClient.setQueriesData<ChatsPage>({ queryKey: ['chats'], exact: false }, old => {
+        if (!old) {
+          return old;
         }
-      );
+        return {
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            chats: page.chats.map(c =>
+              c.id === chatId && c.lastMessage?.messageId === messageId
+                ? { ...c, lastMessage: { ...c.lastMessage, isDeleted: true } }
+                : c
+            ),
+          })),
+        };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId] });
     };
 
-    socket.on('messageDeleted', handleGlobalMessageDeleted);
+    const handleGlobalMessageEdited = ({
+      messageId,
+      chatId,
+      content,
+    }: {
+      messageId: string;
+      chatId: string;
+      content: string;
+    }) => {
+      queryClient.setQueriesData<ChatsPage>({ queryKey: ['chats'], exact: false }, old => {
+        if (!old) {
+          return old;
+        }
+        return {
+          ...old,
+          pages: old.pages.map(page => ({
+            ...page,
+            chats: page.chats.map(c =>
+              c.id === chatId && c.lastMessage?.messageId === messageId
+                ? { ...c, lastMessage: { ...c.lastMessage, content } }
+                : c
+            ),
+          })),
+        };
+      });
+
+      queryClient.invalidateQueries({ queryKey: ['chat-messages', chatId] });
+    };
+
     socket.on('newMessage', handleGlobalNewMessage);
     socket.on('chatUpdated', handleChatUpdated);
+    socket.on('messageDeleted', handleGlobalMessageDeleted);
+    socket.on('messageEdited', handleGlobalMessageEdited);
 
     return () => {
       socket.off('connect');
@@ -225,12 +261,13 @@ export const SocketProvider = ({ children }: SocketProviderProps) => {
       socket.off('newMessage', handleGlobalNewMessage);
       socket.off('chatUpdated', handleChatUpdated);
       socket.off('messageDeleted', handleGlobalMessageDeleted);
+      socket.off('messageEdited', handleGlobalMessageEdited);
       socket.disconnect();
     };
   }, [socket, queryClient, user?.role]);
 
   return (
-    <SocketContext.Provider value={{ socket, onlineUsers, activeChatIdRef }}>
+    <SocketContext.Provider value={{ socket, onlineUsers, lastSeenMap, activeChatIdRef }}>
       {children}
     </SocketContext.Provider>
   );

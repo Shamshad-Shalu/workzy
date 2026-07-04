@@ -7,7 +7,9 @@ export function useActiveChat(chatId?: string) {
     queryKey: ['chat', chatId] as const,
     queryFn: () => ChatService.getById(chatId!),
     enabled: !!chatId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 60,
+    gcTime: 1000 * 60 * 60,
     retry: 1,
+    refetchOnWindowFocus: false,
   });
 }

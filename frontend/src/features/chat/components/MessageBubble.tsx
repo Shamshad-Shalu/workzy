@@ -1,5 +1,4 @@
 import dayjs from 'dayjs';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   Ban,
   Check,
@@ -11,21 +10,22 @@ import {
   Pencil,
   Reply,
   Trash2,
-  X,
 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MESSAGE_TYPE, ROLE, type Role } from '@/constants';
+import { ROLE, type Role } from '@/constants';
+import { MESSAGE_TYPE } from '@/constants';
 import { useSocket } from '@/context/socket/use-socket';
 import { cn } from '@/lib/utils';
 import type { Chat } from '@/types/chat';
 import type { ChatMessage } from '@/types/chatMessage';
 import { formatChatDate } from '@/utils/time.format';
+
+import MediaLightbox from './MediaLightbox';
 
 interface Props {
   message: ChatMessage;
@@ -34,8 +34,14 @@ interface Props {
   onReply?: (message: ChatMessage) => void;
   onEdit?: (message: ChatMessage) => void;
   onJumpToMessage?: (messageId: string) => void;
-  isPending?: boolean;
 }
+
+const STATUS_ICON_MAP = {
+  pending: Clock,
+  sent: Check,
+  delivered: CheckCheck,
+  read: CheckCheck,
+} as const;
 
 export default function MessageBubble({
   message,
@@ -44,7 +50,6 @@ export default function MessageBubble({
   onReply,
   onEdit,
   onJumpToMessage,
-  isPending = false,
 }: Props) {
   const { socket } = useSocket();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,10 +58,10 @@ export default function MessageBubble({
   const [revealDeleted, setRevealDeleted] = useState(false);
   const [imgLoading, setImgLoading] = useState(true);
   const [imgError, setImgError] = useState(false);
-  const [isMediaPreviewOpen, setIsMediaPreviewOpen] = useState(false);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const { content, mediaUrl, readByRoles, createdAt, type, role, isDeleted, id, isEdited } =
+  const { content, mediaUrl, readByRoles, createdAt, type, role, isDeleted, id, isEdited, status } =
     message;
 
   const isOwn = role === currentRole;
@@ -70,26 +75,20 @@ export default function MessageBubble({
         ? chat.participants.worker
         : null;
 
-  const otherRole = role === ROLE.USER ? ROLE.WORKER : role === ROLE.WORKER ? ROLE.USER : null;
-  const messageStatus = isPending
-    ? 'pending'
-    : otherRole && readByRoles.includes(otherRole)
-      ? 'read'
-      : readByRoles.length > 0
-        ? 'delivered'
-        : 'sent';
+  const isPending = status === 'pending';
+  const StatusIcon = STATUS_ICON_MAP[status];
 
   const showDeletedPlaceholder = isDeleted && !(isAdmin && revealDeleted);
-  const canDelete =
-    isOwn && !isDeleted && !chat.isBlocked && dayjs().diff(dayjs(createdAt), 'hour') < 2;
-  const canEdit =
+  const canModify =
     isOwn &&
+    !isPending &&
     !isDeleted &&
-    type === MESSAGE_TYPE.TEXT &&
     !chat.isBlocked &&
     dayjs().diff(dayjs(createdAt), 'hour') < 2;
 
-  // Close context menu on outside click
+  const canDelete = canModify;
+  const canEdit = canModify && type === MESSAGE_TYPE.TEXT;
+
   useEffect(() => {
     if (!menuOpen) {
       return;
@@ -114,59 +113,9 @@ export default function MessageBubble({
     setAskDelete(false);
   };
 
-  const StatusIcon = isPending ? Clock : messageStatus === 'sent' ? Check : CheckCheck;
-
-  const menuButton = !showDeletedPlaceholder && (isOwn || isAdmin || onReply) && (
-    <button
-      onClick={openMenu}
-      className={cn(
-        'absolute -top-2 z-10 w-6 h-6 rounded-full flex items-center justify-center',
-        'opacity-0 group-hover:opacity-100 transition-opacity shadow-lg border',
-        isOwn
-          ? '-left-2 bg-primary border-primary/60 text-primary-foreground hover:bg-primary/90'
-          : '-right-2 bg-card border-border text-muted-foreground hover:text-foreground'
-      )}
-    >
-      <ChevronDown size={13} />
-    </button>
-  );
-
-  const replyBlock = message.replyTo && !showDeletedPlaceholder && (
-    <div
-      onClick={() => message.replyTo?.messageId && onJumpToMessage?.(message.replyTo.messageId)}
-      className={cn(
-        'border-l-4 p-2 rounded mb-2 text-xs cursor-pointer transition-colors',
-        isOwn
-          ? 'bg-background/20 border-primary-foreground/60 hover:bg-background/30'
-          : 'bg-muted/60 border-primary hover:bg-muted/80'
-      )}
-    >
-      <p
-        className={cn(
-          'font-bold text-[10px] mb-0.5',
-          isOwn ? 'text-primary-foreground/80' : 'text-primary'
-        )}
-      >
-        {message.replyTo.role === currentRole ? 'You' : message.replyTo.role}
-      </p>
-      <p className="truncate opacity-80">
-        {message.replyTo.type === MESSAGE_TYPE.TEXT
-          ? message.replyTo.content
-          : message.replyTo.type === MESSAGE_TYPE.IMAGE
-            ? '📷 Photo'
-            : message.replyTo.type === MESSAGE_TYPE.VIDEO
-              ? '🎥 Video'
-              : message.replyTo.type === MESSAGE_TYPE.AUDIO
-                ? '🎵 Audio'
-                : 'Media'}
-      </p>
-    </div>
-  );
-
   return (
     <>
       <div className={cn('flex flex-col mb-1 w-full', isOwn ? 'items-end' : 'items-start')}>
-        {/* Admin sender label */}
         {isSentByAdmin && !isAdmin && (
           <span className="mb-0.5 ml-2 inline-flex items-center gap-1 text-[10px] font-semibold tracking-wide text-blue-500">
             <span className="text-[9px]">✦</span> Admin
@@ -174,15 +123,28 @@ export default function MessageBubble({
         )}
 
         <div className={cn('flex items-end gap-2 w-full', isOwn ? 'flex-row-reverse' : 'flex-row')}>
-          {/* Avatar for admin view */}
+          {/* Avatar (admin view only) */}
           {!isOwn && isAdmin && sender && (
             <ProfileImage src={sender.profileImage} name={sender.name} size={30} />
           )}
 
-          {/* Bubble wrapper with max width */}
+          {/* Bubble */}
           <div className={cn('relative group max-w-[78%]', isOwn ? 'self-end' : 'self-start')}>
-            {menuButton}
-
+            {!isDeleted && (isOwn || isAdmin || onReply) && (
+              <button
+                onClick={openMenu}
+                aria-label="Message options"
+                className={cn(
+                  'absolute -top-2 z-10 w-6 h-6 rounded-full flex items-center justify-center',
+                  'opacity-0 group-hover:opacity-100 transition-opacity shadow-lg border',
+                  isOwn
+                    ? '-left-2 bg-primary border-primary/60 text-primary-foreground hover:bg-primary/90'
+                    : '-right-2 bg-card border-border text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <ChevronDown size={13} />
+              </button>
+            )}
             <div
               className={cn(
                 'rounded-2xl px-3 py-2 text-sm shadow-sm',
@@ -193,7 +155,8 @@ export default function MessageBubble({
                     : 'bg-card text-card-foreground border border-border rounded-tl-none'
               )}
             >
-              <div className="flex">
+              {/* Sender name + admin reveal toggle (admin view) */}
+              <div className="flex items-center gap-1">
                 {isAdmin && !isSentByAdmin && sender && (
                   <p
                     className={cn(
@@ -216,7 +179,40 @@ export default function MessageBubble({
                   </Button>
                 )}
               </div>
-              {replyBlock}
+
+              {message.replyTo?.messageId && !showDeletedPlaceholder && (
+                <div
+                  onClick={() =>
+                    message.replyTo?.messageId && onJumpToMessage?.(message.replyTo.messageId)
+                  }
+                  className={cn(
+                    'border-l-4 p-2 rounded mb-2 text-xs cursor-pointer transition-colors min-w-0 max-w-full overflow-hidden',
+                    isOwn
+                      ? 'bg-background/20 border-primary-foreground/60 hover:bg-background/30'
+                      : 'bg-muted/60 border-primary hover:bg-muted/80'
+                  )}
+                >
+                  <p
+                    className={cn(
+                      'font-bold text-[10px] mb-0.5',
+                      isOwn ? 'text-primary-foreground/80' : 'text-primary'
+                    )}
+                  >
+                    {message.replyTo.role === currentRole ? 'You' : message.replyTo.role}
+                  </p>
+                  <p className="line-clamp-2 break-words opacity-80">
+                    {message.replyTo.type === MESSAGE_TYPE.IMAGE
+                      ? '📷 Photo'
+                      : message.replyTo.type === MESSAGE_TYPE.VIDEO
+                        ? '🎥 Video'
+                        : message.replyTo.type === MESSAGE_TYPE.AUDIO
+                          ? '🎵 Audio'
+                          : message.replyTo.content}
+                  </p>
+                </div>
+              )}
+
+              {/* Message body */}
               {showDeletedPlaceholder ? (
                 <div className="flex items-center gap-1.5 italic opacity-60">
                   <Ban size={13} />
@@ -226,12 +222,10 @@ export default function MessageBubble({
                 </div>
               ) : (
                 <>
-                  {/* TEXT */}
                   {type === MESSAGE_TYPE.TEXT && (
                     <p className="whitespace-pre-wrap leading-relaxed break-words">{content}</p>
                   )}
 
-                  {/* IMAGE */}
                   {type === MESSAGE_TYPE.IMAGE && (
                     <div className="space-y-1">
                       <div className="relative min-w-[200px] max-w-[260px] overflow-hidden rounded-xl">
@@ -249,7 +243,7 @@ export default function MessageBubble({
                               'w-64 h-48 object-cover rounded-xl cursor-pointer hover:opacity-90 hover:scale-[1.02] transition-all duration-300',
                               imgLoading && 'hidden'
                             )}
-                            onClick={() => setIsMediaPreviewOpen(true)}
+                            onClick={() => setLightboxOpen(true)}
                           />
                         ) : (
                           <div className="flex h-40 items-center justify-center rounded-xl border text-xs text-muted-foreground">
@@ -261,12 +255,11 @@ export default function MessageBubble({
                     </div>
                   )}
 
-                  {/* VIDEO */}
                   {type === MESSAGE_TYPE.VIDEO && (
                     <div className="space-y-1">
                       <div
                         className="relative rounded-xl overflow-hidden border border-border bg-card cursor-pointer group/video w-64 h-48 flex items-center justify-center"
-                        onClick={() => setIsMediaPreviewOpen(true)}
+                        onClick={() => setLightboxOpen(true)}
                       >
                         <video
                           src={mediaUrl}
@@ -286,7 +279,6 @@ export default function MessageBubble({
                     </div>
                   )}
 
-                  {/* AUDIO */}
                   {type === MESSAGE_TYPE.AUDIO && (
                     <div className="space-y-1">
                       <audio controls className="w-56 min-w-[200px] mt-1">
@@ -310,30 +302,30 @@ export default function MessageBubble({
                   {formatChatDate(createdAt, 'time')}
                   {isEdited && !isDeleted && <span className="ml-1 opacity-60">(edited)</span>}
                 </span>
-                {isOwn && role !== ROLE.ADMIN && (
-                  <StatusIcon
-                    size={13}
-                    className={cn(
-                      isPending
-                        ? 'text-muted-foreground/50 animate-pulse'
-                        : messageStatus === 'read'
-                          ? 'text-primary'
-                          : 'text-muted-foreground'
-                    )}
-                  />
-                )}
-                {isAdmin && isOwn && role === ROLE.ADMIN && readByRoles.length > 0 && (
-                  <span className="text-[10px] text-muted-foreground opacity-60">
-                    Read by: {readByRoles.join(', ')}
-                  </span>
-                )}
+
+                {isOwn &&
+                  (status === 'read' && isAdmin ? (
+                    <span className="text-[10px] text-muted-foreground opacity-60">
+                      Read by: {readByRoles.filter(r => r !== role).join(', ')}
+                    </span>
+                  ) : (
+                    <StatusIcon
+                      size={13}
+                      className={cn(
+                        status === 'sent'
+                          ? 'text-muted-foreground/50'
+                          : status === 'read'
+                            ? 'text-blue-500'
+                            : 'text-muted-foreground'
+                      )}
+                    />
+                  ))}
               </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Context Menu */}
       {menuOpen && (
         <div
           ref={menuRef}
@@ -380,7 +372,6 @@ export default function MessageBubble({
         </div>
       )}
 
-      {/* Delete confirm modal */}
       <AppModal
         open={askDelete}
         onClose={() => setAskDelete(false)}
@@ -388,63 +379,21 @@ export default function MessageBubble({
         isTitleHidden
         buttonVariant="red"
         onConfirm={handleConfirmDelete}
+        className="md:max-w-lg"
       >
         <div className="text-sm text-muted-foreground">
           This message will be removed for everyone. Admins can still view the original content.
         </div>
       </AppModal>
 
-      {/* Fullscreen media preview lightbox */}
-      {createPortal(
-        <AnimatePresence>
-          {isMediaPreviewOpen && !isDeleted && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsMediaPreviewOpen(false)}
-              className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/95 p-4 backdrop-blur-md cursor-zoom-out"
-            >
-              <button
-                onClick={() => setIsMediaPreviewOpen(false)}
-                className="absolute top-4 right-4 text-white/70 hover:text-white bg-white/10 hover:bg-white/20 p-2.5 rounded-full transition-all shadow-lg"
-                title="Close"
-              >
-                <X size={20} />
-              </button>
-              <motion.div
-                initial={{ scale: 0.96, y: 12 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.96, y: 12 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 220 }}
-                className="relative max-w-5xl max-h-[80vh] overflow-hidden flex flex-col items-center"
-                onClick={e => e.stopPropagation()}
-              >
-                {type === MESSAGE_TYPE.IMAGE ? (
-                  <img
-                    src={mediaUrl}
-                    alt="Full screen preview"
-                    className="max-w-full max-h-[80vh] object-contain rounded-lg shadow-2xl select-none"
-                  />
-                ) : (
-                  <video
-                    src={mediaUrl}
-                    controls
-                    autoPlay
-                    className="max-w-full max-h-[80vh] rounded-lg shadow-2xl"
-                  />
-                )}
-                {content && (
-                  <div className="mt-3 px-4 py-2 bg-black/60 backdrop-blur-sm text-white text-sm rounded-lg max-w-md text-center">
-                    {content}
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>,
-        document.body
-      )}
+      {/* Full-screen lightbox */}
+      <MediaLightbox
+        open={lightboxOpen && !isDeleted}
+        onClose={() => setLightboxOpen(false)}
+        type={type}
+        mediaUrl={mediaUrl}
+        caption={content}
+      />
     </>
   );
 }

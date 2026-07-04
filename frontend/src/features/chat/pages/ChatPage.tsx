@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import ErrorState from '@/components/molecules/ErrorState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE, type Role } from '@/constants';
+import { cn } from '@/lib/utils';
 
 import ChatSidebar from '../components/ChatSidebar';
 import ChatWindow from '../components/ChatWindow';
@@ -12,11 +13,24 @@ import { useActiveChat } from '../hooks/useActiveChat';
 export default function ChatPage({ role = ROLE.ADMIN }: { role?: Role }) {
   const { chatId } = useParams<{ chatId: string }>();
   const { data: chat, isLoading, isError, error, refetch } = useActiveChat(chatId);
+  const hasChatSelected = Boolean(chatId);
 
   return (
     <div className="flex h-full w-full bg-background text-foreground overflow-hidden">
-      <ChatSidebar activeChatId={chatId} role={role} />
-      <main className="flex flex-1 flex-col bg-muted/30 h-full">
+      <div
+        className={cn(
+          hasChatSelected ? 'hidden md:flex' : 'flex md:flex',
+          'w-full md:w-80 lg:w-96 flex-col border-r border-border bg-card h-full shrink-0'
+        )}
+      >
+        <ChatSidebar activeChatId={chatId} role={role} />
+      </div>
+      <main
+        className={cn(
+          hasChatSelected ? 'flex md:flex' : 'hidden md:flex',
+          'flex-1 flex-col bg-muted/30 h-full'
+        )}
+      >
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center">
             <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

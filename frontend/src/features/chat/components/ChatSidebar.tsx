@@ -35,7 +35,7 @@ export default function ChatSidebar({ activeChatId, role = ROLE.ADMIN }: ChatSid
   const getChatPath = (id: string) =>
     role === ROLE.USER ? `/messages/${id}` : `/${role}/messages/${id}`;
   return (
-    <aside className="hidden md:flex md:w-80 lg:w-96 flex-col border-r border-border bg-card h-full shrink-0">
+    <aside className="flex flex-col h-full w-full">
       <div className="px-5 pt-5 pb-3 border-b border-border shrink-0">
         <h2 className="text-xl font-semibold tracking-tight mb-3">Messages</h2>
         <div className="flex items-center gap-2 bg-muted/60 border border-border rounded-xl px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/30 transition-all">
@@ -52,7 +52,7 @@ export default function ChatSidebar({ activeChatId, role = ROLE.ADMIN }: ChatSid
       </div>
       <div className="flex-1 overflow-y-auto no-scrollbar">
         {isLoading ? (
-          Array.from({ length: 7 }).map((_, i) => <ChatListItemSkeleton key={i} />)
+          Array.from({ length: 8 }).map((_, i) => <ChatListItemSkeleton key={i} />)
         ) : isError ? (
           <div className="flex flex-col items-center justify-center gap-3 py-16 px-4 text-center">
             <WifiOff className="h-6 w-6 text-muted-foreground/60" />

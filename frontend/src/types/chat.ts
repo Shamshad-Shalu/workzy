@@ -1,5 +1,14 @@
 import type { MessageType, Role } from '@/constants';
 
+export interface LastMessage {
+  messageId: string;
+  type: MessageType;
+  role: Role;
+  content?: string;
+  createdAt: Date;
+  isDeleted?: boolean;
+}
+
 export interface Chat {
   id: string;
   chatId: string;
@@ -8,24 +17,19 @@ export interface Chat {
       id: string;
       name: string;
       profileImage?: string;
+      lastSeen?: string | null;
     };
     worker: {
       id: string;
       name: string;
       profileImage?: string;
+      lastSeen?: string | null;
     };
   };
   isBlocked: boolean;
   blockedBy?: Role;
   unread?: number;
-  lastMessage?: {
-    messageId: string;
-    type: MessageType;
-    role: Role;
-    content?: string;
-    createdAt: Date;
-    isDeleted: boolean;
-  };
+  lastMessage?: LastMessage;
 }
 
 export interface ChatResponse {

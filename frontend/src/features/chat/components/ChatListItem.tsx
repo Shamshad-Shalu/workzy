@@ -23,7 +23,6 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
     role === ROLE.WORKER ? participants.user : role === ROLE.USER ? participants.worker : null;
 
   const otherUserId = role === ROLE.USER ? participants.worker.id : participants.user.id;
-
   const isOnline = !isAdmin && onlineUsers.has(otherUserId);
 
   return (
@@ -79,7 +78,7 @@ export default function ChatListItem({ chat, role, active, onClick }: ChatListIt
                   {lastMessage.role === role ? 'You deleted this message' : 'Message deleted'}
                 </span>
               ) : (
-                <span className="font-semibold truncate">
+                <span className="block truncate font-semibold">
                   <span className="font-medium text-foreground/70 mr-1">
                     {lastMessage.role === role ? 'You:' : ''}
                   </span>
