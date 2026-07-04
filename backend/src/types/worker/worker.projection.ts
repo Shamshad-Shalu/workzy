@@ -4,7 +4,7 @@ import { PricingMode, ServiceType, StripeAccountStatus, WorkerStatus } from "@/c
 
 import { BulkDiscountType } from "../service/service.entity";
 
-import { IGeoLocation, IJobStats, IReviewStats } from "./worker.entity";
+import { IAvailabilitySlots, IGeoLocation, IJobStats, IReviewStats } from "./worker.entity";
 
 export type WorkerListItem = {
   _id: string;
@@ -40,7 +40,7 @@ export type WorkerProfile = {
   coverImage?: string;
   location: IGeoLocation;
   experience: number;
-
+  availability: IAvailabilitySlots;
   jobStats: IJobStats;
   reviewStats: IReviewStats;
 };

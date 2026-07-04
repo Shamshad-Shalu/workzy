@@ -125,7 +125,6 @@ export default function HomeSectionPage() {
           pageCount={Math.ceil((sectionData?.total ?? 0) / pageSize) || 1}
           onPageChange={p => updateParams({ page: p })}
           onPageSizeChange={s => updateParams({ pageSize: s, page: 0 })}
-          emptyText="No sections found"
           gridClassName="grid gap-5 grid-cols-1 @[480px]:grid-cols-2 @[800px]:grid-cols-3 @[1220px]:grid-cols-4"
           renderCard={section => (
             <HomeSectionCard

@@ -19,7 +19,7 @@ export default function HomePageLayout() {
     );
 
   return (
-    <main>
+    <main className="p-4 lg:p-6">
       <PageHeader
         title="Home Management"
         description={`Manage your platform's ${location.pathname === 'sections' ? 'layout' : 'sections'}`}

@@ -1,9 +1,10 @@
 import dayjs from "dayjs";
 
-export function getTodayKey() {
-  return dayjs().format("dddd").toLowerCase();
-}
+import { Day } from "@/types/worker/worker.entity";
 
+export function getTodayKey(): Day {
+  return dayjs().format("dddd").toLowerCase() as Day;
+}
 export function getCurrentTime() {
   return dayjs().format("HH:mm");
 }

@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
+import AdminChatPage from '@/features/admin/chat/pages/AdminChatPage';
 import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
 
@@ -45,6 +46,11 @@ export default function AdminRoutes() {
             <Route path="payments" element={<AdminPaymentsPage />} />
             <Route path="reviews" element={<AdminReviewsPage />} />
             <Route path="disputes" element={<AdminDisputesPage />} />
+
+            <Route path="messages">
+              <Route index element={<AdminChatPage />} />
+              <Route path=":chatId" element={<AdminChatPage />} />
+            </Route>
 
             <Route path="categories" element={<CategoryManagementPage />} />
             <Route path="bookings" element={<AdminBookingPage />} />

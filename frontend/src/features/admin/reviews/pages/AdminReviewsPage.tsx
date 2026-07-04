@@ -79,7 +79,7 @@ export default function AdminReviewsPage() {
   };
 
   return (
-    <div className="space-y-6 pt-0">
+    <main className="space-y-6 pt-0 p-4 lg:p-6">
       <PageHeader title="All Reviews" description="Platform-wide Review management" />
       <div className="md:sticky md:-top-6 md:z-20 bg-background pt-4 pb-2 ">
         <div className="bg-card border rounded-xl p-4">
@@ -228,6 +228,6 @@ export default function AdminReviewsPage() {
         loading={isTogglingReview}
         onConfirm={handleToggleReview}
       />
-    </div>
+    </main>
   );
 }

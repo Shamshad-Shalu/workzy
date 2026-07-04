@@ -11,6 +11,7 @@ import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
+import { IPresenceService } from "@/core/interfaces/services/IPresenceService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
@@ -30,7 +31,8 @@ export class AuthController implements IAuthController {
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.TokenService) private _tokenService: ITokenService,
     @inject(TYPES.WorkerService) private _workerService: IWorkerService,
-    @inject(TYPES.S3Service) private _s3Service: IS3Service
+    @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.PresenceService) private _presenceService: IPresenceService
   ) {}
 
   // Register a new user and send OTP to email
@@ -99,6 +101,24 @@ export class AuthController implements IAuthController {
   });
 
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { refreshToken } = req.cookies;
+    if (refreshToken) {
+      try {
+        const decodedToken = verifyRefreshToken(refreshToken);
+        if (decodedToken?.user?.id) {
+          const userId = decodedToken.user.id;
+          await this._presenceService.forceOffline(userId);
+          if (decodedToken.user.role === ROLE.WORKER) {
+            const worker = await this._workerService.getWorkerByUserId(userId);
+            if (worker) {
+              await this._presenceService.forceOffline(worker._id.toString());
+            }
+          }
+        }
+      } catch (err) {
+        logger.error("Error clearing presence during logout:", err);
+      }
+    }
     await clearRefreshTokenCookie(res);
     res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGOUT_SUCCESS });
   });

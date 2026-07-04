@@ -1,7 +1,7 @@
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IReview, IReviewPopulated } from "@/types/review";
 import { IReviewStats } from "@/types/worker/worker.entity";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
 export class ReviewResponseDTO {
   id!: string;
@@ -104,7 +104,7 @@ export class ReviewUserDTO extends ReviewBaseDTO {
       id: worker._id.toString(),
       name: entity.bookingId.snapshot.worker.name,
       profileImage: worker.profileImage
-        ? await resolveS3Image(worker.profileImage, s3Service)
+        ? await resolveS3Url(worker.profileImage, s3Service)
         : undefined,
     };
     return dto;
@@ -135,7 +135,7 @@ export class ReviewWorkerDTO extends ReviewBaseDTO {
       id: user._id.toString(),
       name: entity.bookingId.snapshot.user.name,
       profileImage: user.profileImage
-        ? await resolveS3Image(user.profileImage, s3Service)
+        ? await resolveS3Url(user.profileImage, s3Service)
         : undefined,
     };
     return dto;
@@ -175,14 +175,14 @@ export class ReviewAdminDTO extends ReviewBaseDTO {
       id: worker._id.toString(),
       name: snapshot.worker.name,
       profileImage: worker.profileImage
-        ? await resolveS3Image(worker.profileImage, s3Service)
+        ? await resolveS3Url(worker.profileImage, s3Service)
         : undefined,
     };
     dto.user = {
       id: user._id.toString(),
       name: snapshot.user.name,
       profileImage: user.profileImage
-        ? await resolveS3Image(user.profileImage, s3Service)
+        ? await resolveS3Url(user.profileImage, s3Service)
         : undefined,
     };
     return dto;
@@ -213,7 +213,7 @@ export class ReviewPublicDTO extends ReviewBaseDTO {
       id: user._id.toString(),
       name: entity.bookingId.snapshot.user.name,
       profileImage: user.profileImage
-        ? await resolveS3Image(user.profileImage, s3Service)
+        ? await resolveS3Url(user.profileImage, s3Service)
         : undefined,
     };
     return dto;

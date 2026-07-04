@@ -13,3 +13,4 @@ export * from "./review";
 export * from "./redis";
 export * from "./quote";
 export * from "./dispute";
+export * from "./chat";

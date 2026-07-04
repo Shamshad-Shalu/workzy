@@ -114,7 +114,7 @@ export default function CategoryManagementPage() {
   };
 
   return (
-    <div>
+    <main className="p-4 lg:p-6">
       <div className="flex items-center justify-between">
         <PageHeader title="Category Management" />
         <Button
@@ -198,6 +198,6 @@ export default function CategoryManagementPage() {
         category={editingCategory}
         parentCategory={parentCategory}
       />
-    </div>
+    </main>
   );
 }

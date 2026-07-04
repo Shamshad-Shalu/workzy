@@ -202,14 +202,16 @@
   }
   .custom-scrollbar {
     scrollbar-width: thin;
+    scrollbar-gutter: stable;
   }
 
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
+    width: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
+    margin-block: 4px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {

@@ -95,3 +95,45 @@ export function formatDateForUrl(date: Date | null | undefined): string | undefi
 
 export const formatTimeRange = (start: string, end: string) =>
   `${formatTime12(start)} → ${formatTime12(end)}`;
+
+export function formatChatDate(
+  dateInput: string | Date,
+  type: 'label' | 'time' | 'smart' = 'label'
+): string {
+  const d = dayjs(dateInput);
+  const now = dayjs();
+
+  if (type === 'time') {
+    return d.format('h:mm A');
+  }
+
+  const isToday = d.isSame(now, 'day');
+  const isYesterday = d.isSame(now.subtract(1, 'day'), 'day');
+
+  if (type === 'smart') {
+    if (isToday) {
+      return d.format('h:mm A');
+    }
+  }
+  if (isToday) {
+    return 'Today';
+  }
+  if (isYesterday) {
+    return 'Yesterday';
+  }
+
+  const diffInDays = now.startOf('day').diff(d.startOf('day'), 'day');
+
+  if (diffInDays > 1 && diffInDays < 7) {
+    return d.format('dddd');
+  }
+
+  return d.format('DD/MM/YYYY');
+}
+
+export function formatLastSeen(lastSeen: string | Date | null | undefined): string {
+  if (!lastSeen) {
+    return '';
+  }
+  return dayjs(lastSeen).fromNow();
+}

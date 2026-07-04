@@ -15,6 +15,9 @@ export const UploadPurposes = {
   SERVICE_EVIDENCE: 'SERVICE_EVIDENCE',
   REVIEW_EVIDENCE: 'REVIEW_EVIDENCE',
   DISPUTE_EVIDENCE: 'DISPUTE_EVIDENCE',
+  CHAT_IMAGE: 'CHAT_IMAGE',
+  CHAT_VIDEO: 'CHAT_VIDEO',
+  CHAT_AUDIO: 'CHAT_AUDIO',
 } as const;
 
 export type UploadPurpose = (typeof UploadPurposes)[keyof typeof UploadPurposes];

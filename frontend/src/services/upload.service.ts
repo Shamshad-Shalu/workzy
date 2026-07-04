@@ -11,14 +11,20 @@ interface UploadProps {
   purpose: UploadPurpose;
 }
 
+function normalizeMimeType(mime: string): string {
+  return mime.split(';')[0].trim().toLowerCase();
+}
+
 export async function uploadToS3({
   file,
   purpose,
   onProgress,
 }: UploadProps & { onProgress?: (p: number) => void }): Promise<string> {
+  const fileType = normalizeMimeType(file.type);
+
   const { data } = await api.post<UploadUrlResponse>(UPLOAD_API.REQUEST_URL, {
     fileName: file.name,
-    fileType: file.type,
+    fileType,
     fileSize: file.size,
     purpose,
   });
@@ -26,7 +32,7 @@ export async function uploadToS3({
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
     xhr.open('PUT', data.uploadUrl);
-    xhr.setRequestHeader('Content-Type', file.type);
+    xhr.setRequestHeader('Content-Type', fileType);
 
     if (onProgress) {
       xhr.upload.onprogress = e => {

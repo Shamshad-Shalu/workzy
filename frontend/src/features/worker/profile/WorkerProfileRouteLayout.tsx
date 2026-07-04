@@ -53,7 +53,7 @@ export default function WorkerProfileRouteWrapper() {
     }
   }
   return (
-    <main className="space-y-6 md:-mx-7 -mt-6">
+    <main className="space-y-6 md:-mx-7 -mt-6 p-4 lg:p-6">
       {isLoading ? (
         <WorkerProfileLayoutSkeleton />
       ) : isError ? (

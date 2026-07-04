@@ -43,7 +43,9 @@ export default function SearchInput({
 
     timerRef.current = setTimeout(() => {
       const trimmed = inputValue.trim();
-      if (trimmed !== value.trim()) {
+      const isValid = trimmed.length === 0 || trimmed.length >= 2;
+
+      if (isValid && trimmed !== value.trim()) {
         onChange(trimmed);
       }
       setIsTyping(false);

@@ -2,7 +2,7 @@ import { QuoteStatus } from "@/constants";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IBookingSlot } from "@/types/booking/booking.entity";
 import { QuoteListItem } from "@/types/quote/quote.projection";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
 export class QuoteResponseDto {}
 
@@ -47,7 +47,7 @@ export class QuoteResponseListDto {
     dto.user = {
       id: entity.userId._id.toString(),
       name: entity.userId.name,
-      profileImage: await resolveS3Image(entity.userId.profileImage, s3Service),
+      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),

@@ -30,7 +30,7 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useParams, useNavigate, Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
@@ -39,6 +39,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { BOOKING_STATUS, ROLE } from '@/constants';
 import type { BookingStatus, Role } from '@/constants';
+import { useGetOrCreateChat } from '@/features/chat/hooks/useChats';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 import { cn } from '@/lib/utils';
 import PageError from '@/pages/PageError';
@@ -534,6 +535,15 @@ function ActionPanel({
   const isAdmin = role === ROLE.ADMIN;
   const isUser = role === ROLE.USER;
   const isWorker = role === ROLE.WORKER;
+  const navigate = useNavigate();
+  const { mutateAsync: createChatRoom, isPending } = useGetOrCreateChat();
+
+  const getMessageUrl = (role: Role, chatId: string) =>
+    role === ROLE.USER ? `/messages/${chatId}` : `/${role}/messages/${chatId}`;
+  const handleNavigateToChat = async () => {
+    const chat = await createChatRoom({ participantId: isWorker ? b.user.id : b.worker.id });
+    navigate(getMessageUrl(role, chat.id));
+  };
 
   return (
     <div className="flex flex-col gap-2">
@@ -548,7 +558,24 @@ function ActionPanel({
       )}
       <div className="grid grid-cols-2 gap-2">
         <ActionBtn icon={Phone} label="Call Worker" accent="violet" />
-        <ActionBtn icon={MessageCircle} label="Open Chat" accent="sky" />
+
+        {b.chatId ? (
+          <Link
+            to={getMessageUrl(role, b.chatId)}
+            className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200 hover:border-sky-500/30 hover:bg-sky-500/10 hover:text-sky-600 dark:hover:text-sky-400"
+          >
+            <MessageCircle className="h-3.5 w-3.5" />
+            Open Chat
+          </Link>
+        ) : !isAdmin ? (
+          <ActionBtn
+            icon={MessageCircle}
+            label={isPending ? 'Starting...' : 'Start Chat'}
+            accent="sky"
+            onClick={handleNavigateToChat}
+            disabled={isPending}
+          />
+        ) : null}
       </div>
 
       {isUser && (
@@ -956,12 +983,14 @@ function ActionBtn({
   accent,
   onClick,
   full = false,
+  disabled = false,
 }: {
   icon: React.ElementType;
   label: string;
   accent: 'violet' | 'sky' | 'amber' | 'green' | 'red';
   onClick?: () => void;
   full?: boolean;
+  disabled?: boolean;
 }) {
   const cls: Record<string, string> = {
     violet:
@@ -976,8 +1005,9 @@ function ActionBtn({
   return (
     <button
       onClick={onClick}
+      disabled={disabled}
       className={cn(
-        'flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200',
+        'flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-border bg-muted/30 px-3 py-2.5 text-xs font-semibold text-muted-foreground transition-all duration-200 disabled:pointer-events-none disabled:opacity-55',
         cls[accent],
         full && 'col-span-2 w-full'
       )}

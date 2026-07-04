@@ -9,7 +9,7 @@ import {
   IRescheduleRequest,
 } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
 export class BookingListItemDTO {
   id!: string;
@@ -78,7 +78,7 @@ export class BookingListItemDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveS3Image(entity.userId.profileImage, s3Service),
+      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
@@ -181,6 +181,7 @@ export class BookingResponseDTO {
     newSlotId: string;
   };
   reviewId?: string;
+  chatId?: string;
   userNote?: string;
   createdAt!: Date;
   completedAt!: Date | null;
@@ -203,7 +204,7 @@ export class BookingResponseDTO {
       ...user,
       id: entity.userId._id.toString(),
       phone: user.phone || "",
-      profileImage: await resolveS3Image(entity.userId.profileImage, s3Service),
+      profileImage: await resolveS3Url(entity.userId.profileImage, s3Service),
     };
     dto.worker = {
       id: entity.workerId._id.toString(),
@@ -252,6 +253,7 @@ export class BookingResponseDTO {
     dto.statusHistory = entity.statusHistory;
     dto.hasVisibleReview = entity.hasVisibleReview;
     dto.reviewId = entity.reviewId ? entity.reviewId.toString() : undefined;
+    dto.chatId = entity?.chatId;
     dto.userNote = entity.userNote;
 
     dto.completedAt = entity.completedAt || null;

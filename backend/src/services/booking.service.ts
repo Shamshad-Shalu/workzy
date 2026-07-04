@@ -28,6 +28,7 @@ import {
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
+import { IChatRepository } from "@/core/interfaces/repositories/IChatRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
@@ -35,12 +36,11 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingService } from "@/core/interfaces/services/IBookingService";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
+import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
-import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import {
   CancelRescheduleDto,
@@ -82,8 +82,8 @@ export class BookingService implements IBookingService {
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
-    @inject(TYPES.SlotService) private _slotService: ISlotService,
-    @inject(TYPES.RedisService) private _redisService: IRedisService
+    @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
+    @inject(TYPES.MessageService) private _messageService: IMessageService
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
@@ -98,6 +98,13 @@ export class BookingService implements IBookingService {
     const booking = await this._bookingRepository.getBookingDetailById(bookingId);
     if (!booking) {
       throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    const chat = await this._chatRepository.findByParticipants(
+      booking?.userId._id.toString(),
+      booking?.workerId._id.toString()
+    );
+    if (chat) {
+      booking.chatId = chat._id.toString();
     }
     return await BookingResponseDTO.fromEntity(booking, this._s3Service);
   }
@@ -208,7 +215,7 @@ export class BookingService implements IBookingService {
         ? BOOKING_PAYMENT_STATUS.REFUNDED
         : booking.paymentStatus;
 
-    await this._bookingRepository.update(bookingId, {
+    await this._bookingRepository.findByIdAndUpdate(bookingId, {
       $set: {
         status: BOOKING_STATUS.CANCELLED,
         paymentStatus,
@@ -217,11 +224,14 @@ export class BookingService implements IBookingService {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
       },
     });
-    await this._slotRepository.deleteMany({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(userId),
-      status: SLOT_STATUS.BOOKED,
-    });
+    await Promise.all([
+      this._slotRepository.deleteMany({
+        bookingId: new Types.ObjectId(bookingId),
+        reservedBy: new Types.ObjectId(userId),
+        status: SLOT_STATUS.BOOKED,
+      }),
+      this.sendBookingEvent(booking, `Booking ${booking.bookingId} has been cancelled by the user`),
+    ]);
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_CANCELLED(booking.bookingId)
@@ -250,10 +260,16 @@ export class BookingService implements IBookingService {
     if (!booking) {
       throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._workerRepository.findOneAndUpdate(
-      { _id: workerId },
-      { $inc: { "jobStats.accepted": 1 } }
-    );
+    await Promise.all([
+      this._workerRepository.findOneAndUpdate(
+        { _id: workerId },
+        { $inc: { "jobStats.accepted": 1 } }
+      ),
+      this.sendBookingEvent(
+        booking,
+        `Booking ${booking.bookingId} has been confirmed by the worker`
+      ),
+    ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_ACCEPTED(booking.bookingId, booking.snapshot.worker.name)
@@ -279,18 +295,24 @@ export class BookingService implements IBookingService {
         ? BOOKING_PAYMENT_STATUS.REFUNDED
         : booking.paymentStatus;
 
-    await this._bookingRepository.update(bookingId, {
+    await this._bookingRepository.findByIdAndUpdate(bookingId, {
       status: BOOKING_STATUS.REJECTED,
       paymentStatus,
       $push: {
         statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
       },
     });
-    await this._slotRepository.deleteMany({
-      bookingId: new Types.ObjectId(bookingId),
-      reservedBy: new Types.ObjectId(booking.userId),
-      status: SLOT_STATUS.BOOKED,
-    });
+    await Promise.all([
+      this._slotRepository.deleteMany({
+        bookingId: new Types.ObjectId(bookingId),
+        reservedBy: new Types.ObjectId(booking.userId),
+        status: SLOT_STATUS.BOOKED,
+      }),
+      this.sendBookingEvent(
+        booking,
+        `Booking ${booking.bookingId} has been rejected by the worker${reason ? `: ${reason}` : ""}`
+      ),
+    ]);
 
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -373,17 +395,20 @@ export class BookingService implements IBookingService {
     if (!booking.otp || booking.otp !== otp) {
       throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.IN_PROGRESS,
-      $unset: { otp: "" },
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.IN_PROGRESS,
-          ROLE.WORKER,
-          BOOKING_STATUS_MESSAGES.IN_PROGRESS
-        ),
-      },
-    });
+    await Promise.all([
+      this._bookingRepository.update(bookingId, {
+        status: BOOKING_STATUS.IN_PROGRESS,
+        $unset: { otp: "" },
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.IN_PROGRESS,
+            ROLE.WORKER,
+            BOOKING_STATUS_MESSAGES.IN_PROGRESS
+          ),
+        },
+      }),
+      this.sendBookingEvent(booking, `Work has started for booking ${booking.bookingId}`),
+    ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.JOB_STARTED(booking.bookingId)
@@ -427,6 +452,7 @@ export class BookingService implements IBookingService {
         status: SLOT_STATUS.BOOKED,
       }),
       this._workerRepository.findByIdAndUpdate(workerId, { $inc: { "jobStats.completed": 1 } }),
+      this.sendBookingEvent(booking, `Work has been completed for booking ${booking.bookingId}`),
     ]);
     void this._notificationService.createNotification(
       booking.userId.toString(),
@@ -449,18 +475,22 @@ export class BookingService implements IBookingService {
       throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
     }
     await this._paymentService.releaseBookingPayment(booking);
-    await this._bookingRepository.update(bookingId, {
-      status: BOOKING_STATUS.APPROVED,
-      paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
-      completedAt: new Date(),
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(
-          BOOKING_STATUS.APPROVED,
-          ROLE.USER,
-          BOOKING_STATUS_MESSAGES.APPROVED
-        ),
-      },
-    });
+    await Promise.all([
+      this._bookingRepository.update(bookingId, {
+        status: BOOKING_STATUS.APPROVED,
+        paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
+        completedAt: new Date(),
+        $push: {
+          statusHistory: this.createStatusHistoryEntry(
+            BOOKING_STATUS.APPROVED,
+            ROLE.USER,
+            BOOKING_STATUS_MESSAGES.APPROVED
+          ),
+        },
+      }),
+      this.sendBookingEvent(booking, `Booking ${booking.bookingId} has been approved by the user`),
+    ]);
+
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.JOB_APPROVED(booking.bookingId, booking.snapshot.user.name)
@@ -565,136 +595,6 @@ export class BookingService implements IBookingService {
     logger.info(`Booking expiry job done — ${succeeded} expired successfully, ${failed} failed.`);
   }
 
-  private async processBookingExpiry(booking: IBooking): Promise<void> {
-    try {
-      if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
-        await this._paymentService.refundBookingPayment(booking._id.toString());
-      }
-      await Promise.all([
-        this._bookingRepository.update(booking._id.toString(), {
-          status: BOOKING_STATUS.EXPIRED,
-          paymentStatus:
-            booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
-              ? BOOKING_PAYMENT_STATUS.REFUNDED
-              : booking.paymentStatus,
-          $push: {
-            statusHistory: this.createStatusHistoryEntry(
-              BOOKING_STATUS.EXPIRED,
-              ROLE.SYSTEM,
-              BOOKING_STATUS_MESSAGES.EXPIRED
-            ),
-          },
-        }),
-        this._slotRepository.findOneAndDelete({
-          bookingId: new Types.ObjectId(booking._id.toString()),
-          reservedBy: new Types.ObjectId(booking.userId),
-          status: SLOT_STATUS.BOOKED,
-        }),
-        this._workerRepository.findOneAndUpdate(
-          { _id: booking.workerId },
-          { $inc: { noResponses: 1 } }
-        ),
-      ]);
-      void this._notificationService.createNotification(
-        booking.userId.toString(),
-        NOTIFICATION_TEMPLATES.BOOKING_EXPIRED(booking.bookingId)
-      );
-    } catch (error) {
-      logger.error(`Failed to expire booking ${booking._id}:`, error);
-      throw error;
-    }
-  }
-
-  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
-    if (booking.workerId.toString() !== workerId) {
-      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
-    }
-  }
-
-  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
-    return {
-      status,
-      changedBy,
-      reason: reason ?? null,
-      changedAt: new Date(),
-    };
-  }
-
-  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
-    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
-  }
-
-  private getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
-    if (!discounts || !discounts?.length) {
-      return null;
-    }
-    const eligible = discounts.filter((d) => count >= d.count);
-    if (!eligible.length) {
-      return null;
-    }
-    return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
-  }
-
-  private async getBookingContext(
-    workerId: string,
-    serviceId: string,
-    lat: number,
-    lng: number
-  ): Promise<BookingContext> {
-    const [service, worker] = await Promise.all([
-      this._serviceRepository.findById(serviceId),
-      this._workerRepository.findById(workerId),
-    ]);
-    if (!service) {
-      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    if (!worker || worker.status !== WORKER_STATUS.VERIFIED) {
-      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
-    }
-    const category = await this._categoryRepository.findById(service.categoryId);
-    if (!category) {
-      throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-    const workerStripeId = worker.stripeAccountId;
-    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
-      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
-    }
-
-    const rate = service.rate ?? category.baseRate;
-    const estimatedDuration = service.estimatedDuration ?? category.estimatedDuration ?? 60;
-    const bufferTime = service.bufferTime ?? category.bufferTime ?? 15;
-    const platformFeePercent = category.platformFee ?? 0;
-    const travelRatePerKM = category.travelRatePerKM ?? 0;
-    const pricingMode = category.pricingMode as PricingMode;
-
-    const distanceKm = calculateDistanceKm(
-      { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
-      { lat, lng }
-    );
-    const travelCost = Math.min(
-      Math.round(distanceKm * (travelRatePerKM ?? 0)),
-      service.maxTravelCost ?? Infinity
-    );
-
-    return {
-      worker: {
-        name: worker.displayName,
-        phone: worker.phone,
-      },
-      service,
-      category,
-      pricingMode,
-      rate,
-      workerStripeId,
-      estimatedDuration,
-      bufferTime,
-      platformFeePercent,
-      travelRatePerKM,
-      distanceKm,
-      travelCost,
-    };
-  }
-
   async requestReschedule(
     bookingId: string,
     initiatorId: string,
@@ -749,9 +649,9 @@ export class BookingService implements IBookingService {
     if (!oldSlot || oldSlot.bookingId?.toString() !== bookingId) {
       throw new CustomError(BOOKING.RESCHEDULE_OLD_SLOT_MISMATCH, HTTPSTATUS.BAD_REQUEST);
     }
-    // if (dayjs(oldSlot.date).isBefore(dayjs().startOf("day"))) {
-    //    throw new CustomError(BOOKING.RESCHEDULE_SLOT_PASSED, HTTPSTATUS.BAD_REQUEST);
-    // }
+    if (dayjs(oldSlot.date).isBefore(dayjs().startOf("day"))) {
+      throw new CustomError(BOOKING.RESCHEDULE_SLOT_PASSED, HTTPSTATUS.BAD_REQUEST);
+    }
 
     if (!newSlot) {
       throw new CustomError(SLOT.EXPIRED, HTTPSTATUS.BAD_REQUEST);
@@ -942,5 +842,149 @@ export class BookingService implements IBookingService {
       responderId.toString(),
       NOTIFICATION_TEMPLATES.RESCHEDULE_CANCELLED(booking.bookingId)
     );
+  }
+
+  private async processBookingExpiry(booking: IBooking): Promise<void> {
+    try {
+      if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
+        await this._paymentService.refundBookingPayment(booking._id.toString());
+      }
+      await Promise.all([
+        this._bookingRepository.update(booking._id.toString(), {
+          status: BOOKING_STATUS.EXPIRED,
+          paymentStatus:
+            booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+              ? BOOKING_PAYMENT_STATUS.REFUNDED
+              : booking.paymentStatus,
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.EXPIRED,
+              ROLE.SYSTEM,
+              BOOKING_STATUS_MESSAGES.EXPIRED
+            ),
+          },
+        }),
+        this._slotRepository.findOneAndDelete({
+          bookingId: new Types.ObjectId(booking._id.toString()),
+          reservedBy: new Types.ObjectId(booking.userId),
+          status: SLOT_STATUS.BOOKED,
+        }),
+        this._workerRepository.findOneAndUpdate(
+          { _id: booking.workerId },
+          { $inc: { noResponses: 1 } }
+        ),
+      ]);
+      void this._notificationService.createNotification(
+        booking.userId.toString(),
+        NOTIFICATION_TEMPLATES.BOOKING_EXPIRED(booking.bookingId)
+      );
+    } catch (error) {
+      logger.error(`Failed to expire booking ${booking._id}:`, error);
+      throw error;
+    }
+  }
+
+  private assertWorkerOwnership(booking: IBooking, workerId: string): void {
+    if (booking.workerId.toString() !== workerId) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN);
+    }
+  }
+
+  private createStatusHistoryEntry(status: BookingStatus, changedBy: Role, reason?: string) {
+    return {
+      status,
+      changedBy,
+      reason: reason ?? null,
+      changedAt: new Date(),
+    };
+  }
+
+  private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
+    return await getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND);
+  }
+
+  private getBestDiscount(discounts: BulkDiscountType[] | null, count: number) {
+    if (!discounts || !discounts?.length) {
+      return null;
+    }
+    const eligible = discounts.filter((d) => count >= d.count);
+    if (!eligible.length) {
+      return null;
+    }
+    return eligible.reduce((a, b) => (a.percent > b.percent ? a : b));
+  }
+
+  private async getBookingContext(
+    workerId: string,
+    serviceId: string,
+    lat: number,
+    lng: number
+  ): Promise<BookingContext> {
+    const [service, worker] = await Promise.all([
+      this._serviceRepository.findById(serviceId),
+      this._workerRepository.findById(workerId),
+    ]);
+    if (!service) {
+      throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (!worker || worker.status !== WORKER_STATUS.VERIFIED) {
+      throw new CustomError(WORKER.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
+    }
+    const category = await this._categoryRepository.findById(service.categoryId);
+    if (!category) {
+      throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+    }
+    const workerStripeId = worker.stripeAccountId;
+    if (!workerStripeId || worker.stripeAccountStatus !== STRIPE_ACCOUNT_STATUS.ACTIVE) {
+      throw new CustomError(WORKER.STRIPE_NOT_ACTIVE, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    const rate = service.rate ?? category.baseRate;
+    const estimatedDuration = service.estimatedDuration ?? category.estimatedDuration ?? 60;
+    const bufferTime = service.bufferTime ?? category.bufferTime ?? 15;
+    const platformFeePercent = category.platformFee ?? 0;
+    const travelRatePerKM = category.travelRatePerKM ?? 0;
+    const pricingMode = category.pricingMode as PricingMode;
+
+    const distanceKm = calculateDistanceKm(
+      { lat: worker.location.coordinates[1], lng: worker.location.coordinates[0] },
+      { lat, lng }
+    );
+    const travelCost = Math.min(
+      Math.round(distanceKm * (travelRatePerKM ?? 0)),
+      service.maxTravelCost ?? Infinity
+    );
+
+    return {
+      worker: {
+        name: worker.displayName,
+        phone: worker.phone,
+      },
+      service,
+      category,
+      pricingMode,
+      rate,
+      workerStripeId,
+      estimatedDuration,
+      bufferTime,
+      platformFeePercent,
+      travelRatePerKM,
+      distanceKm,
+      travelCost,
+    };
+  }
+
+  private async sendBookingEvent(booking: IBooking, content: string): Promise<void> {
+    try {
+      await this._messageService.saveBookingEvent({
+        userId: booking.userId.toString(),
+        workerId: booking.workerId.toString(),
+        bookingId: booking._id.toString(),
+        content,
+      });
+    } catch (error: unknown) {
+      const msg = error instanceof Error ? error.message : "Failed to send BookingEvent";
+      logger.error(`Failed to save booking event message -${booking.bookingId} - ${msg}`);
+    }
   }
 }

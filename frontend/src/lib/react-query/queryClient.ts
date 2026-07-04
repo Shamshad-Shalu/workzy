@@ -11,11 +11,8 @@ export const queryClient = new QueryClient({
     },
     mutations: {
       onError: error => {
-        if (error instanceof AxiosError) {
-          const status = error.response?.status;
-          if (status === 401) {
-            return;
-          }
+        if (error instanceof AxiosError && error.status === 401) {
+          return;
         }
         toast.error(handleApiError(error));
       },

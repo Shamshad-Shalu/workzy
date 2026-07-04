@@ -1,6 +1,6 @@
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IAdress, ILocation, IUser } from "@/types/user/user.entity";
-import { resolveS3Image } from "@/utils/s3.utils";
+import { resolveS3Url } from "@/utils/s3.utils";
 
 export class UserProfileResponseDto {
   id!: string;
@@ -20,7 +20,7 @@ export class UserProfileResponseDto {
     dto.phone = entity.phone;
     dto.role = entity.role;
     dto.profile = entity.profile;
-    dto.profileImage = await resolveS3Image(entity.profileImage, s3Service);
+    dto.profileImage = await resolveS3Url(entity.profileImage, s3Service);
 
     return dto;
   }

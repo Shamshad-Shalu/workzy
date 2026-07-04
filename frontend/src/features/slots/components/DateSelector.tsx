@@ -45,7 +45,7 @@ export default function DateSelector({
           ))}
         </div>
       ) : error ? (
-        <ErrorState description="Failed to load available dates." onRetry={refetch} />
+        <ErrorState description={error.message} onRetry={refetch} />
       ) : (
         <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide -mx-1 px-1">
           {days.map(day => {

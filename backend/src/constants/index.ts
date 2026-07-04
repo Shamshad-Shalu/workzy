@@ -48,3 +48,5 @@ export * from "./booking";
 export * from "./worker";
 export * from "./notification";
 export * from "./dispute";
+export * from "./chat";
+export * from "./redis";

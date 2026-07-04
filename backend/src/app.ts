@@ -6,6 +6,7 @@ import express from "express";
 import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
 import { startCleanupJob } from "./jobs/cleanup-slots";
+import { apiLogger } from "./middlewares/apiLogger";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import apiRouter from "./routes";
 import webhookRouter from "./routes/webhook.routes";
@@ -26,6 +27,8 @@ const corsOptions = {
 app.use("/api/webhook", express.raw({ type: "*/*" }), webhookRouter);
 
 app.use(cors(corsOptions));
+
+app.use(apiLogger);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

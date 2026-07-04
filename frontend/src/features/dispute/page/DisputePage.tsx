@@ -55,7 +55,7 @@ export default function DisputePage({ role }: { role: Role }) {
   );
 
   return (
-    <div>
+    <main className="p-4 lg:p-6">
       <PageHeader title="Disputes" description="Manage and resolve all booking disputes" />
       <DisputeStatsSection
         isError={isStatsError}
@@ -148,6 +148,6 @@ export default function DisputePage({ role }: { role: Role }) {
         bookingId={disputeBId}
         role={role}
       />
-    </div>
+    </main>
   );
 }

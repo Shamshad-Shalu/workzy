@@ -32,7 +32,7 @@ export default function AdminLayout() {
             setMobileSidebarOpen(true);
           }}
         />
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6 no-scrollbar bg-background overflow-x-auto min-w-0">
+        <main className="flex-1 overflow-y-auto no-scrollbar bg-background overflow-x-auto min-w-0">
           <Outlet />
         </main>
       </div>

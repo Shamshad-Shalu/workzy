@@ -42,7 +42,9 @@ export class S3Service implements IS3Service {
     const policy = PURPOSE_POLICY[purpose];
     if (!policy) throw new CustomError("Invalid upload purpose");
 
-    if (!(policy.allowedTypes as readonly string[]).includes(fileType)) {
+    const normalizedFileType = fileType.split(";")[0].trim().toLowerCase();
+
+    if (!(policy.allowedTypes as readonly string[]).includes(normalizedFileType)) {
       throw new CustomError("File type not allowed");
     }
 
@@ -50,7 +52,7 @@ export class S3Service implements IS3Service {
       throw new Error("File too large");
     }
 
-    const extension = getFileExtension(fileType, fileName);
+    const extension = getFileExtension(normalizedFileType, fileName);
 
     const prefix = getDefaultPrefix(policy.folder);
     const uniqueName = generateUniqueFileName(prefix, extension);
@@ -59,7 +61,7 @@ export class S3Service implements IS3Service {
     const command = new PutObjectCommand({
       Bucket: this.config.bucket,
       Key: fileKey,
-      ContentType: fileType,
+      ContentType: normalizedFileType,
     });
 
     const uploadUrl = await getSignedUrl(this.s3, command, { expiresIn: 300 });

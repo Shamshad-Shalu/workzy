@@ -85,13 +85,13 @@ export class UserService implements IUserService {
   async updateProfileImage(userId: string, url: string): Promise<string> {
     const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
 
-    if (user.profileImage?.includes("private/user/profiles")) {
-      await this._s3Service.deleteFile(user.profileImage);
-    }
     const profileImage = extractKeyFromUrl(url);
     const updatedUser = await this._userRepository.update(user.id, { profileImage });
     if (!updatedUser?.profileImage) {
       throw new CustomError(USER.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
+    }
+    if (user.profileImage?.includes("private/user/profiles")) {
+      void this._s3Service.deleteFile(user.profileImage);
     }
     return await this._s3Service.generateSignedUrl(updatedUser.profileImage);
   }

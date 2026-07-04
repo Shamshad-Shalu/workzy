@@ -11,3 +11,5 @@ export * from './payment.routes';
 export * from './review.routes';
 export * from './notification.routes';
 export * from './dispute.routes';
+export * from './chat.routes';
+export * from './message.routes';

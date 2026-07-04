@@ -3,7 +3,8 @@ export type PaginatedResult<T> = {
   total: number;
 };
 
-export type CursorPaginatedResult<T, C = string | null> = {
+export type CursorPaginatedResult<T> = {
   data: T[];
-  nextCursor: C;
+  nextCursor: string | null;
+  prevCursor?: string | null;
 };

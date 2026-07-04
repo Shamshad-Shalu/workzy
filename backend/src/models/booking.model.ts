@@ -271,9 +271,6 @@ const BookingSchema: Schema<IBooking> = new Schema(
     otp: {
       type: String,
     },
-    chatId: {
-      type: String,
-    },
     extraCharge: { type: ExtraChargeSchema, default: null },
     evidence: { type: EvidenceSchema, default: null },
     hasVisibleReview: { type: Boolean, default: false },

@@ -45,6 +45,8 @@ const TYPES = {
   NotificationController: Symbol.for("NotificationController"),
 
   SocketController: Symbol.for("SocketController"),
+  PresenceService: Symbol.for("PresenceService"),
+  ChatSocketController: Symbol.for("ChatSocketController"),
 
   // home
   HomeController: Symbol.for("HomeController"),
@@ -73,6 +75,7 @@ const TYPES = {
   BookingController: Symbol.for("BookingController"),
   BookingService: Symbol.for("BookingService"),
   BookingRepository: Symbol.for("BookingRepository"),
+  BookingPaymentHandler: Symbol.for("BookingPaymentHandler"),
 
   ReviewController: Symbol.for("ReviewController"),
   ReviewService: Symbol.for("ReviewService"),
@@ -84,6 +87,14 @@ const TYPES = {
   DisputeController: Symbol.for("DisputeController"),
   DisputeService: Symbol.for("DisputeService"),
   DisputeRepository: Symbol.for("DisputeRepository"),
+
+  MessageController: Symbol.for("MessageController"),
+  MessageService: Symbol.for("MessageService"),
+  MessageRepository: Symbol.for("MessageRepository"),
+
+  ChatController: Symbol.for("ChatController"),
+  ChatService: Symbol.for("ChatService"),
+  ChatRepository: Symbol.for("ChatRepository"),
 };
 
 export { TYPES };

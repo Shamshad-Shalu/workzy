@@ -57,4 +57,5 @@ export type BookingDetails = Omit<IBooking, "otp"> & {
     _id: Types.ObjectId;
     iconUrl: string;
   };
+  chatId?: string;
 };

@@ -74,7 +74,7 @@ export default function AdminBookingsPage() {
 
   const isHideButton = fromDate || toDate || status !== 'all' || paymentStatus !== 'all' || search;
   return (
-    <div className="py-6 space-y-6">
+    <main className="py-6 space-y-6 p-4 lg:p-6">
       <PageHeader title="All Bookings" description="Platform-wide booking management" />
       <div className="bg-card border rounded-xl p-6 pb-0 mt-12">
         <div className="grid sm:grid-cols-12 gap-4">
@@ -174,6 +174,6 @@ export default function AdminBookingsPage() {
         onClose={() => setDisputeBId(null)}
         bookingId={disputeBId}
       />
-    </div>
+    </main>
   );
 }

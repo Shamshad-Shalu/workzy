@@ -79,7 +79,7 @@ export default function WorkerReviewsPage() {
   };
 
   return (
-    <main className="space-y-6">
+    <main className="space-y-6 p-4 lg:p-6">
       <PageHeader title="Review Management" description="manage Reviews" />
       {statsLoading ? (
         <ReviewSummarySkeleton />

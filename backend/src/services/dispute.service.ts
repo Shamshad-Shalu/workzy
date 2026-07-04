@@ -19,6 +19,7 @@ import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepos
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
+import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -46,6 +47,7 @@ export class DisputeService implements IDisputeService {
     @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
 
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
+    @inject(TYPES.MessageService) private _messageService: IMessageService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
@@ -88,7 +90,8 @@ export class DisputeService implements IDisputeService {
       evidence,
       searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
     });
-    const [_, disputeResponse] = await Promise.all([
+    const [disputeResponse] = await Promise.all([
+      this.getDisputeByBookingId(bookingId),
       this._bookingRepository.update(bookingId, {
         status: BOOKING_STATUS.DISPUTED,
         $push: {
@@ -100,7 +103,12 @@ export class DisputeService implements IDisputeService {
           },
         },
       }),
-      this.getDisputeByBookingId(bookingId),
+      this._messageService.saveBookingEvent({
+        workerId: booking.workerId.toString(),
+        userId: booking.userId.toString(),
+        bookingId: bookingId,
+        content: `A dispute has been raised for booking ${booking.bookingId}`,
+      }),
     ]);
     if (!disputeResponse || !dispute) {
       throw new CustomError(DISPUTE.FAILED, HTTPSTATUS.INTERNAL_SERVER_ERROR);

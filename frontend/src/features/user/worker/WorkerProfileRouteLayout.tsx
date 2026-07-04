@@ -1,8 +1,9 @@
 import { motion } from 'framer-motion';
-import { NavLink, Outlet, useParams } from 'react-router-dom';
+import { NavLink, Outlet, useNavigate, useParams } from 'react-router-dom';
 
 import ErrorState from '@/components/molecules/ErrorState';
 import WorkerProfileHeader from '@/components/organisms/WorkerProfileHeader';
+import { useGetOrCreateChat } from '@/features/chat/hooks/useChats';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
 import WorkerProfileLayoutSkeleton from '@/features/worker/profile/components/WorkeAboutSkeleton';
 import { cn } from '@/lib/utils';
@@ -14,8 +15,10 @@ const TABS = [
 ];
 
 export default function WorkerProfileRouteLayout() {
+  const navigate = useNavigate();
   const { workerId } = useParams();
   const { data, isLoading, error, isError, refetch } = useWorkerProfile(workerId);
+  const { mutateAsync: createChat, isPending } = useGetOrCreateChat();
 
   const getNavLinkClass = ({ isActive }: { isActive: boolean }) =>
     cn(
@@ -25,6 +28,11 @@ export default function WorkerProfileRouteLayout() {
         : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40'
     );
 
+  const handleStartChat = async () => {
+    const res = await createChat({ participantId: workerId! });
+    navigate(`/messages/${res.id}`);
+  };
+
   return (
     <main className="space-y-6 md:-mx-7 -mt-6">
       {isLoading ? (
@@ -33,7 +41,13 @@ export default function WorkerProfileRouteLayout() {
         <ErrorState description={error.message} onRetry={refetch} />
       ) : (
         <>
-          {data && <WorkerProfileHeader worker={data} />}
+          {data && (
+            <WorkerProfileHeader
+              worker={data}
+              isChatLoading={isPending}
+              onStartChat={handleStartChat}
+            />
+          )}
           <div className="max-w-7xl mx-auto px-4 sm:px-8 pb-16">
             <div className="flex border-b border-border overflow-x-auto no-scrollbar mb-6">
               {TABS.map(tab => (

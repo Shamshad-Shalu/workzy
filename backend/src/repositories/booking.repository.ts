@@ -1,4 +1,5 @@
 import dayjs from "dayjs";
+import { injectable } from "inversify";
 import { FilterQuery, Types } from "mongoose";
 
 import {
@@ -17,6 +18,7 @@ import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { MonthlyEarningStat, WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 
+@injectable()
 export class BookingRepository extends BaseRepository<IBooking> implements IBookingRepository {
   constructor() {
     super(Booking);

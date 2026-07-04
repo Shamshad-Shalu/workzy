@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
+import UserChatPage from '@/features/user/chat/UserChatPage';
 import UserPaymentsPage from '@/features/user/payments/pages/UserPaymentsPage';
 import NotFound from '@/pages/NotFound';
 
@@ -52,6 +53,10 @@ export default function UserRoutes() {
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
         </Route>
 
+        <Route path="messages">
+          <Route index element={<UserChatPage />} />
+          <Route path=":chatId" element={<UserChatPage />} />
+        </Route>
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/join-us" element={<JoinUsPage />} />
@@ -62,7 +67,6 @@ export default function UserRoutes() {
             <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
             <Route path="/profile" element={<UserProfilePage />} />
             <Route path="/disputes" element={<UserDisputesPage />} />
-
             <Route path="/payments" element={<UserPaymentsPage />} />
             <Route path="/quotes" element={<UserQuotesListPage />} />
           </Route>

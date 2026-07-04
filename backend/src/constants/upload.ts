@@ -5,7 +5,7 @@ export const FILE_TYPES = {
 
   VIDEOS: ["video/mp4", "video/webm", "video/quicktime"],
 
-  AUDIOS: ["audio/mpeg", "audio/wav", "audio/ogg"],
+  AUDIOS: ["audio/mpeg", "audio/wav", "audio/ogg", "audio/webm"],
 } as const;
 
 export const PURPOSE_POLICY = {
@@ -81,6 +81,24 @@ export const PURPOSE_POLICY = {
     folder: "public/bookings/disputes",
     maxSizeMB: 50,
     allowedTypes: [...FILE_TYPES.IMAGES, ...FILE_TYPES.VIDEOS],
+  },
+
+  CHAT_IMAGE: {
+    folder: "private/chat/images",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.IMAGES,
+  },
+
+  CHAT_VIDEO: {
+    folder: "private/chat/videos",
+    maxSizeMB: 50,
+    allowedTypes: FILE_TYPES.VIDEOS,
+  },
+
+  CHAT_AUDIO: {
+    folder: "private/chat/audio",
+    maxSizeMB: 10,
+    allowedTypes: FILE_TYPES.AUDIOS,
   },
 } as const;
 
