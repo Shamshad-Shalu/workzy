@@ -108,7 +108,7 @@ export class ChatSocketController implements IChatSocketController {
         return;
       }
 
-      const savedMsg = await this._messageService.saveMessage({
+      let savedMsg = await this._messageService.saveMessage({
         chatId,
         senderId: participantId,
         role,
@@ -123,7 +123,13 @@ export class ChatSocketController implements IChatSocketController {
 
       if (recipientIsOnline) {
         const recipientRole: SenderRole = role === ROLE.WORKER ? ROLE.USER : ROLE.WORKER;
-        await this._messageService.markMessageAsDelivered(savedMsg.id, recipientRole);
+        const updatedMsg = await this._messageService.markMessageAsDelivered(
+          savedMsg.id,
+          recipientRole
+        );
+        if (updatedMsg) {
+          savedMsg = updatedMsg;
+        }
         io.to(chatId).emit("messageStatusUpdate", {
           chatId,
           messageIds: [savedMsg.id],

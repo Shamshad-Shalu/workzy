@@ -225,7 +225,8 @@ export class MessageRepository extends BaseRepository<IChatMessage> implements I
       },
       {
         $addToSet: { deliveredToRoles: role },
-      }
+      },
+      { new: true }
     );
   }
 
