@@ -11,6 +11,7 @@ export interface IWorkerController {
   updateProfileImage: RequestHandler;
 
   createWorkerProfile: RequestHandler;
+  getMyWorkerProfile: RequestHandler;
   reSubmitWorkerDocument: RequestHandler;
   connectStripe: RequestHandler;
   getStripeStatus: RequestHandler;

@@ -1,3 +1,4 @@
+import { WorkerStatus } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { PaginatedResult, CursorPaginatedResult } from "@/types/common/pagination";
 import { IReviewStats, IWorker } from "@/types/worker/worker.entity";
@@ -14,6 +15,7 @@ import {
 } from "@/types/worker/worker.query";
 
 export interface IWorkerRepository extends BaseRepository<IWorker> {
+  getWorkerByUserId(userId: string): Promise<IWorker | null>;
   getWorkerProfile(workerId: string): Promise<WorkerProfile | null>;
   listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerItem[]>;
   listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>>;
@@ -27,4 +29,9 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
   decrementRating(workerId: string, rating: number): Promise<void>;
   getWorkerReviewStats(workerId: string): Promise<IReviewStats | null>;
   getWorkerGrowthAnalytics(): Promise<{ month: number; workers: number }[]>;
+  updateWorkerStatus(
+    workerId: string,
+    status: WorkerStatus,
+    reason: string
+  ): Promise<Worker | null>;
 }

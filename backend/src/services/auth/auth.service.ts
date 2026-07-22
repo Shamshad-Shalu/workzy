@@ -53,6 +53,9 @@ export class AuthService implements IAuthService {
     if (!user) {
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
+    if (user.isBlocked) {
+      throw new CustomError(USER.BLOCKED, HTTPSTATUS.FORBIDDEN);
+    }
     const isPasswordValid = await compare(password, user.password);
     if (!isPasswordValid) {
       throw new CustomError(AUTH.INVALID_CREDENTIALS, HTTPSTATUS.BAD_REQUEST);

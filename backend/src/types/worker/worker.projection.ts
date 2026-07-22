@@ -40,6 +40,7 @@ export type WorkerProfile = {
   coverImage?: string;
   location: IGeoLocation;
   experience: number;
+  languages: string[];
   availability: IAvailabilitySlots;
   jobStats: IJobStats;
   reviewStats: IReviewStats;
@@ -67,4 +68,20 @@ export type PublicWorkerListItem = {
   isAvailable: boolean;
   travelCost: number;
   distanceKm: number;
+};
+
+export type WorkerRevenueStats = {
+  grossRevenue: number;
+  workerEarnings: number;
+  platformRevenue: number;
+};
+
+export type WorkerStatsSummary = WorkerRevenueStats & {
+  totalBookings: number;
+  completedBookings: number;
+  upcomingBookings: number;
+
+  rating: number;
+  totalReviews: number;
+  completionRate: number;
 };

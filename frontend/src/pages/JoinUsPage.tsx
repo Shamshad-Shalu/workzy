@@ -1,13 +1,12 @@
-import { AlertCircle, ArrowRight, PawPrint, Settings, Smartphone } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { ArrowRight, PawPrint, Phone, Settings, Smartphone } from 'lucide-react';
+import { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
-import { ImageUpload } from '@/components/molecules/ImageUpload';
-import type { WorkerStatus } from '@/constants';
+import { WORKER_STATUS } from '@/constants';
 import { FAQ_ITEMS, FEATURE_CARDS, PROCESS_STEPS, STATS_CARDS } from '@/constants/landingItems';
-import { UploadPurposes } from '@/constants/upload';
 import CTASection from '@/features/user/home/components/CTASection';
 import BecomeWorkerForm from '@/features/user/JoinUs/components/BecomeWorkerForm';
 import {
@@ -17,88 +16,36 @@ import {
   MetricCard,
   ProcessStep,
 } from '@/features/user/JoinUs/components/Sections';
-import { useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
+import { useMyWorkerProfile, useWorkerJoin } from '@/features/user/JoinUs/hooks/useWorkerJoin';
 import type { JoinWorkerSchemaType } from '@/features/user/JoinUs/validation/JoinWorkerFormSchema';
-import { cn } from '@/lib/utils';
-import { useAppDispatch } from '@/store/hooks';
-import { updateUser } from '@/store/slices/authSlice';
-// import type { IDocument, WorkerStatus } from '@/types/worker';
-import { handleApiError } from '@/utils/handleApiError';
+import { useAppSelector } from '@/store/hooks';
+import type { RootState } from '@/store/store';
 
-import userImg from '../assets/auth/signup.jpg';
-import teamImg from '../assets/auth/signup.jpg';
-
+import become_wokrer_img from '../assets/images/become_wokrer.webp';
+import workerImg from '../assets/images/worker_image.webp';
 export default function JoinUsPage() {
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const applyNowRef = useRef<HTMLElement | null>(null);
-  const { worker, user, joinWorker, resubmitWorker } = useWorkerJoin();
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [resubmitted, setResubmitted] = useState<boolean>(false);
-  const [existingDoc, setExistingDoc] = useState<Document | null>(null);
   const [formOpen, setFormOpen] = useState<boolean>(false);
-  const [documentValue, setDocumentValue] = useState<string>(existingDoc?.url || '');
+  const { user } = useAppSelector((state: RootState) => state.auth);
 
-  const workerStatus: WorkerStatus | null = worker?.status ?? null;
-  const workerId = worker?.id ?? null;
-  const hasLocation = !!user?.profile?.location?.coordinates;
-  const hasPhoneNumber = !!user?.phone;
-  const isPending = workerStatus === 'pending';
-  const needsRevision = workerStatus === 'needs_revision';
-  const isVerified = workerStatus === 'verified';
+  const { data, isLoading } = useMyWorkerProfile(user?.id);
+  const { joinWorker, resubmitWorker, isPending } = useWorkerJoin();
+  const isVerified = data?.status === WORKER_STATUS.VERIFIED;
 
-  useEffect(() => {
-    if (user) {
-      dispatch(updateUser(user));
-    }
-  }, [user, dispatch]);
-
-  useEffect(() => {
-    if (!needsRevision) {
-      return;
-    }
-
-    const doc = worker?.documents?.[0];
-    if (doc) {
-      setExistingDoc(doc);
-      setDocumentValue(doc.url);
-    }
-  }, [needsRevision, worker]);
-
-  async function onSubmit(data: JoinWorkerSchemaType) {
+  async function onSubmit(formData: JoinWorkerSchemaType) {
     if (!user?.id) {
       return;
     }
-    if (isPending) {
-      toast.info('Your application is already pending review.');
-      return;
+
+    if (data?.id) {
+      const res = await resubmitWorker({ workerId: data.id, data: formData });
+      toast.success(res.message);
+    } else {
+      const res = await joinWorker(formData);
+      toast.success(res.message);
     }
-    try {
-      const res = await joinWorker.mutateAsync({ userId: user.id, data });
-      toast.success(res?.message);
-      navigate('/');
-    } catch (error) {
-      toast.error(handleApiError(error));
-    }
-  }
-  async function reSubmitForm() {
-    if (!existingDoc || !documentValue || !workerId) {
-      toast.error('Please upload the document');
-      return;
-    }
-    setLoading(true);
-    try {
-      const { message } = await resubmitWorker.mutateAsync({
-        workerId,
-        data: { id: existingDoc.id, WorkerStatus: 'pending', url: documentValue },
-      });
-      toast.success(message);
-    } catch (error) {
-      toast.error(handleApiError(error));
-    } finally {
-      setLoading(false);
-    }
+    setFormOpen(false);
   }
 
   const openFormAndScroll = () => {
@@ -106,7 +53,6 @@ export default function JoinUsPage() {
       navigate('/login');
     }
     setFormOpen(true);
-
     requestAnimationFrame(() => {
       applyNowRef.current?.scrollIntoView({ behavior: 'smooth' });
     });
@@ -159,7 +105,7 @@ export default function JoinUsPage() {
               <div className="absolute -top-6 -left-6 w-full h-full rounded-2xl border border-golden/30 animate-pulse"></div>
               <div className="relative rounded-2xl overflow-hidden shadow-2xl transform transition-transform duration-500 hover:scale-[1.02]">
                 <img
-                  src={teamImg}
+                  src={workerImg}
                   alt="Service professional using Workzy"
                   className="w-full h-auto"
                 />
@@ -193,106 +139,64 @@ export default function JoinUsPage() {
       </section>
 
       {formOpen && (
-        <>
-          {/* Application Form Section */}
-          <section id="apply-now" ref={applyNowRef} className="py-20 px-4 bg-muted/30">
-            <div className="container mx-auto max-w-6xl">
-              {workerStatus === 'rejected' && (
-                <div className="bg-destructive/10 border border-destructive/20 rounded-xl p-6 text-center mb-8">
-                  <h4 className="font-semibold text-primary text-lg mb-2">
-                    Application Rejected By Admin
-                  </h4>
-                  <div className="text-primary/80">
-                    Please contact <a className="text-underline">www.workzy.service.com</a>
-                  </div>
-                </div>
-              )}
+        <section id="apply-now" ref={applyNowRef} className="py-20 px-4 bg-muted/30">
+          <div className="container mx-auto max-w-6xl">
+            {!user?.phone ? (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+                className="relative overflow-hidden rounded-2xl p-8 shadow-sm bg-amber-500/15 "
+              >
+                <div className="pointer-events-none absolute -top-10 -right-10 h-40 w-40 rounded-full  blur-3xl" />
 
-              {/* Status Alerts */}
-              {needsRevision && existingDoc && (
-                <div
-                  className={cn(
-                    'rounded-xl p-6 mb-8',
-                    resubmitted
-                      ? 'bg-blue/10 border border-blue/20'
-                      : 'bg-destructive/10 border border-destructive/20'
-                  )}
-                >
-                  <h4 className="font-semibold text-lg mb-2">Action Required</h4>
-                  {existingDoc.rejectReason && (
-                    <p className="text-sm mb-4 text-destructive">
-                      Admin note: {existingDoc.rejectReason}
-                    </p>
-                  )}
-                  <ImageUpload
-                    value={documentValue}
-                    purpose={UploadPurposes.WORKER_DOCUMENT}
-                    className="w-full"
-                    onChange={url => {
-                      setDocumentValue(url);
-                      setResubmitted(true);
-                    }}
-                  />
-                  <Button
-                    fullWidth
-                    size="lg"
-                    variant="blue"
-                    onClick={reSubmitForm}
-                    loading={loading}
-                    disabled={!resubmitted}
+                <div className="relative flex flex-col items-center gap-4 text-center sm:flex-row sm:text-left">
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.15, type: 'spring', stiffness: 200, damping: 15 }}
+                    className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-amber-500/20 "
                   >
-                    Resubmit Document
-                  </Button>
-                </div>
-              )}
+                    <Phone className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  </motion.div>
 
-              {isPending && (
-                <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800 rounded-xl p-6 text-center mb-8">
-                  <h4 className="font-semibold text-primary text-lg mb-2">
-                    Application Under Review
-                  </h4>
-                  <p className="text-primary/80">
-                    Your application is currently being reviewed by our team. You will be notified
-                    once the status changes.
-                  </p>
-                </div>
-              )}
-
-              {/* Profile Completion Warning */}
-              {(!hasLocation || !hasPhoneNumber) && (isPending || workerStatus === null) && (
-                <div className="bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800 rounded-xl p-6 mb-8">
-                  <div className="flex items-start gap-3">
-                    <AlertCircle className="w-5 h-5 text-yellow-600 dark:text-yellow-500 mt-0.5 flex-shrink-0" />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-yellow-900 dark:text-yellow-100 mb-1">
-                        Complete Your Profile First
-                      </h4>
-                      <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                        {!hasLocation && 'Please add your address and set your GPS location'}
-                        {!hasLocation && !hasPhoneNumber && ' and '}
-                        {!hasPhoneNumber && 'add your phone number'}
-                        {' in your profile settings before becoming a service provider.'}
-                      </p>
-                      <button
-                        type="button"
-                        className="mt-3 text-sm font-medium text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300 underline cursor-pointer"
-                        onClick={() => navigate('/profile')}
+                  <div className="flex-1">
+                    <h4 className="text-lg font-semibold text-secondary-foreground">
+                      Add Your Phone Number
+                    </h4>
+                    <p className="mt-1 text-sm text-accent-foreground ">
+                      We need a phone number on file before you can apply as a service provider. It
+                      only takes a moment.
+                    </p>
+                    <Link to="/profile">
+                      <motion.span
+                        whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.97 }}
+                        className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-amber-700"
                       >
-                        Go to Profile Settings →
-                      </button>
-                    </div>
+                        Go to Profile Settings
+                        <ArrowRight className="h-4 w-4" />
+                      </motion.span>
+                    </Link>
                   </div>
                 </div>
-              )}
-              {/* Application Form */}
-              {!['pending', 'needs_revision', 'rejected', 'verified'].includes(
-                workerStatus ?? ''
-              ) && (
-                <BecomeWorkerForm onSubmit={onSubmit} disabled={!hasLocation || !hasPhoneNumber} />
-              )}
-            </div>
-          </section>
-        </>
+              </motion.div>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: 'easeOut' }}
+              >
+                <BecomeWorkerForm
+                  worker={data}
+                  isLoading={isLoading || isPending}
+                  onSubmit={onSubmit}
+                  userPhone={user?.phone}
+                />
+              </motion.div>
+            )}
+          </div>
+        </section>
       )}
 
       {/* Why Join Us Section */}
@@ -356,8 +260,12 @@ export default function JoinUsPage() {
             </div>
 
             <div className="relative">
-              <div className="relative z-10 rounded-2xl overflow-hidden shadow-2xl">
-                <img src={userImg} alt="Workzy app demonstration" className="w-full h-auto" />
+              <div className="relative flex items-center justify-center">
+                <img
+                  src={become_wokrer_img}
+                  alt="Workzy app demonstration"
+                  className="w-full max-w-[620px] object-contain"
+                />
               </div>
               <div className="absolute top-1/2 left-0 transform -translate-x-1/2 -translate-y-1/2 bg-golden rounded-full p-6 shadow-xl">
                 <Smartphone className="h-8 w-8 text-[var(--golden-dark)]" />
@@ -395,7 +303,7 @@ export default function JoinUsPage() {
       </section>
 
       {/* Final CTA Section */}
-      <CTASection isVerified={workerStatus === 'verified'} onBecomeProvider={openFormAndScroll} />
+      <CTASection isVerified={isVerified} onBecomeProvider={openFormAndScroll} />
     </main>
   );
 }

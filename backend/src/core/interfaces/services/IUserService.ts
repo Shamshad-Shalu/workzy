@@ -11,7 +11,6 @@ import { UserListQuery } from "@/types/user/user.query";
 
 export interface IUserService {
   findByEmail(email: string): Promise<IUser | null>;
-  toggleUserStatus(userId: string): Promise<string>;
   listUsers(query: UserListQuery): Promise<PaginatedResult<UsersResponseDTO>>;
   updateProfileImage(userId: string, url: string): Promise<string>;
   updateProfile(userId: string, data: UserProfileRequestDto): Promise<UserProfileResponseDto>;
@@ -24,4 +23,5 @@ export interface IUserService {
   requestChangeEmail(userId: string, email: string): Promise<boolean>;
   requestChangePhone(userId: string, phone: string): Promise<boolean>;
   resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean>;
+  toggleUserStatus(userId: string): Promise<string>;
 }

@@ -14,6 +14,10 @@ const TYPES = {
   WorkerController: Symbol.for("WorkerController"),
 
   AdminController: Symbol.for("AdminController"),
+  AdminWorkerController: Symbol.for("AdminWorkerController"),
+  AdminUserController: Symbol.for("AdminUserController"),
+  AdminBookingController: Symbol.for("AdminBookingController"),
+  AdminBookingService: Symbol.for("AdminBookingService"),
   AdminService: Symbol.for("AdminService"),
 
   //category
@@ -80,9 +84,6 @@ const TYPES = {
   ReviewController: Symbol.for("ReviewController"),
   ReviewService: Symbol.for("ReviewService"),
   ReviewRepository: Symbol.for("ReviewRepository"),
-
-  AdminBookingController: Symbol.for("AdminBookingController"),
-  AdminBookingService: Symbol.for("AdminBookingService"),
 
   DisputeController: Symbol.for("DisputeController"),
   DisputeService: Symbol.for("DisputeService"),

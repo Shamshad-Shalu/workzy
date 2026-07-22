@@ -53,16 +53,16 @@ export default function UserRoutes() {
           <Route path="/auth/google/callback" element={<GoogleCallback />} />
         </Route>
 
-        <Route path="messages">
-          <Route index element={<UserChatPage />} />
-          <Route path=":chatId" element={<UserChatPage />} />
-        </Route>
         <Route element={<UserLayout />}>
           <Route path="/" element={<RoleBasedRoot />} />
           <Route path="/join-us" element={<JoinUsPage />} />
           <Route path="/services" element={<ServicePage />} />
           <Route path="/services/:serviceId" element={<WorkerListingPage />} />
           <Route element={<ProtectedRoute requiredRoles={[ROLE.USER, ROLE.WORKER]} />}>
+            <Route path="messages">
+              <Route index element={<UserChatPage />} />
+              <Route path=":chatId" element={<UserChatPage />} />
+            </Route>
             <Route path="/bookings" element={<UserBookingsPage />} />
             <Route path="/bookings/:bookingId" element={<UserBookingDetailsPage />} />
             <Route path="/profile" element={<UserProfilePage />} />

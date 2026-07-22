@@ -5,6 +5,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AdminChatPage from '@/features/admin/chat/pages/AdminChatPage';
 import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
+import WorkerOverviewPage from '@/features/admin/worker/pages/WorkerOverviewPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -16,7 +17,9 @@ const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDet
 const WorkerManagementPage = lazy(
   () => import('@/features/admin/worker/pages/WorkerMangementPage')
 );
-const WorkerDetailsLayout = lazy(() => import('@/features/admin/worker/pages/WorkerDetailsLayout'));
+const WorkerDetailsLayout = lazy(
+  () => import('@/features/admin/worker/wrapper/WorkerDetailsLayout')
+);
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
@@ -37,24 +40,38 @@ export default function AdminRoutes() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AdminLayout />}>
             <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="users" element={<UserManagementPage />} />
-            <Route path="users/:userId" element={<UserDetailsLayout />}></Route>
 
-            <Route path="workers" element={<WorkerManagementPage />} />
-            <Route path="workers/:workerId" element={<WorkerDetailsLayout />}></Route>
+            <Route path="users">
+              <Route index element={<UserManagementPage />} />
+              <Route path=":userId" element={<UserDetailsLayout />} />
+            </Route>
+
+            <Route path="workers">
+              <Route index element={<WorkerManagementPage />} />
+              <Route path=":workerId" element={<WorkerDetailsLayout />}>
+                <Route index element={<WorkerOverviewPage />} />
+                <Route path="documents" element={<WorkerOverviewPage />} />
+                <Route path="services" element={<WorkerOverviewPage />} />
+                <Route path="bookings" element={<WorkerOverviewPage />} />
+                <Route path="reviews" element={<WorkerOverviewPage />} />
+                <Route path="quotes" element={<WorkerOverviewPage />} />
+                <Route path="disputes" element={<WorkerOverviewPage />} />
+                <Route path="payments" element={<WorkerOverviewPage />} />
+              </Route>
+            </Route>
+
+            <Route path="bookings" element={<AdminBookingPage />} />
+            <Route path="bookings/:bookingId" element={<AdminBookingDetailsPage />} />
 
             <Route path="payments" element={<AdminPaymentsPage />} />
             <Route path="reviews" element={<AdminReviewsPage />} />
             <Route path="disputes" element={<AdminDisputesPage />} />
+            <Route path="categories" element={<CategoryManagementPage />} />
 
             <Route path="messages">
               <Route index element={<AdminChatPage />} />
               <Route path=":chatId" element={<AdminChatPage />} />
             </Route>
-
-            <Route path="categories" element={<CategoryManagementPage />} />
-            <Route path="bookings" element={<AdminBookingPage />} />
-            <Route path="bookings/:bookingId" element={<AdminBookingDetailsPage />} />
 
             <Route path="home" element={<HomePageLayout />}>
               <Route index element={<HomeLayoutPage />} />

@@ -4,6 +4,7 @@ import {
   Briefcase,
   Calendar,
   Clock,
+  Globe,
   MapPin,
   Pencil,
   Phone,
@@ -22,8 +23,9 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
+import MultiSelectInput from '@/components/molecules/MultiSelectInput';
 import { Badge } from '@/components/ui/badge';
-import { WORKER_STATUS } from '@/constants';
+import { INDIAN_LANGUAGES, WORKER_STATUS, WORKER_STATUS_CONFIG } from '@/constants';
 import { UploadPurposes } from '@/constants/upload';
 import MapSelector from '@/features/profile/components/MapSelector';
 import type { WorkerProfileDetails } from '@/types/worker';
@@ -87,7 +89,7 @@ export default function WorkerProfileSection({
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [locationMapOpen, setLocationMapOpen] = useState(false);
 
-  const { displayName, tagline, about, status } = workerData;
+  const { displayName, tagline, about, status, languages } = workerData;
 
   const {
     register,
@@ -154,6 +156,8 @@ export default function WorkerProfileSection({
     edit: { opacity: 1, y: 0, transition: { duration: 0.25 } },
     exit: { opacity: 0, y: -6, transition: { duration: 0.15 } },
   };
+  const config = WORKER_STATUS_CONFIG[status] ?? WORKER_STATUS_CONFIG[WORKER_STATUS.PENDING];
+  const StatusIcon = config.icon;
 
   return (
     <>
@@ -171,18 +175,9 @@ export default function WorkerProfileSection({
                 <User2 size={16} className="text-primary" />
               </div>
               <h3 className="text-lg font-bold text-foreground">Worker Profile</h3>
-              <Badge
-                variant={
-                  status === WORKER_STATUS.VERIFIED
-                    ? 'green'
-                    : status === WORKER_STATUS.PENDING
-                      ? 'outline'
-                      : status === WORKER_STATUS.NEEDS_REVISION
-                        ? 'blue'
-                        : 'red'
-                }
-              >
-                {status}
+              <Badge variant={config.badgeVariant}>
+                <StatusIcon className="size-3" />
+                {config.label}
               </Badge>
             </div>
 
@@ -339,6 +334,59 @@ export default function WorkerProfileSection({
                         <p className="text-sm text-card-foreground leading-relaxed whitespace-pre-wrap">
                           {about}
                         </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <div>
+                  <Label>Languages Spoken</Label>
+                  <AnimatePresence mode="wait">
+                    {isEditing ? (
+                      <motion.div
+                        key="lang-edit"
+                        initial="exit"
+                        animate="edit"
+                        exit="exit"
+                        variants={fieldVariants}
+                      >
+                        <Controller
+                          name="languages"
+                          control={control}
+                          render={({ field, fieldState }) => (
+                            <MultiSelectInput
+                              value={field.value ?? []}
+                              onChange={field.onChange}
+                              options={INDIAN_LANGUAGES}
+                              icon={Globe}
+                              placeholder="Search and add a language…"
+                              error={fieldState.error?.message}
+                            />
+                          )}
+                        />
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="lang-view"
+                        initial="exit"
+                        animate="view"
+                        exit="exit"
+                        variants={fieldVariants}
+                        className="flex flex-wrap gap-1.5 pt-2"
+                      >
+                        {languages && languages.length > 0 ? (
+                          languages.map(lang => (
+                            <span
+                              key={lang}
+                              className="rounded-full border border-section-blue-border bg-section-blue px-2.5 py-0.5 text-xs font-medium text-section-blue-text"
+                            >
+                              {lang}
+                            </span>
+                          ))
+                        ) : (
+                          <p className="text-sm italic text-muted-foreground py-2">
+                            No languages specified
+                          </p>
+                        )}
                       </motion.div>
                     )}
                   </AnimatePresence>

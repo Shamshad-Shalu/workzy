@@ -59,7 +59,7 @@ class AvailabilityDto {
   sunday!: AvailabilitySlotDto[];
 }
 
-class GeoLocationDto {
+export class GeoLocationDto {
   @IsString()
   type!: "Point";
 
@@ -98,4 +98,8 @@ export class WorkerProfileRequestDto {
 
   @IsString()
   coverImage?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  languages!: string[];
 }

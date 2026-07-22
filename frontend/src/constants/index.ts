@@ -2,6 +2,7 @@ export * from './env';
 export * from './messages';
 export * from './roles';
 export * from './indianStates';
+export * from './indianLanguages';
 export * from './service';
 export * from './home';
 export * from './apiRoutes/index';

@@ -64,6 +64,12 @@ export const BOOKING_STATUS_META: Record<
     accent: 'border-l-orange-500',
     dot: 'bg-orange-500',
   },
+  expired: {
+    label: 'Expired',
+    badge: 'bg-zinc-500/15 text-zinc-600 dark:text-zinc-400 border-zinc-500/30',
+    accent: 'border-l-zinc-500',
+    dot: 'bg-zinc-500',
+  },
 };
 
 export const PAYMENT_STATUS_META: Record<string, { label: string; badge: string }> = {

@@ -8,6 +8,6 @@ export function useWorkerProfileDetails(workerId?: string) {
     queryFn: () => WorkerService.getWorkerProfileDetails(workerId!),
     enabled: !!workerId,
     staleTime: 1000 * 60 * 5,
-    // select: data => data.worker,
+    gcTime: 1000 * 60 * 10,
   });
 }

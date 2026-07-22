@@ -9,11 +9,10 @@ import {
   Moon,
   Sun,
 } from 'lucide-react';
-import { useParams } from 'react-router-dom';
+import { useOutletContext } from 'react-router-dom';
 
 import { cn } from '@/lib/utils';
-
-import { useWorkerProfileDetails } from '../hooks/useWorkerProfile';
+import type { WorkerProfile } from '@/types/worker';
 
 import type { Transition } from 'framer-motion';
 
@@ -38,6 +37,10 @@ const DAY_LABELS: Record<Day, string> = {
   sunday: 'Sun',
 };
 
+type WorkerOutletContext = {
+  worker: WorkerProfile;
+};
+
 const fade = (delay = 0) => ({
   initial: { opacity: 0, y: 10 },
   animate: { opacity: 1, y: 0 },
@@ -45,12 +48,8 @@ const fade = (delay = 0) => ({
 });
 
 export default function WorkerAboutTab() {
-  const { workerId } = useParams();
-  const { data } = useWorkerProfileDetails(workerId);
-
-  const { about, availability } = data ?? {};
-
-  const languages: string[] = ['malayalam', 'english', 'hindi'];
+  const { worker } = useOutletContext<WorkerOutletContext>();
+  const { about, availability, languages } = worker;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">

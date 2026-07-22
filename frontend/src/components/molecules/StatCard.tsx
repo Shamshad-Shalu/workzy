@@ -24,7 +24,7 @@ export default function StatCard({
     neutral: 'bg-muted text-muted-foreground',
   };
   return (
-    <Card>
+    <Card className="hover:shadow-md transition-shadow">
       <CardContent className="flex items-center gap-3 p-4">
         {icon && (
           <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneMap[tone]}`}>

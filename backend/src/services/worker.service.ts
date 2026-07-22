@@ -3,11 +3,14 @@ import { Types } from "mongoose";
 
 import {
   DEFAULT_WORKER_COVER_IMAGE,
+  DOCUMENT_STATUS,
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   ROLE,
   StripeAccountStatus,
+  UPCOMING_BOOKING_STATUSES,
   WORKER,
+  WORKER_JOIN_DOCUMENT_KEY_MAP,
   WORKER_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -15,11 +18,12 @@ import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository"
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
+import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
-import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
-import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
+import { WorkerReviewRequestDTO } from "@/dtos/requests/admin/worker-review.dto";
+import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
 import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
@@ -29,7 +33,8 @@ import {
   WorkerProfileResponseDTO,
 } from "@/dtos/responses/worker/worker.profile.dto";
 import { CursorPaginatedResult, PaginatedResult } from "@/types/common/pagination";
-import { IWorker } from "@/types/worker/worker.entity";
+import { IWorker, IWorkerDocument } from "@/types/worker/worker.entity";
+import { WorkerStatsSummary } from "@/types/worker/worker.projection";
 import {
   NearbyWorkerListQuery,
   PublicWorkerListQuery,
@@ -47,12 +52,13 @@ export class WorkerService implements IWorkerService {
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
     @inject(TYPES.UserRepository) private _userRepository: IUserRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.PaymentService) private _paymentservice: IPaymentService,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
   getWorkerByUserId = async (userId: string): Promise<IWorker | null> => {
-    return this._workerRepository.findOne({ userId });
+    return this._workerRepository.getWorkerByUserId(userId);
   };
 
   // worker listing - admin side
@@ -93,7 +99,7 @@ export class WorkerService implements IWorkerService {
     if (!worker) {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
-    return WorkerDetailsResponseDto.fromEntity(worker);
+    return WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
   }
 
   async updateWorkerProfile(
@@ -113,7 +119,7 @@ export class WorkerService implements IWorkerService {
     if (worker?.coverImage && coverImage !== worker.coverImage) {
       await this._s3Service.deleteFile(worker.coverImage);
     }
-    return WorkerDetailsResponseDto.fromEntity(updatedWorker);
+    return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 
   async updateWorkerPhone(workerId: string, phone: string): Promise<boolean> {
@@ -137,117 +143,92 @@ export class WorkerService implements IWorkerService {
     return updateWorker.profileImage;
   }
 
-  async createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO> {
-    const isAlredyWorker = await this._workerRepository.findOne({ userId });
-    if (isAlredyWorker) {
-      throw new CustomError("Already Provided", HTTPSTATUS.BAD_REQUEST);
+  async getMyWorkerProfile(userId: string): Promise<WorkerDetailsResponseDto | null> {
+    const worker = await this._workerRepository.getWorkerByUserId(userId);
+    if (!worker) {
+      return null;
     }
-    await getEntityOrThrow(this._userRepository, userId);
-    const { document, ...rest } = data;
-    const updates: Partial<IWorker> = { ...rest };
-    const url = extractKeyFromUrl(document);
-
-    updates.documents = [{ url, type: "id_proof" }];
-    updates.userId = new Types.ObjectId(userId);
-    const worker = await this._workerRepository.create({
-      ...updates,
-    });
-    return WorkerProfileResponseDTO.fromEntity(worker);
+    return await WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
   }
 
-  async verifyWorker(
-    workerId: string,
-    data: VerifyWorkerRequestDTO
-  ): Promise<WorkerProfileResponseDTO> {
-    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-    const { status, docName, reason, docId } = data;
-    const updates: Partial<IWorker> = {};
-    const document = worker.documents.find((doc) => doc._id?.toString() === docId);
-    if (!document) {
-      throw new CustomError(WORKER.VERIFY_ERROR, HTTPSTATUS.BAD_REQUEST);
+  async createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto> {
+    const isAlredyWorker = await this._workerRepository.findOne({ userId });
+    if (isAlredyWorker) {
+      throw new CustomError(WORKER.ALREADY_EXISTS, HTTPSTATUS.BAD_REQUEST);
     }
-    if (status === WORKER_STATUS.VERIFIED) {
-      document.name = docName;
-      document.status = "verified";
-      updates.status = "verified";
-    }
-    if (status === WORKER_STATUS.NEEDS_REVISION) {
-      document.rejectReason = reason;
-      document.status = "rejected";
-      updates.status = "needs_revision";
-    }
-    if (status === WORKER_STATUS.REJECTED) {
-      document.rejectReason = reason;
-      document.status = "rejected";
-      updates.rejectReason = reason;
-      updates.status = "rejected";
-    }
-    updates.documents = worker.documents.map((doc) =>
-      doc._id?.toString() === docId ? document : doc
-    );
-    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId, updates);
-    if (!updatedWorker) {
-      throw new CustomError(WORKER.VERIFY_ERROR);
-    }
-    if (status === WORKER_STATUS.VERIFIED) {
-      await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
-      void this._notificationService.createNotification(
-        worker.userId.toString(),
-        NOTIFICATION_TEMPLATES.WORKER_VERIFIED()
-      );
-    } else if (status === WORKER_STATUS.NEEDS_REVISION) {
-      void this._notificationService.createNotification(
-        worker.userId.toString(),
-        NOTIFICATION_TEMPLATES.WORKER_REVISION(reason ?? "No reason provided")
-      );
-    } else if (status === WORKER_STATUS.REJECTED) {
-      void this._notificationService.createNotification(
-        worker.userId.toString(),
-        NOTIFICATION_TEMPLATES.WORKER_REJECTED(reason ?? "No reason provided")
-      );
-    }
-    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+
+    const documents: IWorkerDocument[] = Object.entries(data.documents).map(([key, url]) => ({
+      type: WORKER_JOIN_DOCUMENT_KEY_MAP[key as keyof typeof WORKER_JOIN_DOCUMENT_KEY_MAP],
+      url: extractKeyFromUrl(url),
+      status: DOCUMENT_STATUS.PENDING,
+      uploadedAt: new Date(),
+    }));
+
+    const worker = await this._workerRepository.create({
+      ...data,
+      userId: new Types.ObjectId(userId),
+      documents,
+    });
+
+    return WorkerDetailsResponseDto.fromEntity(worker, this._s3Service);
   }
 
   async reSubmitWorkerDocument(
     workerId: string,
-    data: ResubmitDocument
-  ): Promise<WorkerProfileResponseDTO> {
+    data: JoinUsDTO
+  ): Promise<WorkerDetailsResponseDto> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-    const { id, WorkerStatus, type, url } = data;
+    const documents: IWorkerDocument[] = [];
+    const deleteKeys: string[] = [];
 
-    if (!id) {
-      throw new CustomError(WORKER.DOCUMENT_REQUIRED, HTTPSTATUS.BAD_REQUEST);
-    }
-    const updates: Partial<IWorker> = {};
+    for (const [key, url] of Object.entries(data.documents)) {
+      const type = WORKER_JOIN_DOCUMENT_KEY_MAP[key as keyof typeof WORKER_JOIN_DOCUMENT_KEY_MAP];
+      const newKey = extractKeyFromUrl(url);
+      const existing = worker.documents.find((doc) => doc.type === type);
 
-    const document = worker.documents.find((doc) => doc._id?.toString() === id);
-    if (!document) {
-      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
-    }
-
-    await this._s3Service.deleteFile(document.url);
-
-    updates.documents = worker.documents.map((doc) =>
-      doc._id?.toString() === id
-        ? {
-            _id: doc._id,
-            name: doc.name,
-            type: type || doc.type,
-            url: extractKeyFromUrl(url),
-            status: "pending",
+      if (existing) {
+        if (existing.url !== newKey) {
+          deleteKeys.push(existing.url);
+          documents.push({
+            type,
+            _id: existing._id,
+            url: newKey,
+            status: DOCUMENT_STATUS.PENDING,
             rejectReason: undefined,
-          }
-        : doc
-    );
-    if (WorkerStatus) {
-      updates.status = WorkerStatus;
+            verifiedAt: undefined,
+            uploadedAt: new Date(),
+          });
+        } else {
+          documents.push(existing);
+        }
+      }
     }
-    const updatedWorker = await this._workerRepository.update(worker.id, updates);
+
+    const updates: Partial<IWorker> = {
+      displayName: data.displayName,
+      tagline: data.tagline,
+      about: data.about,
+      experience: data.experience,
+      location: data.location,
+      profileImage: data.profileImage,
+      phone: data.phone,
+      languages: data.languages,
+      documents,
+      status: WORKER_STATUS.PENDING,
+      rejectReason: undefined,
+    };
+
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId, updates);
+
     if (!updatedWorker) {
       throw new CustomError(WORKER.DOCUMENT_UPDATE_ERROR);
     }
-    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+
+    if (deleteKeys.length > 0) {
+      void Promise.allSettled(deleteKeys.map((url) => this._s3Service.deleteFile(url)));
+    }
+
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 
   async getStripeStatus(
@@ -272,5 +253,120 @@ export class WorkerService implements IWorkerService {
 
   async getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics> {
     return await this._bookingRepository.getWorkerDashboardAnalytics(workerId);
+  }
+
+  async toggleWorkerStatus(workerId: string, reason: string): Promise<string> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+
+    const isVerified = worker.status === WORKER_STATUS.VERIFIED;
+
+    if (worker.status !== WORKER_STATUS.SUSPENDED && !isVerified) {
+      throw new CustomError(WORKER.INVALID_STATUS_TOGGLE, HTTPSTATUS.FORBIDDEN);
+    }
+    const newStatus = isVerified ? WORKER_STATUS.SUSPENDED : WORKER_STATUS.VERIFIED;
+    const updated = await this._workerRepository.updateWorkerStatus(workerId, newStatus, reason);
+    if (isVerified) {
+      await this._redisService.set(`blocked_user:${worker.userId.toString()}`, "1");
+    } else {
+      await this._redisService.delete(`blocked_user:${worker.userId.toString()}`);
+    }
+
+    if (!updated) {
+      throw new CustomError(WORKER.STATUS_UPDATE_FAILED, HTTPSTATUS.INTERNAL_SERVER_ERROR);
+    }
+    const message = isVerified ? WORKER.BLOCK_SUCCESS : WORKER.UNBLOCK_SUCCESS;
+
+    void this._notificationService.createNotification(
+      workerId,
+      isVerified
+        ? NOTIFICATION_TEMPLATES.ACCOUNT_BLOCKED()
+        : NOTIFICATION_TEMPLATES.ACCOUNT_UNBLOCKED()
+    );
+
+    return message;
+  }
+
+  async getWorkerStats(workerId: string): Promise<WorkerStatsSummary> {
+    const [worker, revenue, upcomingBookings] = await Promise.all([
+      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
+      this._bookingRepository.getWorkerRevenueStats(workerId),
+      this._bookingRepository.countDocuments({
+        workerId: new Types.ObjectId(workerId),
+        status: UPCOMING_BOOKING_STATUSES,
+      }),
+    ]);
+    const {
+      jobStats: { completed, accepted, offered },
+      reviewStats,
+    } = worker;
+    const { grossRevenue, platformRevenue, workerEarnings } = revenue;
+    return {
+      totalBookings: offered,
+      completedBookings: completed,
+      completionRate: accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0,
+      upcomingBookings,
+      totalReviews: reviewStats.reviewCount,
+      rating: reviewStats.averageRating,
+      grossRevenue,
+      platformRevenue,
+      workerEarnings,
+    };
+  }
+
+  async reviewWorker(
+    workerId: string,
+    data: WorkerReviewRequestDTO
+  ): Promise<WorkerDetailsResponseDto> {
+    const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
+    const { documents, status, rejectReason } = data;
+
+    const allVerified = documents.every((doc) => doc.status === DOCUMENT_STATUS.VERIFIED);
+
+    if (!allVerified && status === WORKER_STATUS.VERIFIED) {
+      throw new CustomError("the documents are should be verified ");
+    }
+
+    const updatedDocuments = worker.documents.map((existingDoc) => {
+      const incoming = documents.find((doc) => doc.id === existingDoc._id?.toString());
+      if (!incoming) return existingDoc;
+
+      return {
+        _id: existingDoc._id,
+        type: existingDoc.type,
+        uploadedAt: existingDoc.uploadedAt,
+        url: existingDoc.url,
+        status: incoming.status,
+        rejectReason: incoming.rejectReason,
+        verifiedAt:
+          incoming.status === WORKER_STATUS.VERIFIED ? new Date() : existingDoc.verifiedAt,
+      };
+    });
+
+    const updatedWorker = await this._workerRepository.findByIdAndUpdate(workerId, {
+      status,
+      rejectReason: rejectReason,
+      documents: updatedDocuments,
+    });
+    if (!updatedWorker) {
+      throw new CustomError(WORKER.VERIFY_ERROR);
+    }
+    if (status === WORKER_STATUS.VERIFIED) {
+      await this._userRepository.findByIdAndUpdate(worker.userId.toString(), { role: ROLE.WORKER });
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_VERIFIED()
+      );
+    } else if (status === WORKER_STATUS.NEEDS_REVISION) {
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_REVISION(rejectReason ?? "No reason provided")
+      );
+    } else if (status === WORKER_STATUS.REJECTED) {
+      void this._notificationService.createNotification(
+        worker.userId.toString(),
+        NOTIFICATION_TEMPLATES.WORKER_REJECTED(rejectReason ?? "No reason provided")
+      );
+    }
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 }

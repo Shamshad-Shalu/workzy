@@ -13,16 +13,23 @@ const router = Router();
 
 const workerController = container.get<IWorkerController>(TYPES.WorkerController);
 
-router.post("/joinUs/:userId", validateDto(JoinUsDTO), workerController.createWorkerProfile);
+router.post(
+  "/joinUs",
+  authenticate([ROLE.USER]),
+  validateDto(JoinUsDTO),
+  workerController.createWorkerProfile
+);
 
 router.patch(
   "/:workerId/reApply",
   authenticate([ROLE.WORKER, ROLE.USER]),
+  validateDto(JoinUsDTO),
   workerController.reSubmitWorkerDocument
 );
 router.get("/service/:serviceId", optionalAuth, workerController.listPublicWorkers);
 
 router.get("/details", authenticate([ROLE.WORKER]), workerController.getWorkerProfileDetails);
+router.get("/me", authenticate([ROLE.USER, ROLE.WORKER]), workerController.getMyWorkerProfile);
 
 router.get("/:workerId/details", workerController.getWorkerProfileDetailsById);
 

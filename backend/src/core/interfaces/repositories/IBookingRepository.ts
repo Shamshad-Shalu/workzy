@@ -4,6 +4,7 @@ import { IBooking } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import { WorkerRevenueStats } from "@/types/worker/worker.projection";
 import { WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 
 export interface IBookingRepository extends BaseRepository<IBooking> {
@@ -15,4 +16,5 @@ export interface IBookingRepository extends BaseRepository<IBooking> {
   getRevenueAnalytics(): Promise<RevenueChartItem[]>;
   getCategoryDistribution(): Promise<CategoryDistributionItem[]>;
   getTopWorkers(): Promise<TopWorkerItem[]>;
+  getWorkerRevenueStats(workerId: string): Promise<WorkerRevenueStats>;
 }

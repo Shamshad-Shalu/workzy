@@ -1,5 +1,6 @@
 import { Filter } from 'lucide-react';
 import { useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
@@ -17,7 +18,7 @@ import { useAdminWorkers } from '../hooks/useAdminWorkers';
 const CUSTOM_PARAMS = [{ key: 'stripStatus', defaultValue: 'all' }];
 
 export default function WorkerManagementPage() {
-  // const [selectedWorker, setSelectedWorker] = useState<WorkerListItem | null>(null);
+  const navigate = useNavigate();
   const { pageIndex, pageSize, search, status, updateParams, stripStatus } = useUrlFilterParams<{
     stripStatus: string;
   }>(CUSTOM_PARAMS);
@@ -98,7 +99,7 @@ export default function WorkerManagementPage() {
         pageSize={pageSize}
         mode="table"
         isLoading={isLoading}
-        columns={workerColumns()}
+        columns={workerColumns((id, email) => navigate(id, { state: { email } }))}
         onPageChange={v => updateParams({ pageIndex: v })}
         onPageSizeChange={v => updateParams({ pageSize: v, pageIndex: 0 })}
         pageCount={Math.ceil(total / pageSize) || 1}

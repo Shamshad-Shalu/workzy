@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
-import { STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
+import { DOCUMENT_STATUS, DOCUMENT_TYPE, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
 import {
   IAvailabilitySlots,
-  IDocument,
   IGeoLocation,
   IJobStats,
   IReviewStats,
   IWorker,
+  IWorkerDocument,
 } from "@/types/worker/worker.entity";
 
 const LocationSchema = new Schema<IGeoLocation>(
@@ -66,15 +66,15 @@ const AvailabilitySchema = new Schema<IAvailabilitySlots>(
   { _id: false }
 );
 
-const DocumentSchema = new Schema<IDocument>({
-  name: { type: String },
-  type: { type: String, enum: ["id_proof", "license", "certificate", "other"], required: true },
+const DocumentSchema = new Schema<IWorkerDocument>({
+  type: { type: String, enum: Object.values(DOCUMENT_TYPE), required: true },
   url: { type: String, required: true },
   status: {
     type: String,
-    enum: ["pending", "in_review", "verified", "rejected"],
-    default: "pending",
+    enum: Object.values(DOCUMENT_STATUS),
+    default: DOCUMENT_STATUS.PENDING,
   },
+  uploadedAt: { type: Date, default: Date.now },
   rejectReason: { type: String },
   verifiedAt: { type: Date },
 });
@@ -105,7 +105,7 @@ const ReviewStatsSchema = new Schema<IReviewStats>(
   { _id: false }
 );
 
-const workerSchema: Schema = new Schema<IWorker>(
+const workerSchema = new Schema<IWorker>(
   {
     userId: {
       type: Schema.Types.ObjectId,
@@ -166,6 +166,10 @@ const workerSchema: Schema = new Schema<IWorker>(
     },
     rejectReason: { type: String },
     suspensionReason: { type: String },
+    languages: {
+      type: [String],
+      default: [],
+    },
     location: {
       type: LocationSchema,
       required: true,

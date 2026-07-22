@@ -32,18 +32,6 @@ class BookingLocationDto {
   location!: LocationDto;
 }
 
-// class BookingScheduleEntryDTO {
-//   @Type(() => Date)
-//   @IsDate()
-//   date!: Date;
-
-//   @Matches(/^\d{2}:\d{2}$/)
-//   startTime!: string;
-
-//   @Matches(/^\d{2}:\d{2}$/)
-//   endTime!: string;
-// }
-
 export class CreatebookingDTO {
   @IsMongoId()
   workerId!: string;

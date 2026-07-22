@@ -1,14 +1,14 @@
 import { Router } from "express";
 
-import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
+import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdminUserController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 
 const router = Router();
 
-const adminController = container.get<IAdminController>(TYPES.AdminController);
+const controller = container.get<IAdminUserController>(TYPES.AdminUserController);
 
-router.get("/", adminController.listUsers);
-router.patch("/toggle-status/:userId", adminController.toggleStatus);
+router.get("/", controller.listUsers);
+router.patch("/:userId/toggle-status", controller.toggleStatus);
 
 export default router;

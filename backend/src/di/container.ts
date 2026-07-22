@@ -2,6 +2,8 @@ import { Container } from "inversify";
 
 import { AdminBookingController } from "@/controllers/admin/admin-booking.controller";
 import { AdminCategoryController } from "@/controllers/admin/admin-category.controller";
+import { AdminUserController } from "@/controllers/admin/admin-user.controller";
+import { AdminWorkerController } from "@/controllers/admin/admin-worker.controller";
 import { AdminController } from "@/controllers/admin/admin.controller";
 import { AuthController } from "@/controllers/auth.controller";
 import { BookingController } from "@/controllers/booking.controller";
@@ -25,6 +27,8 @@ import { WorkerController } from "@/controllers/worker.controller";
 import { IAdminBookingController } from "@/core/interfaces/controllers/admin/IAdminBookingController";
 import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IAdminCategoryController";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
+import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdminUserController";
+import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IAuthController } from "@/core/interfaces/controllers/IAuthController";
 import { IBookingController } from "@/core/interfaces/controllers/IBookingController";
 import { ICategoryController } from "@/core/interfaces/controllers/ICategoryController";
@@ -154,11 +158,16 @@ container.bind<IWorkerController>(TYPES.WorkerController).to(WorkerController);
 container.bind<IAdminController>(TYPES.AdminController).to(AdminController);
 container.bind<IAdminService>(TYPES.AdminService).to(AdminService);
 
+container.bind<IAdminUserController>(TYPES.AdminUserController).to(AdminUserController);
+container.bind<IAdminWorkerController>(TYPES.AdminWorkerController).to(AdminWorkerController);
+container.bind<IAdminCategoryController>(TYPES.AdminCategoryController).to(AdminCategoryController);
+container.bind<IAdminBookingController>(TYPES.AdminBookingController).to(AdminBookingController);
+container.bind<IAdminBookingService>(TYPES.AdminBookingService).to(AdminBookingService);
+
 // categories
 container.bind<ICategoryRepository>(TYPES.CategoryRepository).to(CategoryRepository);
 container.bind<ICategoryController>(TYPES.CategoryController).to(CategoryController);
 container.bind<ICategoryService>(TYPES.CategoryService).to(CategoryService);
-container.bind<IAdminCategoryController>(TYPES.AdminCategoryController).to(AdminCategoryController);
 container
   .bind<ICategoryManagementService>(TYPES.CategoryManagementService)
   .to(CategoryManagementService);
@@ -205,9 +214,6 @@ container
 container.bind<IReviewController>(TYPES.ReviewController).to(ReviewController);
 container.bind<IReviewService>(TYPES.ReviewService).to(ReviewService);
 container.bind<IReviewRepository>(TYPES.ReviewRepository).to(ReviewRepository);
-
-container.bind<IAdminBookingController>(TYPES.AdminBookingController).to(AdminBookingController);
-container.bind<IAdminBookingService>(TYPES.AdminBookingService).to(AdminBookingService);
 
 container.bind<INotificationRepository>(TYPES.NotificationRepository).to(NotificationRepository);
 container.bind<INotificationService>(TYPES.NotificationService).to(NotificationService);
