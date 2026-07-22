@@ -1,4 +1,10 @@
-import type { PricingMode, ServiceType, WorkerStatus } from '@/constants';
+import type {
+  DocumentStatus,
+  DocumentType,
+  PricingMode,
+  ServiceType,
+  WorkerStatus,
+} from '@/constants';
 
 import type { WorkerReviewStats } from './review';
 import type { BulkDiscountType } from './service';
@@ -18,12 +24,15 @@ export interface AvailabilitySlots {
   sunday: TimeSlot[];
 }
 
-export interface Document {
+export interface WorkerDocument {
   id: string;
-  type: 'id_proof' | 'license' | 'certificate' | 'other';
+  type: DocumentType;
   url: string;
-  status: 'pending' | 'verified' | 'rejected';
+  name?: string;
+  status: DocumentStatus;
   rejectReason?: string;
+  verifiedAt?: Date;
+  uploadedAt: Date;
 }
 
 export interface Worker {
@@ -34,32 +43,9 @@ export interface Worker {
   about?: string;
   coverImage?: string;
   status: WorkerStatus;
-  documents: Document[];
+  documents: WorkerDocument[];
   availability: AvailabilitySlots;
   rejectReason?: string;
-}
-
-// interface WorkerInfo {
-//   id: string;
-//   displayName: string;
-//   tagline: string;
-//   about: string;
-//   profileImage: string;
-//   coverImage: string;
-//   experience: number;
-//   rate: number;
-//   address: string;
-//   isPremium: boolean;
-//   averageRating: number;
-//   completionRate: number | null;
-//   reviewCount: number;
-//   worksCompleted: number;
-// }
-
-export interface ResubmitDocumentPayload {
-  id: string;
-  WorkerStatus?: string;
-  url: string;
 }
 
 export interface GeoLocation {
@@ -103,6 +89,7 @@ export type WorkerProfile = {
   coverImage: string;
   addressLabel: string;
   reviewStats: WorkerReviewStats;
+  availability: AvailabilitySlots;
   isAvailableToday: boolean;
   jobStats: {
     offered: number;
@@ -118,13 +105,29 @@ export type WorkerProfileDetails = {
   displayName: string;
   tagline: string;
   about: string;
+  availability: AvailabilitySlots;
   experience: number;
   phone: string;
   profileImage?: string;
   coverImage: string;
   location: GeoLocation;
   status: WorkerStatus;
-  availability: AvailabilitySlots;
+  documents: WorkerDocument[];
   rejectReason?: string;
   suspensionReason?: string;
+  createdAt: Date;
 };
+
+export interface WorkerStatsSummary {
+  totalBookings: number;
+  completedBookings: number;
+  upcomingBookings: number;
+
+  rating: number;
+  totalReviews: number;
+  completionRate: number;
+
+  grossRevenue: number;
+  workerEarnings: number;
+  platformRevenue: number;
+}

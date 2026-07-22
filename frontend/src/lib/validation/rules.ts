@@ -76,5 +76,5 @@ export const createDescriptionRule = (
     .max(max, `${label} cannot exceed ${max} characters`)
     .regex(DESCRIPTION_REGEX, `${label} contains invalid characters`);
 
-  return required ? schema : schema.optional();
+  return required ? schema : schema.or(z.literal('')).optional();
 };

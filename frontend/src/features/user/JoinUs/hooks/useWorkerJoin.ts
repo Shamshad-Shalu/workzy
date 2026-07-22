@@ -1,61 +1,43 @@
-import {
-  useMutation,
-  useQueries,
-  useQueryClient,
-  type UseQueryResult,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { profileApi } from '@/services/profile.service';
 import WorkerProfileService from '@/services/worker/workerProfile.service';
-import type { User } from '@/types/user';
-import type { ResubmitDocumentPayload, Worker } from '@/types/worker';
 
 import type { JoinWorkerSchemaType } from '../validation/JoinWorkerFormSchema';
+
+export function useMyWorkerProfile(userId?: string) {
+  return useQuery({
+    queryKey: ['worker', 'me'],
+    queryFn: () => WorkerProfileService.getMyWorkerProfile(),
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: true,
+  });
+}
 
 export function useWorkerJoin() {
   const queryClient = useQueryClient();
 
-  const results = useQueries({
-    queries: [
-      {
-        queryKey: ['user', 'me'],
-        queryFn: profileApi.getProfilePage,
-        staleTime: 1000 * 60 * 5,
-      },
-      {
-        queryKey: ['worker', 'me'],
-        queryFn: WorkerProfileService.getMe,
-        staleTime: 1000 * 60 * 5,
-      },
-    ],
-  }) as [UseQueryResult<User>, UseQueryResult<Worker | null>];
-
-  const [userQuery, workerQuery] = results;
-
   const joinWorker = useMutation({
-    mutationFn: ({ userId, data }: { userId: string; data: JoinWorkerSchemaType }) =>
-      WorkerProfileService.addWorkerProfile(userId, data),
-
+    mutationFn: (data: JoinWorkerSchemaType) => WorkerProfileService.addWorkerProfile(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['worker', 'me'] });
     },
   });
 
   const resubmitWorker = useMutation({
-    mutationFn: ({ workerId, data }: { workerId: string; data: ResubmitDocumentPayload }) =>
+    mutationFn: ({ workerId, data }: { workerId: string; data: JoinWorkerSchemaType }) =>
       WorkerProfileService.reSubmitWorkerInfo(workerId, data),
-
-    onSuccess: () => {
+    onSuccess: (_, { workerId }) => {
       queryClient.invalidateQueries({ queryKey: ['worker', 'me'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-workers'] });
+      queryClient.invalidateQueries({ queryKey: ['worker', workerId, 'profile-details'] });
     },
   });
 
   return {
-    user: userQuery.data,
-    worker: workerQuery.data,
-    isLoading: userQuery.isLoading || workerQuery.isLoading,
-
-    joinWorker,
-    resubmitWorker,
+    joinWorker: joinWorker.mutateAsync,
+    resubmitWorker: resubmitWorker.mutateAsync,
+    isPending: joinWorker.isPending || resubmitWorker.isPending,
   };
 }

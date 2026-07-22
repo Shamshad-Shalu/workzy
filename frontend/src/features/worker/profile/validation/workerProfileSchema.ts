@@ -4,7 +4,7 @@ import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules
 
 import { availabilitySchema } from './availabilitySchema';
 
-const geoLocationSchema = z.object({
+export const geoLocationSchema = z.object({
   type: z.literal('Point'),
   coordinates: z
     .tuple([z.number(), z.number()])

@@ -1,17 +1,25 @@
 import z from 'zod';
 
-import { descriptionRuleRequired, serviceNameRule } from '@/lib/validation/rules';
+import { geoLocationSchema } from '@/features/worker/profile/validation/workerProfileSchema';
+import { createDescriptionRule, descriptionRuleRequired, phoneRule } from '@/lib/validation/rules';
 
 export const JoinWorkerSchema = z.object({
-  displayName: serviceNameRule,
-  tagline: serviceNameRule,
+  displayName: createDescriptionRule('Name', true, 3, 80),
+  tagline: createDescriptionRule('Tagline', true, 3, 80),
   about: descriptionRuleRequired,
-  document: z.string().min(1, 'Please provide an ID proof image'),
-  defaultRate: z.number({ message: 'Amount is required' }).min(1, 'Rate must be a valid amount'),
+  phone: phoneRule,
+  profileImage: z.string().optional(),
   experience: z
     .number({ message: 'Experience is required' })
-    .min(0, 'Experience cannot be negative')
+    .min(0, 'Experience must be a positive number')
     .max(100, 'Experience seems too high'),
+  documents: z.object({
+    aadhaar: z.url('Aadhaar document is required'),
+    pan: z.url('PAN document is required'),
+    selfie: z.url('Selfie verification is required'),
+    profile: z.url('Profile photo is required'),
+  }),
+  location: geoLocationSchema,
 });
 
 export type JoinWorkerSchemaType = z.infer<typeof JoinWorkerSchema>;
