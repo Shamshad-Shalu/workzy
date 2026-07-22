@@ -68,3 +68,19 @@ export type PublicWorkerListItem = {
   travelCost: number;
   distanceKm: number;
 };
+
+export type WorkerRevenueStats = {
+  grossRevenue: number;
+  workerEarnings: number;
+  platformRevenue: number;
+};
+
+export type WorkerStatsSummary = WorkerRevenueStats & {
+  totalBookings: number;
+  completedBookings: number;
+  upcomingBookings: number;
+
+  rating: number;
+  totalReviews: number;
+  completionRate: number;
+};

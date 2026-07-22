@@ -1,6 +1,6 @@
 import { StripeAccountStatus } from "@/constants";
-import { VerifyWorkerRequestDTO } from "@/dtos/requests/admin/worker.verify.dto";
-import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
+import { WorkerReviewRequestDTO } from "@/dtos/requests/admin/worker-review.dto";
+import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
 import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
@@ -11,6 +11,7 @@ import {
 } from "@/dtos/responses/worker/worker.profile.dto";
 import { CursorPaginatedResult, PaginatedResult } from "@/types/common/pagination";
 import { IWorker } from "@/types/worker/worker.entity";
+import { WorkerStatsSummary } from "@/types/worker/worker.projection";
 import {
   NearbyWorkerListQuery,
   PublicWorkerListQuery,
@@ -23,6 +24,7 @@ export interface IWorkerService {
   listNearbyWorkers(query: NearbyWorkerListQuery): Promise<NearbyWorkerResponseDTO[]>;
   getWorkerProfile(workerId: string): Promise<WorkerProfileResponseDTO>;
   getWorkerByUserId(userId: string): Promise<IWorker | null>;
+  getMyWorkerProfile(userId: string): Promise<WorkerDetailsResponseDto | null>;
   listPublicWorkers(
     serviceId: string,
     query: PublicWorkerListQuery
@@ -37,15 +39,14 @@ export interface IWorkerService {
     data: WorkerProfileRequestDto
   ): Promise<WorkerDetailsResponseDto>;
 
-  createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO>;
-  verifyWorker(workerId: string, data: VerifyWorkerRequestDTO): Promise<WorkerProfileResponseDTO>;
-  reSubmitWorkerDocument(
-    workerId: string,
-    data: ResubmitDocument
-  ): Promise<WorkerProfileResponseDTO>;
+  createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto>;
+  reSubmitWorkerDocument(workerId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO>;
   connectStripe(workerId: string): Promise<string>;
   getStripeStatus(
     workerId: string
   ): Promise<{ status: StripeAccountStatus; stripeAccountId: string | null }>;
+  toggleWorkerStatus(workerId: string, reason: string): Promise<string>;
+  getWorkerStats(workerId: string): Promise<WorkerStatsSummary>;
   getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics>;
+  reviewWorker(workerId: string, data: WorkerReviewRequestDTO): Promise<WorkerProfileResponseDTO>;
 }

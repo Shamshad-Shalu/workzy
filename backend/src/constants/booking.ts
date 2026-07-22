@@ -15,6 +15,13 @@ export const BOOKING_STATUS = {
 export const BOOKING_STATUS_VALUES = Object.values(BOOKING_STATUS);
 export type BookingStatus = (typeof BOOKING_STATUS)[keyof typeof BOOKING_STATUS];
 
+export const UPCOMING_BOOKING_STATUSES = [
+  BOOKING_STATUS.CONFIRMED,
+  BOOKING_STATUS.EN_ROUTE,
+  BOOKING_STATUS.REACHED,
+  BOOKING_STATUS.IN_PROGRESS,
+] as const;
+
 export const BOOKING_PAYMENT_STATUS = {
   PENDING: "pending",
   HELD: "held",

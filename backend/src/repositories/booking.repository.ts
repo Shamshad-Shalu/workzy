@@ -16,6 +16,7 @@ import { IBooking } from "@/types/booking/booking.entity";
 import { BookingDetails, BookingListItem } from "@/types/booking/booking.projection";
 import { BookingListQuery } from "@/types/booking/booking.query";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import { WorkerRevenueStats } from "@/types/worker/worker.projection";
 import { MonthlyEarningStat, WorkerDashboardAnalytics } from "@/types/worker/workerDashboard.types";
 
 @injectable()
@@ -394,5 +395,33 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
         },
       },
     ]);
+  }
+
+  async getWorkerRevenueStats(workerId: string): Promise<WorkerRevenueStats> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          workerId: new Types.ObjectId(workerId),
+          status: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED] },
+          paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          grossRevenue: { $sum: "$chargeableAmount" },
+          platformRevenue: { $sum: "$platformFee" },
+        },
+      },
+    ]);
+
+    const grossRevenue = result[0]?.grossRevenue ?? 0;
+    const platformRevenue = result[0]?.platformRevenue ?? 0;
+
+    return {
+      grossRevenue,
+      platformRevenue,
+      workerEarnings: grossRevenue - platformRevenue,
+    };
   }
 }
