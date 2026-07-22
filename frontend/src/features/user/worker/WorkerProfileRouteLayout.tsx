@@ -68,7 +68,7 @@ export default function WorkerProfileRouteLayout() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, ease: 'easeOut' }}
             >
-              <Outlet />
+              <Outlet context={{ worker: data }} />
             </motion.div>
           </div>
         </>

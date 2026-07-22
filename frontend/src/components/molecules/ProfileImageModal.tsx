@@ -1,39 +1,28 @@
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 import userprofile from '@/assets/images/userprofile.avif';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   image: string | undefined;
 }
-
 export default function ProfileImageModal({ open, onOpenChange, image }: Props) {
   const profileImage = image || userprofile;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogHeader>
+      <DialogContent className="p-0 border-none bg-transparent shadow-none flex items-center justify-center max-w-3xl">
         <VisuallyHidden>
-          <DialogTitle>Image</DialogTitle>
-          <DialogDescription>Image</DialogDescription>
+          <DialogTitle>Profile Image</DialogTitle>
+          <DialogDescription>Preview of profile image</DialogDescription>
         </VisuallyHidden>
-      </DialogHeader>
-      <DialogContent
-        className="
-         p-0 border-none w-[400px] h-[400px] fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2
-         "
-      >
+
         <img
           src={profileImage}
-          alt="Profile image"
-          className="rounded-lg w-full h-full object-cover"
+          alt="Profile"
+          className="max-h-[85vh] max-w-full object-contain rounded-xl"
         />
       </DialogContent>
     </Dialog>

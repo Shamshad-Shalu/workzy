@@ -1,4 +1,4 @@
-import { Camera } from 'lucide-react';
+import { Camera, User } from 'lucide-react';
 import React, { useRef, useState } from 'react';
 
 import { cn } from '@/lib/utils';
@@ -120,7 +120,11 @@ export default function ProfileImage({
           )}
           style={{ width: size, height: size, fontSize: size * 0.35 }}
         >
-          {getInitials(name)}
+          {name ? (
+            <span style={{ fontSize: size * 0.35 }}>{getInitials(name)}</span>
+          ) : (
+            <User size={size * 0.4} />
+          )}
         </div>
       )}
 
