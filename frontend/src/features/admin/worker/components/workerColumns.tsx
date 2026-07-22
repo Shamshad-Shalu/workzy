@@ -1,15 +1,16 @@
 import { Eye } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import { Badge } from '@/components/ui/badge';
+import { WORKER_STATUS_CONFIG } from '@/constants';
 import type { WorkerListItem } from '@/types/admin/worker';
 import type { TableColumnDef } from '@/types/table.types';
 import { formatDate } from '@/utils/time.format';
 
-const workerColumns = () // onToggleStatus: (worker: WorkerListItem) => void,
-: TableColumnDef<WorkerListItem>[] => [
+const workerColumns = (
+  onView: (id: string, email: string) => void
+): TableColumnDef<WorkerListItem>[] => [
   {
     id: 'index',
     header: '#',
@@ -57,29 +58,15 @@ const workerColumns = () // onToggleStatus: (worker: WorkerListItem) => void,
     header: 'Status',
     accessorKey: 'status',
     cell: ({ row }) => {
-      const status = row.original.status;
-      const statusLabel = status;
-      let statusType: 'green' | 'amber' | 'red' | 'blue' | 'slate' = 'slate';
+      const config = WORKER_STATUS_CONFIG[row.original.status!];
+      const Icon = config.icon;
 
-      switch (status) {
-        case 'verified':
-          statusType = 'green';
-          break;
-        case 'pending':
-          statusType = 'amber';
-          break;
-        case 'rejected':
-          statusType = 'red';
-          break;
-        case 'needs_revision':
-          statusType = 'blue';
-          break;
-        case 'suspended':
-          statusType = 'red';
-          break;
-      }
-
-      return <Badge variant={statusType}>{statusLabel || ''}</Badge>;
+      return (
+        <Badge variant={config.badgeVariant}>
+          <Icon className="size-3" />
+          {config.label}
+        </Badge>
+      );
     },
     showInMobileHeader: true,
     mobileOrder: 2,
@@ -125,17 +112,16 @@ const workerColumns = () // onToggleStatus: (worker: WorkerListItem) => void,
     header: 'Actions',
     cell: ({ row }) => (
       <div className="flex items-center gap-2">
-        <Link to={row.original.id}>
-          <Button size="sm" variant="outline" iconLeft={<Eye className="w-4 h-4" />}>
-            View
-          </Button>
-        </Link>
+        <Button
+          size="sm"
+          variant="outline"
+          iconLeft={<Eye className="w-4 h-4" />}
+          onClick={() => onView(row.original.id, row.original.email)}
+        >
+          View
+        </Button>
       </div>
     ),
-    showInMobileHeader: false,
-    mobileOrder: 7,
-    width: 180,
-    minWidth: 180,
   },
 ];
 
