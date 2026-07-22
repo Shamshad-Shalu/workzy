@@ -40,7 +40,7 @@ export interface IWorkerService {
   ): Promise<WorkerDetailsResponseDto>;
 
   createWorkerProfile(userId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto>;
-  reSubmitWorkerDocument(workerId: string, data: JoinUsDTO): Promise<WorkerProfileResponseDTO>;
+  reSubmitWorkerDocument(workerId: string, data: JoinUsDTO): Promise<WorkerDetailsResponseDto>;
   connectStripe(workerId: string): Promise<string>;
   getStripeStatus(
     workerId: string
@@ -48,5 +48,5 @@ export interface IWorkerService {
   toggleWorkerStatus(workerId: string, reason: string): Promise<string>;
   getWorkerStats(workerId: string): Promise<WorkerStatsSummary>;
   getWorkerDashboardAnalytics(workerId: string): Promise<WorkerDashboardAnalytics>;
-  reviewWorker(workerId: string, data: WorkerReviewRequestDTO): Promise<WorkerProfileResponseDTO>;
+  reviewWorker(workerId: string, data: WorkerReviewRequestDTO): Promise<WorkerDetailsResponseDto>;
 }

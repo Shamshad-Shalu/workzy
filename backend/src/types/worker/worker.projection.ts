@@ -40,6 +40,7 @@ export type WorkerProfile = {
   coverImage?: string;
   location: IGeoLocation;
   experience: number;
+  languages: string[];
   availability: IAvailabilitySlots;
   jobStats: IJobStats;
   reviewStats: IReviewStats;

@@ -166,6 +166,10 @@ const workerSchema = new Schema<IWorker>(
     },
     rejectReason: { type: String },
     suspensionReason: { type: String },
+    languages: {
+      type: [String],
+      default: [],
+    },
     location: {
       type: LocationSchema,
       required: true,

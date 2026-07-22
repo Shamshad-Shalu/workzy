@@ -67,6 +67,7 @@ export interface IWorker extends Document<string> {
   availability: IAvailabilitySlots;
   rejectReason?: string;
   suspensionReason?: string;
+  languages: string[];
 
   location: IGeoLocation;
   currentLocation?: {

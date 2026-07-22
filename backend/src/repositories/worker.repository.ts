@@ -112,7 +112,7 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
     return await this.model
       .findById(workerId)
       .select(
-        " displayName tagline about profileImage coverImage experience location availability jobStats reviewStats"
+        " displayName tagline about profileImage coverImage experience location availability jobStats reviewStats languages"
       )
       .lean()
       .exec();

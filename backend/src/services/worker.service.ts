@@ -176,7 +176,7 @@ export class WorkerService implements IWorkerService {
   async reSubmitWorkerDocument(
     workerId: string,
     data: JoinUsDTO
-  ): Promise<WorkerProfileResponseDTO> {
+  ): Promise<WorkerDetailsResponseDto> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
     const documents: IWorkerDocument[] = [];
     const deleteKeys: string[] = [];
@@ -212,6 +212,7 @@ export class WorkerService implements IWorkerService {
       location: data.location,
       profileImage: data.profileImage,
       phone: data.phone,
+      languages: data.languages,
       documents,
       status: WORKER_STATUS.PENDING,
       rejectReason: undefined,
@@ -227,7 +228,7 @@ export class WorkerService implements IWorkerService {
       void Promise.allSettled(deleteKeys.map((url) => this._s3Service.deleteFile(url)));
     }
 
-    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 
   async getStripeStatus(
@@ -315,7 +316,7 @@ export class WorkerService implements IWorkerService {
   async reviewWorker(
     workerId: string,
     data: WorkerReviewRequestDTO
-  ): Promise<WorkerProfileResponseDTO> {
+  ): Promise<WorkerDetailsResponseDto> {
     const worker = await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
     const { documents, status, rejectReason } = data;
 
@@ -366,6 +367,6 @@ export class WorkerService implements IWorkerService {
         NOTIFICATION_TEMPLATES.WORKER_REJECTED(rejectReason ?? "No reason provided")
       );
     }
-    return WorkerProfileResponseDTO.fromEntity(updatedWorker);
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 }

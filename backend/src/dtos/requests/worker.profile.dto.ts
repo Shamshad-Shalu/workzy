@@ -98,4 +98,8 @@ export class WorkerProfileRequestDto {
 
   @IsString()
   coverImage?: string | null;
+
+  @IsArray()
+  @IsString({ each: true })
+  languages!: string[];
 }

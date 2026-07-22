@@ -22,6 +22,7 @@ export class WorkerProfileResponseDTO {
   addressLabel!: string;
   reviewStats!: Omit<IReviewStats, "totalRating">;
   isAvailableToday!: boolean;
+  languages!: string[];
   jobStats!: {
     offered: number;
     accepted: number;
@@ -52,6 +53,7 @@ export class WorkerProfileResponseDTO {
     };
     dto.availability = entity.availability;
     dto.isAvailableToday = entity.availability[getTodayKey()].length > 0;
+    dto.languages = entity.languages ?? [];
     dto.reviewStats = {
       averageRating: Math.round((averageRating ?? 0) * 10) / 10,
       breakdown,
@@ -76,6 +78,7 @@ export class WorkerDetailsResponseDto {
   status!: WorkerStatus;
   documents!: WorkerDocumentDto[];
   availability!: IAvailabilitySlots;
+  languages!: string[];
   rejectReason?: string;
   suspensionReason?: string;
   createdAt!: Date;
@@ -112,6 +115,7 @@ export class WorkerDetailsResponseDto {
     dto.location = entity.location;
     dto.status = entity.status;
     dto.availability = entity.availability;
+    dto.languages = entity.languages ?? [];
     dto.rejectReason = entity.rejectReason;
     dto.suspensionReason = entity.suspensionReason;
     dto.createdAt = entity.createdAt;

@@ -8,6 +8,7 @@ import {
   IsOptional,
   Max,
   ValidateNested,
+  IsArray,
 } from "class-validator";
 
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
@@ -62,4 +63,8 @@ export class JoinUsDTO {
   @IsString()
   @PhoneRule()
   phone!: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  languages!: string[];
 }
