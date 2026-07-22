@@ -21,6 +21,7 @@ export const workerProfileSchema = z.object({
   coverImage: z.string().optional(),
   location: geoLocationSchema,
   availability: availabilitySchema,
+  languages: z.array(z.string()),
 });
 
 export type WorkerProfileSchemaType = z.infer<typeof workerProfileSchema>;

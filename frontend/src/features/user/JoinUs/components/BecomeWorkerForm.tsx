@@ -7,11 +7,13 @@ import {
   BadgeCheck,
   Clock,
   FileEdit,
+  Globe,
   MapPin,
   Pencil,
   ShieldCheck,
   User,
   X,
+  type LucideIcon,
 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
@@ -21,8 +23,9 @@ import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { ImageUpload } from '@/components/molecules/ImageUpload';
+import MultiSelectInput from '@/components/molecules/MultiSelectInput';
 import ProfileImage from '@/components/molecules/ProfileImage';
-import { DOCUMENT_TYPE, WORKER_STATUS, type DocumentType } from '@/constants';
+import { DOCUMENT_TYPE, INDIAN_LANGUAGES, WORKER_STATUS, type DocumentType } from '@/constants';
 import { UploadPurposes } from '@/constants/upload';
 import MapSelector from '@/features/profile/components/MapSelector';
 import { useImageUpload } from '@/features/profile/hooks/useImageUpload';
@@ -74,6 +77,7 @@ const defaultValues: JoinWorkerSchemaType = {
   phone: '',
   location: { addressLabel: '', coordinates: [0, 0], type: 'Point' },
   documents: { aadhaar: '', pan: '', selfie: '', profile: '' },
+  languages: [],
 };
 
 export default function BecomeWorkerForm({
@@ -101,6 +105,7 @@ export default function BecomeWorkerForm({
     handleSubmit,
     reset,
     trigger,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<JoinWorkerSchemaType>({
     resolver: zodResolver(JoinWorkerSchema),
@@ -126,6 +131,7 @@ export default function BecomeWorkerForm({
       profileImage: worker?.profileImage ?? '',
       phone: worker?.phone ?? userPhone ?? '',
       location: worker?.location ?? { addressLabel: '', coordinates: [0, 0], type: 'Point' },
+      languages: worker?.languages ?? [],
       documents: DOC_KEYS.reduce(
         (acc, key) => {
           acc[key] = worker?.documents.find(d => d.type === DOC_KEY_TO_TYPE[key])?.url ?? '';
@@ -210,7 +216,14 @@ export default function BecomeWorkerForm({
 
   const next = async () => {
     if (step === 0) {
-      const isValid = await trigger(['displayName', 'experience', 'tagline', 'about', 'location']);
+      const isValid = await trigger([
+        'displayName',
+        'experience',
+        'tagline',
+        'about',
+        'location',
+        'languages',
+      ]);
       if (!isValid) {
         return;
       }
@@ -227,7 +240,7 @@ export default function BecomeWorkerForm({
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm text-slate-500 shadow-sm">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-muted-foreground bg-white p-10 text-center text-sm text-muted-foreground shadow-sm">
         Loading application…
       </div>
     );
@@ -235,10 +248,12 @@ export default function BecomeWorkerForm({
 
   if (isVerified) {
     return (
-      <div className="mx-auto max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50 p-10 text-center shadow-sm">
-        <BadgeCheck className="mx-auto text-emerald-600" size={40} />
-        <h2 className="mt-2 text-xl font-bold text-emerald-900">You're a Verified Provider</h2>
-        <p className="mt-1 text-sm text-emerald-700">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-section-green-border bg-section-green p-10 text-center shadow-sm">
+        <BadgeCheck className="mx-auto text-section-green-text" size={40} />
+        <h2 className="mt-2 text-xl font-bold text-section-green-text">
+          You're a Verified Provider
+        </h2>
+        <p className="mt-1 text-sm text-section-green-text">
           Your application has been approved. You're all set to start accepting jobs.
         </p>
       </div>
@@ -247,10 +262,10 @@ export default function BecomeWorkerForm({
 
   if (isRejected) {
     return (
-      <div className="mx-auto max-w-3xl rounded-2xl border border-red-200 bg-red-50 p-10 text-center shadow-sm">
-        <AlertTriangle className="mx-auto text-red-600" size={40} />
-        <h2 className="mt-2 text-xl font-bold text-red-900">Application Rejected</h2>
-        <p className="mt-1 text-sm text-red-700">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-section-red-border bg-section-red p-10 text-center shadow-sm">
+        <AlertTriangle className="mx-auto text-section-red-text" size={40} />
+        <h2 className="mt-2 text-xl font-bold text-section-red-text">Application Rejected</h2>
+        <p className="mt-1 text-sm text-section-red-text">
           {worker?.rejectReason ?? 'Please contact support for more details.'}
         </p>
       </div>
@@ -264,7 +279,7 @@ export default function BecomeWorkerForm({
       transition={{ duration: 0.35 }}
       className="mx-auto max-w-3xl"
     >
-      <div className="overflow-hidden rounded-2xl border border-slate-200 shadow-sm">
+      <div className="overflow-hidden rounded-2xl shadow-2xl border">
         <form
           onSubmit={handleSubmit(onSubmit)}
           onKeyDown={e => {
@@ -278,23 +293,23 @@ export default function BecomeWorkerForm({
           <div className="flex items-start justify-between gap-3">
             <div>
               <h2 className="text-2xl font-bold ">Provider Application</h2>
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Complete your professional profile to start accepting jobs.
               </p>
             </div>
             <div className="flex items-center gap-2">
               {isInReview && (
-                <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-blue-700">
+                <span className="rounded-full border border-section-blue-border bg-section-blue px-3 py-1 text-xs font-semibold uppercase tracking-wider text-section-blue-text">
                   In Review
                 </span>
               )}
               {isPendingDraft && (
-                <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-slate-600">
+                <span className="rounded-full border border-muted-foreground bg-muted-foreground/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Draft
                 </span>
               )}
               {isRevision && (
-                <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-amber-700">
+                <span className="rounded-full border border-section-amber-border bg-section-amber px-3 py-1 text-xs font-semibold uppercase tracking-wider text-section-amber-text">
                   Needs Revision
                 </span>
               )}
@@ -322,26 +337,26 @@ export default function BecomeWorkerForm({
                 className={cn(
                   'flex items-start gap-3 rounded-xl border p-4 overflow-hidden',
                   banner.tone === 'warn'
-                    ? 'border-amber-300 bg-amber-50'
-                    : 'border-blue-200 bg-blue-500/15'
+                    ? 'border-section-amber-border bg-section-amber'
+                    : 'border-section-blue-border bg-section-blue'
                 )}
               >
                 <banner.Icon
                   size={22}
                   className={cn(
                     'shrink-0',
-                    banner.tone === 'warn' ? 'text-amber-600' : 'text-blue-600'
+                    banner.tone === 'warn' ? 'text-section-amber-text' : 'text-section-blue-text'
                   )}
                 />
                 <div>
-                  <h4 className="font-semibold text-slate-900">{banner.title}</h4>
-                  <p className="text-sm text-slate-600">{banner.body}</p>
+                  <h4 className="font-semibold">{banner.title}</h4>
+                  <p className="text-sm text-muted-foreground">{banner.body}</p>
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Stepper */}
+          {/* Step section */}
           <div className="flex items-center justify-between px-2">
             {STEPS.map((s, i) => {
               const active = i === step;
@@ -357,10 +372,10 @@ export default function BecomeWorkerForm({
                       className={cn(
                         'flex h-10 w-10 items-center justify-center rounded-full font-bold transition',
                         active
-                          ? 'bg-blue-600 text-white shadow-md'
+                          ? 'bg-section-blue-text text-white shadow-md'
                           : done
-                            ? 'bg-emerald-500 text-white'
-                            : 'bg-slate-200 text-slate-600'
+                            ? 'bg-section-green-text text-white'
+                            : 'bg-muted-foreground/10 text-muted-foreground'
                       )}
                     >
                       {done ? '✓' : i + 1}
@@ -368,7 +383,7 @@ export default function BecomeWorkerForm({
                     <span
                       className={cn(
                         'text-xs font-medium',
-                        active ? 'text-blue-700' : 'text-slate-500'
+                        active ? 'text-section-blue-text' : 'text-muted-foreground'
                       )}
                     >
                       {s.label}
@@ -378,7 +393,7 @@ export default function BecomeWorkerForm({
                     <div
                       className={cn(
                         'mx-2 mb-5 h-0.5 flex-1',
-                        i < step ? 'bg-emerald-500' : 'bg-slate-200'
+                        i < step ? 'bg-section-green-text' : 'bg-muted-foreground/10'
                       )}
                     />
                   )}
@@ -390,18 +405,13 @@ export default function BecomeWorkerForm({
           {/* Step content */}
           <div className="min-h-[340px]">
             {step === 0 && (
-              <div>
-                <div className="space-y-4">
-                  <h3 className="flex items-center gap-2 border-b border-slate-200 pb-2 text-lg font-semibold text-slate-900">
-                    <User size={20} className="text-blue-600" />
-                    Professional Profile
-                  </h3>
-
-                  <Controller
-                    name="profileImage"
-                    control={control}
-                    render={({ field }) => (
-                      <div className="flex items-center gap-4">
+              <div className="space-y-6">
+                <FormSection icon={User} title="Professional Profile">
+                  <div className="flex flex-col gap-5 sm:flex-row sm:items-start">
+                    <Controller
+                      name="profileImage"
+                      control={control}
+                      render={({ field }) => (
                         <ProfileImage
                           src={field.value}
                           name={worker?.displayName}
@@ -415,60 +425,96 @@ export default function BecomeWorkerForm({
                             }
                           }}
                         />
-                      </div>
-                    )}
-                  />
+                      )}
+                    />
 
-                  <div className="grid gap-4 md:grid-cols-2">
-                    <div>
-                      <Label>Full Name</Label>
-                      <Input
-                        placeholder="e.g., John's Plumbing Services"
-                        className="px-3"
-                        disabled={!isFieldEditable('displayName')}
-                        error={errors.displayName?.message}
-                        {...register('displayName', { setValueAs: v => v.trim() })}
-                      />
+                    <div className="grid flex-1 gap-4 sm:grid-cols-2">
+                      {isFieldEditable('displayName') ? (
+                        <div>
+                          <Label>Full Name</Label>
+                          <Input
+                            placeholder="e.g., John's Plumbing Services"
+                            className="px-3"
+                            error={errors.displayName?.message}
+                            {...register('displayName', { setValueAs: v => v.trim() })}
+                          />
+                        </div>
+                      ) : (
+                        <ReadOnlyField label="Full Name" value={watch('displayName')} />
+                      )}
+
+                      {isFieldEditable('tagline') ? (
+                        <div>
+                          <Label>Professional Tagline</Label>
+                          <Input
+                            placeholder="e.g., Expert Plumber, 10+ yrs"
+                            className="px-3"
+                            error={errors.tagline?.message}
+                            {...register('tagline', { setValueAs: v => v.trim() })}
+                          />
+                        </div>
+                      ) : (
+                        <ReadOnlyField label="Professional Tagline" value={watch('tagline')} />
+                      )}
                     </div>
+                  </div>
+
+                  {isFieldEditable('experience') ? (
                     <div>
-                      <Label>Professional Tagline</Label>
-                      <Input
-                        placeholder="e.g., Expert Plumber, 10+ yrs"
-                        className="px-3"
-                        disabled={!isFieldEditable('tagline')}
-                        error={errors.tagline?.message}
-                        {...register('tagline', { setValueAs: v => v.trim() })}
-                      />
-                    </div>
-                    <div className="md:col-span-2">
                       <Label>Years of Experience</Label>
                       <Input
                         placeholder="e.g., 5"
                         className="px-3 md:max-w-xs"
                         type="number"
-                        disabled={!isFieldEditable('experience')}
+                        rightIcon={<span className="text-xs text-muted-foreground">yrs</span>}
                         error={errors.experience?.message}
                         {...register('experience', { valueAsNumber: true })}
                       />
                     </div>
-                    <div className="md:col-span-2">
+                  ) : (
+                    <div className="md:max-w-xs">
+                      <ReadOnlyField
+                        label="Years of Experience"
+                        value={`${watch('experience') || 0} yrs`}
+                      />
+                    </div>
+                  )}
+
+                  {isFieldEditable('about') ? (
+                    <div>
                       <Label>About Your Service</Label>
                       <Textarea
                         placeholder="Tell customers what makes your service stand out…"
                         className="px-3"
-                        disabled={!isFieldEditable('about')}
                         error={errors.about?.message}
                         {...register('about', { setValueAs: v => v.trim() })}
                       />
                     </div>
-                  </div>
-                </div>
+                  ) : (
+                    <ReadOnlyField label="About Your Service" value={watch('about')} multiline />
+                  )}
+                </FormSection>
 
-                <div className="space-y-4">
-                  <h3 className="flex items-center gap-2 border-b border-slate-200 pb-2 text-lg font-semibold text-slate-900">
-                    <MapPin size={20} className="text-blue-600" />
-                    Service Location
-                  </h3>
+                <FormSection icon={Globe} title="Languages Spoken">
+                  <Controller
+                    name="languages"
+                    control={control}
+                    render={({ field, fieldState }) => (
+                      <MultiSelectInput
+                        value={field.value as string[]}
+                        onChange={field.onChange}
+                        options={INDIAN_LANGUAGES}
+                        icon={Globe}
+                        placeholder="Search and add a language…"
+                        emptyText="No languages specified"
+                        disabled={!isFieldEditable('languages')}
+                        error={fieldState.error?.message}
+                      />
+                    )}
+                  />
+                </FormSection>
+
+                <FormSection icon={MapPin} title="Service Location">
                   <div className="rounded-xl border border-border/60 bg-muted/40 overflow-hidden">
                     <Controller
                       name="location"
@@ -503,7 +549,7 @@ export default function BecomeWorkerForm({
                               <button
                                 type="button"
                                 onClick={() => setLocationMapOpen(true)}
-                                className="ml-3 shrink-0 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+                                className="ml-3 shrink-0 rounded-lg border border-muted-foreground px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted/50"
                               >
                                 <MapPin size={13} className="mr-1 inline" />
                                 {field.value?.coordinates ? 'Update' : 'Set'}
@@ -535,16 +581,12 @@ export default function BecomeWorkerForm({
                   {errors.location?.addressLabel && (
                     <p className="text-xs text-red-600">{errors.location.addressLabel.message}</p>
                   )}
-                </div>
+                </FormSection>
               </div>
             )}
 
             {step === 1 && (
-              <div className="space-y-4">
-                <h3 className="flex items-center gap-2 border-b border-slate-200 pb-2 text-lg font-semibold text-slate-900">
-                  <ShieldCheck size={20} className="text-blue-600" />
-                  Identity Verification
-                </h3>
+              <FormSection icon={ShieldCheck} title="Identity Verification">
                 <div className="grid grid-cols-2 gap-4">
                   {DOC_KEYS.map(key => {
                     const docType: DocumentType = DOC_KEY_TO_TYPE[key];
@@ -554,19 +596,21 @@ export default function BecomeWorkerForm({
                       <div
                         key={key}
                         className={
-                          isRejectedDoc ? 'rounded-lg border border-amber-300 bg-amber-50 p-2' : ''
+                          isRejectedDoc
+                            ? 'rounded-lg border border-section-amber-border bg-section-amber p-2'
+                            : ''
                         }
                       >
                         <Label>
                           {DOC_LABELS[key]}
                           {isRejectedDoc && (
-                            <span className="ml-2 rounded-full bg-amber-200 px-2 py-0.5 text-[10px] font-bold uppercase text-amber-800">
+                            <span className="ml-2 rounded-full bg-section-amber-border/40 px-2 py-0.5 text-[10px] font-bold uppercase text-section-amber-text">
                               Rejected
                             </span>
                           )}
                         </Label>
                         {isRejectedDoc && (
-                          <p className="mb-1 text-xs text-amber-700">
+                          <p className="mb-1 text-xs text-section-amber-text">
                             <span className="font-semibold">Reason:</span> {rejectReason}
                           </p>
                         )}
@@ -588,12 +632,12 @@ export default function BecomeWorkerForm({
                     );
                   })}
                 </div>
-              </div>
+              </FormSection>
             )}
           </div>
 
           {/* Footer nav */}
-          <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+          <div className="flex items-center justify-between border-t pt-4">
             <Button
               type="button"
               onClick={back}
@@ -604,7 +648,7 @@ export default function BecomeWorkerForm({
             >
               Back
             </Button>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-muted-foreground">
               Step {step + 1} of {STEPS.length}
             </span>
             {step < STEPS.length - 1 ? (
@@ -636,7 +680,7 @@ export default function BecomeWorkerForm({
                       : 'Save Changes'}
               </Button>
             ) : (
-              <span className="rounded-lg bg-slate-100 px-5 py-2 text-sm font-semibold text-slate-400">
+              <span className="rounded-lg bg-muted/50 px-5 py-2 text-sm font-semibold text-muted-foreground">
                 {isPendingDraft ? 'Click Edit ' : 'Locked'}
               </span>
             )}
@@ -644,5 +688,49 @@ export default function BecomeWorkerForm({
         </form>
       </div>
     </motion.div>
+  );
+}
+function FormSection({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: LucideIcon;
+  title: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-5">
+      <h3 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+        <Icon size={20} className="text-section-blue-text" />
+        {title}
+      </h3>
+      {children}
+    </div>
+  );
+}
+
+function ReadOnlyField({
+  label,
+  value,
+  multiline,
+}: {
+  label: string;
+  value?: string | number | null;
+  multiline?: boolean;
+}) {
+  const hasValue = value !== undefined && value !== null && value !== '';
+  return (
+    <div>
+      <Label className="text-muted-foreground">{label}</Label>
+      <div
+        className={cn(
+          'mt-1 rounded-lg border border-border/60 bg-muted/30 px-3 py-2.5 text-sm text-foreground',
+          multiline && 'whitespace-pre-wrap leading-relaxed'
+        )}
+      >
+        {hasValue ? value : <span className="italic text-muted-foreground">Not provided</span>}
+      </div>
+    </div>
   );
 }

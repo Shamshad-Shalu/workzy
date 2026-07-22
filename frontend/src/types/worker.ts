@@ -91,6 +91,7 @@ export type WorkerProfile = {
   reviewStats: WorkerReviewStats;
   availability: AvailabilitySlots;
   isAvailableToday: boolean;
+  languages: string[];
   jobStats: {
     offered: number;
     accepted: number;
@@ -113,6 +114,7 @@ export type WorkerProfileDetails = {
   location: GeoLocation;
   status: WorkerStatus;
   documents: WorkerDocument[];
+  languages: string[];
   rejectReason?: string;
   suspensionReason?: string;
   createdAt: Date;

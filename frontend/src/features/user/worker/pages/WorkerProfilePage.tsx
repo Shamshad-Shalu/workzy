@@ -49,9 +49,7 @@ const fade = (delay = 0) => ({
 
 export default function WorkerAboutTab() {
   const { worker } = useOutletContext<WorkerOutletContext>();
-  const { about, availability } = worker;
-
-  const languages: string[] = ['malayalam', 'english', 'hindi'];
+  const { about, availability, languages } = worker;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_340px]">

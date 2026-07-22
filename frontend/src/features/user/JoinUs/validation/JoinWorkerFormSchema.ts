@@ -20,6 +20,7 @@ export const JoinWorkerSchema = z.object({
     profile: z.url('Profile photo is required'),
   }),
   location: geoLocationSchema,
+  languages: z.array(z.string()),
 });
 
 export type JoinWorkerSchemaType = z.infer<typeof JoinWorkerSchema>;

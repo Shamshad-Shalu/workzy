@@ -20,6 +20,7 @@ import {
   Briefcase,
   ClipboardCheck,
   ArrowLeft,
+  Globe,
 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
@@ -427,6 +428,23 @@ export default function WorkerApplicationReview({ worker }: { worker: WorkerProf
                 </span>
                 <span>Applied {dayjs(worker.createdAt).format('MMM DD, YYYY')}</span>
               </div>
+              {worker?.languages?.length > 0 && (
+                <div className="flex items-start gap-2">
+                  <span className="p-2 rounded-lg bg-muted text-muted-foreground shrink-0">
+                    <Globe className="h-4 w-4 shrink-0" />
+                  </span>
+                  <div className="flex flex-wrap gap-1.5 pt-1.5">
+                    {worker.languages.map(lang => (
+                      <span
+                        key={lang}
+                        className="rounded-full border border-section-blue-border bg-section-blue px-2.5 py-0.5 text-xs font-medium text-section-blue-text"
+                      >
+                        {lang}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
