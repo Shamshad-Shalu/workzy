@@ -6,7 +6,7 @@ import { AUTH, HTTPSTATUS, WORKER } from "@/constants";
 import { IWorkerController } from "@/core/interfaces/controllers/IWorkerController";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
-import { JoinUsDTO, ResubmitDocument } from "@/dtos/requests/joinUs.dto";
+import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import CustomError from "@/utils/customError";
 
@@ -62,6 +62,7 @@ export class WorkerController implements IWorkerController {
     const workerData = await this._workerService.getWorkerProfileDetails(workerId);
     res.status(HTTPSTATUS.OK).json(workerData);
   });
+
   getWorkerProfileDetailsById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const workerData = await this._workerService.getWorkerProfileDetails(workerId);
@@ -93,19 +94,30 @@ export class WorkerController implements IWorkerController {
     res.status(HTTPSTATUS.OK).json({ url: imageUrl });
   });
 
-  createWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const userId = req.params.userId;
-    const data = req.body as JoinUsDTO;
+  getMyWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const worker = await this._workerService.getMyWorkerProfile(userId);
+    res.status(HTTPSTATUS.OK).json(worker);
+  });
 
+  createWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    if (!userId) {
+      throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const data = req.body as JoinUsDTO;
     const worker = await this._workerService.createWorkerProfile(userId, data);
-    res.status(200).json({ message: WORKER.CREATE_SUCCES, worker });
+    res.status(HTTPSTATUS.CREATED).json({ message: WORKER.CREATE_SUCCESS, worker });
   });
 
   reSubmitWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
-    const data = req.body as ResubmitDocument;
+    const data = req.body as JoinUsDTO;
     const workerData = await this._workerService.reSubmitWorkerDocument(workerId, data);
-    res.status(200).json({ message: WORKER.DOCUMENT_UPDATED, worker: workerData });
+    res.status(HTTPSTATUS.OK).json({ message: WORKER.DOCUMENT_UPDATED, worker: workerData });
   });
   connectStripe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);

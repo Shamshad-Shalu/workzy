@@ -59,7 +59,7 @@ class AvailabilityDto {
   sunday!: AvailabilitySlotDto[];
 }
 
-class GeoLocationDto {
+export class GeoLocationDto {
   @IsString()
   type!: "Point";
 

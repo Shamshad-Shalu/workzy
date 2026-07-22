@@ -1,8 +1,6 @@
 import { Document, Types } from "mongoose";
 
-import { StripeAccountStatus, WorkerStatus } from "@/constants";
-
-export type DocumentType = "id_proof" | "license" | "certificate" | "other";
+import { DocumentStatus, DocumentType, StripeAccountStatus, WorkerStatus } from "@/constants";
 
 export interface ITimeSlot {
   startTime: string;
@@ -24,15 +22,16 @@ export interface IAvailabilitySlots {
   sunday: ITimeSlot[];
 }
 
-export interface IDocument {
-  _id?: string;
+export interface IWorkerDocument {
+  _id?: Types.ObjectId;
   type: DocumentType;
   url: string;
-  name?: string;
-  status?: "pending" | "in_review" | "verified" | "rejected";
+  status: DocumentStatus;
   rejectReason?: string;
   verifiedAt?: Date;
+  uploadedAt: Date;
 }
+
 export interface IReviewStats {
   averageRating: number;
   totalRating: number;
@@ -63,7 +62,7 @@ export interface IWorker extends Document<string> {
 
   status: WorkerStatus;
   experience: number;
-  documents: IDocument[];
+  documents: IWorkerDocument[];
 
   availability: IAvailabilitySlots;
   rejectReason?: string;
@@ -84,4 +83,3 @@ export interface IWorker extends Document<string> {
 }
 
 export type Day = keyof IAvailabilitySlots;
-export type DocumentDto = Omit<IDocument, "_id"> & { id?: string };

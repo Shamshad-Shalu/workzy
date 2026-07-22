@@ -2,7 +2,7 @@ import dayjs from "dayjs";
 import { injectable } from "inversify";
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
-import { SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS } from "@/constants";
+import { SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS, WorkerStatus } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import Worker from "@/models/worker.model";
@@ -26,6 +26,13 @@ import { getCurrentTime, getTodayKey, getTodayStart, getTodayEnd } from "@/utils
 export class WorkerRepository extends BaseRepository<IWorker> implements IWorkerRepository {
   constructor() {
     super(Worker);
+  }
+
+  async getWorkerByUserId(userId: string): Promise<IWorker | null> {
+    const worker = await this.model.findOne({ userId: new Types.ObjectId(userId) }).lean<IWorker>();
+
+    if (!worker) return null;
+    return worker;
   }
 
   async listWorkers(query: WorkerListQuery): Promise<PaginatedResult<WorkerListItem>> {
@@ -621,5 +628,22 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
         },
       },
     ]);
+  }
+
+  async updateWorkerStatus(
+    workerId: string,
+    status: WorkerStatus,
+    reason: string
+  ): Promise<Worker | null> {
+    return await this.model.findByIdAndUpdate(
+      workerId,
+      {
+        $set: {
+          status,
+          suspensionReason: reason,
+        },
+      },
+      { new: true }
+    );
   }
 }

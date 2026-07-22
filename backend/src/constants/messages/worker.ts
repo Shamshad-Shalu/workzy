@@ -3,7 +3,7 @@ export const WORKER = {
   UNAUTHORIZED: "Unauthorized Worker",
   UPDATE_FAILED: "Failed to update worker profile",
   UPDATE_SUCCESS: "Worker profile updated successfully",
-  CREATE_SUCCES: "Worker profile created successfully",
+  CREATE_SUCCESS: "Worker profile created successfully",
   DOCUMENT_REQUIRED: "Document is required.",
   DOCUMENT_UPDATED: "Document updated successfully",
   DOCUMENT_NOTFOUND: "Document not found",
@@ -12,4 +12,10 @@ export const WORKER = {
   VERIFY_ERROR: "Error while verifying  the worker",
   NOT_AVAILABLE: "This worker is no longer available.",
   STRIPE_NOT_ACTIVE: "Worker strip account is not active",
+  ALREADY_EXISTS: "Worker is already exists",
+
+  INVALID_STATUS_TOGGLE: "Only verified or suspended workers can change status",
+  STATUS_UPDATE_FAILED: "Failed to update worker status",
+  BLOCK_SUCCESS: "Worker blocked successfully",
+  UNBLOCK_SUCCESS: "Worker unblocked successfully",
 };

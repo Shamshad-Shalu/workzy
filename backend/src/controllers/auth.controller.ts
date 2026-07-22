@@ -35,7 +35,7 @@ export class AuthController implements IAuthController {
     @inject(TYPES.PresenceService) private _presenceService: IPresenceService
   ) {}
 
-  // Register a new user and send OTP to email
+  // Register a new user
   register = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userData = req.body as RegisterRequestDTO;
 
@@ -82,13 +82,6 @@ export class AuthController implements IAuthController {
 
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const user = await this._authService.login(req.body as LoginRequestDTO);
-
-    const isBlocked = await this._authService.isUserBlocked(user.id);
-    if (isBlocked) {
-      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
-      return;
-    }
-
     setRefreshTokenCookie(res, { id: user.id.toString(), role: user.role as Role });
 
     const accessToken = generateAccessToken({
@@ -227,7 +220,7 @@ export class AuthController implements IAuthController {
       name: googleProfile.displayName,
       profile: jsonData?.picture || "",
     });
-    const isBlocked = await this._authService.isUserBlocked(user.id);
+    const isBlocked = await redisClient.get(`blocked_user:${user.id}`);
     if (isBlocked) {
       return res.redirect(`${CLIENT_URL}/auth/google/callback?error=blocked`);
     }

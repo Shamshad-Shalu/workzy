@@ -1,8 +1,33 @@
-import { IsString, Matches, IsUrl, IsNumber, Min, IsOptional } from "class-validator";
+import { Type } from "class-transformer";
+import {
+  IsString,
+  Matches,
+  IsUrl,
+  IsNumber,
+  Min,
+  IsOptional,
+  Max,
+  ValidateNested,
+} from "class-validator";
 
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
-import { WorkerStatus } from "@/constants";
-import { DocumentType } from "@/types/worker/worker.entity";
+import { PhoneRule } from "@/validations/rules";
+
+import { GeoLocationDto } from "./worker.profile.dto";
+
+class WorkerDocumentDTO {
+  @IsUrl({}, { message: "Document URL must be a valid URL" })
+  aadhaar!: string;
+
+  @IsUrl({}, { message: "Document URL must be a valid URL" })
+  pan!: string;
+
+  @IsUrl({}, { message: "Document URL must be a valid URL" })
+  selfie!: string;
+
+  @IsUrl({}, { message: "Document URL must be a valid URL" })
+  profile!: string;
+}
 
 export class JoinUsDTO {
   @IsString()
@@ -17,30 +42,24 @@ export class JoinUsDTO {
   @Matches(DESCRIPTION_REGEX, { message: "Please Enter valid description" })
   about!: string;
 
-  @IsString()
-  @IsUrl()
-  document!: string;
-
   @IsNumber()
   @Min(0, { message: "Experience cannot be negative" })
+  @Max(100, { message: "Experience seems too high" })
   experience!: number;
 
-  @IsNumber({}, { message: "Amount is required" })
-  @Min(1, { message: "Rate must be a valid amount" })
-  defaultRate!: number;
-}
-
-export class ResubmitDocument {
-  @IsString()
-  id!: string;
-
-  @IsString()
-  @IsUrl()
-  url!: string;
+  @ValidateNested()
+  @Type(() => GeoLocationDto)
+  location!: GeoLocationDto;
 
   @IsOptional()
-  WorkerStatus?: WorkerStatus;
+  @IsUrl({}, { message: "Profile image must be a valid URL" })
+  profileImage?: string;
 
-  @IsOptional()
-  type?: DocumentType;
+  @ValidateNested()
+  @Type(() => WorkerDocumentDTO)
+  documents!: WorkerDocumentDTO;
+
+  @IsString()
+  @PhoneRule()
+  phone!: string;
 }
