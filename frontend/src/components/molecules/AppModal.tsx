@@ -22,6 +22,7 @@ interface AppModalProps {
   cancelText?: string;
   className?: string;
   isConfirmLoading?: boolean;
+  isConfirmDisabled?: boolean;
   hideFooter?: boolean;
   footer?: React.ReactNode;
   canCloseOnOutsideClick?: boolean;
@@ -41,12 +42,13 @@ export function AppModal({
   buttonVariant,
   cancelText = 'Cancel',
   isConfirmLoading = false,
+  isConfirmDisabled = false,
   footer,
   canCloseOnOutsideClick = true,
   className = 'sm:max-w-lg',
 }: AppModalProps) {
   const DefaultFooter = !footer && (
-    <div className="flex items-center justify-end gap-3 pt-2">
+    <div className="flex items-center justify-end gap-3 w-full">
       <Button variant="outline" onClick={onClose} disabled={isConfirmLoading} size="sm">
         {cancelText}
       </Button>
@@ -54,7 +56,7 @@ export function AppModal({
         <Button
           variant={buttonVariant}
           onClick={onConfirm}
-          disabled={isConfirmLoading}
+          disabled={isConfirmLoading || isConfirmDisabled}
           loading={isConfirmLoading}
           size="sm"
         >

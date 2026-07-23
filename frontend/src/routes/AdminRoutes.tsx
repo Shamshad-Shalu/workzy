@@ -5,7 +5,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import AdminChatPage from '@/features/admin/chat/pages/AdminChatPage';
 import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
 import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
-import WorkerOverviewPage from '@/features/admin/worker/pages/WorkerOverviewPage';
+import WorkerAboutPage from '@/features/admin/worker/pages/WorkerAboutPage';
+import WorkerDocumentsPage from '@/features/admin/worker/pages/WorkerDocumentsPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -49,14 +50,14 @@ export default function AdminRoutes() {
             <Route path="workers">
               <Route index element={<WorkerManagementPage />} />
               <Route path=":workerId" element={<WorkerDetailsLayout />}>
-                <Route index element={<WorkerOverviewPage />} />
-                <Route path="documents" element={<WorkerOverviewPage />} />
-                <Route path="services" element={<WorkerOverviewPage />} />
-                <Route path="bookings" element={<WorkerOverviewPage />} />
-                <Route path="reviews" element={<WorkerOverviewPage />} />
-                <Route path="quotes" element={<WorkerOverviewPage />} />
-                <Route path="disputes" element={<WorkerOverviewPage />} />
-                <Route path="payments" element={<WorkerOverviewPage />} />
+                <Route index element={<WorkerAboutPage />} />
+                <Route path="documents" element={<WorkerDocumentsPage />} />
+                <Route path="services" element={<WorkerAboutPage />} />
+                <Route path="bookings" element={<WorkerAboutPage />} />
+                <Route path="reviews" element={<WorkerAboutPage />} />
+                <Route path="quotes" element={<WorkerAboutPage />} />
+                <Route path="disputes" element={<WorkerAboutPage />} />
+                <Route path="payments" element={<WorkerAboutPage />} />
               </Route>
             </Route>
 

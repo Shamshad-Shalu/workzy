@@ -15,6 +15,8 @@ export const ADMIN_API = {
   WORKER: {
     WORKERS: admin(`/workers`),
     REVIEW: (id: string) => admin(`/workers/${id}/review`),
+    REVIEW_DOCUMENT: (workerId: string, documentId: string) =>
+      admin(`/workers/${workerId}/documents/${documentId}/review`),
     STATUS_CHANGE: (id: string) => admin(`/workers/${id}/status`),
     STATS: (id: string) => admin(`/workers/${id}/stats`),
   },

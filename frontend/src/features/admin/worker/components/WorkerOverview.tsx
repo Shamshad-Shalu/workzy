@@ -10,7 +10,7 @@ import type { WorkerProfileDetails } from '@/types/worker';
 
 const TABS = [
   { name: 'About', path: '' },
-  { name: 'Verification', path: 'documents' },
+  { name: 'Documents', path: 'documents' },
   { name: 'Services', path: 'services' },
   { name: 'Bookings', path: 'bookings' },
   { name: 'Reviews', path: 'reviews' },

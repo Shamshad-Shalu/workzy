@@ -23,7 +23,7 @@ import { createDescriptionRule } from '@/lib/validation/rules';
 import PageError from '@/pages/PageError';
 import { handleApiError } from '@/utils/handleApiError';
 
-import WorkerApplicationReview from '../components/WorkerApplicationReview ';
+import WorkerApplicationReview from '../components/WorkerApplicationReview';
 import WorkerOverview from '../components/WorkerOverview';
 import { useWorkerStatusToggle } from '../hooks/useWorker';
 
