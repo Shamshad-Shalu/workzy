@@ -5,4 +5,5 @@ export interface IAdminWorkerController {
   toggleStatus: RequestHandler;
   getWorkerStats: RequestHandler;
   reviewWorker: RequestHandler;
+  reviewWorkerDocument: RequestHandler;
 }

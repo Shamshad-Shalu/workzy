@@ -6,7 +6,10 @@ import { HTTPSTATUS, StripeAccountStatus, WORKER } from "@/constants";
 import { IAdminWorkerController } from "@/core/interfaces/controllers/admin/IAdminWorkerController";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
-import { WorkerReviewRequestDTO } from "@/dtos/requests/admin/worker-review.dto";
+import {
+  WorkerDocumentReviewRequestDTO,
+  WorkerReviewRequestDTO,
+} from "@/dtos/requests/admin/worker-review.dto";
 import { WorkerStatusFilter } from "@/types/worker/worker.query";
 
 @injectable()
@@ -47,6 +50,15 @@ export class AdminWorkerController implements IAdminWorkerController {
     const message = await this._workerService.toggleWorkerStatus(workerId, reason);
     res.status(HTTPSTATUS.OK).json({ message });
   });
+
+  reviewWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const { workerId, documentId } = req.params;
+    const data = req.body as WorkerDocumentReviewRequestDTO;
+    const worker = await this._workerService.reviewWorkerDocument(workerId, documentId, data);
+
+    res.status(HTTPSTATUS.OK).json({ message: WORKER.DOCUMENT_REVIEWED, worker: worker });
+  });
+
   getWorkerStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const stats = await this._workerService.getWorkerStats(workerId);
