@@ -17,9 +17,11 @@ export type WorkerServiceItem = Omit<IService, "categoryId"> & {
 
 export type PublicWorkerServiceItem = {
   _id: Types.ObjectId;
+  categoryId: Types.ObjectId;
   serviceName: string;
   categoryName: string;
   rate: number;
+  experience: number;
   description: string;
   iconUrl: string;
   imageUrl: string;

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Filter, Search, X } from 'lucide-react';
 import { useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
@@ -9,18 +9,16 @@ import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import SearchInput from '@/components/molecules/SearchInput';
 import { type ServiceType, SERVICE_TYPE } from '@/constants';
+import WorkerServiceCard from '@/features/service/components/WorkerServiceCard';
+import WorkerServiceGridSkeleton from '@/features/service/components/WorkerServiceCardSkeleton';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 
-import { PublicServiceCard } from '../components/PublicServiceCard';
-import {
-  ServiceGridSkeleton,
-  ServiceGridSkeletonAppend,
-} from '../components/PublicServiceCardSkeleton';
 import { useWorkerServices } from '../hooks/useWorkerServices';
 
 export default function WorkerServicesPage() {
   const { workerId = '' } = useParams<{ workerId: string }>();
+  const navigate = useNavigate();
 
   const { updateParams, search, type } = useUrlFilterParams<{
     type: ServiceType | 'all';
@@ -77,7 +75,7 @@ export default function WorkerServicesPage() {
       {error ? (
         <ErrorState onRetry={refetch} description={error.message} />
       ) : isLoading ? (
-        <ServiceGridSkeleton count={6} />
+        <WorkerServiceGridSkeleton count={6} />
       ) : services.length === 0 ? (
         <EmptyState
           title={hasActiveFilters ? 'No matches' : 'No services found'}
@@ -97,7 +95,7 @@ export default function WorkerServicesPage() {
       ) : (
         <>
           <motion.div
-            className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
             initial="hidden"
             animate="show"
             variants={{
@@ -117,12 +115,15 @@ export default function WorkerServicesPage() {
                   },
                 }}
               >
-                <PublicServiceCard service={service} />
+                <WorkerServiceCard
+                  service={service}
+                  onBookService={() => navigate(`/services/${service.categoryId}`)}
+                />
               </motion.div>
             ))}
           </motion.div>
           <div ref={sentinelRef} className="h-4" />
-          {isFetchingNextPage && <ServiceGridSkeletonAppend count={3} />}
+          {isFetchingNextPage && <WorkerServiceGridSkeleton count={3} />}
         </>
       )}
     </div>

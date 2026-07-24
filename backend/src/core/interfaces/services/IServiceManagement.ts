@@ -26,5 +26,5 @@ export interface IServiceManagement {
     query: PublicServiceListQuery
   ): Promise<CursorPaginatedResult<PublicServiceListResponseDto>>;
 
-  getWorkerServiceFilters(workerId: string): Promise<CategoryOption[]>;
+  getWorkerServiceCategories(workerId: string): Promise<CategoryOption[]>;
 }

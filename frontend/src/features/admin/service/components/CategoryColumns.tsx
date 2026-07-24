@@ -1,6 +1,5 @@
 import { Eye, Pencil } from 'lucide-react';
 
-import categoryImage from '@/assets/images/categoryImage.jpeg';
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
 import type { Category } from '@/types/category';
@@ -40,7 +39,7 @@ const categoryColumns = (
       header: 'Icon',
       accessorKey: 'iconUrl',
       cell: ({ row }) => (
-        <ProfileImage src={row.original.iconUrl} size={40} fallbackImage={categoryImage} />
+        <ProfileImage src={row.original.iconUrl} size={40} name={row.original.name} />
       ),
       hideOnSmall: true,
       showInMobileHeader: false,
@@ -53,7 +52,7 @@ const categoryColumns = (
       header: 'Image',
       accessorKey: 'imageUrl',
       cell: ({ row }) => (
-        <ProfileImage src={row.original.imageUrl} size={40} fallbackImage={categoryImage} />
+        <ProfileImage src={row.original.imageUrl} size={40} name={row.original.name} />
       ),
       hideOnSmall: true,
       showInMobileHeader: false,

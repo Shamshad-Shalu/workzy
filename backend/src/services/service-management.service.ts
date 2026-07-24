@@ -165,8 +165,7 @@ export class ServiceManagement implements IServiceManagement {
     return result;
   }
 
-  async getWorkerServiceFilters(workerId: string): Promise<CategoryOption[]> {
-    await getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND);
-    return this._serviceRepository.getWorkerServiceParentCategories(workerId);
+  async getWorkerServiceCategories(workerId: string): Promise<CategoryOption[]> {
+    return this._serviceRepository.getWorkerServiceCategories(workerId);
   }
 }

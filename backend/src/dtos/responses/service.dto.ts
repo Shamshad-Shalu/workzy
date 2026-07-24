@@ -57,6 +57,7 @@ export class ServiceResponseDto {
 
 export class PublicServiceListResponseDto {
   id!: string;
+  categoryId!: string;
   serviceName!: string;
   categoryName!: string;
   serviceType!: ServiceType;
@@ -74,12 +75,14 @@ export class PublicServiceListResponseDto {
     const dto = new PublicServiceListResponseDto();
 
     dto.id = entity._id.toString();
+    dto.categoryId = entity.categoryId?.toString();
     dto.serviceName = entity.serviceName;
     dto.categoryName = entity.categoryName;
     dto.serviceType = entity.serviceType;
     dto.pricingMode = entity.pricingMode;
     dto.iconUrl = entity.iconUrl;
     dto.imageUrl = entity.imageUrl;
+    dto.experience = entity.experience;
 
     dto.rate = entity.rate;
     dto.description = entity.description;

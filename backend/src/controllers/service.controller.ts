@@ -84,7 +84,7 @@ export class ServiceController implements IServiceController {
 
   getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
-    const categories = await this._serviceMangement.getWorkerServiceFilters(workerId);
+    const categories = await this._serviceMangement.getWorkerServiceCategories(workerId);
     res.status(HTTPSTATUS.OK).json({ categories });
   });
 

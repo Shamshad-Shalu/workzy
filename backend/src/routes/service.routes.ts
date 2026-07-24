@@ -16,7 +16,7 @@ router.get("/worker/:workerId", serviceController.listWorkerPublicServices);
 router.use(authenticate([ROLE.WORKER]));
 
 router.get("/worker", serviceController.getWorkerServices);
-router.get("/service-filters", serviceController.getWorkerServiceCategories);
+router.get("/service-categories", serviceController.getWorkerServiceCategories);
 router.post("/", validateDto(ServiceRequestDTO), serviceController.createService);
 router.patch("/:serviceId", validateDto(ServiceRequestDTO), serviceController.updateService);
 router.patch("/:serviceId/status", serviceController.toggleStatus);
