@@ -2,28 +2,27 @@ import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { Skeleton } from '@/components/ui/skeleton';
-import AdminChatPage from '@/features/admin/chat/pages/AdminChatPage';
-import AdminDisputesPage from '@/features/admin/disputes/pages/AdminDisputesPage';
-import HomePageLayout from '@/features/admin/home/layout/HomeLayout';
-import WorkerAboutPage from '@/features/admin/worker/pages/WorkerAboutPage';
-import WorkerDocumentsPage from '@/features/admin/worker/pages/WorkerDocumentsPage';
-
 import ProtectedRoute from './ProtectedRoute';
 
-const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const AdminLayout = lazy(() => import('@/layouts/admin/AdminLayout'));
+const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const UserManagementPage = lazy(() => import('@/features/admin/user/pages/UserMangementPage'));
 const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDetailsLayout'));
-
 const WorkerManagementPage = lazy(
   () => import('@/features/admin/worker/pages/WorkerMangementPage')
 );
 const WorkerDetailsLayout = lazy(
   () => import('@/features/admin/worker/wrapper/WorkerDetailsLayout')
 );
+const WorkerAboutPage = lazy(() => import('@/features/admin/worker/pages/WorkerAboutPage'))
+const WorkerDocumentsPage = lazy(() => import('@/features/admin/worker/pages/WorkerDocumentsPage'))
+
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
+const AdminChatPage = lazy(() => import('@/features/admin/chat/pages/AdminChatPage'));
+const AdminDisputesPage = lazy(() => import('@/features/admin/disputes/pages/AdminDisputesPage'));
+const HomePageLayout = lazy(() => import('@/features/admin/home/layout/HomeLayout'));
 
 const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
 const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));

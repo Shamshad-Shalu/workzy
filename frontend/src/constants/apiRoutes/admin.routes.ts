@@ -19,6 +19,8 @@ export const ADMIN_API = {
       admin(`/workers/${workerId}/documents/${documentId}/review`),
     STATUS_CHANGE: (id: string) => admin(`/workers/${id}/status`),
     STATS: (id: string) => admin(`/workers/${id}/stats`),
+    SERVICES: (id: string) => admin(`/workers/${id}/services`),
+    SERVICE_CATEGORIES: (id: string) => admin(`/workers/${id}/service-categories`),
   },
   BOOKING: {
     ROOT: admin('/bookings/'),
