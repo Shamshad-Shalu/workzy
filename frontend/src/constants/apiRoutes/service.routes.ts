@@ -7,7 +7,7 @@ export const SERVICE_API = {
   BY_WORKER: service(`/worker`),
   PUBLIC: (id: string) => service(`worker/${id}`),
   BY_ID: (id: string) => service(`/${id}`),
-  FILTERS: service(`/service-filters`),
+  SERVICE_CATEGORIES: service(`/service-categories`),
   STATUS: (id: string) => service(`/${id}/status`),
   UPDATE: (id: string) => service(`/${id}`),
 } as const;

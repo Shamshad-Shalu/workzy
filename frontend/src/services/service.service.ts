@@ -35,7 +35,7 @@ const ServiceManagement = {
     return res.data;
   },
   getWorkerServiceCategories: async (): Promise<{ categories: CategoryOption[] }> => {
-    const res = await api.get(SERVICE_API.FILTERS);
+    const res = await api.get(SERVICE_API.SERVICE_CATEGORIES);
     return res.data;
   },
 

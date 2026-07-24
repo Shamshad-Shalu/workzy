@@ -14,6 +14,6 @@ export interface IServiceRepository extends BaseRepository<IService> {
     workerId: string,
     query: PublicServiceListQuery
   ): Promise<CursorPaginatedResult<PublicWorkerServiceItem>>;
-  getWorkerServiceParentCategories(workerId: string): Promise<CategoryOption[]>;
+  getWorkerServiceCategories(workerId: string): Promise<CategoryOption[]>;
   getServiceById(serviceId: string): Promise<WorkerServiceItem | null>;
 }

@@ -147,7 +147,10 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
         },
       },
       {
-        $unwind: "$parentCategory",
+        $unwind: {
+          path: "$parentCategory",
+          preserveNullAndEmptyArrays: true,
+        },
       },
     ];
 
@@ -158,7 +161,14 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
     }
 
     if (search) {
-      pipeline.push({ $match: { "category.name": { $regex: search, $options: "i" } } });
+      pipeline.push({
+        $match: {
+          $or: [
+            { "category.name": { $regex: search, $options: "i" } },
+            { "parentCategory.name": { $regex: search, $options: "i" } },
+          ],
+        },
+      });
     }
 
     if (cursor) {
@@ -181,10 +191,12 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
       {
         $project: {
           _id: 1,
+          categoryId: 1,
           rate: 1,
           description: 1,
           estimatedDuration: 1,
           bulkDiscounts: 1,
+          experience: 1,
           createdAt: 1,
           serviceName: "$category.name",
           categoryName: "$parentCategory.name",
@@ -217,7 +229,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
     };
   }
 
-  async getWorkerServiceParentCategories(workerId: string): Promise<CategoryOption[]> {
+  async getWorkerServiceCategories(workerId: string): Promise<CategoryOption[]> {
     const pipeline: PipelineStage[] = [
       {
         $match: {

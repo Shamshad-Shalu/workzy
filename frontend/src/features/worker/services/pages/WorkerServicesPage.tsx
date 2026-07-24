@@ -8,12 +8,12 @@ import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import StatusChangeModal from '@/components/molecules/StatusChangeModal';
+import WorkerServiceCard from '@/features/service/components/WorkerServiceCard';
+import WorkerServiceGridSkeleton from '@/features/service/components/WorkerServiceCardSkeleton';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import type { Service } from '@/types/service';
 
-import { WorkerServiceCardSkeletonList } from '../components/serviceCardSkeleton';
-import WorkerServiceCard from '../components/WorkerServiceCard';
 import { WorkerServiceModal } from '../components/WorkerServiceModal';
 import {
   useAddService,
@@ -154,7 +154,7 @@ export default function WorkerServicesPage() {
       </div>
       <section className="@container pt-12">
         {isLoading ? (
-          <WorkerServiceCardSkeletonList />
+          <WorkerServiceGridSkeleton />
         ) : isError ? (
           <ErrorState onRetry={refetch} description={error.message} />
         ) : services.length === 0 ? (
@@ -173,18 +173,18 @@ export default function WorkerServicesPage() {
           />
         ) : (
           <>
-            <div className="grid gap-5 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {services.map(service => (
                 <WorkerServiceCard
-                  key={service.id}
                   service={service}
+                  mode="worker"
                   onEdit={openEditModal}
                   onToggleStatus={setStatusService}
                 />
               ))}
             </div>
             <div ref={sentinelRef} className="h-20" />
-            {isFetchingNextPage && <WorkerServiceCardSkeletonList />}
+            {isFetchingNextPage && <WorkerServiceGridSkeleton count={6} />}
           </>
         )}
       </section>

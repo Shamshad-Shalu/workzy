@@ -48,6 +48,7 @@ export type ServiceFilters = {
 export type PublicWorkerServiceItem = Pick<
   Service,
   | 'id'
+  | 'categoryId'
   | 'serviceName'
   | 'serviceType'
   | 'pricingMode'
