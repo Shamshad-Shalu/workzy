@@ -17,7 +17,7 @@ import { useAdminWorkers } from '../hooks/useAdminWorkers';
 
 const CUSTOM_PARAMS = [{ key: 'stripStatus', defaultValue: 'all' }];
 
-export default function WorkerManagementPage() {
+export default function AdminWorkerManagementPage() {
   const navigate = useNavigate();
   const { pageIndex, pageSize, search, status, updateParams, stripStatus } = useUrlFilterParams<{
     stripStatus: string;

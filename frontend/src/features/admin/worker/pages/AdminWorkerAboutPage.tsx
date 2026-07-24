@@ -7,7 +7,7 @@ type WorkerOutletContext = {
   worker: WorkerProfileDetails;
 };
 
-export default function WorkerAboutPage() {
+export default function AdminWorkerAboutPage() {
   const { worker } = useOutletContext<WorkerOutletContext>();
   const { about, availability, languages } = worker;
   return (

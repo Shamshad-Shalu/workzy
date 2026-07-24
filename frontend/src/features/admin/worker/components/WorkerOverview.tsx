@@ -4,6 +4,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 
 import StatCard from '@/components/molecules/StatCard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DOCUMENT_STATUS } from '@/constants';
 import { useWorkerStats } from '@/features/admin/worker/hooks/useWorkerStats';
 import { cn } from '@/lib/utils';
 import type { WorkerProfileDetails } from '@/types/worker';
@@ -37,6 +38,11 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
     upcomingBookings,
     workerEarnings,
   } = stats ?? {};
+
+  const pendingDocumentsCount =
+    worker.documents?.filter(
+      doc => doc.status === DOCUMENT_STATUS.PENDING || doc.status === DOCUMENT_STATUS.IN_REVIEW
+    ).length ?? 0;
 
   return (
     <>
@@ -119,7 +125,7 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
                 end={tab.path === ''}
                 className={({ isActive }) =>
                   cn(
-                    'px-5 py-3 text-sm font-medium transition-all duration-150 border-b-2 whitespace-nowrap',
+                    'px-5 py-3 text-sm font-medium transition-all duration-150 border-b-2 whitespace-nowrap flex items-center gap-2',
                     isActive
                       ? 'text-foreground font-semibold border-foreground'
                       : 'text-muted-foreground border-transparent hover:text-foreground hover:bg-muted/40'
@@ -127,6 +133,11 @@ export default function WorkerOverview({ worker }: WorkerOverviewProps) {
                 }
               >
                 {tab.name}
+                {tab.name === 'Documents' && pendingDocumentsCount > 0 && (
+                  <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full">
+                    {pendingDocumentsCount}
+                  </span>
+                )}
               </NavLink>
             ))}
           </div>

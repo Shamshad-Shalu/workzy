@@ -6,4 +6,6 @@ export interface IAdminWorkerController {
   getWorkerStats: RequestHandler;
   reviewWorker: RequestHandler;
   reviewWorkerDocument: RequestHandler;
+  getWorkerServices: RequestHandler;
+  getWorkerServiceCategories: RequestHandler;
 }

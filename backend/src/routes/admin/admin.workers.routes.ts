@@ -23,4 +23,7 @@ router.patch(
   validateDto(WorkerDocumentReviewRequestDTO),
   controller.reviewWorkerDocument
 );
+router.get("/:workerId/services", controller.getWorkerServices);
+router.get("/:workerId/service-categories", controller.getWorkerServiceCategories);
+
 export default router;

@@ -10,7 +10,7 @@ import { MANDATORY_DOCUMENT_TYPES } from '../utils/documentUtils';
 
 type WorkerOutletContext = { worker: WorkerProfileDetails };
 
-export default function WorkerDocumentsPage() {
+export default function AdminWorkerDocumentsPage() {
   const { worker } = useOutletContext<WorkerOutletContext>();
   const [reviewDoc, setReviewDoc] = useState<WorkerDocument | null>(null);
 
