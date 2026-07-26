@@ -12,6 +12,7 @@ import {
   HTTPSTATUS,
   NOTIFICATION_TEMPLATES,
   PAYMENT_STATUS,
+  Role,
   ROLE,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
@@ -55,9 +56,10 @@ export class DisputeService implements IDisputeService {
   async raiseDispute(
     bookingId: string,
     initiatorId: string,
+    raisedBy: Role,
     data: CreateDisputeDto
   ): Promise<DisputeResponseDto> {
-    const { reason, description, evidence, raisedBy } = data;
+    const { reason, description, evidence } = data;
     const [booking, existingDispute, admin] = await Promise.all([
       getEntityOrThrow(this._bookingRepository, bookingId, BOOKING.NOT_FOUND),
       this._disputeRepository.findByBookingId(bookingId),
@@ -149,6 +151,7 @@ export class DisputeService implements IDisputeService {
   async updateDispute(
     disputeId: string,
     initiatorId: string,
+    raisedBy: Role,
     data: CreateDisputeDto
   ): Promise<DisputeResponseDto> {
     const dispute = await this._disputeRepository.findById(disputeId);
@@ -156,7 +159,7 @@ export class DisputeService implements IDisputeService {
       throw new CustomError(DISPUTE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
     if (
-      dispute.raisedBy !== data.raisedBy ||
+      dispute.raisedBy !== raisedBy ||
       (initiatorId !== dispute.workerId.toString() && initiatorId !== dispute.userId.toString())
     ) {
       throw new CustomError(DISPUTE.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
