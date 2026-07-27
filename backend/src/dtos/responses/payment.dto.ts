@@ -1,7 +1,7 @@
 import { BillType, PaymentStatus } from "@/constants";
 import { IPayment } from "@/types/payment/payment.entity";
 
-class PaymentBaseDTO {
+class PaymentBaseDto {
   id!: string;
   refId!: string;
   transactionId!: string;
@@ -12,8 +12,8 @@ class PaymentBaseDTO {
   failureReason?: string;
   createdAt!: Date;
 
-  static baseMap(entity: IPayment): PaymentBaseDTO {
-    const dto = new PaymentBaseDTO();
+  static mapBase(entity: IPayment): PaymentBaseDto {
+    const dto = new PaymentBaseDto();
 
     dto.id = entity._id.toString();
     dto.refId = entity.bookingId.toString();
@@ -28,14 +28,14 @@ class PaymentBaseDTO {
   }
 }
 
-export class PaymentUserDTO extends PaymentBaseDTO {
+export class PaymentUserDto extends PaymentBaseDto {
   workerId!: string;
   workerName!: string;
 
-  static fromEntity(entity: IPayment): PaymentUserDTO {
-    const dto = new PaymentUserDTO();
+  static fromEntity(entity: IPayment): PaymentUserDto {
+    const dto = new PaymentUserDto();
 
-    Object.assign(dto, PaymentBaseDTO.baseMap(entity));
+    Object.assign(dto, PaymentBaseDto.mapBase(entity));
 
     dto.workerId = entity.workerId?.toString() ?? "";
     dto.workerName = entity.workerName ?? "";
@@ -43,20 +43,20 @@ export class PaymentUserDTO extends PaymentBaseDTO {
     return dto;
   }
 
-  static fromEntities(entities: IPayment[]): PaymentUserDTO[] {
+  static fromEntities(entities: IPayment[]): PaymentUserDto[] {
     return entities.map((e) => this.fromEntity(e));
   }
 }
 
-export class PaymentWorkerDTO extends PaymentBaseDTO {
+export class PaymentWorkerDto extends PaymentBaseDto {
   userId!: string;
   userName!: string;
   workerAmount!: number | null;
 
-  static fromEntity(entity: IPayment): PaymentWorkerDTO {
-    const dto = new PaymentWorkerDTO();
+  static fromEntity(entity: IPayment): PaymentWorkerDto {
+    const dto = new PaymentWorkerDto();
 
-    Object.assign(dto, PaymentBaseDTO.baseMap(entity));
+    Object.assign(dto, PaymentBaseDto.mapBase(entity));
 
     dto.userId = entity.userId?.toString() ?? "";
     dto.userName = entity.userName ?? "";
@@ -65,12 +65,12 @@ export class PaymentWorkerDTO extends PaymentBaseDTO {
     return dto;
   }
 
-  static fromEntities(entities: IPayment[]): PaymentWorkerDTO[] {
+  static fromEntities(entities: IPayment[]): PaymentWorkerDto[] {
     return entities.map((e) => this.fromEntity(e));
   }
 }
 
-export class PaymentAdminDTO extends PaymentBaseDTO {
+export class PaymentAdminDto extends PaymentBaseDto {
   user!: {
     id: string;
     name: string;
@@ -82,10 +82,10 @@ export class PaymentAdminDTO extends PaymentBaseDTO {
   workerAmount!: number | null;
   platformFee!: number | null;
 
-  static fromEntity(entity: IPayment): PaymentAdminDTO {
-    const dto = new PaymentAdminDTO();
+  static fromEntity(entity: IPayment): PaymentAdminDto {
+    const dto = new PaymentAdminDto();
 
-    Object.assign(dto, PaymentBaseDTO.baseMap(entity));
+    Object.assign(dto, PaymentBaseDto.mapBase(entity));
 
     dto.worker = {
       id: entity.workerId?.toString() ?? "",
@@ -100,7 +100,7 @@ export class PaymentAdminDTO extends PaymentBaseDTO {
     return dto;
   }
 
-  static fromEntities(entities: IPayment[]): PaymentAdminDTO[] {
+  static fromEntities(entities: IPayment[]): PaymentAdminDto[] {
     return entities.map((e) => this.fromEntity(e));
   }
 }

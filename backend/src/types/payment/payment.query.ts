@@ -1,28 +1,15 @@
 import { BillType, PaymentStatus } from "@/constants";
 
-export interface PaymentListQueryInput {
+import { Cursor } from "../common/query";
+
+export interface PaymentListQuery {
   limit: number;
-  cursor?: {
-    createdAt: string;
-    id: string;
-  };
+  search?: string;
   billType?: BillType | "all";
+  cursor?: Cursor | null;
   status?: PaymentStatus | "all";
   userId?: string;
   workerId?: string;
-  fromDate?: string;
-  toDate?: string;
-  minAmount?: number;
-  maxAmount?: number;
-  search?: string;
-}
-
-export interface PaymentListQuery
-  extends Omit<PaymentListQueryInput, "cursor" | "fromDate" | "toDate"> {
-  cursor?: {
-    createdAt: Date;
-    _id: string;
-  };
   fromDate?: Date;
   toDate?: Date;
 }
