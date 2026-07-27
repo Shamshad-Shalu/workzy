@@ -1,4 +1,5 @@
 import { Eye } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
 
 import Button from '@/components/atoms/Button';
 import ProfileImage from '@/components/molecules/ProfileImage';
@@ -11,8 +12,19 @@ import { formatDate } from '@/utils/time.format';
 
 const disputeColumns = (
   onDisputeDetails: (bookingId: string) => void,
-  role: Role = ROLE.ADMIN
+  role: Role = ROLE.ADMIN,
+  context?: { workerId?: string; userId?: string }
 ): TableColumnDef<DisputeListItem>[] => {
+  const getProfileLink = (target: 'user' | 'worker', id: string, role: Role) => {
+    if (role === ROLE.ADMIN) {
+      return `/admin/${target}s/${id}`;
+    }
+    if (role === ROLE.USER && target === 'worker') {
+      return `/workers/${id}`;
+    }
+    return null;
+  };
+
   const columns: TableColumnDef<DisputeListItem>[] = [
     {
       id: 'id',
@@ -32,36 +44,56 @@ const disputeColumns = (
       id: 'user',
       header: 'User ',
       accessorKey: 'user.name',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <ProfileImage
-            src={row.original.user.profileImage}
-            size={32}
-            name={row.original.user.name}
-          />
-          <div className="font-medium text-sm">{row.original.user.name}</div>
-        </div>
-      ),
-      hideOnSmall: true,
+      cell: ({ row }) => {
+        const link = getProfileLink('user', row.original.user.id, role);
+        return (
+          <div className="flex items-center gap-2">
+            <ProfileImage
+              src={row.original.user.profileImage}
+              size={32}
+              name={row.original.user.name}
+            />
+            {link ? (
+              <NavLink to={link} className="hover:underline font-medium text-sm">
+                {row.original.user.name}
+              </NavLink>
+            ) : (
+              <div className="font-medium text-sm">{row.original.user.name}</div>
+            )}
+          </div>
+        );
+      },
       showInMobileHeader: false,
+      mobileOrder: 4,
+      mobileLabel: 'User',
       minWidth: 150,
     },
     {
       id: 'worker',
       header: 'Worker',
       accessorKey: 'worker.name',
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <ProfileImage
-            src={row.original.worker.profileImage}
-            size={32}
-            name={row.original.worker.name}
-          />
-          <div className="font-medium text-sm">{row.original.worker.name}</div>
-        </div>
-      ),
-      hideOnSmall: true,
+      cell: ({ row }) => {
+        const link = getProfileLink('worker', row.original.worker.id, role);
+        return (
+          <div className="flex items-center gap-2">
+            <ProfileImage
+              src={row.original.worker.profileImage}
+              size={32}
+              name={row.original.worker.name}
+            />
+            {link ? (
+              <NavLink to={link} className="hover:underline font-medium text-sm">
+                {row.original.worker.name}
+              </NavLink>
+            ) : (
+              <div className="font-medium text-sm">{row.original.worker.name}</div>
+            )}
+          </div>
+        );
+      },
       showInMobileHeader: false,
+      mobileOrder: 5,
+      mobileLabel: 'Worker',
       minWidth: 150,
     },
     {
@@ -88,8 +120,8 @@ const disputeColumns = (
           <span className="text-zinc-600 text-sm font-medium">{DISPUTE_REASON_LABELS[reason]}</span>
         );
       },
-      showInMobileHeader: true,
-      mobileOrder: 3,
+      showInMobileHeader: false,
+      mobileOrder: 6,
       mobileLabel: 'Reason',
       minWidth: 150,
     },
@@ -120,7 +152,7 @@ const disputeColumns = (
         return <Badge variant={statusType}>{label}</Badge>;
       },
       showInMobileHeader: true,
-      mobileOrder: 4,
+      mobileOrder: 8,
       mobileLabel: 'Status',
       width: 120,
     },
@@ -135,8 +167,9 @@ const disputeColumns = (
           </span>
         );
       },
-      hideOnSmall: true,
-      showInMobileHeader: false,
+      showInMobileHeader: true,
+      mobileOrder: 3,
+      mobileLabel: 'Raised At',
       width: 140,
     },
     {
@@ -155,6 +188,8 @@ const disputeColumns = (
         </div>
       ),
       showInMobileHeader: false,
+      mobileOrder: 7,
+      mobileLabel: 'Actions',
       width: 100,
     },
   ];
@@ -166,6 +201,13 @@ const disputeColumns = (
     if (role === ROLE.WORKER && col.id === 'worker') {
       return false;
     }
+    if (context?.workerId && col.id === 'worker') {
+      return false;
+    }
+    if (context?.userId && col.id === 'user') {
+      return false;
+    }
+
     return true;
   });
 };
