@@ -8,43 +8,34 @@ import Label from '@/components/atoms/Label';
 import Select from '@/components/atoms/Select';
 import { Textarea } from '@/components/atoms/Textarea';
 import { MultiUpload } from '@/components/molecules/MultiUpload';
-import { ROLE, UploadPurposes, type Role } from '@/constants';
+import { UploadPurposes } from '@/constants';
 import { DISPUTE_REASON, DISPUTE_REASON_LABELS } from '@/constants/dispute';
 import type { Dispute } from '@/types/dispute';
-import { handleApiError } from '@/utils/handleApiError';
 
-import { disputeSchema, type DisputeFormType } from '../validation/disputeFormData';
+import { raiseDisputeSchema, type RaiseDisputeFormType } from '../validation/raiseDispute.schema';
 
 interface Props {
-  role?: Role;
-  onSubmit: (data: DisputeFormType) => Promise<string | undefined | void>;
+  onSubmit: (data: RaiseDisputeFormType) => Promise<string | undefined | void>;
   dispute?: Dispute | null;
   mediaUploading: (isUploading: boolean) => void;
   onPreview: (index: number) => void;
 }
 
-const DEFAULT_FORM_VALUES: DisputeFormType = {
+const DEFAULT_FORM_VALUES: RaiseDisputeFormType = {
   reason: DISPUTE_REASON.NOT_FINISHED,
   description: '',
   evidence: [],
-  raisedBy: ROLE.USER,
 };
 
-export default function RaiseDisputeForm({
-  role = ROLE.USER,
-  dispute,
-  onSubmit,
-  mediaUploading,
-  onPreview,
-}: Props) {
+export default function RaiseDisputeForm({ dispute, onSubmit, mediaUploading, onPreview }: Props) {
   const {
     register,
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
     reset,
-  } = useForm<DisputeFormType>({
-    resolver: zodResolver(disputeSchema),
+  } = useForm<RaiseDisputeFormType>({
+    resolver: zodResolver(raiseDisputeSchema),
     defaultValues: DEFAULT_FORM_VALUES,
     mode: 'onChange',
   });
@@ -54,19 +45,14 @@ export default function RaiseDisputeForm({
       reason: dispute?.reason || DEFAULT_FORM_VALUES.reason,
       description: dispute?.description || DEFAULT_FORM_VALUES.description,
       evidence: dispute?.evidence || DEFAULT_FORM_VALUES.evidence,
-      raisedBy: dispute?.raisedBy || role,
     });
-  }, [dispute, role, reset]);
+  }, [dispute, reset]);
 
-  const onSubmitForm = async (data: DisputeFormType) => {
-    try {
-      const message = await onSubmit(data);
-      if (message) {
-        toast.success(message);
-        reset();
-      }
-    } catch (error) {
-      toast.error(handleApiError(error));
+  const onSubmitForm = async (data: RaiseDisputeFormType) => {
+    const message = await onSubmit(data);
+    if (message) {
+      toast.success(message);
+      reset();
     }
   };
   return (

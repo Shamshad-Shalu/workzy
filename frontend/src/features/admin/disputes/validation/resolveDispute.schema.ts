@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { DISPUTE_STATUS_VALUES, DISPUTE_RESOLUTION_VALUES } from '@/constants/dispute';
 import { createDescriptionRule } from '@/lib/validation/rules';
 
-export const disputeResolveFormData = z.object({
+export const resolveDisputeSchema = z.object({
   status: z.enum(DISPUTE_STATUS_VALUES as [string, ...string[]], {
     message: 'please select the status',
   }),
@@ -15,4 +15,4 @@ export const disputeResolveFormData = z.object({
   ),
 });
 
-export type DisputeResolveFormType = z.infer<typeof disputeResolveFormData>;
+export type ResolveDisputeFormType = z.infer<typeof resolveDisputeSchema>;

@@ -1,3 +1,4 @@
+import { Role } from "@/constants";
 import { CreateDisputeDto, ResolveDisputeDto } from "@/dtos/requests/dispute.dto";
 import {
   DisputeListItemDto,
@@ -11,11 +12,13 @@ export interface IDisputeService {
   raiseDispute(
     bookingId: string,
     initiatorId: string,
+    raisedBy: Role,
     data: CreateDisputeDto
   ): Promise<DisputeResponseDto>;
   updateDispute(
     disputeId: string,
     initiatorId: string,
+    raisedBy: Role,
     data: CreateDisputeDto
   ): Promise<DisputeResponseDto>;
   getDisputeByBookingId(bookingId: string): Promise<DisputeResponseDto | null>;
