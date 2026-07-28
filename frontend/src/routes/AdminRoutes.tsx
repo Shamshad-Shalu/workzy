@@ -28,7 +28,7 @@ const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSecti
 const HomeLayoutPage = lazy(() => import('@/features/admin/home/pages/HomeLayoutPage'));
 const AdminReviewsPage = lazy(() => import('@/features/admin/reviews/pages/AdminReviewsPage'));
 const AdminBookingPage = lazy(() => import('@/features/admin/booking/pages/AdminBookingPage'));
-const AdminPaymentsPage = lazy(() => import('@/features/admin/payments/pages/AdminPaymentsPage'));
+const AdminPaymentsPage = lazy(() => import('@/features/payments/pages/AdminPaymentsPage'));
 const AdminBookingDetailsPage = lazy(
   () => import('@/features/admin/booking/pages/AdminBookingDetailsPage')
 );

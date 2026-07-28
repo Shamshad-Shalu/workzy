@@ -1,23 +1,22 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { paymentKeys } from '@/features/admin/payments/hooks/useAdminPayments';
+import { paymentKeys } from '@/features/payments';
 import PaymentService from '@/services/payment.service';
-import type { PaymentListQuery, PaymentUserResponse } from '@/types/payment';
+import type { AdminPaymentListQuery, PaymentAdminResponse } from '@/types/payment';
 
 const LIMIT = 5;
 
-export function useUserPayments(filters: Omit<PaymentListQuery, 'limit' | 'cursor'>) {
+export function useAdminPayments(filters: Omit<AdminPaymentListQuery, 'limit' | 'cursor'>) {
   return useInfiniteQuery<
-    PaymentUserResponse,
+    PaymentAdminResponse,
     Error,
-    { pages: PaymentUserResponse[]; pageParams: (string | undefined)[] },
-    ReturnType<typeof paymentKeys.user>,
+    { pages: PaymentAdminResponse[]; pageParams: (string | undefined)[] },
+    ReturnType<typeof paymentKeys.admin>,
     string | undefined
   >({
-    queryKey: paymentKeys.user(filters),
-
+    queryKey: paymentKeys.admin(filters),
     queryFn: ({ pageParam }) =>
-      PaymentService.getUserPayments({
+      PaymentService.getAdminPayments({
         ...filters,
         limit: LIMIT,
         cursor: pageParam ?? null,
@@ -26,7 +25,6 @@ export function useUserPayments(filters: Omit<PaymentListQuery, 'limit' | 'curso
     initialPageParam: undefined,
 
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-
     staleTime: 1000 * 60 * 2,
     gcTime: 1000 * 60 * 5,
   });

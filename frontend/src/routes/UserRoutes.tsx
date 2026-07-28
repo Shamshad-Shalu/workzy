@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
 import UserChatPage from '@/features/user/chat/UserChatPage';
-import UserPaymentsPage from '@/features/user/payments/pages/UserPaymentsPage';
 import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
@@ -39,6 +38,7 @@ const UserBookingDetailsPage = lazy(
   () => import('@/features/user/booking/pages/UserBookingDetailsPage')
 );
 const UserDisputesPage = lazy(() => import('@/features/user/disputes/pages/UserDisputesPage'));
+const UserPaymentsPage = lazy(() => import('@/features/payments/pages/UserPaymentsPage'));
 
 export default function UserRoutes() {
   return (

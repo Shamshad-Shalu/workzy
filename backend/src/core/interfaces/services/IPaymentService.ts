@@ -1,9 +1,10 @@
 import Stripe from "stripe";
 
-import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
+import { PaymentAdminDto, PaymentUserDto, PaymentWorkerDto } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
-import { PaymentListQueryInput } from "@/types/payment/payment.query";
+import { PaymentListQuery } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 
 export interface IPaymentService {
@@ -18,16 +19,13 @@ export interface IPaymentService {
     amount: number;
   }): Promise<string>;
   releaseBookingPayment(booking: IBooking, customAmount?: number): Promise<void>;
-
-  getPayments(
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentAdminDTO[]; nextCursor: string | null }>;
+  getPayments(input: PaymentListQuery): Promise<CursorPaginatedResult<PaymentAdminDto>>;
   getUserPayments(
     userId: string,
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentUserDTO[]; nextCursor: string | null }>;
+    input: PaymentListQuery
+  ): Promise<CursorPaginatedResult<PaymentUserDto>>;
   getWorkerPayments(
     workerId: string,
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentWorkerDTO[]; nextCursor: string | null }>;
+    input: PaymentListQuery
+  ): Promise<CursorPaginatedResult<PaymentWorkerDto>>;
 }

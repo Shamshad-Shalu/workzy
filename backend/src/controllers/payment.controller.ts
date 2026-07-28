@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
@@ -17,7 +18,7 @@ import {
 import { IPaymentController } from "@/core/interfaces/controllers/IPaymentController";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { TYPES } from "@/di/types";
-import { PaymentListQueryInput } from "@/types/payment/payment.query";
+import { PaymentListQuery } from "@/types/payment/payment.query";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -56,12 +57,12 @@ export class PaymentController implements IPaymentController {
     const query = this.parseQuery(req);
     const userId = req.query.userId as string | undefined;
     const workerId = req.query.workerId as string | undefined;
-    const { nextCursor, payments } = await this._paymentService.getPayments({
+    const { nextCursor, data } = await this._paymentService.getPayments({
       userId,
       workerId,
       ...query,
     });
-    res.status(HTTPSTATUS.OK).json({ payments, nextCursor });
+    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
   });
 
   getUserPayments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -70,8 +71,8 @@ export class PaymentController implements IPaymentController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
     }
     const query = this.parseQuery(req);
-    const { nextCursor, payments } = await this._paymentService.getUserPayments(userId, query);
-    res.status(HTTPSTATUS.OK).json({ payments, nextCursor });
+    const { nextCursor, data } = await this._paymentService.getUserPayments(userId, query);
+    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
   });
 
   getWorkerPayments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -80,26 +81,25 @@ export class PaymentController implements IPaymentController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
     }
     const query = this.parseQuery(req);
-    const { nextCursor, payments } = await this._paymentService.getWorkerPayments(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ payments, nextCursor });
+    const { nextCursor, data } = await this._paymentService.getWorkerPayments(workerId, query);
+    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
   });
 
-  private parseQuery(req: Request): PaymentListQueryInput {
+  private parseQuery(req: Request): PaymentListQuery {
     const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 10, 1), 50);
     const parsedCursor = req.query.cursor
       ? JSON.parse(Buffer.from(req.query.cursor as string, "base64url").toString("utf8"))
       : undefined;
-
+    const fromDate = req.query.fromDate as string | undefined;
+    const toDate = req.query.toDate as string | undefined;
     return {
       limit,
       status: (req.query.status as PaymentStatus) ?? ("all" as PaymentStatus),
       billType: (req.query.billType as BillType) || "all",
-      minAmount: req.query.minAmount ? Number(req.query.minAmount) : undefined,
-      maxAmount: req.query.maxAmount ? Number(req.query.maxAmount) : undefined,
       search: (req.query.search as string) ?? "",
       cursor: parsedCursor,
-      fromDate: req.query.fromDate as string | undefined,
-      toDate: req.query.toDate as string | undefined,
+      fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
+      toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
     };
   }
 }

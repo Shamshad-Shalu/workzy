@@ -2,13 +2,13 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
-import WorkerPaymentsPage from '@/features/worker/payments/pages/WorkerPaymentsPage';
 import WorkerQuotePage from '@/features/worker/quote/pages/WorkerQuotePage';
 import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesListPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
 const WorkerChatPage = lazy(() => import('@/features/worker/chat/pages/WorkerChatPage'));
+const WorkerPaymentsPage = lazy(() => import('@/features/payments/pages/WorkerPaymentsPage'));
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDisputesPage = lazy(
   () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
