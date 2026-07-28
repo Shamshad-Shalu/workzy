@@ -1,6 +1,6 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { paymentKeys } from '@/features/admin/payments/hooks/useAdminPayments';
+import { paymentKeys } from '@/features/payments';
 import PaymentService from '@/services/payment.service';
 import type { PaymentListQuery, PaymentWorkerResponse } from '@/types/payment';
 
