@@ -11,5 +11,5 @@ export interface IReviewController {
   getPublicWorkerReviews: RequestHandler;
   getWorkerReviewStats: RequestHandler;
   getMyWorkerReviews: RequestHandler;
-  getMyReviews: RequestHandler;
+  getUserReviews: RequestHandler;
 }
