@@ -4,7 +4,6 @@ import { reviewKeys } from '@/features/review';
 import ReviewService from '@/services/review.service';
 import type { Review } from '@/types/review';
 
-
 export function useReviewDetails(reviewId?: string | null) {
   return useQuery<Review>({
     queryKey: reviewKeys.detail(reviewId!),
