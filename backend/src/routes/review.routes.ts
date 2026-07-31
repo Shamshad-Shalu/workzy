@@ -4,7 +4,7 @@ import { ROLE } from "@/constants";
 import { IReviewController } from "@/core/interfaces/controllers/IReviewController";
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
-import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
+import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
 import { authenticate } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
 
@@ -25,9 +25,9 @@ router.patch(
 
 router.use(authenticate([ROLE.WORKER, ROLE.USER]));
 
-router.get("/user/me", controller.getMyReviews);
-router.post("/", validateDto(CreateReviewDTO), controller.createReview);
-router.patch("/:reviewId", validateDto(UpdateReviewDTO), controller.updateReviewById);
-router.patch("/:reviewId/reply", validateDto(ReviewReplyDTO), controller.addReplyToReview);
+router.get("/user/me", controller.getUserReviews);
+router.post("/", validateDto(CreateReviewDto), controller.createReview);
+router.patch("/:reviewId", validateDto(UpdateReviewDto), controller.updateReviewById);
+router.patch("/:reviewId/reply", validateDto(ReviewReplyDto), controller.addReplyToReview);
 
 export default router;

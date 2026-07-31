@@ -4,16 +4,17 @@ import { FilterQuery, Types } from "mongoose";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IReviewRepository } from "@/core/interfaces/repositories/IReviewRepository";
 import ReviewModel from "@/models/review.model";
-import { IReview, IReviewPopulated, ReviewListQuery } from "@/types/review";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { IReview } from "@/types/review/review.entity";
+import { ReviewListItem } from "@/types/review/review.projection";
+import { ReviewListQuery } from "@/types/review/review.query";
 
 @injectable()
 export class ReviewRepository extends BaseRepository<IReview> implements IReviewRepository {
   constructor() {
     super(ReviewModel);
   }
-  async getAllReviews(
-    filters: ReviewListQuery
-  ): Promise<{ reviews: IReviewPopulated[]; nextCursor: string | null }> {
+  async getAllReviews(filters: ReviewListQuery): Promise<CursorPaginatedResult<ReviewListItem>> {
     const {
       search,
       limit,
@@ -105,7 +106,7 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
       .populate("workerId", "profileImage")
       .sort(sortQuery)
       .limit(limit + 1)
-      .lean<IReviewPopulated[]>();
+      .lean<ReviewListItem[]>();
 
     let nextCursor: string | null = null;
 
@@ -120,72 +121,6 @@ export class ReviewRepository extends BaseRepository<IReview> implements IReview
         })
       ).toString("base64url");
     }
-    return { reviews: docs, nextCursor };
+    return { data: docs, nextCursor };
   }
-
-  // async getRatingsSummary(workerId: string): Promise<RatingsSummaryDTO> {
-  //   const [summary, recent] = await Promise.all([
-  //     this.model.aggregate([
-  //       { $match: { workerId:new Types.ObjectId(workerId), isHidden: false } },
-  //       {
-  //         $group: {
-  //           _id: null,
-  //           averageRating: { $avg: "$rating" },
-  //           totalReviews: { $sum: 1 },
-  //           r1: { $sum: { $cond: [{ $eq: ["$rating", 1] }, 1, 0] } },
-  //           r2: { $sum: { $cond: [{ $eq: ["$rating", 2] }, 1, 0] } },
-  //           r3: { $sum: { $cond: [{ $eq: ["$rating", 3] }, 1, 0] } },
-  //           r4: { $sum: { $cond: [{ $eq: ["$rating", 4] }, 1, 0] } },
-  //           r5: { $sum: { $cond: [{ $eq: ["$rating", 5] }, 1, 0] } },
-  //         },
-  //       },
-  //     ]),
-
-  //     this.model.aggregate([
-  //       { $match: { workerId:new Types.ObjectId(workerId), isHidden: false } },
-  //       { $sort: { createdAt: -1 } },
-  //       { $limit: 3 },
-  //       {
-  //         $lookup: {
-  //           from: "users",
-  //           localField: "userId",
-  //           foreignField: "_id",
-  //           as: "user",
-  //           pipeline: [{ $project: { name: 1, profileImage: 1 } }],
-  //         },
-  //       },
-  //       { $unwind: "$user" },
-  //       {
-  //         $lookup: {
-  //           from: "categories",
-  //           localField: "categoryId",
-  //           foreignField: "_id",
-  //           as: "category",
-  //           pipeline: [{ $project: { name: 1 } }],
-  //         },
-  //       },
-  //       { $unwind: { path: "$category", preserveNullAndEmpty: true } },
-  //       {
-  //         $project: {
-  //           _id: 0,
-  //           id: { $toString: "$_id" },
-  //           customerName: "$user.name",
-  //           customerImage: "$user.profileImage",
-  //           rating: 1,
-  //           reviewText: 1,
-  //           serviceName: "$category.name",
-  //           createdAt: 1,
-  //         },
-  //       },
-  //     ]),
-  //   ]);
-
-  //   const s = summary[0] ?? {};
-  //   return {
-  //     averageRating: parseFloat((s.averageRating ?? 0).toFixed(1)),
-  //     totalReviews: s.totalReviews ?? 0,
-  //     breakdown: { 1: s.r1 ?? 0, 2: s.r2 ?? 0, 3: s.r3 ?? 0, 4: s.r4 ?? 0, 5: s.r5 ?? 0 },
-  //     recent,
-  //   };
-  // }
 }

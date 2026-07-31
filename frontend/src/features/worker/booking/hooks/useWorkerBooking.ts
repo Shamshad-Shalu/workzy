@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 
 import type { BookingFilterStatus } from '@/constants';
 import { bookingKeys, useAcceptBooking } from '@/features/booking/hooks/useBooking';
-import { useAddReviewReply } from '@/features/user/booking/hooks/useReview';
+import { useAddReviewReply } from '@/features/review';
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
 

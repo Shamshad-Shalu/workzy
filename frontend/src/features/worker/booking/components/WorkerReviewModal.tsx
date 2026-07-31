@@ -6,7 +6,7 @@ import { StarRating } from '@/components/atoms/StarRating';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
-import { useReviewDetails } from '@/features/user/booking/hooks/useReview';
+import { useReviewDetails } from '@/features/review';
 import { formatSmartDateTime } from '@/utils/time.format';
 
 interface WorkerReviewReplyModalProps {
@@ -26,7 +26,7 @@ export default function WorkerReviewReplyModal({
   onSubmit,
   isReplying = false,
 }: WorkerReviewReplyModalProps) {
-  const { review, isLoading } = useReviewDetails(reviewId);
+  const { data: review, isLoading } = useReviewDetails(reviewId);
   const [message, setMessage] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);

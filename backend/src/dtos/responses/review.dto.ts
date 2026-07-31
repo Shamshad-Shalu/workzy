@@ -1,9 +1,10 @@
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
-import { IReview, IReviewPopulated } from "@/types/review";
+import { IReview } from "@/types/review/review.entity";
+import { ReviewListItem } from "@/types/review/review.projection";
 import { IReviewStats } from "@/types/worker/worker.entity";
 import { resolveS3Url } from "@/utils/s3.utils";
 
-export class ReviewResponseDTO {
+export class ReviewResponseDto {
   id!: string;
   bookingId!: string;
   userId!: string;
@@ -24,8 +25,8 @@ export class ReviewResponseDTO {
   isHidden!: boolean;
   createdAt!: Date;
 
-  static fromEntity(entity: IReview): ReviewResponseDTO {
-    const dto = new ReviewResponseDTO();
+  static fromEntity(entity: IReview): ReviewResponseDto {
+    const dto = new ReviewResponseDto();
 
     dto.id = entity._id.toString();
     dto.bookingId = entity.bookingId.toString();
@@ -43,12 +44,12 @@ export class ReviewResponseDTO {
     return dto;
   }
 
-  static fromEntities(entities: IReview[]): ReviewResponseDTO[] {
+  static fromEntities(entities: IReview[]): ReviewResponseDto[] {
     return entities.map((entity) => this.fromEntity(entity));
   }
 }
 
-class ReviewBaseDTO {
+class ReviewBaseDto {
   id!: string;
   bookingId!: string;
   serviceId!: string;
@@ -68,8 +69,8 @@ class ReviewBaseDTO {
   };
   isEdited!: boolean;
   createdAt!: Date;
-  static baseMap(entity: IReviewPopulated): ReviewBaseDTO {
-    const dto = new ReviewBaseDTO();
+  static baseMap(entity: ReviewListItem): ReviewBaseDto {
+    const dto = new ReviewBaseDto();
 
     dto.id = entity._id.toString();
     dto.bookingId = entity.bookingId._id.toString();
@@ -89,15 +90,15 @@ class ReviewBaseDTO {
   }
 }
 
-export class ReviewUserDTO extends ReviewBaseDTO {
+export class ReviewUserDto extends ReviewBaseDto {
   worker!: {
     id: string;
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(entity: IReviewPopulated, s3Service: IS3Service): Promise<ReviewUserDTO> {
-    const dto = new ReviewUserDTO();
-    Object.assign(dto, ReviewUserDTO.baseMap(entity));
+  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewUserDto> {
+    const dto = new ReviewUserDto();
+    Object.assign(dto, ReviewUserDto.baseMap(entity));
     const worker = entity.workerId;
 
     dto.worker = {
@@ -110,25 +111,22 @@ export class ReviewUserDTO extends ReviewBaseDTO {
     return dto;
   }
   static async fromEntities(
-    entities: IReviewPopulated[],
+    entities: ReviewListItem[],
     s3Service: IS3Service
-  ): Promise<ReviewUserDTO[]> {
+  ): Promise<ReviewUserDto[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }
 
-export class ReviewWorkerDTO extends ReviewBaseDTO {
+export class ReviewWorkerDto extends ReviewBaseDto {
   user!: {
     id: string;
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(
-    entity: IReviewPopulated,
-    s3Service: IS3Service
-  ): Promise<ReviewWorkerDTO> {
-    const dto = new ReviewWorkerDTO();
-    Object.assign(dto, ReviewWorkerDTO.baseMap(entity));
+  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewWorkerDto> {
+    const dto = new ReviewWorkerDto();
+    Object.assign(dto, ReviewWorkerDto.baseMap(entity));
     const user = entity.userId;
 
     dto.user = {
@@ -141,14 +139,14 @@ export class ReviewWorkerDTO extends ReviewBaseDTO {
     return dto;
   }
   static async fromEntities(
-    entities: IReviewPopulated[],
+    entities: ReviewListItem[],
     s3Service: IS3Service
-  ): Promise<ReviewWorkerDTO[]> {
+  ): Promise<ReviewWorkerDto[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }
 
-export class ReviewAdminDTO extends ReviewBaseDTO {
+export class ReviewAdminDto extends ReviewBaseDto {
   isHidden!: boolean;
   user!: {
     id: string;
@@ -160,12 +158,9 @@ export class ReviewAdminDTO extends ReviewBaseDTO {
     name: string;
     profileImage?: string;
   };
-  static async fromEntity(
-    entity: IReviewPopulated,
-    s3Service: IS3Service
-  ): Promise<ReviewAdminDTO> {
-    const dto = new ReviewAdminDTO();
-    Object.assign(dto, ReviewAdminDTO.baseMap(entity));
+  static async fromEntity(entity: ReviewListItem, s3Service: IS3Service): Promise<ReviewAdminDto> {
+    const dto = new ReviewAdminDto();
+    Object.assign(dto, ReviewAdminDto.baseMap(entity));
     const user = entity.userId;
     const worker = entity.workerId;
     const snapshot = entity.bookingId.snapshot;
@@ -188,40 +183,9 @@ export class ReviewAdminDTO extends ReviewBaseDTO {
     return dto;
   }
   static async fromEntities(
-    entities: IReviewPopulated[],
+    entities: ReviewListItem[],
     s3Service: IS3Service
-  ): Promise<ReviewAdminDTO[]> {
-    return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
-  }
-}
-
-export class ReviewPublicDTO extends ReviewBaseDTO {
-  user!: {
-    id: string;
-    name: string;
-    profileImage?: string;
-  };
-  static async fromEntity(
-    entity: IReviewPopulated,
-    s3Service: IS3Service
-  ): Promise<ReviewPublicDTO> {
-    const dto = new ReviewPublicDTO();
-    Object.assign(dto, ReviewPublicDTO.baseMap(entity));
-    const user = entity.userId;
-
-    dto.user = {
-      id: user._id.toString(),
-      name: entity.bookingId.snapshot.user.name,
-      profileImage: user.profileImage
-        ? await resolveS3Url(user.profileImage, s3Service)
-        : undefined,
-    };
-    return dto;
-  }
-  static async fromEntities(
-    entities: IReviewPopulated[],
-    s3Service: IS3Service
-  ): Promise<ReviewPublicDTO[]> {
+  ): Promise<ReviewAdminDto[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }

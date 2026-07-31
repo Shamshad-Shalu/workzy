@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 
 import { bookingKeys } from '@/features/booking/hooks/useBooking';
-import { useToggleReviewVisibility } from '@/features/user/booking/hooks/useReview';
+import { useToggleReviewVisibility } from '@/features/review';
 import BookingService from '@/services/booking.service';
 import type { AdminBookingListQuery, BookingListingResponse } from '@/types/booking';
 

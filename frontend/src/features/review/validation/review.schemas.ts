@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { createDescriptionRule } from '@/lib/validation/rules';
 
-export const ReviewSchema = z.object({
+export const createReviewSchema = z.object({
   bookingId: z.string().min(1, 'Booking ID is required'),
   rating: z
     .number({ message: 'Rating is required' })
@@ -20,4 +20,4 @@ export const ReviewSchema = z.object({
     .optional(),
 });
 
-export type ReviewFormType = z.infer<typeof ReviewSchema>;
+export type CreateReviewFormType = z.infer<typeof createReviewSchema>;

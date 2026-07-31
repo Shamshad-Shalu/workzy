@@ -10,21 +10,21 @@ import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import StatusChangeModal from '@/components/molecules/StatusChangeModal';
-import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { Button as Btn } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useToggleReviewVisibility } from '@/features/user/booking/hooks/useReview';
+import {
+  ReviewCardSkeleton,
+  useAdminReviews,
+  AdminReviewFilters,
+  useAdminReviewFilters,
+  useToggleReviewVisibility,
+  ReviewCard,
+  ReviewMediaViewer,
+} from '@/features/review';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import { cn } from '@/lib/utils';
 import type { EvidenceItem } from '@/types/booking';
 import type { AdminReviewView } from '@/types/review';
 import { formatDateForUrl } from '@/utils/time.format';
-
-import AdminReviewCard from '../components/AdminReviewCard';
-import { AdminReviewFilters } from '../components/AdminReviewFilters';
-import { AdminReviewCardSkeleton } from '../components/AdminReviewsSkeleton';
-import { useAdminReviewFilters } from '../hooks/useAdminReviewFilters';
-import { useAdminReviews } from '../hooks/useAdminReviews';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -79,76 +79,59 @@ export default function AdminReviewsPage() {
   };
 
   return (
-    <main className="space-y-6 pt-0 p-4 lg:p-6">
+    <main className="pt-0 p-4 lg:p-6">
       <PageHeader title="All Reviews" description="Platform-wide Review management" />
-      <div className="md:sticky md:-top-6 md:z-20 bg-background pt-4 pb-2 ">
-        <div className="bg-card border rounded-xl p-4">
-          <div className="grid sm:grid-cols-12 gap-3">
-            <div className="sm:col-span-6">
-              <SearchInput
-                disabled={!!error}
-                placeholder="Search by booking ID or name..."
-                value={search}
-                onChange={handleSearchChange}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Select
-                value={sortBy}
-                onChange={v => updateParams({ sortBy: v })}
-                leftIcon={<ArrowUpDown size={14} className="mr-1" />}
-                options={[
-                  { label: 'Most Recent', value: 'createdAt' },
-                  { label: 'Rating', value: 'rating' },
-                ]}
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <Select
-                value={sortOrder}
-                onChange={v => updateParams({ sortOrder: v })}
-                options={[
-                  { label: 'High → Low', value: 'desc' },
-                  { label: 'Low → High', value: 'asc' },
-                ]}
-              />
-            </div>
-            <div className="sm:col-span-1">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Btn variant="outline">
-                    <SlidersHorizontal size={14} />
-                    Filters ({filters.activeFilterCount})
-                  </Btn>
-                </PopoverTrigger>
-                <PopoverContent className="w-[320px] space-y-3">
-                  <AdminReviewFilters {...filters} />
-                </PopoverContent>
-              </Popover>
-            </div>
+      <div className="sticky top-0 z-20 bg-background pt-4 pb-2">
+        <div className="grid grid-cols-12 gap-4 md:grid-cols-[1fr_200px_200px_auto]">
+          <div className="col-span-8 md:col-span-1">
+            <SearchInput
+              disabled={!!error}
+              placeholder="Search by booking ID or name..."
+              value={search}
+              onChange={handleSearchChange}
+            />
+          </div>
+          <div className="col-span-4 md:col-span-1 flex items-start md:order-last">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Btn variant="outline" className="w-full md:w-auto mt-[1px] h-10">
+                  <SlidersHorizontal size={14} />
+                  Filters ({filters.activeFilterCount})
+                </Btn>
+              </PopoverTrigger>
+              <PopoverContent className="w-full md:w-auto mt-[1px] space-y-3">
+                <AdminReviewFilters {...filters} />
+              </PopoverContent>
+            </Popover>
+          </div>
+          <div className="col-span-6 md:col-span-1">
+            <Select
+              value={sortBy}
+              onChange={v => updateParams({ sortBy: v })}
+              leftIcon={<ArrowUpDown size={14} className="mr-1" />}
+              options={[
+                { label: 'Most Recent', value: 'createdAt' },
+                { label: 'Rating', value: 'rating' },
+              ]}
+            />
+          </div>
+          <div className="col-span-6 md:col-span-1">
+            <Select
+              value={sortOrder}
+              onChange={v => updateParams({ sortOrder: v })}
+              options={[
+                { label: 'High → Low', value: 'desc' },
+                { label: 'Low → High', value: 'asc' },
+              ]}
+            />
           </div>
         </div>
       </div>
 
-      <div
-        className={cn(
-          'space-y-6 mt-4',
-          reviews.length > 10 &&
-            'md:overflow-y-auto md:max-h-[calc(100vh-200px)] md:custom-scrollbar'
-        )}
-      >
+      <div className="space-y-6 mt-4">
         {isLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-              >
-                <AdminReviewCardSkeleton key={i} />
-              </motion.div>
-            ))}
+            <ReviewCardSkeleton showBothParties />
           </div>
         ) : error ? (
           <ErrorState
@@ -183,10 +166,10 @@ export default function AdminReviewsPage() {
                 />
               ) : (
                 reviews.map(review => (
-                  <AdminReviewCard
-                    key={review.id}
+                  <ReviewCard
                     review={review}
                     onOpenMedia={handleOpenMedia}
+                    role="admin"
                     onToggleReview={r => setReview(r)}
                   />
                 ))
@@ -195,31 +178,14 @@ export default function AdminReviewsPage() {
             <div ref={sentinelRef} className="h-4" />
           </motion.div>
         )}
-        {isFetchingNextPage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col gap-3"
-          >
-            {Array.from({ length: 3 }).map((_, i) => (
-              <AdminReviewCardSkeleton key={i} />
-            ))}
-          </motion.div>
-        )}
+        {isFetchingNextPage && <ReviewCardSkeleton showBothParties count={3} />}
       </div>
-      <AnimatePresence>
-        {previewIndex !== null && mediaItems[previewIndex] && (
-          <MediaViewer
-            item={mediaItems[previewIndex] as MediaItem}
-            onClose={() => setPreviewIndex(null)}
-            onPrev={() => setPreviewIndex(i => Math.max(0, i! - 1))}
-            onNext={() => setPreviewIndex(i => Math.min(mediaItems.length - 1, i! + 1))}
-            hasPrev={previewIndex > 0}
-            hasNext={previewIndex < mediaItems.length - 1}
-            counter={`${previewIndex + 1} / ${mediaItems.length}`}
-          />
-        )}
-      </AnimatePresence>
+      <ReviewMediaViewer
+        previewIndex={previewIndex}
+        mediaItems={mediaItems}
+        onClose={() => setPreviewIndex(null)}
+        setPreviewIndex={setPreviewIndex}
+      />
       <StatusChangeModal
         open={!!review}
         onClose={() => setReview(null)}

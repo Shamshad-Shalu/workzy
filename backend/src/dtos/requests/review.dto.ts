@@ -18,7 +18,7 @@ import {
 
 import { DESCRIPTION_REGEX } from "@/constants";
 
-class MediaItemDTO {
+class MediaItemDto {
   @IsUrl()
   url!: string;
 
@@ -26,7 +26,7 @@ class MediaItemDTO {
   type!: "image" | "video";
 }
 
-export class CreateReviewDTO {
+export class CreateReviewDto {
   @IsMongoId()
   bookingId!: string;
 
@@ -43,12 +43,12 @@ export class CreateReviewDTO {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => MediaItemDTO)
+  @Type(() => MediaItemDto)
   @IsOptional()
-  media?: MediaItemDTO[];
+  media?: MediaItemDto[];
 }
 
-export class UpdateReviewDTO {
+export class UpdateReviewDto {
   @IsNumber()
   @Min(1)
   @Max(5)
@@ -62,15 +62,14 @@ export class UpdateReviewDTO {
 
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => MediaItemDTO)
+  @Type(() => MediaItemDto)
   @IsOptional()
-  media?: MediaItemDTO[];
+  media?: MediaItemDto[];
 }
 
-export class ReviewReplyDTO {
+export class ReviewReplyDto {
   @IsString()
   @MinLength(1)
   @MaxLength(500)
-  // @Matches(DESCRIPTION_REGEX, { message: "Invalid review message format." })
   message!: string;
 }

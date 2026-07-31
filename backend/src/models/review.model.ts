@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-import { IReview } from "@/types/review";
+import { IReview } from "@/types/review/review.entity";
 
 import { EvidenceItemSchema } from "./booking.model";
 

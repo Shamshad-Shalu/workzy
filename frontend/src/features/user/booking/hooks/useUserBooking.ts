@@ -9,12 +9,9 @@ import {
   useCancelBooking,
   usePayExtraCharge,
 } from '@/features/booking/hooks/useBooking';
+import { useCreateReview, useUpdateReview, type CreateReviewFormType } from '@/features/review';
 import BookingService from '@/services/booking.service';
 import type { BookingListingResponse, BookingListItem } from '@/types/booking';
-
-import { useCreateBookingReview, useEditBookingReview } from './useReview';
-
-import type { ReviewFormType } from '../validation/ReviewFormData';
 
 const LIMIT = 5;
 
@@ -53,8 +50,8 @@ export function useUserBookingHandler() {
   const { mutateAsync: cancel, isPending: isCancelling } = useCancelBooking();
   const { mutateAsync: approve, isPending: isApproving } = useApproveBooking();
   const { mutateAsync: payExtra, isPending: isPayingExtra } = usePayExtraCharge();
-  const { mutateAsync: addReview } = useCreateBookingReview();
-  const { mutateAsync: editReview } = useEditBookingReview();
+  const { mutateAsync: addReview } = useCreateReview();
+  const { mutateAsync: editReview } = useUpdateReview();
 
   const handleCancelBooking = async (reason: string) => {
     if (!cancelB?.id) {
@@ -86,7 +83,7 @@ export function useUserBookingHandler() {
     setPayExtraBId(null);
   };
 
-  const handleSubmitReview = async (data: ReviewFormType) => {
+  const handleSubmitReview = async (data: CreateReviewFormType) => {
     const { rating, reviewText, media } = data;
     if (reviewData?.reviewId) {
       const res = await editReview({

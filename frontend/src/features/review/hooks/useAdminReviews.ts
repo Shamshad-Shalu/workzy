@@ -1,22 +1,22 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-import { reviewKeys } from '@/features/user/worker/hooks/useWorkerReviews';
+import { reviewKeys } from '@/features/review';
 import ReviewService from '@/services/review.service';
-import type { WorkerReviewListResponse, ReviewListQuery } from '@/types/review';
+import type { AdminReviewListQuery, AdminReviewListResponse } from '@/types/review';
 
 const LIMIT = 3;
 
-export function useWorkerReviews(query?: Omit<ReviewListQuery, 'cursor' | 'limit'>) {
+export function useAdminReviews(query: Omit<AdminReviewListQuery, 'cursor' | 'limit'>) {
   return useInfiniteQuery<
-    WorkerReviewListResponse,
+    AdminReviewListResponse,
     Error,
-    { pages: WorkerReviewListResponse[]; pageParams: (string | undefined)[] },
-    ReturnType<typeof reviewKeys.worker>,
+    { pages: AdminReviewListResponse[]; pageParams: (string | undefined)[] },
+    ReturnType<typeof reviewKeys.admin>,
     string | undefined
   >({
-    queryKey: reviewKeys.worker(query),
+    queryKey: reviewKeys.admin(query),
     queryFn: ({ pageParam }) =>
-      ReviewService.getWorkerReviews({
+      ReviewService.listReviews({
         limit: LIMIT,
         cursor: pageParam,
         ...query,
