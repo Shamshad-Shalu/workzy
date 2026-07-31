@@ -30,7 +30,9 @@ const WorkerProfileRouteLayout = lazy(
 );
 const WorkerProfilePage = lazy(() => import('@/features/user/worker/pages/WorkerProfilePage'));
 const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/WorkerServicesPage'));
-const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
+const WorkerPublicReviewsPage = lazy(
+  () => import('@/features/review/pages/WorkerPublicReviewsPage.tsx')
+);
 const UserQuotesListPage = lazy(() => import('@/features/user/quote/pages/UserQuotesListPage'));
 
 const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
@@ -73,7 +75,7 @@ export default function UserRoutes() {
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />
             <Route path="services" element={<WorkerServicesPage />} />
-            <Route path="reviews" element={<WorkerReviewsPage />} />
+            <Route path="reviews" element={<WorkerPublicReviewsPage />} />
           </Route>
           <Route path="not-found" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />

@@ -39,16 +39,11 @@ const ReviewService = {
     return res.data;
   },
 
-  // getMyReviews: async (): Promise<Review[]> => {
-  //   const res = await api.get(REVIEW_API.MY_REVIEWS);
-  //   return res.data.reviews;
-  // },
-
   getWorkerReviewStats: async (workerId: string): Promise<WorkerReviewStats> => {
     const res = await api.get(REVIEW_API.WORKER_REVIEWS_STATS(workerId));
     return res.data;
   },
-  getPublicWorkerReviews: async (
+  getWorkerPublicReviews: async (
     workerId: string,
     query: ReviewListQuery
   ): Promise<PublicReviewListResponse> => {
@@ -56,7 +51,7 @@ const ReviewService = {
     return res.data;
   },
 
-  getWorkerReviews: async (params: ReviewListQuery): Promise<WorkerReviewListResponse> => {
+  getWorkerOwnReviews: async (params: ReviewListQuery): Promise<WorkerReviewListResponse> => {
     const res = await api.get(REVIEW_API.MY_WORKER_REVIEWS, { params });
     return res.data;
   },

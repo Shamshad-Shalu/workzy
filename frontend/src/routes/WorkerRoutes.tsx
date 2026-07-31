@@ -14,7 +14,7 @@ const WorkerDisputesPage = lazy(
   () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
 );
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/WorkerDashboard'));
-const WorkerReviews = lazy(() => import('@/features/worker/reviews/pages/WorkerReviewsPage'));
+const WorkerOwnReviewsPage = lazy(() => import('@/features/review/pages/WorkerOwnReviewsPage'));
 const WorkerServicesPage = lazy(
   () => import('@/features/worker/services/pages/WorkerServicesPage')
 );
@@ -43,7 +43,7 @@ export default function WorkerRoutes() {
       <Route element={<ProtectedRoute requiredRoles={[ROLE.WORKER]} />}>
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
-          <Route path="reviews" element={<WorkerReviews />} />
+          <Route path="reviews" element={<WorkerOwnReviewsPage />} />
           <Route path="services" element={<WorkerServicesPage />} />
           <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />

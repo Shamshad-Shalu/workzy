@@ -10,9 +10,15 @@ import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import StatusChangeModal from '@/components/molecules/StatusChangeModal';
-import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { Button as Btn } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import {
+  ReviewCardSkeleton,
+  useAdminReviews,
+  AdminReviewFilters,
+  useAdminReviewFilters,
+} from '@/features/review';
+import ReviewMediaViewer from '@/features/review/components/ReviewMediaViewer';
 import { useToggleReviewVisibility } from '@/features/user/booking/hooks/useReview';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { cn } from '@/lib/utils';
@@ -20,11 +26,7 @@ import type { EvidenceItem } from '@/types/booking';
 import type { AdminReviewView } from '@/types/review';
 import { formatDateForUrl } from '@/utils/time.format';
 
-import AdminReviewCard from '../components/AdminReviewCard';
-import { AdminReviewFilters } from '../components/AdminReviewFilters';
-import { AdminReviewCardSkeleton } from '../components/AdminReviewsSkeleton';
-import { useAdminReviewFilters } from '../hooks/useAdminReviewFilters';
-import { useAdminReviews } from '../hooks/useAdminReviews';
+import ReviewCard from '../components/ReviewCard';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -139,16 +141,7 @@ export default function AdminReviewsPage() {
       >
         {isLoading ? (
           <div className="space-y-4">
-            {Array.from({ length: 4 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 12 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.08 }}
-              >
-                <AdminReviewCardSkeleton key={i} />
-              </motion.div>
-            ))}
+            <ReviewCardSkeleton showBothParties />
           </div>
         ) : error ? (
           <ErrorState
@@ -183,10 +176,10 @@ export default function AdminReviewsPage() {
                 />
               ) : (
                 reviews.map(review => (
-                  <AdminReviewCard
-                    key={review.id}
+                  <ReviewCard
                     review={review}
                     onOpenMedia={handleOpenMedia}
+                    role="admin"
                     onToggleReview={r => setReview(r)}
                   />
                 ))
@@ -195,31 +188,14 @@ export default function AdminReviewsPage() {
             <div ref={sentinelRef} className="h-4" />
           </motion.div>
         )}
-        {isFetchingNextPage && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex flex-col gap-3"
-          >
-            {Array.from({ length: 3 }).map((_, i) => (
-              <AdminReviewCardSkeleton key={i} />
-            ))}
-          </motion.div>
-        )}
+        {isFetchingNextPage && <ReviewCardSkeleton showBothParties count={3} />}
       </div>
-      <AnimatePresence>
-        {previewIndex !== null && mediaItems[previewIndex] && (
-          <MediaViewer
-            item={mediaItems[previewIndex] as MediaItem}
-            onClose={() => setPreviewIndex(null)}
-            onPrev={() => setPreviewIndex(i => Math.max(0, i! - 1))}
-            onNext={() => setPreviewIndex(i => Math.min(mediaItems.length - 1, i! + 1))}
-            hasPrev={previewIndex > 0}
-            hasNext={previewIndex < mediaItems.length - 1}
-            counter={`${previewIndex + 1} / ${mediaItems.length}`}
-          />
-        )}
-      </AnimatePresence>
+      <ReviewMediaViewer
+        previewIndex={previewIndex}
+        mediaItems={mediaItems}
+        onClose={() => setPreviewIndex(null)}
+        setPreviewIndex={setPreviewIndex}
+      />
       <StatusChangeModal
         open={!!review}
         onClose={() => setReview(null)}
