@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 import { Skeleton } from '@/components/ui/skeleton';
-export default function ReviewSummarySkeleton() {
+export function ReviewSummarySkeleton() {
   return (
     <div className="space-y-6">
       <motion.div

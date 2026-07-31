@@ -93,7 +93,7 @@ function PartyIdentity({
   return <NavLink to={to}>{content}</NavLink>;
 }
 
-export default function ReviewCard({
+export function ReviewCard({
   review,
   role,
   context,

@@ -16,7 +16,7 @@ type ReviewSummaryProps = {
   onRatingChange: (star: number | null) => void;
 };
 
-export default function ReviewSummary({
+export function ReviewSummary({
   averageRating,
   reviewCount,
   breakdown,

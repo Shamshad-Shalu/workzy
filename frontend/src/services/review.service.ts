@@ -1,5 +1,5 @@
 import { REVIEW_API } from '@/constants';
-import type { ReviewFormType } from '@/features/user/booking/validation/ReviewFormData';
+import type { CreateReviewFormType } from '@/features/review';
 import api from '@/lib/api/axios';
 import type {
   AdminReviewListQuery,
@@ -12,7 +12,7 @@ import type {
 } from '@/types/review';
 
 const ReviewService = {
-  createReview: async (data: ReviewFormType): Promise<{ message: string }> => {
+  createReview: async (data: CreateReviewFormType): Promise<{ message: string }> => {
     const res = await api.post(REVIEW_API.ROOT, data);
     return res.data;
   },
@@ -24,7 +24,7 @@ const ReviewService = {
 
   updateReview: async (
     reviewId: string,
-    data: Partial<ReviewFormType>
+    data: Partial<CreateReviewFormType>
   ): Promise<{ message: string }> => {
     const res = await api.patch(REVIEW_API.BY_ID(reviewId), data);
     return res.data;

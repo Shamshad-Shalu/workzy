@@ -11,15 +11,13 @@ import { AppModal } from '@/components/molecules/AppModal';
 import { MultiUpload } from '@/components/molecules/MultiUpload';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { UploadPurposes } from '@/constants';
+import { createReviewSchema, useReviewDetails, type CreateReviewFormType } from '@/features/review';
 import { formatDate } from '@/utils/time.format';
-
-import { useReviewDetails } from '../../hooks/useReview';
-import { ReviewSchema, type ReviewFormType } from '../../validation/ReviewFormData';
 
 interface ReviewModalProps {
   open: boolean;
   onClose: () => void;
-  onSubmit?: (data: ReviewFormType) => Promise<void>;
+  onSubmit?: (data: CreateReviewFormType) => Promise<void>;
   bookingId?: string;
   reviewId?: string | null;
 }
@@ -34,7 +32,7 @@ export default function ReviewModal({
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const { review } = useReviewDetails(reviewId ?? null);
+  const { data: review } = useReviewDetails(reviewId ?? null);
   const isExpired = review ? dayjs().isAfter(dayjs(review.createdAt).add(48, 'hour')) : true;
 
   const {
@@ -45,8 +43,8 @@ export default function ReviewModal({
     watch,
     reset,
     formState: { errors, isSubmitting, isValid },
-  } = useForm<ReviewFormType>({
-    resolver: zodResolver(ReviewSchema),
+  } = useForm<CreateReviewFormType>({
+    resolver: zodResolver(createReviewSchema),
     defaultValues: {
       bookingId: bookingId ?? '',
       media: [],
@@ -86,7 +84,7 @@ export default function ReviewModal({
     onClose();
   };
 
-  async function onSubmitForm(data: ReviewFormType) {
+  async function onSubmitForm(data: CreateReviewFormType) {
     await onSubmit?.(data);
     setIsEditMode(false);
   }

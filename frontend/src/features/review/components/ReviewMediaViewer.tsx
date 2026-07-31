@@ -12,7 +12,7 @@ type ReviewMediaViewerProps = {
   setPreviewIndex: Dispatch<SetStateAction<number | null>>;
 };
 
-export default function ReviewMediaViewer({
+export function ReviewMediaViewer({
   previewIndex,
   mediaItems,
   onClose,

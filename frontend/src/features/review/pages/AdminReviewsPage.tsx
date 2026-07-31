@@ -17,16 +17,15 @@ import {
   useAdminReviews,
   AdminReviewFilters,
   useAdminReviewFilters,
+  useToggleReviewVisibility,
+  ReviewCard,
+  ReviewMediaViewer,
 } from '@/features/review';
-import ReviewMediaViewer from '@/features/review/components/ReviewMediaViewer';
-import { useToggleReviewVisibility } from '@/features/user/booking/hooks/useReview';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import { cn } from '@/lib/utils';
 import type { EvidenceItem } from '@/types/booking';
 import type { AdminReviewView } from '@/types/review';
 import { formatDateForUrl } from '@/utils/time.format';
-
-import ReviewCard from '../components/ReviewCard';
 
 const containerVariants = {
   hidden: { opacity: 0 },

@@ -18,7 +18,7 @@ type ReviewFilterBarProps = {
   onClearRating: () => void;
 };
 
-export default function ReviewFilterBar({
+export function ReviewFilterBar({
   sortBy,
   sortOrder,
   rating,

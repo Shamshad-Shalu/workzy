@@ -24,6 +24,7 @@ import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { StatusBadge } from '@/features/booking/components/BookingCard';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
+import { useWorkerReviews } from '@/features/review';
 import PageError from '@/pages/PageError';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
@@ -31,7 +32,6 @@ import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
 import { useWorkerBooking } from '../../booking/hooks/useWorkerBooking';
-import { useWorkerReviews } from '../../reviews/hooks/useWorkerReviews';
 import WorkerDashboardSkeleton from '../components/WorkerDashboardSkeleton';
 import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 
