@@ -4,11 +4,10 @@ import { IBookingSlot } from "@/types/booking/booking.entity";
 import { QuoteListItem } from "@/types/quote/quote.projection";
 import { resolveS3Url } from "@/utils/s3.utils";
 
-export class QuoteResponseDto {}
-
-export class QuoteResponseListDto {
+export class QuoteListItemDto {
   id!: string;
   bookingId!: string;
+  serviceId!: string;
   dates!: IBookingSlot[];
   totalPrice!: number;
   message?: string;
@@ -30,14 +29,12 @@ export class QuoteResponseListDto {
     iconUrl: string;
   };
 
-  static async fromEntity(
-    entity: QuoteListItem,
-    s3Service: IS3Service
-  ): Promise<QuoteResponseListDto> {
-    const dto = new QuoteResponseListDto();
+  static async fromEntity(entity: QuoteListItem, s3Service: IS3Service): Promise<QuoteListItemDto> {
+    const dto = new QuoteListItemDto();
 
     dto.id = entity._id.toString();
     dto.bookingId = entity.bookingId.toString();
+    dto.serviceId = entity.serviceId.toString();
     dto.dates = entity.dates;
     dto.totalPrice = entity.totalPrice;
     dto.message = entity.message;
@@ -66,7 +63,7 @@ export class QuoteResponseListDto {
   static async fromEntities(
     entities: QuoteListItem[],
     s3Service: IS3Service
-  ): Promise<QuoteResponseListDto[]> {
+  ): Promise<QuoteListItemDto[]> {
     return Promise.all(entities.map((entity) => this.fromEntity(entity, s3Service)));
   }
 }

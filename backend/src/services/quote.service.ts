@@ -24,12 +24,9 @@ import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteDto } from "@/dtos/requests/quote.dto";
-import {
-  QuoteResponseDto,
-  QuoteResponseListDto,
-  WorkerQuoteStatsDto,
-} from "@/dtos/responses/quote.dto";
+import { QuoteListItemDto, WorkerQuoteStatsDto } from "@/dtos/responses/quote.dto";
 import { CursorPaginatedResult } from "@/types/common/pagination";
+import { IQuote } from "@/types/quote/quote.entity";
 import { QuoteListQuery } from "@/types/quote/quote.query";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -48,7 +45,7 @@ export class QuoteService implements IQuoteService {
     @inject(TYPES.NotificationService) private _notificationService: INotificationService
   ) {}
 
-  async createQuote(workerId: string, data: CreateQuoteDto): Promise<QuoteResponseDto> {
+  async createQuote(workerId: string, data: CreateQuoteDto): Promise<IQuote> {
     const { bookingId, dates: selectedDates, totalPrice, message } = data;
     const booking = await this._bookingRepository.findOne({
       _id: new Types.ObjectId(bookingId),
@@ -185,7 +182,7 @@ export class QuoteService implements IQuoteService {
     if (!quote) {
       throw new CustomError(QUOTE.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
-    const [_, booking] = await Promise.all([
+    const [_slots, booking] = await Promise.all([
       this._slotService.releaseQuoteSlots(quote.slotIds.map((v) => v.toString())),
       this._bookingRepository.findById(quote.bookingId),
     ]);
@@ -198,29 +195,15 @@ export class QuoteService implements IQuoteService {
     }
   }
 
-  async listUserQuotes(
-    userId: string,
-    query: QuoteListQuery
-  ): Promise<CursorPaginatedResult<QuoteResponseListDto>> {
-    const { data, nextCursor } = await this._quoteRepository.listQuotes({ userId, ...query });
+  async listQuotes(query: QuoteListQuery): Promise<CursorPaginatedResult<QuoteListItemDto>> {
+    const { data, nextCursor } = await this._quoteRepository.listQuotes(query);
     return {
-      data: await QuoteResponseListDto.fromEntities(data, this._s3Service),
+      data: await QuoteListItemDto.fromEntities(data, this._s3Service),
       nextCursor,
     };
   }
 
-  async listWorkerQuotes(
-    workerId: string,
-    query: QuoteListQuery
-  ): Promise<CursorPaginatedResult<QuoteResponseListDto>> {
-    const { data, nextCursor } = await this._quoteRepository.listQuotes({ workerId, ...query });
-    return {
-      data: await QuoteResponseListDto.fromEntities(data, this._s3Service),
-      nextCursor,
-    };
-  }
-
-  async getWokerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
-    return await this._quoteRepository.getWokerQuoteStats(workerId);
+  async getWorkerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
+    return await this._quoteRepository.getWorkerQuoteStats(workerId);
   }
 }

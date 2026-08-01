@@ -2,9 +2,8 @@ import { RequestHandler } from "express";
 
 export interface IQuoteController {
   createQuote: RequestHandler;
-  listWorkerQuotes: RequestHandler;
-  listUserQuotes: RequestHandler;
-  getWokerQuoteStats: RequestHandler;
+  listQuotes: RequestHandler;
+  getWorkerQuoteStats: RequestHandler;
   rejectQuote: RequestHandler;
   acceptQuote: RequestHandler;
 }
