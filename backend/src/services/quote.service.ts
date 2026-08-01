@@ -23,7 +23,7 @@ import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
-import { CreateQuoteDto } from "@/dtos/requests/quote.dto";
+import { CreateQuoteDto, UpdateQuoteDto } from "@/dtos/requests/quote.dto";
 import { QuoteListItemDto, WorkerQuoteStatsDto } from "@/dtos/responses/quote.dto";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IQuote } from "@/types/quote/quote.entity";
@@ -193,6 +193,68 @@ export class QuoteService implements IQuoteService {
         NOTIFICATION_TEMPLATES.QUOTE_REJECTED(booking.bookingId)
       );
     }
+  }
+
+  async updateQuote(workerId: string, quoteId: string, data: UpdateQuoteDto): Promise<IQuote> {
+    const quote = await this._quoteRepository.findOne({
+      _id: new Types.ObjectId(quoteId),
+      workerId: new Types.ObjectId(workerId),
+      status: QUOTE_STATUS.PENDING,
+    });
+
+    if (!quote) {
+      throw new CustomError(QUOTE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    if (new Date() > quote.expiresAt) {
+      throw new CustomError(QUOTE.EXPIRED, HTTPSTATUS.BAD_REQUEST);
+    }
+    const updateData: Partial<IQuote> = {};
+
+    if (data.dates && data.dates.length > 0) {
+      const booking = await this._bookingRepository.findById(quote.bookingId);
+      if (!booking) {
+        throw new CustomError(BOOKING.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
+      }
+
+      const { serviceId, address } = booking;
+      const [lng, lat] = address.location.coordinates;
+
+      await this._slotService.releaseQuoteSlots(quote.slotIds.map((v) => v.toString()));
+      const { slotIds, reservedUntil, dates } = await this._slotService.reserveQuoteSlots(
+        workerId,
+        {
+          serviceId: serviceId.toString(),
+          bookingId: quote.bookingId.toString(),
+          dates: data.dates,
+          lat,
+          lng,
+        }
+      );
+
+      updateData.slotIds = slotIds.map((id) => new Types.ObjectId(id));
+      updateData.dates = dates;
+      updateData.expiresAt = reservedUntil;
+    }
+
+    if (data.totalPrice) {
+      updateData.totalPrice = data.totalPrice;
+    }
+
+    if (data.message) {
+      updateData.message = data.message;
+    }
+
+    const updatedQuote = await this._quoteRepository.findByIdAndUpdate(quoteId, updateData);
+
+    if (!updatedQuote) {
+      throw new CustomError(QUOTE.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
+    }
+
+    return updatedQuote;
+  }
+
+  async expireQuotes(): Promise<number> {
+    return await this._quoteRepository.expireQuotes();
   }
 
   async listQuotes(query: QuoteListQuery): Promise<CursorPaginatedResult<QuoteListItemDto>> {

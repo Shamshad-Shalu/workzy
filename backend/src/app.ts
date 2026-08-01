@@ -6,6 +6,7 @@ import express from "express";
 import passport from "./config/passport";
 import { CLIENT_URL, DUMMY_URL } from "./constants";
 import { startCleanupJob } from "./jobs/cleanup-slots";
+import { startQuoteExpiryJob } from "./jobs/quote-expiry";
 import { apiLogger } from "./middlewares/apiLogger";
 import errorMiddleware from "./middlewares/errorMiddleware";
 import apiRouter from "./routes";
@@ -38,6 +39,7 @@ app.use("/api", apiRouter);
 
 app.use(errorMiddleware);
 
+startQuoteExpiryJob();
 startCleanupJob();
 
 export default app;

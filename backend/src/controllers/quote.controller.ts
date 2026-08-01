@@ -6,7 +6,7 @@ import { AUTH, HTTPSTATUS, QUOTE, QuoteStatus, ROLE } from "@/constants";
 import { IQuoteController } from "@/core/interfaces/controllers/IQuoteController";
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { TYPES } from "@/di/types";
-import { CreateQuoteDto } from "@/dtos/requests/quote.dto";
+import { CreateQuoteDto, UpdateQuoteDto } from "@/dtos/requests/quote.dto";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -18,6 +18,14 @@ export class QuoteController implements IQuoteController {
     const data = req.body as CreateQuoteDto;
     const quote = await this._quoteService.createQuote(workerId, data);
     res.status(HTTPSTATUS.OK).json({ message: QUOTE.CREATED, quote });
+  });
+
+  updateQuote = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { quoteId } = req.params;
+    const data = req.body as UpdateQuoteDto;
+    const quote = await this._quoteService.updateQuote(workerId, quoteId, data);
+    res.status(HTTPSTATUS.OK).json({ message: QUOTE.UPDATED, quote });
   });
 
   getWorkerQuoteStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {

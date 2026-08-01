@@ -11,4 +11,5 @@ export const REDIS = {
   HDEL_ERROR: (key: string) => `Redis hash delete field error for key ${key}:`,
   HGETALL_ERROR: (key: string) => `Redis hash get all fields error for key ${key}:`,
   HSET_ERROR: (key: string) => `Redis HSET failed for key: ${key}`,
+  NX_SET_ERROR: (key: string) => `Redis NX SET failed for key: ${key}`,
 };

@@ -149,4 +149,17 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
       }
     );
   }
+
+  async expireQuotes(): Promise<number> {
+    const result = await this.model.updateMany(
+      {
+        status: QUOTE_STATUS.PENDING,
+        expiresAt: { $lt: new Date() },
+      },
+      {
+        status: QUOTE_STATUS.EXPIRED,
+      }
+    );
+    return result.modifiedCount || 0;
+  }
 }

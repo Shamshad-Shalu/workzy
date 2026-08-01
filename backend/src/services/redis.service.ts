@@ -61,6 +61,15 @@ export class RedisService implements IRedisService {
       logger.error(REDIS.DELETE_MANY_ERROR, error);
     }
   }
+  async setIfNotExists(key: string, value: string, ttlSeconds: number): Promise<boolean> {
+    try {
+      const result = await redisClient.set(key, value, { NX: true, EX: ttlSeconds });
+      return result === "OK";
+    } catch (error) {
+      logger.error(REDIS.NX_SET_ERROR(key), error);
+      return false;
+    }
+  }
 
   async hSet(key: string, field: string, value: string): Promise<void> {
     try {
