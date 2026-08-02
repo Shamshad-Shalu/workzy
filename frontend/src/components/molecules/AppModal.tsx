@@ -29,6 +29,7 @@ interface AppModalProps {
   cancelText?: string;
   className?: string;
   isConfirmLoading?: boolean;
+  isConfirmDisabled?: boolean;
   hideFooter?: boolean;
   footer?: React.ReactNode;
   canCloseOnOutsideClick?: boolean;
@@ -48,6 +49,7 @@ export function AppModal({
   buttonVariant,
   cancelText = 'Cancel',
   isConfirmLoading = false,
+  isConfirmDisabled = false,
   footer,
   canCloseOnOutsideClick = true,
   className = 'sm:max-w-lg',
@@ -61,7 +63,7 @@ export function AppModal({
         <Button
           variant={buttonVariant}
           onClick={onConfirm}
-          disabled={isConfirmLoading}
+          disabled={isConfirmLoading || isConfirmDisabled}
           loading={isConfirmLoading}
           size="sm"
         >

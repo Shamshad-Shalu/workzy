@@ -2,8 +2,6 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
-import WorkerQuotePage from '@/features/worker/quote/pages/WorkerQuotePage';
-import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesListPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
@@ -13,6 +11,9 @@ const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDisputesPage = lazy(
   () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
 );
+const WorkerQuoteCreatePage = lazy(() => import('@/features/quote/pages/WorkerQuoteCreatePage'));
+const WorkerQuotesListPage = lazy(() => import('@/features/quote/pages/WorkerQuotesListPage'));
+
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/WorkerDashboard'));
 const WorkerOwnReviewsPage = lazy(() => import('@/features/review/pages/WorkerOwnReviewsPage'));
 const WorkerServicesPage = lazy(
@@ -49,12 +50,12 @@ export default function WorkerRoutes() {
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
           <Route path="quotes" element={<WorkerQuotesListPage />} />
+          <Route path="quotes/:bookingId" element={<WorkerQuoteCreatePage />} />
           <Route path="messages">
             <Route index element={<WorkerChatPage />} />
             <Route path=":chatId" element={<WorkerChatPage />} />
           </Route>
           <Route path="disputes" element={<WorkerDisputesPage />} />
-          <Route path="quotes/:bookingId" element={<WorkerQuotePage />} />
           <Route path="profile" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />

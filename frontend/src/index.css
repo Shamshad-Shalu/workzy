@@ -101,9 +101,9 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
 
-  --section-blue: oklch(0.95 0.03 250);
-  --section-blue-border: oklch(0.75 0.08 250);
-  --section-blue-text: oklch(0.45 0.12 250);
+  --section-blue: oklch(0.925 0.035 247.5);
+  --section-blue-border: oklch(0.89 0.035 245);
+  --section-blue-text: oklch(0.44 0.16 250);
 
   --section-red: oklch(0.95 0.04 25);
   --section-red-border: oklch(0.75 0.1 25);

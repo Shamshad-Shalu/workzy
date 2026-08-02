@@ -5,6 +5,7 @@ import type { BookingSlot } from './booking';
 export interface QuoteListItem {
   id: string;
   bookingId: string;
+  serviceId: string;
   dates: BookingSlot[];
   totalPrice: number;
   message?: string;
@@ -33,6 +34,8 @@ export interface QuoteListResponse {
 }
 
 export interface QuoteListQuery {
+  userId?: string;
+  workerId?: string;
   search?: string;
   status?: string;
   cursor?: string;

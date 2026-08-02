@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function StatsSkeleton() {
+export function QuoteStatsSkeleton() {
   return (
     <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
       {Array.from({ length: 3 }).map((_, i) => (
