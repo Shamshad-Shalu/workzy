@@ -7,5 +7,6 @@ import { QuoteListQuery } from "@/types/quote/quote.query";
 
 export interface IQuoteRepository extends BaseRepository<IQuote> {
   listQuotes(query: QuoteListQuery): Promise<CursorPaginatedResult<QuoteListItem>>;
-  getWokerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto>;
+  getWorkerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto>;
+  expireQuotes(): Promise<number>;
 }

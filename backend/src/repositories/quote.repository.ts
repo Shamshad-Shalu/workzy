@@ -49,7 +49,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
     }
     const docs = await this.model
       .find(filter)
-      .select("dates bookingId totalPrice message status createdAt")
+      .select("dates bookingId serviceId totalPrice message status createdAt")
       .populate("workerId", "profileImage displayName")
       .populate("userId", "profileImage name")
       .populate("categoryId", "iconUrl name")
@@ -74,7 +74,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
     };
   }
 
-  async getWokerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
+  async getWorkerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
     const [stats] = await this.model.aggregate([
       {
         $match: {
@@ -148,5 +148,18 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
         acceptRate: 0,
       }
     );
+  }
+
+  async expireQuotes(): Promise<number> {
+    const result = await this.model.updateMany(
+      {
+        status: QUOTE_STATUS.PENDING,
+        expiresAt: { $lt: new Date() },
+      },
+      {
+        status: QUOTE_STATUS.EXPIRED,
+      }
+    );
+    return result.modifiedCount || 0;
   }
 }

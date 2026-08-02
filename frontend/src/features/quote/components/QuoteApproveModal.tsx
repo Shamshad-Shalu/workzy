@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { CalendarDays, Clock, CreditCard, CheckCircle2 } from 'lucide-react';
 
 import { AppModal } from '@/components/molecules/AppModal';
@@ -5,20 +6,12 @@ import type { BookingSlot } from '@/types/booking';
 import type { QuoteListItem } from '@/types/quote';
 import { formatCurrency } from '@/utils/currency';
 
-function formatSlotDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date));
-}
-
 function SlotRow({ slot }: { slot: BookingSlot }) {
   return (
     <div className="flex items-center justify-between gap-4 py-1.5 border-b border-border/40 last:border-0">
       <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
         <CalendarDays className="h-3 w-3 text-primary/70 flex-shrink-0" />
-        {formatSlotDate(slot.date)}
+        {dayjs(slot.date).format('ddd, MMM D')}
       </span>
       <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground tabular-nums">
         <Clock className="h-3 w-3 flex-shrink-0" />
@@ -36,7 +29,7 @@ interface Props {
   isSubmitting: boolean;
 }
 
-export default function ApproveQuoteModal({ open, onClose, quote, onSubmit, isSubmitting }: Props) {
+export function QuoteApproveModal({ open, onClose, quote, onSubmit, isSubmitting }: Props) {
   return (
     <AppModal
       open={open}

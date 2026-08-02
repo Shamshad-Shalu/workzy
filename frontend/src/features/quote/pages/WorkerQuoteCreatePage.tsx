@@ -12,17 +12,20 @@ import { Badge } from '@/components/ui/badge';
 import { SERVICE_TYPE } from '@/constants';
 import { useBookingDetails } from '@/hooks/useBookingDetails';
 
-import PriceSection from '../components/PriceSection';
-import SlotPicker from '../components/SlotPicker';
-import SummarySection from '../components/SummarySection';
-import { useCreateQuote } from '../hooks/useWorkerQuotes';
-import { quoteFormSchema, type QuoteFormType } from '../validation/quoteSchema';
+import {
+  createQuoteSchema,
+  QuotePriceSection,
+  QuoteSlotPicker,
+  QuoteSummarySection,
+  useCreateQuote,
+  type CreateQuoteFormType,
+} from '../index';
 
-export default function WorkerQuotePage() {
+export default function WorkerQuoteCreatePage() {
   const { bookingId } = useParams();
   const navigate = useNavigate();
   const { booking } = useBookingDetails(bookingId);
-  const { createQuote, isPending } = useCreateQuote();
+  const { mutateAsync: createQuote, isPending } = useCreateQuote();
 
   const {
     user,
@@ -33,8 +36,8 @@ export default function WorkerQuotePage() {
     serviceId,
   } = booking ?? {};
 
-  const methods = useForm<QuoteFormType>({
-    resolver: zodResolver(quoteFormSchema),
+  const methods = useForm<CreateQuoteFormType>({
+    resolver: zodResolver(createQuoteSchema),
     defaultValues: {
       bookingId: '',
       dates: [],
@@ -50,7 +53,7 @@ export default function WorkerQuotePage() {
     }
   }, [booking?.id, setValue]);
 
-  const handleQuoteSubmit = async (data: QuoteFormType) => {
+  const handleQuoteSubmit = async (data: CreateQuoteFormType) => {
     console.log({ QuoteForm: data });
     if (!bookingId) {
       return;
@@ -137,12 +140,12 @@ export default function WorkerQuotePage() {
               )}
             </motion.div>
 
-            <SlotPicker serviceId={serviceId} />
-            <PriceSection />
+            <QuoteSlotPicker serviceId={serviceId} />
+            <QuotePriceSection />
           </div>
 
           {/* Right: summary + submit */}
-          <SummarySection booking={booking ?? undefined} isSubmitting={isPending} />
+          <QuoteSummarySection booking={booking ?? undefined} isSubmitting={isPending} />
         </div>
       </form>
     </FormProvider>

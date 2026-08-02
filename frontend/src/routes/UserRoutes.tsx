@@ -33,7 +33,7 @@ const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/Worke
 const WorkerPublicReviewsPage = lazy(
   () => import('@/features/review/pages/WorkerPublicReviewsPage.tsx')
 );
-const UserQuotesListPage = lazy(() => import('@/features/user/quote/pages/UserQuotesListPage'));
+const UserQuotesListPage = lazy(() => import('@/features/quote/pages/UserQuotesListPage'));
 
 const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
 const UserBookingDetailsPage = lazy(

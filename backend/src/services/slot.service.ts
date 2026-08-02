@@ -42,7 +42,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
-const QUOTE_TTL_SECONDS = 24 * 60 * 60;
+const QUOTE_TTL_SECONDS = 48 * 60 * 60;
 
 @injectable()
 export class SlotService implements ISlotService {
@@ -344,13 +344,21 @@ export class SlotService implements ISlotService {
         const dateStr = dayjs(date).format("YYYY-MM-DD");
         const lockKey = `slot:${workerId}:${dateStr}:fullday`;
 
-        const existing = await this._redisService.get(lockKey);
-        if (existing) throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
+        const lockAcquired = await this._redisService.setIfNotExists(lockKey, workerId, 60);
+        if (!lockAcquired) {
+          throw new CustomError(SLOT.EXISTS, HTTPSTATUS.CONFLICT);
+        }
+        acquiredLocks.push(lockKey);
 
         const dayName = dayjs(date).format("dddd").toLowerCase() as Day;
         const dayWindows = worker.availability[dayName];
-        if (!dayWindows || dayWindows.length === 0)
+        if (!dayWindows || dayWindows.length === 0) {
           throw new CustomError(SLOT.NOT_AVAILABLE, HTTPSTATUS.BAD_REQUEST);
+        }
+      }
+      const slotPromises = dates.map(async (date) => {
+        const dayName = dayjs(date).format("dddd").toLowerCase() as Day;
+        const dayWindows = worker.availability[dayName]!;
 
         const startTime = dayWindows[0].startTime;
         const endTime = dayWindows[dayWindows.length - 1].endTime;
@@ -371,21 +379,32 @@ export class SlotService implements ISlotService {
           reservedUntil,
         });
 
-        await this._redisService.setWithTTL(lockKey, workerId, 60);
-        acquiredLocks.push(lockKey);
-        createdIds.push(newSlot._id.toString());
+        return newSlot;
+      });
+
+      const results = await Promise.all(slotPromises);
+      results.forEach((slot) => {
+        createdIds.push(slot._id.toString());
         createdSlots.push({
-          date: newSlot.date,
-          startTime: newSlot.startTime,
-          endTime: newSlot.endTime,
+          date: slot.date,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
         });
-      }
+      });
     } catch (err) {
-      if (createdIds.length > 0) await this._slotRepository.deleteManyByIds(createdIds);
-      await this._redisService.deleteMany(acquiredLocks);
+      if (createdIds.length > 0) {
+        await this._slotRepository.deleteManyByIds(createdIds);
+      }
+      if (acquiredLocks.length > 0) {
+        await this._redisService.deleteMany(acquiredLocks);
+      }
       throw err;
     }
-    return { slotIds: createdIds, reservedUntil, dates: createdSlots };
+    return {
+      slotIds: createdIds,
+      reservedUntil,
+      dates: createdSlots,
+    };
   }
 
   async releaseQuoteSlots(slotIds: string[]): Promise<boolean> {

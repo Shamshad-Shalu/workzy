@@ -7,6 +7,7 @@ import { IBookingSlot } from "../booking/booking.entity";
 export type QuoteListItem = {
   _id: Types.ObjectId;
   bookingId: Types.ObjectId;
+  serviceId: Types.ObjectId;
   dates: IBookingSlot[];
   totalPrice: number;
   message?: string;

@@ -5,14 +5,13 @@ import { useFormContext } from 'react-hook-form';
 import Input from '@/components/atoms/Input';
 import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
+import type { CreateQuoteFormType } from '@/features/quote';
 
-import type { QuoteFormType } from '../validation/quoteSchema';
-
-export default function PriceSection() {
+export function QuotePriceSection() {
   const {
     register,
     formState: { errors },
-  } = useFormContext<QuoteFormType>();
+  } = useFormContext<CreateQuoteFormType>();
 
   return (
     <motion.div

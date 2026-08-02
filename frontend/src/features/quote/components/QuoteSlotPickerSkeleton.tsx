@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function SlotPickerSkeleton() {
+export function QuoteSlotPickerSkeleton() {
   return (
     <div className="space-y-3">
       <Skeleton className="h-3 w-24 rounded" />
