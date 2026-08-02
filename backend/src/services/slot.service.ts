@@ -42,7 +42,7 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { minutesToTime, timeToMinutes } from "@/utils/time.convert";
 
 const RESERVATION_TTL_SECONDS = 15 * 60;
-const QUOTE_TTL_SECONDS = 24 * 60 * 60;
+const QUOTE_TTL_SECONDS = 48 * 60 * 60;
 
 @injectable()
 export class SlotService implements ISlotService {

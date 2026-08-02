@@ -1,29 +1,21 @@
+import dayjs from 'dayjs';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendarDays, Clock, Info, Send, Sparkles, User, Wallet } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 
 import Button from '@/components/atoms/Button';
 import { Separator } from '@/components/ui/separator';
+import type { CreateQuoteFormType } from '@/features/quote';
 import type { BookingDetails } from '@/types/booking';
 import { formatCurrency } from '@/utils/currency';
-
-import type { QuoteFormType } from '../validation/quoteSchema';
-
-function formatDayLabel(iso: string) {
-  return new Date(iso).toLocaleDateString(undefined, {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-}
 
 interface Props {
   booking?: BookingDetails | null;
   isSubmitting: boolean;
 }
 
-export default function SummarySection({ booking, isSubmitting }: Props) {
-  const { watch, setValue } = useFormContext<QuoteFormType>();
+export function QuoteSummarySection({ booking, isSubmitting }: Props) {
+  const { watch, setValue } = useFormContext<CreateQuoteFormType>();
   const selectedDates = watch('dates');
   const totalPrice = watch('totalPrice');
 
@@ -86,7 +78,7 @@ export default function SummarySection({ booking, isSubmitting }: Props) {
                 <ul className="space-y-1 text-xs">
                   {selectedDates.map(d => (
                     <li key={d} className="flex items-center justify-between">
-                      <span>{formatDayLabel(d)}</span>
+                      <span>{dayjs(d).format('ddd, MMM D')}</span>
                       <button
                         type="button"
                         onClick={() => removeDate(d)}

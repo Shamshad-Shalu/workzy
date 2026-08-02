@@ -9,15 +9,14 @@ import Button from '@/components/atoms/Button';
 import { DatePicker } from '@/components/atoms/Datepicker';
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
+import {
+  QuoteSlotPickerSkeleton,
+  useQuoteAvailableDates,
+  type CreateQuoteFormType,
+} from '@/features/quote';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { cn } from '@/lib/utils';
 import { formatDateForUrl } from '@/utils/time.format';
-
-import { useQuoteAvailableDates } from '../hooks/useWorkerQuotes';
-
-import SlotPickerSkeleton from './SlotPickerSkeleton';
-
-import type { QuoteFormType } from '../validation/quoteSchema';
 
 const CUSTOM_PARAMS = [
   { key: 'endDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
@@ -26,15 +25,17 @@ const CUSTOM_PARAMS = [
 
 interface Props {
   serviceId: string | undefined;
+  currentQuoteDates?: string[];
 }
 
-export default function SlotPicker({ serviceId }: Props) {
+export function QuoteSlotPicker({ serviceId, currentQuoteDates = [] }: Props) {
   const {
     setValue,
     watch,
     formState: { errors },
-  } = useFormContext<QuoteFormType>();
-  const selectedDates = watch('dates');
+  } = useFormContext<CreateQuoteFormType>();
+  const watchedDates = watch('dates');
+  const selectedDates = useMemo(() => watchedDates || [], [watchedDates]);
 
   const { updateParams, endDate, startDate } = useUrlFilterParams<{
     endDate: Date | null;
@@ -46,7 +47,15 @@ export default function SlotPicker({ serviceId }: Props) {
     endDate: formatDateForUrl(endDate),
   });
 
-  const dateKeys = useMemo(() => Object.keys(dates), [dates]);
+  const dateKeys = useMemo(() => {
+    const keys = Object.keys(dates);
+    for (const d of currentQuoteDates) {
+      if (!keys.includes(d)) {
+        keys.push(d);
+      }
+    }
+    return keys.sort();
+  }, [dates, currentQuoteDates]);
 
   const monthGroups = useMemo(() => {
     const groups: Record<string, string[]> = {};
@@ -70,11 +79,11 @@ export default function SlotPicker({ serviceId }: Props) {
     if (!dateKeys.length) {
       return;
     }
-    const valid = selectedDates.filter(d => dateKeys.includes(d));
+    const valid = selectedDates.filter(d => dateKeys.includes(d) || currentQuoteDates.includes(d));
     if (valid.length !== selectedDates.length) {
       setValue('dates', valid, { shouldValidate: true });
     }
-  }, [dateKeys, selectedDates, setValue]);
+  }, [dateKeys, selectedDates, currentQuoteDates, setValue]);
 
   const isAppliedFilter = startDate || endDate;
 
@@ -83,7 +92,8 @@ export default function SlotPicker({ serviceId }: Props) {
   }, [updateParams]);
 
   function toggle(date: string) {
-    if (!dates[date]) {
+    const isAvailable = dates[date] || currentQuoteDates.includes(date);
+    if (!isAvailable) {
       return;
     }
     const next = selectedDates.includes(date)
@@ -154,7 +164,7 @@ export default function SlotPicker({ serviceId }: Props) {
       </div>
       <div className="mt-4 space-y-5">
         {isLoading ? (
-          <SlotPickerSkeleton />
+          <QuoteSlotPickerSkeleton />
         ) : error ? (
           <ErrorState onRetry={refetch} description={error.message} />
         ) : Object.entries(monthGroups).length === 0 ? (
@@ -177,7 +187,7 @@ export default function SlotPicker({ serviceId }: Props) {
               </div>
               <div className="grid grid-cols-4 gap-2 sm:grid-cols-6 md:grid-cols-7">
                 {days.map(d => {
-                  const isAvailable = dates[d];
+                  const isAvailable = dates[d] || currentQuoteDates.includes(d);
                   const isSelected = selectedDates.includes(d);
                   return (
                     <button
@@ -187,12 +197,12 @@ export default function SlotPicker({ serviceId }: Props) {
                       disabled={!isAvailable}
                       className={cn(
                         'group relative flex flex-col items-center justify-center rounded-lg border px-2 py-2.5 text-center transition-all',
-                        isAvailable
-                          ? 'hover:border-primary/60 hover:bg-primary/5'
-                          : 'cursor-not-allowed opacity-40',
-                        isSelected
-                          ? 'border-primary bg-primary text-primary-foreground shadow-sm'
-                          : 'border-border bg-background'
+                        !isAvailable && 'cursor-not-allowed opacity-40 border-border bg-background',
+                        isAvailable &&
+                          !isSelected &&
+                          'border-border bg-background hover:border-primary/60 hover:bg-primary/5 text-foreground',
+                        isSelected &&
+                          'border-primary bg-primary text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground'
                       )}
                     >
                       <span className="text-[10px] font-medium uppercase opacity-80">
@@ -216,7 +226,6 @@ export default function SlotPicker({ serviceId }: Props) {
         )}
       </div>
 
-      {/* Footer row */}
       <div className="mt-4 flex items-center justify-between rounded-lg bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
         <span>
           {Object.values(dates).filter(Boolean).length} of {dateKeys.length} days available

@@ -12,7 +12,7 @@ interface Props {
   isSubmitting: boolean;
 }
 
-export default function RejectQuoteModal({ open, onClose, quote, onSubmit, isSubmitting }: Props) {
+export function QuoteRejectModal({ open, onClose, quote, onSubmit, isSubmitting }: Props) {
   return (
     <AppModal
       open={open}
