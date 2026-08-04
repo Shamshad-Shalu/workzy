@@ -118,7 +118,11 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
 
     await this._unitOfWork.execute(async (options) => {
       if (quoteId && quoteSlotIds.length > 0) {
-        await this._slotRepository.updatePaymentSlots(quoteSlotIds, new Types.ObjectId(bookingId));
+        await this._slotRepository.updatePaymentSlots(
+          quoteSlotIds,
+          new Types.ObjectId(bookingId),
+          options
+        );
         await this._quoteRepository.findByIdAndUpdate(
           quoteId,
           { status: QUOTE_STATUS.ACCEPTED },

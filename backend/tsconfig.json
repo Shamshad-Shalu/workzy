@@ -19,12 +19,12 @@
     "sourceMap": true,                        // Generate `.map` files for debugging
 
     /* Node.js Specific Options */
-    "moduleResolution": "node",
-    "ignoreDeprecations": "6.0",              // Use Node.js module resolution
+    //  "moduleResolution": "node",
+    "ignoreDeprecations": "5.0",              // Suppress deprecated option warnings
     "allowSyntheticDefaultImports": true,    // Allow default imports from modules with no default export
     "types": ["node"],                        // Include Node.js type definitions
     "typeRoots": ["./src/core/types", "./node_modules/@types"],
-    "baseUrl": ".", // Base directory for resolving paths
+    //  "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     }
