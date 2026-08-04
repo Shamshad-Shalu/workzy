@@ -8,6 +8,7 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
 import {
@@ -29,7 +30,8 @@ export class ReviewService implements IReviewService {
     @inject(TYPES.BookingRepository) private _bookingRepo: IBookingRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.RedisService) private _redisService: IRedisService
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
   async createReview(userId: string, reviewData: CreateReviewDto): Promise<ReviewResponseDto> {
@@ -56,13 +58,16 @@ export class ReviewService implements IReviewService {
       media,
       createdAt: new Date(),
     });
-    await Promise.all([
-      this._bookingRepo.update(bookingId, {
-        hasVisibleReview: true,
-        reviewId: review._id,
-      }),
-      this._workerRepository.incrementRating(workerId.toString(), rating),
-    ]);
+
+    await this._unitOfWork.execute(async (options) => {
+      await this._bookingRepo.findByIdAndUpdate(
+        bookingId,
+        { hasVisibleReview: true, reviewId: review._id },
+        options
+      );
+      await this._workerRepository.incrementRating(workerId.toString(), rating);
+    });
+
     await this._redisService.clearPattern("reviews");
     return ReviewResponseDto.fromEntity(review);
   }
@@ -132,14 +137,20 @@ export class ReviewService implements IReviewService {
     const review = await getEntityOrThrow(this._reviewRepo, reviewId, REVIEW.NOT_FOUND);
     const newStatus = !review.isHidden;
 
-    await Promise.all([
-      this._reviewRepo.update(reviewId, { isHidden: newStatus }),
-      this._bookingRepo.update(review.bookingId.toString(), { hasVisibleReview: !newStatus }),
-      newStatus
-        ? this._workerRepository.decrementRating(review.workerId.toString(), review.rating)
-        : this._workerRepository.incrementRating(review.workerId.toString(), review.rating),
-      this._redisService.clearPattern("reviews"),
-    ]);
+    await this._unitOfWork.execute(async (options) => {
+      await this._reviewRepo.update(reviewId, { isHidden: newStatus }, options);
+      await this._bookingRepo.update(
+        review.bookingId.toString(),
+        { hasVisibleReview: !newStatus },
+        options
+      );
+      if (newStatus) {
+        await this._workerRepository.decrementRating(review.workerId.toString(), review.rating);
+      } else {
+        await this._workerRepository.incrementRating(review.workerId.toString(), review.rating);
+      }
+    });
+    await this._redisService.clearPattern("reviews");
     return newStatus ? REVIEW.HIDDEN : REVIEW.UNHIDDEN;
   }
 
