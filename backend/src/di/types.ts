@@ -96,6 +96,8 @@ const TYPES = {
   ChatController: Symbol.for("ChatController"),
   ChatService: Symbol.for("ChatService"),
   ChatRepository: Symbol.for("ChatRepository"),
+
+  UnitOfWork: Symbol.for("UnitOfWork"),
 };
 
 export { TYPES };

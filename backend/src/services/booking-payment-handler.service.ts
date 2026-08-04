@@ -19,6 +19,7 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { IBooking } from "@/types/booking/booking.entity";
 import { IWorker } from "@/types/worker/worker.entity";
@@ -32,7 +33,8 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
     @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
-    @inject(TYPES.MessageService) private _messageService: IMessageService
+    @inject(TYPES.MessageService) private _messageService: IMessageService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
   private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
@@ -60,19 +62,17 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
   ): Promise<void> {
     const booking = await this.getBookingOrThrow(bookingId);
 
-    let slotUpdate: Promise<unknown>;
     let bookingUpdateData: UpdateQuery<IBooking>;
     let workerUpdateData: UpdateQuery<IWorker>;
     let notifyAction: () => void;
     let chatMessage = `Booking ${booking.bookingId} has been created and is awaiting worker confirmation`;
+    let quoteSlotIds: string[] = [];
+    let quoteId: string | null = null;
 
     if (booking.quoteId) {
       const quote = await this._quoteRepository.findById(booking.quoteId.toString());
-      const slotIds = quote?.slotIds?.map((id) => id.toString()) ?? [];
-      slotUpdate = Promise.all([
-        this._slotRepository.updatePaymentSlots(slotIds, new Types.ObjectId(bookingId)),
-        this._quoteRepository.findByIdAndUpdate(booking.quoteId, { status: QUOTE_STATUS.ACCEPTED }),
-      ]);
+      quoteSlotIds = quote?.slotIds?.map((id) => id.toString()) ?? [];
+      quoteId = booking.quoteId.toString();
 
       bookingUpdateData = {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
@@ -95,11 +95,6 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
         );
       };
     } else {
-      slotUpdate = this._slotRepository.findByIdAndUpdate(slotId, {
-        status: SLOT_STATUS.BOOKED,
-        bookingId: new Types.ObjectId(bookingId),
-      });
-
       bookingUpdateData = {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
         statusHistory: [
@@ -120,13 +115,31 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
         );
       };
     }
-    await Promise.all([
-      slotUpdate,
-      this._bookingRepository.findByIdAndUpdate(bookingId, bookingUpdateData),
-      this._workerRepository.findByIdAndUpdate(workerId, workerUpdateData),
-      this.sendBookingEvent(booking, chatMessage),
-    ]);
 
+    await this._unitOfWork.execute(async (options) => {
+      if (quoteId && quoteSlotIds.length > 0) {
+        await this._slotRepository.updatePaymentSlots(
+          quoteSlotIds,
+          new Types.ObjectId(bookingId),
+          options
+        );
+        await this._quoteRepository.findByIdAndUpdate(
+          quoteId,
+          { status: QUOTE_STATUS.ACCEPTED },
+          options
+        );
+      } else {
+        await this._slotRepository.findByIdAndUpdate(
+          slotId,
+          { status: SLOT_STATUS.BOOKED, bookingId: new Types.ObjectId(bookingId) },
+          options
+        );
+      }
+      await this._bookingRepository.findByIdAndUpdate(bookingId, bookingUpdateData, options);
+      await this._workerRepository.findByIdAndUpdate(workerId, workerUpdateData, options);
+    });
+
+    await this.sendBookingEvent(booking, chatMessage);
     notifyAction();
   }
 
