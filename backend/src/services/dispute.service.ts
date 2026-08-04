@@ -24,6 +24,7 @@ import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { CreateDisputeDto, ResolveDisputeDto } from "@/dtos/requests/dispute.dto";
 import {
@@ -50,8 +51,19 @@ export class DisputeService implements IDisputeService {
     @inject(TYPES.PaymentService) private _paymentService: IPaymentService,
     @inject(TYPES.MessageService) private _messageService: IMessageService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.NotificationService) private _notificationService: INotificationService
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
+
+  private notify(...tasks: Promise<unknown>[]) {
+    void Promise.allSettled(tasks).then((results) => {
+      for (const result of results) {
+        if (result.status === "rejected") {
+          console.error(result.reason);
+        }
+      }
+    });
+  }
 
   async raiseDispute(
     bookingId: string,
@@ -80,49 +92,66 @@ export class DisputeService implements IDisputeService {
     ) {
       throw new CustomError(DISPUTE.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
-    const dispute = await this._disputeRepository.create({
-      disputeId: generateTxnCode("DSP"),
-      bookingId: new Types.ObjectId(bookingId),
-      workerId: new Types.ObjectId(booking.workerId),
-      userId: new Types.ObjectId(booking.userId),
-      raisedBy,
-      reason,
-      status: DISPUTE_STATUS.PENDING,
-      description,
-      evidence,
-      searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
-    });
-    const [disputeResponse] = await Promise.all([
-      this.getDisputeByBookingId(bookingId),
-      this._bookingRepository.update(bookingId, {
-        status: BOOKING_STATUS.DISPUTED,
-        $push: {
-          statusHistory: {
-            status: BOOKING_STATUS.DISPUTED,
-            changedBy: raisedBy,
-            reason,
-            changedAt: new Date(),
+
+    const dispute = await this._unitOfWork.execute(async (options) => {
+      const created = await this._disputeRepository.create(
+        {
+          disputeId: generateTxnCode("DSP"),
+          bookingId: new Types.ObjectId(bookingId),
+          workerId: new Types.ObjectId(booking.workerId),
+          userId: new Types.ObjectId(booking.userId),
+          raisedBy,
+          reason,
+          status: DISPUTE_STATUS.PENDING,
+          description,
+          evidence,
+          searchText: `${booking.bookingId} - ${booking.snapshot.category.name}`,
+        },
+        options
+      );
+
+      await this._bookingRepository.update(
+        bookingId,
+        {
+          status: BOOKING_STATUS.DISPUTED,
+          $push: {
+            statusHistory: {
+              status: BOOKING_STATUS.DISPUTED,
+              changedBy: raisedBy,
+              reason,
+              changedAt: new Date(),
+            },
           },
         },
-      }),
-      this._messageService.saveBookingEvent({
-        workerId: booking.workerId.toString(),
-        userId: booking.userId.toString(),
-        bookingId: bookingId,
-        content: `A dispute has been raised for booking ${booking.bookingId}`,
-      }),
-    ]);
+        options
+      );
+
+      return created;
+    });
+
+    await this._messageService.saveBookingEvent({
+      workerId: booking.workerId.toString(),
+      userId: booking.userId.toString(),
+      bookingId: bookingId,
+      content: `A dispute has been raised for booking ${booking.bookingId}`,
+    });
+
+    const disputeResponse = await this.getDisputeByBookingId(bookingId);
     if (!disputeResponse || !dispute) {
       throw new CustomError(DISPUTE.FAILED, HTTPSTATUS.INTERNAL_SERVER_ERROR);
     }
-    void this._notificationService.createNotification(
-      defendantId.toString(),
-      NOTIFICATION_TEMPLATES.BOOKING_DISPUTED(booking.bookingId)
+
+    this.notify(
+      this._notificationService.createNotification(
+        defendantId.toString(),
+        NOTIFICATION_TEMPLATES.BOOKING_DISPUTED(booking.bookingId)
+      ),
+      this._notificationService.createNotification(
+        admin?.id.toString(),
+        NOTIFICATION_TEMPLATES.BOOKING_DISPUTED(booking.bookingId)
+      )
     );
-    void this._notificationService.createNotification(
-      admin?.id.toString(),
-      NOTIFICATION_TEMPLATES.BOOKING_DISPUTED(booking.bookingId)
-    );
+
     return disputeResponse;
   }
 
@@ -205,31 +234,38 @@ export class DisputeService implements IDisputeService {
     };
 
     if (status === DISPUTE_STATUS.UNDER_REVIEW) {
-      await Promise.all([
-        this._disputeRepository.update(disputeId, disputeUpdate),
-        this._bookingRepository.update(booking._id.toString(), {
-          adminNote: note,
-          $push: {
-            statusHistory: {
-              status: booking.status,
-              changedBy: ROLE.ADMIN,
-              reason: "Dispute marked under review by admin.",
-              changedAt: new Date(),
+      await this._unitOfWork.execute(async (options) => {
+        await this._disputeRepository.update(disputeId, disputeUpdate, options);
+        await this._bookingRepository.update(
+          booking._id.toString(),
+          {
+            adminNote: note,
+            $push: {
+              statusHistory: {
+                status: booking.status,
+                changedBy: ROLE.ADMIN,
+                reason: "Dispute marked under review by admin.",
+                changedAt: new Date(),
+              },
             },
           },
-        }),
-      ]);
+          options
+        );
+      });
 
-      void this._notificationService.createNotification(
-        dispute.userId.toString(),
-        NOTIFICATION_TEMPLATES.DISPUTE_UNDER_REVIEW_CUSTOMER(booking.bookingId)
-      );
-      void this._notificationService.createNotification(
-        dispute.workerId.toString(),
-        NOTIFICATION_TEMPLATES.DISPUTE_UNDER_REVIEW_WORKER(booking.bookingId)
+      this.notify(
+        this._notificationService.createNotification(
+          dispute.userId.toString(),
+          NOTIFICATION_TEMPLATES.DISPUTE_UNDER_REVIEW_CUSTOMER(booking.bookingId)
+        ),
+        this._notificationService.createNotification(
+          dispute.workerId.toString(),
+          NOTIFICATION_TEMPLATES.DISPUTE_UNDER_REVIEW_WORKER(booking.bookingId)
+        )
       );
       return;
     }
+
     disputeUpdate.resolvedAt = new Date();
 
     if (status === DISPUTE_STATUS.DISMISSED) {
@@ -248,18 +284,20 @@ export class DisputeService implements IDisputeService {
         },
       };
 
-      await Promise.all([
-        this._disputeRepository.update(disputeId, disputeUpdate),
-        this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-      ]);
+      await this._unitOfWork.execute(async (options) => {
+        await this._disputeRepository.update(disputeId, disputeUpdate, options);
+        await this._bookingRepository.update(booking._id.toString(), bookingUpdate, options);
+      });
 
-      void this._notificationService.createNotification(
-        dispute.userId.toString(),
-        NOTIFICATION_TEMPLATES.DISPUTE_DISMISSED_CUSTOMER(booking.bookingId)
-      );
-      void this._notificationService.createNotification(
-        dispute.workerId.toString(),
-        NOTIFICATION_TEMPLATES.DISPUTE_DISMISSED_WORKER(booking.bookingId)
+      this.notify(
+        this._notificationService.createNotification(
+          dispute.userId.toString(),
+          NOTIFICATION_TEMPLATES.DISPUTE_DISMISSED_CUSTOMER(booking.bookingId)
+        ),
+        this._notificationService.createNotification(
+          dispute.workerId.toString(),
+          NOTIFICATION_TEMPLATES.DISPUTE_DISMISSED_WORKER(booking.bookingId)
+        )
       );
       return;
     }
@@ -288,21 +326,23 @@ export class DisputeService implements IDisputeService {
             },
           };
 
-          await Promise.all([
-            this._disputeRepository.update(disputeId, disputeUpdate),
-            this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-          ]);
+          await this._unitOfWork.execute(async (options) => {
+            await this._disputeRepository.update(disputeId, disputeUpdate, options);
+            await this._bookingRepository.update(booking._id.toString(), bookingUpdate, options);
+          });
 
-          void this._notificationService.createNotification(
-            dispute.userId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_FULL_REFUND_CUSTOMER(
-              booking.bookingId,
-              booking.total
+          this.notify(
+            this._notificationService.createNotification(
+              dispute.userId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_FULL_REFUND_CUSTOMER(
+                booking.bookingId,
+                booking.total
+              )
+            ),
+            this._notificationService.createNotification(
+              dispute.workerId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_FULL_REFUND_WORKER(booking.bookingId)
             )
-          );
-          void this._notificationService.createNotification(
-            dispute.workerId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_FULL_REFUND_WORKER(booking.bookingId)
           );
           break;
         }
@@ -332,12 +372,36 @@ export class DisputeService implements IDisputeService {
 
               await this._paymentService.releaseBookingPayment(booking, remainingWorkerAmount);
 
-              await this._paymentRepository.findOneAndUpdate(
-                { _id: payment._id },
-                { platformFee: remainingPlatformFee }
-              );
+              await this._unitOfWork.execute(async (options) => {
+                await this._paymentRepository.findOneAndUpdate(
+                  { _id: payment._id },
+                  { platformFee: remainingPlatformFee },
+                  options
+                );
+                await this._disputeRepository.update(disputeId, disputeUpdate, options);
+                await this._bookingRepository.update(
+                  booking._id.toString(),
+                  bookingUpdate,
+                  options
+                );
+              });
+            } else {
+              await this._unitOfWork.execute(async (options) => {
+                await this._disputeRepository.update(disputeId, disputeUpdate, options);
+                await this._bookingRepository.update(
+                  booking._id.toString(),
+                  bookingUpdate,
+                  options
+                );
+              });
             }
+
             bookingUpdate.paymentStatus = BOOKING_PAYMENT_STATUS.RELEASED;
+          } else {
+            await this._unitOfWork.execute(async (options) => {
+              await this._disputeRepository.update(disputeId, disputeUpdate, options);
+              await this._bookingRepository.update(booking._id.toString(), bookingUpdate, options);
+            });
           }
 
           bookingUpdate.status = BOOKING_STATUS.APPROVED;
@@ -351,23 +415,21 @@ export class DisputeService implements IDisputeService {
             },
           };
           disputeUpdate.refundedAmount = refundedAmount;
-          await Promise.all([
-            this._disputeRepository.update(disputeId, disputeUpdate),
-            this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-          ]);
 
-          void this._notificationService.createNotification(
-            dispute.userId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PARTIAL_REFUND_CUSTOMER(
-              booking.bookingId,
-              refundedAmount
-            )
-          );
-          void this._notificationService.createNotification(
-            dispute.workerId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PARTIAL_REFUND_WORKER(
-              booking.bookingId,
-              refundedAmount
+          this.notify(
+            this._notificationService.createNotification(
+              dispute.userId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PARTIAL_REFUND_CUSTOMER(
+                booking.bookingId,
+                refundedAmount
+              )
+            ),
+            this._notificationService.createNotification(
+              dispute.workerId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PARTIAL_REFUND_WORKER(
+                booking.bookingId,
+                refundedAmount
+              )
             )
           );
           break;
@@ -389,18 +451,20 @@ export class DisputeService implements IDisputeService {
             },
           };
 
-          await Promise.all([
-            this._disputeRepository.update(disputeId, disputeUpdate),
-            this._bookingRepository.update(booking._id.toString(), bookingUpdate),
-          ]);
+          await this._unitOfWork.execute(async (options) => {
+            await this._disputeRepository.update(disputeId, disputeUpdate, options);
+            await this._bookingRepository.update(booking._id.toString(), bookingUpdate, options);
+          });
 
-          void this._notificationService.createNotification(
-            dispute.userId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PAYOUT_WORKER_CUSTOMER(booking.bookingId)
-          );
-          void this._notificationService.createNotification(
-            dispute.workerId.toString(),
-            NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PAYOUT_WORKER_WORKER(booking.bookingId)
+          this.notify(
+            this._notificationService.createNotification(
+              dispute.userId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PAYOUT_WORKER_CUSTOMER(booking.bookingId)
+            ),
+            this._notificationService.createNotification(
+              dispute.workerId.toString(),
+              NOTIFICATION_TEMPLATES.DISPUTE_RESOLVED_PAYOUT_WORKER_WORKER(booking.bookingId)
+            )
           );
           break;
         }
