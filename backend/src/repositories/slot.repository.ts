@@ -4,6 +4,7 @@ import { Types } from "mongoose";
 import { SLOT_STATUS } from "@/constants/booking";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
+import { RepositoryOptions } from "@/core/types/repository";
 import SlotModel from "@/models/slot.model";
 import { ISlot, SlotOption } from "@/types/slot";
 
@@ -20,7 +21,11 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
     });
   }
 
-  async updatePaymentSlots(slotIds: string[], bookingId: Types.ObjectId): Promise<void> {
+  async updatePaymentSlots(
+    slotIds: string[],
+    bookingId: Types.ObjectId,
+    options?: RepositoryOptions
+  ): Promise<void> {
     await this.model.updateMany(
       { _id: { $in: slotIds.map((id) => new Types.ObjectId(id)) } },
       {
@@ -28,7 +33,8 @@ export class SlotRepository extends BaseRepository<ISlot> implements ISlotReposi
           status: SLOT_STATUS.BOOKED,
           bookingId,
         },
-      }
+      },
+      { session: options?.session }
     );
   }
 

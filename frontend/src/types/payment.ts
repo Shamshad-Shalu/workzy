@@ -62,8 +62,6 @@ export interface PaymentListQuery {
 
 export interface AdminPaymentListQuery extends PaymentListQuery {
   billType?: BillType | 'all';
-  minAmount?: number;
-  maxAmount?: number;
 
   userId?: string;
   workerId?: string;

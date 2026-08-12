@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
@@ -9,17 +8,18 @@ import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerReposit
 import { IRedisService } from "@/core/interfaces/services/IRedisService";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
-import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
+import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
 import {
-  ReviewAdminDTO,
-  ReviewPublicDTO,
-  ReviewResponseDTO,
-  ReviewUserDTO,
-  ReviewWorkerDTO,
+  ReviewAdminDto,
+  ReviewWorkerDto,
+  ReviewResponseDto,
+  ReviewUserDto,
   WorkerReviewStatsDto,
 } from "@/dtos/responses/review.dto";
-import { AdminReviewListQueryInput, ReviewListQueryInput } from "@/types/review";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { ReviewListQuery, ReviewListQueryInput } from "@/types/review/review.query";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 
@@ -30,10 +30,11 @@ export class ReviewService implements IReviewService {
     @inject(TYPES.BookingRepository) private _bookingRepo: IBookingRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.RedisService) private _redisService: IRedisService
+    @inject(TYPES.RedisService) private _redisService: IRedisService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
-  async createReview(userId: string, reviewData: CreateReviewDTO): Promise<ReviewResponseDTO> {
+  async createReview(userId: string, reviewData: CreateReviewDto): Promise<ReviewResponseDto> {
     const { bookingId, rating, reviewText, media } = reviewData;
     const booking = await getEntityOrThrow(this._bookingRepo, bookingId, BOOKING.NOT_FOUND);
     const { status, reviewId, workerId, serviceId, categoryId } = booking;
@@ -57,18 +58,21 @@ export class ReviewService implements IReviewService {
       media,
       createdAt: new Date(),
     });
-    await Promise.all([
-      this._bookingRepo.update(bookingId, {
-        hasVisibleReview: true,
-        reviewId: review._id,
-      }),
-      this._workerRepository.incrementRating(workerId.toString(), rating),
-    ]);
+
+    await this._unitOfWork.execute(async (options) => {
+      await this._bookingRepo.findByIdAndUpdate(
+        bookingId,
+        { hasVisibleReview: true, reviewId: review._id },
+        options
+      );
+      await this._workerRepository.incrementRating(workerId.toString(), rating);
+    });
+
     await this._redisService.clearPattern("reviews");
-    return ReviewResponseDTO.fromEntity(review);
+    return ReviewResponseDto.fromEntity(review);
   }
 
-  async updateReview(reviewId: string, updateData: UpdateReviewDTO): Promise<ReviewResponseDTO> {
+  async updateReview(reviewId: string, updateData: UpdateReviewDto): Promise<ReviewResponseDto> {
     const review = await getEntityOrThrow(this._reviewRepo, reviewId, REVIEW.NOT_FOUND);
     const oldUrls = review.media?.map((m) => m.url) ?? [];
     const newUrls = updateData.media?.map((m) => m.url) ?? [];
@@ -78,42 +82,38 @@ export class ReviewService implements IReviewService {
       ...updateData,
       isEdited: true,
     });
-    const tasks: Promise<void>[] = [];
     if (updateData.rating && updateData.rating !== review.rating) {
-      tasks.push(
-        this._workerRepository.adjustRating(
-          String(review.workerId),
-          review.rating,
-          updateData.rating
-        )
+      await this._workerRepository.adjustRating(
+        String(review.workerId),
+        review.rating,
+        updateData.rating
       );
     }
-    if (removedUrls.length > 0) {
-      tasks.push(
-        Promise.allSettled(removedUrls.map((url) => this._s3Service.deleteFile(url))).then(() => {})
-      );
-    }
-    await Promise.all(tasks);
     if (!updated) {
       throw new CustomError(REVIEW.UPDATE_ERROR, HTTPSTATUS.BAD_REQUEST);
     }
     await this._redisService.clearPattern("reviews");
-    return ReviewResponseDTO.fromEntity(updated);
+    if (removedUrls.length > 0) {
+      void Promise.allSettled(removedUrls.map((url) => this._s3Service.deleteFile(url))).then(
+        () => {}
+      );
+    }
+    return ReviewResponseDto.fromEntity(updated);
   }
 
-  async getReviewById(reviewId: string): Promise<ReviewResponseDTO> {
+  async getReviewById(reviewId: string): Promise<ReviewResponseDto> {
     const review = await this._reviewRepo.findById(reviewId);
     if (!review) {
       throw new CustomError("review not found", HTTPSTATUS.BAD_REQUEST);
     }
-    return ReviewResponseDTO.fromEntity(review);
+    return ReviewResponseDto.fromEntity(review);
   }
 
   async addReplyToReview(
     reviewId: string,
-    data: ReviewReplyDTO,
+    data: ReviewReplyDto,
     workerId: string
-  ): Promise<ReviewResponseDTO> {
+  ): Promise<ReviewResponseDto> {
     const review = await this._reviewRepo.findOneAndUpdate(
       {
         _id: new Types.ObjectId(reviewId),
@@ -130,101 +130,76 @@ export class ReviewService implements IReviewService {
       throw new CustomError(REVIEW.NOT_FOUND, HTTPSTATUS.BAD_REQUEST);
     }
     await this._redisService.clearPattern("reviews");
-    return ReviewResponseDTO.fromEntity(review);
+    return ReviewResponseDto.fromEntity(review);
   }
 
   async toggleReviewVisibility(reviewId: string): Promise<string> {
     const review = await getEntityOrThrow(this._reviewRepo, reviewId, REVIEW.NOT_FOUND);
     const newStatus = !review.isHidden;
 
-    await Promise.all([
-      this._reviewRepo.update(reviewId, { isHidden: newStatus }),
-      this._bookingRepo.update(review.bookingId.toString(), { hasVisibleReview: !newStatus }),
-      newStatus
-        ? this._workerRepository.decrementRating(review.workerId.toString(), review.rating)
-        : this._workerRepository.incrementRating(review.workerId.toString(), review.rating),
-      this._redisService.clearPattern("reviews"),
-    ]);
+    await this._unitOfWork.execute(async (options) => {
+      await this._reviewRepo.update(reviewId, { isHidden: newStatus }, options);
+      await this._bookingRepo.update(
+        review.bookingId.toString(),
+        { hasVisibleReview: !newStatus },
+        options
+      );
+      if (newStatus) {
+        await this._workerRepository.decrementRating(review.workerId.toString(), review.rating);
+      } else {
+        await this._workerRepository.incrementRating(review.workerId.toString(), review.rating);
+      }
+    });
+    await this._redisService.clearPattern("reviews");
     return newStatus ? REVIEW.HIDDEN : REVIEW.UNHIDDEN;
   }
 
-  async listReviews(
-    input: AdminReviewListQueryInput
-  ): Promise<{ reviews: ReviewAdminDTO[]; nextCursor: string | null }> {
-    const { fromDate, toDate } = input;
-    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
-      ...input,
-      fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
-      toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
-    });
+  async listReviews(input: ReviewListQuery): Promise<CursorPaginatedResult<ReviewAdminDto>> {
+    const { data, nextCursor } = await this._reviewRepo.getAllReviews(input);
     return {
-      reviews: await ReviewAdminDTO.fromEntities(reviews, this._s3Service),
+      data: await ReviewAdminDto.fromEntities(data, this._s3Service),
       nextCursor,
     };
   }
 
-  async getPublicWorkerReviews(
-    workerId: string,
-    input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }> {
-    const { limit, cursor, rating, sortBy, sortOrder } = input;
-    const cacheKey = `reviews:public:${workerId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
-    const cachedData = await this._redisService.get(cacheKey);
-    if (cachedData) {
-      return JSON.parse(cachedData);
-    }
-    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
-      workerId,
-      status: "visible",
-      ...input,
-    });
-    const response = {
-      reviews: await ReviewPublicDTO.fromEntities(reviews, this._s3Service),
-      nextCursor,
-    };
-    await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
-    return response;
-  }
   async getUserReviews(
     userId: string,
     input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }> {
-    const { limit, cursor, rating, sortBy, sortOrder } = input;
-    const cacheKey = `reviews:${userId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
+  ): Promise<CursorPaginatedResult<ReviewUserDto>> {
+    const { limit, cursor, rating, sortBy, sortOrder, status } = input;
+    const cacheKey = `reviews:${userId}:${status}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
     const cachedData = await this._redisService.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
+    const { data, nextCursor } = await this._reviewRepo.getAllReviews({
       userId,
-      status: "visible",
       ...input,
     });
     const response = {
-      reviews: await ReviewUserDTO.fromEntities(reviews, this._s3Service),
+      data: await ReviewUserDto.fromEntities(data, this._s3Service),
       nextCursor,
     };
     await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));
     return response;
   }
 
-  async getMyWorkerReviews(
+  async getWorkerReviews(
     workerId: string,
     input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewWorkerDTO[]; nextCursor: string | null }> {
-    const { limit, cursor, rating, sortBy, sortOrder } = input;
-    const cacheKey = `reviews:${workerId}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
+  ): Promise<CursorPaginatedResult<ReviewWorkerDto>> {
+    const { limit, cursor, rating, sortBy, sortOrder, status } = input;
+    const cacheKey = `reviews:${workerId}:${status}:${limit}:${cursor ?? "first"}:${sortBy}:${sortOrder}:${rating ?? "all"}`;
     const cachedData = await this._redisService.get(cacheKey);
     if (cachedData) {
       return JSON.parse(cachedData);
     }
-    const { reviews, nextCursor } = await this._reviewRepo.getAllReviews({
+    const { data, nextCursor } = await this._reviewRepo.getAllReviews({
       workerId,
-      status: "visible",
       ...input,
     });
     const response = {
-      reviews: await ReviewWorkerDTO.fromEntities(reviews, this._s3Service),
+      data: await ReviewWorkerDto.fromEntities(data, this._s3Service),
       nextCursor,
     };
     await this._redisService.setWithTTL(cacheKey, JSON.stringify(response));

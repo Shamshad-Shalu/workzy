@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export function BookingCardSkeleton() {
+function BookingCardSkeletonItem() {
   return (
     <div className="bg-card rounded-xl border border-border border-l-4 border-l-muted shadow-sm overflow-hidden">
       <div className="p-5 space-y-4">
@@ -33,11 +33,11 @@ export function BookingCardSkeleton() {
   );
 }
 
-export default function BookingCardSkeletonList({ count = 4 }: { count?: number }) {
+export default function BookingCardSkeleton({ count = 4 }: { count?: number }) {
   return (
     <div className="space-y-3">
       {Array.from({ length: count }).map((_, i) => (
-        <BookingCardSkeleton key={i} />
+        <BookingCardSkeletonItem key={i} />
       ))}
     </div>
   );

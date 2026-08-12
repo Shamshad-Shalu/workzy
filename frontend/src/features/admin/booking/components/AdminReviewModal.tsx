@@ -5,7 +5,7 @@ import Button from '@/components/atoms/Button';
 import { StarRating } from '@/components/atoms/StarRating';
 import { AppModal } from '@/components/molecules/AppModal';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
-import { useReviewDetails } from '@/features/user/booking/hooks/useReview';
+import { useReviewDetails } from '@/features/review';
 import { formatSmartDateTime } from '@/utils/time.format';
 
 interface AdminReviewModalProps {
@@ -23,7 +23,7 @@ export default function AdminReviewModal({
   onToggleVisibility,
   isToggling = false,
 }: AdminReviewModalProps) {
-  const { review, isLoading } = useReviewDetails(reviewId);
+  const { data: review, isLoading } = useReviewDetails(reviewId);
   const [previewIndex, setPreviewIndex] = useState<number | null>(null);
 
   const mediaItems = review?.media ?? [];

@@ -31,7 +31,7 @@ export default function WorkerBookingDetailsPage() {
         role={ROLE.WORKER}
         handlers={{
           onAccept: id => accept.setAcceptBId(id),
-          onReject: id => accept.setAcceptBId(id),
+          onReject: id => reject.setRejectBId(id),
           onEnRoute: id => setEnRouteBId(id),
           onReached: id => setReachedBId(id),
           onDispute: id => setDisputeBId(id),

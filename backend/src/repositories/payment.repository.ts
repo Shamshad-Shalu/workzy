@@ -4,6 +4,7 @@ import { FilterQuery, Types } from "mongoose";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import Payment from "@/models/payment.model";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IPayment } from "@/types/payment/payment.entity";
 import { PaymentListQuery } from "@/types/payment/payment.query";
 
@@ -12,22 +13,8 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
   constructor() {
     super(Payment);
   }
-  async getPayments(
-    filter: PaymentListQuery
-  ): Promise<{ payments: IPayment[]; nextCursor: string | null }> {
-    const {
-      limit,
-      billType,
-      cursor,
-      fromDate,
-      toDate,
-      maxAmount,
-      minAmount,
-      search,
-      status,
-      userId,
-      workerId,
-    } = filter;
+  async getPayments(filter: PaymentListQuery): Promise<CursorPaginatedResult<IPayment>> {
+    const { limit, billType, cursor, fromDate, toDate, search, status, userId, workerId } = filter;
 
     const query: FilterQuery<IPayment> = {};
     const andConditions: FilterQuery<IPayment>[] = [];
@@ -45,13 +32,6 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
       query.createdAt = {
         ...(fromDate && { $gte: fromDate }),
         ...(toDate && { $lte: toDate }),
-      };
-    }
-
-    if (minAmount || maxAmount) {
-      query.amount = {
-        ...(minAmount && { $gte: minAmount }),
-        ...(maxAmount && { $lte: maxAmount }),
       };
     }
     if (search) {
@@ -103,7 +83,7 @@ export class PaymentRepository extends BaseRepository<IPayment> implements IPaym
       ).toString("base64url");
     }
     return {
-      payments: docs,
+      data: docs,
       nextCursor,
     };
   }

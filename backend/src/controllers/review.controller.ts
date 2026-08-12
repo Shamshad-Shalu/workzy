@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { Request, Response } from "express";
 import asyncHandler from "express-async-handler";
 import { inject, injectable } from "inversify";
@@ -6,8 +7,8 @@ import { AUTH, HTTPSTATUS, REVIEW } from "@/constants";
 import { IReviewController } from "@/core/interfaces/controllers/IReviewController";
 import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { TYPES } from "@/di/types";
-import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
-import { ReviewListQueryInput } from "@/types/review";
+import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
+import { ReviewListQueryInput } from "@/types/review/review.query";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -22,14 +23,14 @@ export class ReviewController implements IReviewController {
 
   createReview = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
-    const data = req.body as CreateReviewDTO;
+    const data = req.body as CreateReviewDto;
     const review = await this._reviewService.createReview(userId, data);
     res.status(HTTPSTATUS.CREATED).json({ message: REVIEW.CREATED, review });
   });
 
   updateReviewById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
-    const data = req.body as UpdateReviewDTO;
+    const data = req.body as UpdateReviewDto;
     const review = await this._reviewService.updateReview(reviewId, data);
     res.status(HTTPSTATUS.OK).json({ message: REVIEW.UPDATED, review });
   });
@@ -37,7 +38,7 @@ export class ReviewController implements IReviewController {
   addReplyToReview = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const { reviewId } = req.params;
-    const data = req.body as ReviewReplyDTO;
+    const data = req.body as ReviewReplyDto;
     await this._reviewService.addReplyToReview(reviewId, data, workerId);
     res.status(HTTPSTATUS.OK).json({ message: REVIEW.REPLY_ADDED });
   });
@@ -52,31 +53,31 @@ export class ReviewController implements IReviewController {
     const query = this.parseQuery(req);
     const userId = req.query.userId as string | undefined;
     const workerId = req.query.workerId as string | undefined;
-
-    const { reviews, nextCursor } = await this._reviewService.listReviews({
+    const fromDate = req.query.fromDate as string | undefined;
+    const toDate = req.query.toDate as string | undefined;
+    const { data, nextCursor } = await this._reviewService.listReviews({
       ...query,
-      status: (req.query.status as "all" | "hidden" | "visible") ?? "all",
       search: (req.query.search as string) ?? "",
       serviceId: (req.query.serviceId as string) ?? undefined,
       categoryId: (req.query.categoryId as string) ?? undefined,
       minRating: req.query.minRating ? Number(req.query.minRating) : undefined,
       maxRating: req.query.maxRating ? Number(req.query.maxRating) : undefined,
-      fromDate: req.query.fromDate as string | undefined,
-      toDate: req.query.toDate as string | undefined,
+      fromDate: fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined,
+      toDate: toDate ? dayjs(toDate).endOf("day").toDate() : undefined,
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ reviews, nextCursor });
+    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
   });
 
   getPublicWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const query = this.parseQuery(req);
-    const { reviews, nextCursor } = await this._reviewService.getPublicWorkerReviews(
-      workerId,
-      query
-    );
-    res.status(HTTPSTATUS.OK).json({ reviews: reviews, nextCursor: nextCursor });
+    const { data, nextCursor } = await this._reviewService.getWorkerReviews(workerId, {
+      ...query,
+      status: "visible",
+    });
+    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor: nextCursor });
   });
 
   getWorkerReviewStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -88,15 +89,15 @@ export class ReviewController implements IReviewController {
   getMyWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
-    const { reviews, nextCursor } = await this._reviewService.getMyWorkerReviews(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews, nextCursor });
+    const { data, nextCursor } = await this._reviewService.getWorkerReviews(workerId, query);
+    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
   });
 
-  getMyReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+  getUserReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
-    const result = await this._reviewService.getUserReviews(userId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews: result.reviews, nextCursor: result.nextCursor });
+    const { data, nextCursor } = await this._reviewService.getUserReviews(userId, query);
+    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
   });
 
   private parseQuery(req: Request): ReviewListQueryInput {
@@ -116,6 +117,7 @@ export class ReviewController implements IReviewController {
         : undefined,
       sortBy: req.query.sortBy as "createdAt" | "rating" | undefined,
       sortOrder: req.query.sortOrder as "asc" | "desc" | undefined,
+      status: (req.query.status as "all" | "hidden" | "visible") ?? "all",
     };
   }
   private requireUserId(req: Request): string {

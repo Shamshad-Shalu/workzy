@@ -2,19 +2,20 @@ import { lazy } from 'react';
 import { Route, Routes } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
-import WorkerPaymentsPage from '@/features/worker/payments/pages/WorkerPaymentsPage';
-import WorkerQuotePage from '@/features/worker/quote/pages/WorkerQuotePage';
-import WorkerQuotesListPage from '@/features/worker/quote/pages/WorkerQuotesListPage';
 
 import ProtectedRoute from './ProtectedRoute';
 
 const WorkerChatPage = lazy(() => import('@/features/worker/chat/pages/WorkerChatPage'));
+const WorkerPaymentsPage = lazy(() => import('@/features/payments/pages/WorkerPaymentsPage'));
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
 const WorkerDisputesPage = lazy(
   () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
 );
+const WorkerQuoteCreatePage = lazy(() => import('@/features/quote/pages/WorkerQuoteCreatePage'));
+const WorkerQuotesListPage = lazy(() => import('@/features/quote/pages/WorkerQuotesListPage'));
+
 const WorkerDashboard = lazy(() => import('@/features/worker/dashboard/pages/WorkerDashboard'));
-const WorkerReviews = lazy(() => import('@/features/worker/reviews/pages/WorkerReviewsPage'));
+const WorkerOwnReviewsPage = lazy(() => import('@/features/review/pages/WorkerOwnReviewsPage'));
 const WorkerServicesPage = lazy(
   () => import('@/features/worker/services/pages/WorkerServicesPage')
 );
@@ -43,18 +44,18 @@ export default function WorkerRoutes() {
       <Route element={<ProtectedRoute requiredRoles={[ROLE.WORKER]} />}>
         <Route element={<WorkerLayout />}>
           <Route path="dashboard" element={<WorkerDashboard />} />
-          <Route path="reviews" element={<WorkerReviews />} />
+          <Route path="reviews" element={<WorkerOwnReviewsPage />} />
           <Route path="services" element={<WorkerServicesPage />} />
           <Route path="payments" element={<WorkerPaymentsPage />} />
           <Route path="bookings" element={<WorkerBookingsPage />} />
           <Route path="bookings/:bookingId" element={<WorkerBookingDetailsPage />} />
           <Route path="quotes" element={<WorkerQuotesListPage />} />
+          <Route path="quotes/:bookingId" element={<WorkerQuoteCreatePage />} />
           <Route path="messages">
             <Route index element={<WorkerChatPage />} />
             <Route path=":chatId" element={<WorkerChatPage />} />
           </Route>
           <Route path="disputes" element={<WorkerDisputesPage />} />
-          <Route path="quotes/:bookingId" element={<WorkerQuotePage />} />
           <Route path="profile" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerAboutContentPage />} />
             <Route path="documents" element={<WorkerDocumentsContentPage />} />

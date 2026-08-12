@@ -8,7 +8,7 @@ import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
-import { type Role } from '@/constants';
+import { ROLE, type Role } from '@/constants';
 import {
   DISPUTE_STATUS_VALUES,
   DISPUTE_REASON_LABELS,
@@ -22,7 +22,12 @@ import { cn } from '@/lib/utils';
 
 import { useDisputes, useDisputeStats } from '../hooks/useDisputes';
 
-export default function DisputePage({ role }: { role: Role }) {
+interface DisputePageProps {
+  role?: Role;
+  userId?: string;
+  workerId?: string;
+}
+export default function DisputePage({ role = ROLE.USER, workerId, userId }: DisputePageProps) {
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const { updateParams, search, status, reason } = useUrlFilterParams<{
     reason: DisputeReason | 'all';
@@ -36,12 +41,13 @@ export default function DisputePage({ role }: { role: Role }) {
     error,
     isError,
     refetch,
-  } = useDisputes({ search, status, reason, role });
+  } = useDisputes({ search, status, reason, userId, workerId });
+
   const {
     data: statsData,
     isLoading: isStatsLoading,
     isError: isStatsError,
-  } = useDisputeStats(role);
+  } = useDisputeStats({ userId, workerId });
 
   const disputes = data?.pages.flatMap(page => page.disputes) ?? [];
 
@@ -56,14 +62,23 @@ export default function DisputePage({ role }: { role: Role }) {
 
   return (
     <main className="p-4 lg:p-6">
-      <PageHeader title="Disputes" description="Manage and resolve all booking disputes" />
+      {!workerId && !userId && (
+        <PageHeader title="Disputes" description="Manage and resolve all booking disputes" />
+      )}
       <DisputeStatsSection
         isError={isStatsError}
         isLoading={isStatsLoading}
         statsData={statsData}
       />
-      <div className="grid sm:grid-cols-12 gap-4 mt-12">
-        <div className={cn('sm:col-span-8', hasActiveFilters && 'sm:col-span-7')}>
+      <div
+        className={cn(
+          'grid grid-cols-12 gap-4 mt-12',
+          hasActiveFilters
+            ? 'md:grid-cols-[1fr_200px_200px_auto]'
+            : 'md:grid-cols-[1fr_200px_200px]'
+        )}
+      >
+        <div className={cn('col-span-12 md:col-span-1', hasActiveFilters && 'col-span-8')}>
           <SearchInput
             disabled={isError}
             placeholder="Search by bookingId or ServiceName..."
@@ -71,7 +86,20 @@ export default function DisputePage({ role }: { role: Role }) {
             onChange={handleSearchChange}
           />
         </div>
-        <div className="sm:col-span-2">
+        {hasActiveFilters && (
+          <div className="col-span-4 md:col-span-1 flex items-start md:order-last">
+            <Button
+              onClick={clearFilters}
+              size="md"
+              iconLeft={<X className="h-3 w-3" />}
+              variant="red"
+              className="w-full md:w-auto mt-[1px]"
+            >
+              Clear
+            </Button>
+          </div>
+        )}
+        <div className="col-span-6 md:col-span-1">
           <Select
             value={status}
             onChange={v => updateParams({ status: v })}
@@ -86,7 +114,7 @@ export default function DisputePage({ role }: { role: Role }) {
             ]}
           />
         </div>
-        <div className="sm:col-span-2">
+        <div className="col-span-6 md:col-span-1">
           <Select
             value={reason}
             onChange={v => updateParams({ reason: v })}
@@ -101,17 +129,6 @@ export default function DisputePage({ role }: { role: Role }) {
             ]}
           />
         </div>
-        {hasActiveFilters && (
-          <Button
-            onClick={clearFilters}
-            size="md"
-            iconLeft={<X className="h-3 w-3" />}
-            variant="red"
-            className="ml-auto"
-          >
-            Clear
-          </Button>
-        )}
       </div>
       <div className="mt-6">
         <DataList
@@ -134,7 +151,7 @@ export default function DisputePage({ role }: { role: Role }) {
               }
             />
           }
-          columns={disputeColumns(id => setDisputeBId(id), role)}
+          columns={disputeColumns(id => setDisputeBId(id), role, { workerId, userId })}
           mode="table"
           paginationType="cursor"
           hasNextPage={!!hasNextPage}

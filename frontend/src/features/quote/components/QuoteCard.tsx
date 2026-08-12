@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 import { motion } from 'framer-motion';
 import { ArrowRight, CalendarDays, ChevronDown, Clock, PenIcon, User, Wrench } from 'lucide-react';
 import { useState } from 'react';
@@ -19,7 +20,7 @@ const statusVariantMap: Record<string, 'green' | 'blue' | 'red'> = {
   [QUOTE_STATUS.EXPIRED]: 'red',
 };
 
-export default function QuoteCard({
+export function QuoteCard({
   quote,
   delay,
   onAccept,
@@ -150,14 +151,6 @@ export default function QuoteCard({
   );
 }
 
-function formatSlotDate(date: Date) {
-  return new Intl.DateTimeFormat('en-US', {
-    weekday: 'short',
-    month: 'short',
-    day: 'numeric',
-  }).format(new Date(date));
-}
-
 function PersonChip({
   person,
   label,
@@ -188,7 +181,7 @@ function SlotRow({ slot }: { slot: BookingSlot }) {
     <div className="flex items-center justify-between gap-4 py-1.5 border-b border-border/40 last:border-0">
       <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-foreground">
         <CalendarDays className="h-3 w-3 text-primary/70 flex-shrink-0" />
-        {formatSlotDate(slot.date)}
+        {dayjs(slot.date).format('ddd, MMM D')}
       </span>
       <span className="inline-flex items-center gap-1 text-[11px] text-muted-foreground tabular-nums">
         <Clock className="h-3 w-3 flex-shrink-0" />

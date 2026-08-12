@@ -21,7 +21,7 @@ export default function DisputeStatsSection({ isError, isLoading, statsData }: P
   return (
     <>
       {!isError && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
           {isLoading
             ? DISPUTE_STATS_CONFIG.map((_, i) => <SkeletonStatCard key={i} />)
             : DISPUTE_STATS_CONFIG.map(item => (

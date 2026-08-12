@@ -1,6 +1,6 @@
-import { DISPUTE_API, type Role } from '@/constants';
-import type { DisputeResolveFormType } from '@/features/admin/disputes/validation/disputeResolveFormData';
-import type { DisputeFormType } from '@/features/dispute/validation/disputeFormData';
+import { DISPUTE_API } from '@/constants';
+import type { ResolveDisputeFormType } from '@/features/admin/disputes/validation/resolveDispute.schema';
+import type { RaiseDisputeFormType } from '@/features/dispute/validation/raiseDispute.schema';
 import api from '@/lib/api/axios';
 import type {
   Dispute,
@@ -12,7 +12,7 @@ import type {
 export const disputeService = {
   raiseDispute: async (
     bookingId: string,
-    data: DisputeFormType
+    data: RaiseDisputeFormType
   ): Promise<{ message: string; dispute: Dispute }> => {
     const res = await api.post(DISPUTE_API.BY_BOOKING_ID(bookingId), data);
     return res.data;
@@ -20,7 +20,7 @@ export const disputeService = {
 
   updateDispute: async (
     disputeId: string,
-    data: DisputeFormType
+    data: RaiseDisputeFormType
   ): Promise<{ message: string; dispute: Dispute }> => {
     const res = await api.patch(DISPUTE_API.UPDATE(disputeId), data);
     return res.data;
@@ -28,7 +28,7 @@ export const disputeService = {
 
   resolveDispute: async (
     disputeId: string,
-    data: DisputeResolveFormType
+    data: ResolveDisputeFormType
   ): Promise<{ message: string }> => {
     const res = await api.patch(DISPUTE_API.RESOLVE(disputeId), data);
     return res.data;
@@ -45,8 +45,11 @@ export const disputeService = {
     return res.data;
   },
 
-  getDisputeStats: async (role: Role): Promise<DisputeStats> => {
-    const res = await api.get(DISPUTE_API.STATS, { params: { role } });
+  getDisputeStats: async (params: {
+    userId?: string;
+    workerId?: string;
+  }): Promise<DisputeStats> => {
+    const res = await api.get(DISPUTE_API.STATS, { params });
     return res.data;
   },
 };

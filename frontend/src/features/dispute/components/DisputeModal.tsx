@@ -1,24 +1,17 @@
 import { Edit, UserCheck, ArrowLeft } from 'lucide-react';
-import { useState } from 'react';
-import { toast } from 'sonner';
 
 import Button from '@/components/atoms/Button';
 import { AppModal } from '@/components/molecules/AppModal';
 import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer';
 import { ROLE, type Role } from '@/constants';
 import { DISPUTE_STATUS } from '@/constants/dispute';
-import { useResolveDispute } from '@/features/admin/disputes/hooks/useDisputes';
-import type { DisputeResolveFormType } from '@/features/admin/disputes/validation/disputeResolveFormData';
-import { handleApiError } from '@/utils/handleApiError';
 
-import { useDisputeDetails, useRaiseDispute, useUpdateDispute } from '../hooks/useDisputes';
+import { useDisputeModal } from '../hooks/useDisputeModal';
 
 import DisputeDetailsView from './DisputeDetailsView';
 import DisputeModalSkeleton from './DisputeModalSkeleton';
 import RaiseDisputeForm from './RaiseDisputeForm';
 import ResolveDisputeForm from './ResolveDisputeForm';
-
-import type { DisputeFormType } from '../validation/disputeFormData';
 
 interface Props {
   open: boolean;
@@ -28,93 +21,47 @@ interface Props {
 }
 
 export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USER }: Props) {
-  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [isResolving, setIsResolving] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
-
-  const { dispute, isLoading: isDisputeLoading, refetch } = useDisputeDetails(bookingId);
-  const { mutateAsync: updateDisputeMutation, isPending: isUpdatingPending } = useUpdateDispute();
-  const { mutateAsync: raiseDisputeMutation, isPending: isRaisingPending } = useRaiseDispute();
-  const isSubmitting = isUpdatingPending || isRaisingPending;
-  const { mutateAsync: resolveDisputeMutation, isPending: isResolvingSubmitting } =
-    useResolveDispute();
+  const {
+    dispute,
+    isDisputeLoading,
+    isSubmitting,
+    isResolvingSubmitting,
+    isUploading,
+    mode,
+    previewIndex,
+    openPreview,
+    closePreview,
+    setIsUploading,
+    nextPreview,
+    previousPreview,
+    backToView,
+    openEdit,
+    openResolve,
+    handleRaiseOrUpdate,
+    handleResolve,
+    handleClose,
+  } = useDisputeModal(bookingId, onClose);
 
   const evidenceItems = dispute?.evidence ?? [];
 
-  const handleRaiseDispute = async (data: DisputeFormType) => {
-    try {
-      if (!bookingId) {
-        return;
-      }
-      if (dispute) {
-        const { message } = await updateDisputeMutation({
-          disputeId: dispute.id,
-          data,
-        });
-        onClose();
-        setIsEditMode(false);
-        return message;
-      } else {
-        const { message } = await raiseDisputeMutation({
-          bookingId,
-          data,
-        });
-        onClose();
-        setIsEditMode(false);
-        return message;
-      }
-    } catch (err) {
-      toast.error(handleApiError(err));
-    }
-  };
-
-  const handleResolveSubmit = async (data: DisputeResolveFormType) => {
-    try {
-      if (!dispute) {
-        return;
-      }
-      const { message } = await resolveDisputeMutation({
-        disputeId: dispute.id,
-        data,
-      });
-      setIsResolving(false);
-      refetch();
-      onClose();
-      return message;
-    } catch (err) {
-      toast.error(handleApiError(err));
-    }
-  };
-
-  const handleClose = () => {
-    setIsEditMode(false);
-    setIsResolving(false);
-    onClose();
-  };
-
-  const renderModalTitle = () => {
-    if (isDisputeLoading) {
-      return 'Loading Dispute...';
-    }
-    if (!dispute) {
-      return 'Raise a Dispute';
-    }
-    if (isResolving) {
-      return 'Resolve Dispute (Admin Panel)';
-    }
-    if (isEditMode) {
-      return 'Edit Dispute Details';
-    }
-    return `Dispute details: #${dispute.disputeId || 'Active'}`;
-  };
+  const isEditMode = mode === 'edit';
+  const isResolveMode = mode === 'resolve';
+  const modalTitle = isDisputeLoading
+    ? 'Loading Dispute...'
+    : !dispute
+      ? 'Raise a Dispute'
+      : mode === 'edit'
+        ? 'Edit Dispute Details'
+        : mode === 'resolve'
+          ? 'Resolve Dispute'
+          : `Dispute Details: #${dispute.disputeId}`;
 
   return (
     <>
       <AppModal
         open={open && previewIndex === null}
         onClose={handleClose}
-        title={renderModalTitle()}
+        title={modalTitle}
         canCloseOnOutsideClick={!isSubmitting && !isResolvingSubmitting && !isUploading}
         className="sm:max-w-3xl max-h-[92vh] overflow-y-auto no-scrollbar rounded-2xl "
         footer={
@@ -142,10 +89,10 @@ export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USE
                 </Button>
               )}
 
-              {!isEditMode && !isResolving && dispute && (
+              {mode === 'view' && dispute && (
                 <>
                   {dispute?.status === DISPUTE_STATUS.PENDING && dispute.raisedBy === role && (
-                    <Button iconLeft={<Edit size={16} />} onClick={() => setIsEditMode(true)}>
+                    <Button iconLeft={<Edit size={16} />} onClick={openEdit}>
                       Edit Dispute
                     </Button>
                   )}
@@ -153,7 +100,7 @@ export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USE
                     dispute.status !== DISPUTE_STATUS.RESOLVED &&
                     dispute.status !== DISPUTE_STATUS.DISMISSED && (
                       <Button
-                        onClick={() => setIsResolving(true)}
+                        onClick={openResolve}
                         variant="green"
                         iconLeft={<UserCheck size={16} />}
                       >
@@ -163,11 +110,11 @@ export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USE
                 </>
               )}
 
-              {isResolving && (
+              {isResolveMode && (
                 <>
                   <Button
                     variant="outline"
-                    onClick={() => setIsResolving(false)}
+                    onClick={backToView}
                     className="flex items-center gap-1 flex-1 sm:flex-none"
                   >
                     <ArrowLeft size={16} /> Back
@@ -190,23 +137,22 @@ export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USE
           <DisputeModalSkeleton />
         ) : (
           <div className="space-y-6 pt-2">
-            {isEditMode || !dispute ? (
+            {!dispute || isEditMode ? (
               <RaiseDisputeForm
-                role={role}
                 mediaUploading={setIsUploading}
-                onSubmit={handleRaiseDispute}
+                onSubmit={handleRaiseOrUpdate}
                 dispute={dispute}
-                onPreview={setPreviewIndex}
+                onPreview={openPreview}
                 key={dispute?.id}
               />
-            ) : isResolving ? (
+            ) : isResolveMode ? (
               <ResolveDisputeForm
                 dispute={dispute}
-                onSubmit={handleResolveSubmit}
+                onSubmit={handleResolve}
                 isSubmitting={isResolvingSubmitting}
               />
             ) : dispute ? (
-              <DisputeDetailsView dispute={dispute} role={role} onPreview={setPreviewIndex} />
+              <DisputeDetailsView dispute={dispute} role={role} onPreview={openPreview} />
             ) : null}
           </div>
         )}
@@ -214,9 +160,9 @@ export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USE
       {previewIndex !== null && evidenceItems[previewIndex] && (
         <MediaViewer
           item={evidenceItems[previewIndex] as MediaItem}
-          onClose={() => setPreviewIndex(null)}
-          onPrev={() => setPreviewIndex(i => Math.max(0, i! - 1))}
-          onNext={() => setPreviewIndex(i => Math.min(evidenceItems.length - 1, i! + 1))}
+          onClose={closePreview}
+          onPrev={previousPreview}
+          onNext={() => nextPreview(evidenceItems.length - 1)}
           hasPrev={previewIndex > 0}
           hasNext={previewIndex < evidenceItems.length - 1}
           counter={`${previewIndex + 1} / ${evidenceItems.length}`}

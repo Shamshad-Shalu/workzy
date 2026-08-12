@@ -4,12 +4,13 @@ import { FilterQuery, Types } from "mongoose";
 import { QUOTE_STATUS } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
+import { RepositoryOptions } from "@/core/types/repository";
 import { WorkerQuoteStatsDto } from "@/dtos/responses/quote.dto";
 import QuoteModel from "@/models/quote.model";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { IQuote } from "@/types/quote/quote.entity";
 import { QuoteListItem } from "@/types/quote/quote.projection";
-import { QuoteListQuery } from "@/types/quote/quote.query";
+import { ISyncRescheduleSlotData, QuoteListQuery } from "@/types/quote/quote.query";
 
 @injectable()
 export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRepository {
@@ -49,7 +50,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
     }
     const docs = await this.model
       .find(filter)
-      .select("dates bookingId totalPrice message status createdAt")
+      .select("dates bookingId serviceId totalPrice message status createdAt")
       .populate("workerId", "profileImage displayName")
       .populate("userId", "profileImage name")
       .populate("categoryId", "iconUrl name")
@@ -74,7 +75,7 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
     };
   }
 
-  async getWokerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
+  async getWorkerQuoteStats(workerId: string): Promise<WorkerQuoteStatsDto> {
     const [stats] = await this.model.aggregate([
       {
         $match: {
@@ -147,6 +148,54 @@ export class QuoteRepository extends BaseRepository<IQuote> implements IQuoteRep
         },
         acceptRate: 0,
       }
+    );
+  }
+
+  async expireQuotes(): Promise<number> {
+    const result = await this.model.updateMany(
+      {
+        status: QUOTE_STATUS.PENDING,
+        expiresAt: { $lt: new Date() },
+      },
+      {
+        status: QUOTE_STATUS.EXPIRED,
+      }
+    );
+    return result.modifiedCount || 0;
+  }
+
+  async syncRescheduleSlot(
+    quoteId: string,
+    { newSlot, newSlotId, oldSlotDate, oldSlotId }: ISyncRescheduleSlotData,
+    options?: RepositoryOptions
+  ): Promise<void> {
+    const session = options?.session;
+    await this.model.bulkWrite(
+      [
+        {
+          updateOne: {
+            filter: { _id: new Types.ObjectId(quoteId) },
+            update: {
+              $pull: {
+                slotIds: new Types.ObjectId(oldSlotId),
+                dates: { date: oldSlotDate },
+              },
+            },
+          },
+        },
+        {
+          updateOne: {
+            filter: { _id: new Types.ObjectId(quoteId) },
+            update: {
+              $push: {
+                slotIds: new Types.ObjectId(newSlotId),
+                dates: { $each: [newSlot], $sort: { date: 1 } },
+              },
+            },
+          },
+        },
+      ],
+      { session }
     );
   }
 }

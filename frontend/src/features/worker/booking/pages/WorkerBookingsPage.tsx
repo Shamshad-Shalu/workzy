@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import PageHeader from '@/components/molecules/PageHeader';
 import { ROLE, type BookingFilterStatus } from '@/constants';
+import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
 import DisputeModal from '@/features/dispute/components/DisputeModal';
@@ -13,7 +14,7 @@ import WorkerExtraChargeModal from '../components/WorkerExtraChargeModal';
 import WorkerRejectModal from '../components/WorkerRejectModal';
 import WorkerReviewReplyModal from '../components/WorkerReviewModal';
 import WorkerStartJobModal from '../components/WorkerStartJobModal';
-import { useWorkerBooking, useWorkerBookingHandler } from '../hooks/useWorkerBooking';
+import { useWorkerBookingHandler } from '../hooks/useWorkerBooking';
 
 export default function WorkerBookingsPage() {
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export default function WorkerBookingsPage() {
   const { reachedBId, setReachedBId, handleMarkReached, isReachedPending } = reached;
 
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useWorkerBooking(status);
+    useBookings({ status });
 
   const bookings = data?.pages.flatMap(p => p.bookings) ?? [];
 

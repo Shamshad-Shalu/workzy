@@ -1,0 +1,90 @@
+import dayjs from 'dayjs';
+import { useCallback } from 'react';
+
+import type { BillType, PaymentStatus } from '@/constants/payment';
+import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
+
+const CUSTOM_PARAMS = [
+  { key: 'billType', defaultValue: 'all' },
+  { key: 'fromDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
+  { key: 'toDate', parser: (v: string) => (v ? dayjs(v).toDate() : null) },
+];
+
+export const formatDateForUrl = (date: Date | null | undefined): string | null => {
+  if (!date) {
+    return null;
+  }
+  return dayjs(date).format('YYYY-MM-DD');
+};
+
+export function usePaymentFilterParams() {
+  const { search, status, billType, updateParams, fromDate, toDate } = useUrlFilterParams<{
+    billType: string;
+    fromDate: Date | null;
+    toDate: Date | null;
+  }>(CUSTOM_PARAMS);
+
+  const handleSearchChange = useCallback(
+    (v: string) => updateParams({ search: v }),
+    [updateParams]
+  );
+
+  const handleStatusChange = useCallback(
+    (v: string) => updateParams({ status: v }),
+    [updateParams]
+  );
+
+  const handleBillTypeChange = useCallback(
+    (v: string) => updateParams({ billType: v }),
+    [updateParams]
+  );
+
+  const handleFromDateChange = useCallback(
+    (date: Date | undefined) => updateParams({ fromDate: formatDateForUrl(date) }),
+    [updateParams]
+  );
+
+  const handleToDateChange = useCallback(
+    (date: Date | undefined) => updateParams({ toDate: formatDateForUrl(date) }),
+    [updateParams]
+  );
+
+  const clearAllFilters = useCallback(() => {
+    updateParams({
+      search: '',
+      status: 'all',
+      billType: 'all',
+      fromDate: null,
+      toDate: null,
+    });
+  }, [updateParams]);
+
+  const hasActiveFilters = !!(
+    fromDate ||
+    toDate ||
+    (status && status !== 'all') ||
+    (billType && billType !== 'all') ||
+    search
+  );
+
+  const fromDateString = fromDate ? dayjs(fromDate).startOf('day').format('YYYY-MM-DD') : undefined;
+  const toDateString = toDate ? dayjs(toDate).endOf('day').format('YYYY-MM-DD') : undefined;
+
+  return {
+    search,
+    status: status as PaymentStatus | 'all',
+    billType: billType as BillType | 'all',
+    fromDate,
+    toDate,
+    fromDateString,
+    toDateString,
+    hasActiveFilters,
+    handleSearchChange,
+    handleStatusChange,
+    handleBillTypeChange,
+    handleFromDateChange,
+    handleToDateChange,
+    clearAllFilters,
+    updateParams,
+  };
+}

@@ -4,7 +4,6 @@ import { Route, Routes } from 'react-router-dom';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROLE } from '@/constants';
 import UserChatPage from '@/features/user/chat/UserChatPage';
-import UserPaymentsPage from '@/features/user/payments/pages/UserPaymentsPage';
 import NotFound from '@/pages/NotFound';
 
 import GuestRoute from './GuestRoute';
@@ -31,14 +30,17 @@ const WorkerProfileRouteLayout = lazy(
 );
 const WorkerProfilePage = lazy(() => import('@/features/user/worker/pages/WorkerProfilePage'));
 const WorkerServicesPage = lazy(() => import('@/features/user/worker/pages/WorkerServicesPage'));
-const WorkerReviewsPage = lazy(() => import('@/features/user/worker/pages/WorkerReviewsPage'));
-const UserQuotesListPage = lazy(() => import('@/features/user/quote/pages/UserQuotesListPage'));
+const WorkerPublicReviewsPage = lazy(
+  () => import('@/features/review/pages/WorkerPublicReviewsPage.tsx')
+);
+const UserQuotesListPage = lazy(() => import('@/features/quote/pages/UserQuotesListPage'));
 
 const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBookingsPage'));
 const UserBookingDetailsPage = lazy(
   () => import('@/features/user/booking/pages/UserBookingDetailsPage')
 );
 const UserDisputesPage = lazy(() => import('@/features/user/disputes/pages/UserDisputesPage'));
+const UserPaymentsPage = lazy(() => import('@/features/payments/pages/UserPaymentsPage'));
 
 export default function UserRoutes() {
   return (
@@ -73,7 +75,7 @@ export default function UserRoutes() {
           <Route path="/workers/:workerId" element={<WorkerProfileRouteLayout />}>
             <Route index element={<WorkerProfilePage />} />
             <Route path="services" element={<WorkerServicesPage />} />
-            <Route path="reviews" element={<WorkerReviewsPage />} />
+            <Route path="reviews" element={<WorkerPublicReviewsPage />} />
           </Route>
           <Route path="not-found" element={<NotFound />} />
           <Route path="*" element={<NotFound />} />

@@ -1,43 +1,32 @@
-import { CreateReviewDTO, UpdateReviewDTO, ReviewReplyDTO } from "@/dtos/requests/review.dto";
+import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
 import {
-  ReviewResponseDTO,
-  ReviewUserDTO,
+  ReviewResponseDto,
+  ReviewUserDto,
   WorkerReviewStatsDto,
+  ReviewAdminDto,
+  ReviewWorkerDto,
 } from "@/dtos/responses/review.dto";
-import { AdminReviewListQueryInput, ReviewListQueryInput } from "@/types/review";
-
-import {
-  ReviewAdminDTO,
-  ReviewPublicDTO,
-  ReviewWorkerDTO,
-} from "../../../dtos/responses/review.dto";
+import { CursorPaginatedResult } from "@/types/common/pagination";
+import { ReviewListQueryInput, ReviewListQuery } from "@/types/review/review.query";
 
 export interface IReviewService {
-  createReview(userId: string, reviewData: CreateReviewDTO): Promise<ReviewResponseDTO>;
-  updateReview(reviewId: string, updateData: UpdateReviewDTO): Promise<ReviewResponseDTO>;
-  getReviewById(reviewId: string): Promise<ReviewResponseDTO>;
+  createReview(userId: string, reviewData: CreateReviewDto): Promise<ReviewResponseDto>;
+  updateReview(reviewId: string, updateData: UpdateReviewDto): Promise<ReviewResponseDto>;
+  getReviewById(reviewId: string): Promise<ReviewResponseDto>;
   addReplyToReview(
     reviewId: string,
-    data: ReviewReplyDTO,
+    data: ReviewReplyDto,
     workerId: string
-  ): Promise<ReviewResponseDTO>;
+  ): Promise<ReviewResponseDto>;
   toggleReviewVisibility(reviewId: string): Promise<string>;
-  listReviews(
-    input: AdminReviewListQueryInput
-  ): Promise<{ reviews: ReviewAdminDTO[]; nextCursor: string | null }>;
-  getPublicWorkerReviews(
+  listReviews(input: ReviewListQuery): Promise<CursorPaginatedResult<ReviewAdminDto>>;
+  getWorkerReviews(
     workerId: string,
     input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewPublicDTO[]; nextCursor: string | null }>;
-
-  getMyWorkerReviews(
-    workerId: string,
-    input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewWorkerDTO[]; nextCursor: string | null }>;
-
+  ): Promise<CursorPaginatedResult<ReviewWorkerDto>>;
   getUserReviews(
     userId: string,
     input: ReviewListQueryInput
-  ): Promise<{ reviews: ReviewUserDTO[]; nextCursor: string | null }>;
+  ): Promise<CursorPaginatedResult<ReviewUserDto>>;
   getWorkerReviewStats(workerId: string): Promise<WorkerReviewStatsDto>;
 }

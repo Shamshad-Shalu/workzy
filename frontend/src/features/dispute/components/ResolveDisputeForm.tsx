@@ -14,14 +14,14 @@ import {
   DISPUTE_STATUS_VALUES,
 } from '@/constants/dispute';
 import {
-  disputeResolveFormData,
-  type DisputeResolveFormType,
-} from '@/features/admin/disputes/validation/disputeResolveFormData';
+  resolveDisputeSchema,
+  type ResolveDisputeFormType,
+} from '@/features/admin/disputes/validation/resolveDispute.schema';
 import type { Dispute } from '@/types/dispute';
 
 interface Props {
   dispute: Dispute | null;
-  onSubmit: (data: DisputeResolveFormType) => Promise<string | undefined | void>;
+  onSubmit: (data: ResolveDisputeFormType) => Promise<string | undefined | void>;
   isSubmitting: boolean;
 }
 
@@ -34,8 +34,8 @@ export default function ResolveDisputeForm({ dispute, onSubmit, isSubmitting }: 
     formState: { errors },
     reset,
     control,
-  } = useForm<DisputeResolveFormType>({
-    resolver: zodResolver(disputeResolveFormData) as Resolver<DisputeResolveFormType>,
+  } = useForm<ResolveDisputeFormType>({
+    resolver: zodResolver(resolveDisputeSchema) as Resolver<ResolveDisputeFormType>,
     defaultValues: {
       status: DISPUTE_STATUS.UNDER_REVIEW,
       note: '',
@@ -43,7 +43,7 @@ export default function ResolveDisputeForm({ dispute, onSubmit, isSubmitting }: 
     mode: 'onChange',
   });
 
-  const onSubmitForm = async (data: DisputeResolveFormType) => {
+  const onSubmitForm = async (data: ResolveDisputeFormType) => {
     const message = await onSubmit({
       status: data.status,
       resolution: data.status === DISPUTE_STATUS.RESOLVED ? data.resolution : undefined,

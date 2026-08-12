@@ -41,6 +41,7 @@ import { INotificationService } from "@/core/interfaces/services/INotificationSe
 import { IOTPService } from "@/core/interfaces/services/IOTPService";
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import {
   CancelRescheduleDto,
@@ -83,7 +84,8 @@ export class BookingService implements IBookingService {
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
     @inject(TYPES.ChatRepository) private _chatRepository: IChatRepository,
-    @inject(TYPES.MessageService) private _messageService: IMessageService
+    @inject(TYPES.MessageService) private _messageService: IMessageService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
   async getBookings(input: BookingListQuery): Promise<CursorPaginatedResult<BookingListItemDTO>> {
@@ -215,23 +217,38 @@ export class BookingService implements IBookingService {
         ? BOOKING_PAYMENT_STATUS.REFUNDED
         : booking.paymentStatus;
 
-    await this._bookingRepository.findByIdAndUpdate(bookingId, {
-      $set: {
-        status: BOOKING_STATUS.CANCELLED,
-        paymentStatus,
-      },
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.CANCELLED, ROLE.USER, reason),
-      },
+    await this._unitOfWork.execute(async (options) => {
+      await this._bookingRepository.findByIdAndUpdate(
+        bookingId,
+        {
+          $set: {
+            status: BOOKING_STATUS.CANCELLED,
+            paymentStatus,
+          },
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.CANCELLED,
+              ROLE.USER,
+              reason
+            ),
+          },
+        },
+        options
+      );
+      await this._slotRepository.deleteMany(
+        {
+          bookingId: new Types.ObjectId(bookingId),
+          reservedBy: new Types.ObjectId(userId),
+          status: SLOT_STATUS.BOOKED,
+        },
+        options
+      );
     });
-    await Promise.all([
-      this._slotRepository.deleteMany({
-        bookingId: new Types.ObjectId(bookingId),
-        reservedBy: new Types.ObjectId(userId),
-        status: SLOT_STATUS.BOOKED,
-      }),
-      this.sendBookingEvent(booking, `Booking ${booking.bookingId} has been cancelled by the user`),
-    ]);
+
+    void this.sendBookingEvent(
+      booking,
+      `Booking ${booking.bookingId} has been cancelled by the user`
+    );
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_CANCELLED(booking.bookingId)
@@ -239,37 +256,41 @@ export class BookingService implements IBookingService {
   }
 
   async acceptBooking(bookingId: string, workerId: string): Promise<void> {
-    const booking = await this._bookingRepository.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(bookingId),
-        workerId: new Types.ObjectId(workerId),
-        status: BOOKING_STATUS.PENDING,
-        paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
-      },
-      {
-        status: BOOKING_STATUS.CONFIRMED,
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            BOOKING_STATUS.CONFIRMED,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.CONFIRMED
-          ),
+    const booking = await this._unitOfWork.execute(async (options) => {
+      const updated = await this._bookingRepository.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(bookingId),
+          workerId: new Types.ObjectId(workerId),
+          status: BOOKING_STATUS.PENDING,
+          paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
         },
+        {
+          status: BOOKING_STATUS.CONFIRMED,
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.CONFIRMED,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.CONFIRMED
+            ),
+          },
+        },
+        options
+      );
+      if (!updated) {
+        throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
       }
-    );
-    if (!booking) {
-      throw new CustomError(BOOKING.CANNOT_ACCEPT, HTTPSTATUS.BAD_REQUEST);
-    }
-    await Promise.all([
-      this._workerRepository.findOneAndUpdate(
+      await this._workerRepository.findOneAndUpdate(
         { _id: workerId },
-        { $inc: { "jobStats.accepted": 1 } }
-      ),
-      this.sendBookingEvent(
-        booking,
-        `Booking ${booking.bookingId} has been confirmed by the worker`
-      ),
-    ]);
+        { $inc: { "jobStats.accepted": 1 } },
+        options
+      );
+      return updated;
+    });
+
+    void this.sendBookingEvent(
+      booking,
+      `Booking ${booking.bookingId} has been confirmed by the worker`
+    );
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_ACCEPTED(booking.bookingId, booking.snapshot.worker.name)
@@ -295,25 +316,36 @@ export class BookingService implements IBookingService {
         ? BOOKING_PAYMENT_STATUS.REFUNDED
         : booking.paymentStatus;
 
-    await this._bookingRepository.findByIdAndUpdate(bookingId, {
-      status: BOOKING_STATUS.REJECTED,
-      paymentStatus,
-      $push: {
-        statusHistory: this.createStatusHistoryEntry(BOOKING_STATUS.REJECTED, ROLE.WORKER, reason),
-      },
+    await this._unitOfWork.execute(async (options) => {
+      await this._bookingRepository.findByIdAndUpdate(
+        bookingId,
+        {
+          status: BOOKING_STATUS.REJECTED,
+          paymentStatus,
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.REJECTED,
+              ROLE.WORKER,
+              reason
+            ),
+          },
+        },
+        options
+      );
+      await this._slotRepository.deleteMany(
+        {
+          bookingId: new Types.ObjectId(bookingId),
+          reservedBy: new Types.ObjectId(booking.userId),
+          status: SLOT_STATUS.BOOKED,
+        },
+        options
+      );
     });
-    await Promise.all([
-      this._slotRepository.deleteMany({
-        bookingId: new Types.ObjectId(bookingId),
-        reservedBy: new Types.ObjectId(booking.userId),
-        status: SLOT_STATUS.BOOKED,
-      }),
-      this.sendBookingEvent(
-        booking,
-        `Booking ${booking.bookingId} has been rejected by the worker${reason ? `: ${reason}` : ""}`
-      ),
-    ]);
 
+    void this.sendBookingEvent(
+      booking,
+      `Booking ${booking.bookingId} has been rejected by the worker${reason ? `: ${reason}` : ""}`
+    );
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.BOOKING_REJECTED(
@@ -395,20 +427,18 @@ export class BookingService implements IBookingService {
     if (!booking.otp || booking.otp !== otp) {
       throw new CustomError(BOOKING.INVALID_OTP, HTTPSTATUS.BAD_REQUEST);
     }
-    await Promise.all([
-      this._bookingRepository.update(bookingId, {
-        status: BOOKING_STATUS.IN_PROGRESS,
-        $unset: { otp: "" },
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            BOOKING_STATUS.IN_PROGRESS,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.IN_PROGRESS
-          ),
-        },
-      }),
-      this.sendBookingEvent(booking, `Work has started for booking ${booking.bookingId}`),
-    ]);
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.IN_PROGRESS,
+      $unset: { otp: "" },
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.IN_PROGRESS,
+          ROLE.WORKER,
+          BOOKING_STATUS_MESSAGES.IN_PROGRESS
+        ),
+      },
+    });
+    void this.sendBookingEvent(booking, `Work has started for booking ${booking.bookingId}`);
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.JOB_STARTED(booking.bookingId)
@@ -422,38 +452,48 @@ export class BookingService implements IBookingService {
       before: evidence.before,
       uploadedAt: new Date(),
     };
-    const booking = await this._bookingRepository.findOneAndUpdate(
-      {
-        _id: new Types.ObjectId(bookingId),
-        workerId: new Types.ObjectId(workerId),
-        status: BOOKING_STATUS.IN_PROGRESS,
-      },
-      {
-        status: BOOKING_STATUS.COMPLETED,
-        evidence: bookingEvidence,
-        workerNote: note,
-        completedAt: new Date(),
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            BOOKING_STATUS.COMPLETED,
-            ROLE.WORKER,
-            BOOKING_STATUS_MESSAGES.COMPLETED
-          ),
+    const booking = await this._unitOfWork.execute(async (options) => {
+      const updated = await this._bookingRepository.findOneAndUpdate(
+        {
+          _id: new Types.ObjectId(bookingId),
+          workerId: new Types.ObjectId(workerId),
+          status: BOOKING_STATUS.IN_PROGRESS,
         },
+        {
+          status: BOOKING_STATUS.COMPLETED,
+          evidence: bookingEvidence,
+          workerNote: note,
+          completedAt: new Date(),
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              BOOKING_STATUS.COMPLETED,
+              ROLE.WORKER,
+              BOOKING_STATUS_MESSAGES.COMPLETED
+            ),
+          },
+        },
+        options
+      );
+      if (!updated) {
+        throw new CustomError(BOOKING.CANNOT_COMPLETE, HTTPSTATUS.BAD_REQUEST);
       }
-    );
-    if (!booking) {
-      throw new CustomError(BOOKING.CANNOT_COMPLETE, HTTPSTATUS.BAD_REQUEST);
-    }
-    await Promise.all([
-      this._slotRepository.deleteMany({
-        bookingId: new Types.ObjectId(bookingId),
-        reservedBy: new Types.ObjectId(booking.userId),
-        status: SLOT_STATUS.BOOKED,
-      }),
-      this._workerRepository.findByIdAndUpdate(workerId, { $inc: { "jobStats.completed": 1 } }),
-      this.sendBookingEvent(booking, `Work has been completed for booking ${booking.bookingId}`),
-    ]);
+      await this._slotRepository.deleteMany(
+        {
+          bookingId: new Types.ObjectId(bookingId),
+          reservedBy: new Types.ObjectId(updated.userId),
+          status: SLOT_STATUS.BOOKED,
+        },
+        options
+      );
+      await this._workerRepository.findByIdAndUpdate(
+        workerId,
+        { $inc: { "jobStats.completed": 1 } },
+        options
+      );
+      return updated;
+    });
+
+    void this.sendBookingEvent(booking, `Work has been completed for booking ${booking.bookingId}`);
     void this._notificationService.createNotification(
       booking.userId.toString(),
       NOTIFICATION_TEMPLATES.JOB_COMPLETED(booking.bookingId, booking.snapshot.worker.name)
@@ -475,22 +515,23 @@ export class BookingService implements IBookingService {
       throw new CustomError(BOOKING.EXTRA_CHARGE_PENDING, HTTPSTATUS.BAD_REQUEST);
     }
     await this._paymentService.releaseBookingPayment(booking);
-    await Promise.all([
-      this._bookingRepository.update(bookingId, {
-        status: BOOKING_STATUS.APPROVED,
-        paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
-        completedAt: new Date(),
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            BOOKING_STATUS.APPROVED,
-            ROLE.USER,
-            BOOKING_STATUS_MESSAGES.APPROVED
-          ),
-        },
-      }),
-      this.sendBookingEvent(booking, `Booking ${booking.bookingId} has been approved by the user`),
-    ]);
+    await this._bookingRepository.update(bookingId, {
+      status: BOOKING_STATUS.APPROVED,
+      paymentStatus: BOOKING_PAYMENT_STATUS.RELEASED,
+      completedAt: new Date(),
+      $push: {
+        statusHistory: this.createStatusHistoryEntry(
+          BOOKING_STATUS.APPROVED,
+          ROLE.USER,
+          BOOKING_STATUS_MESSAGES.APPROVED
+        ),
+      },
+    });
 
+    void this.sendBookingEvent(
+      booking,
+      `Booking ${booking.bookingId} has been approved by the user`
+    );
     void this._notificationService.createNotification(
       booking.workerId.toString(),
       NOTIFICATION_TEMPLATES.JOB_APPROVED(booking.bookingId, booking.snapshot.user.name)
@@ -745,53 +786,64 @@ export class BookingService implements IBookingService {
         startTime: newSlot.startTime,
         endTime: newSlot.endTime,
       };
-      await this._bookingRepository.update(bookingId, {
-        $pull: { dates: { date: oldSlot.date } },
-      });
 
-      await Promise.all([
-        this._bookingRepository.update(bookingId, {
-          $push: {
-            dates: newBookingSlot,
-            statusHistory: this.createStatusHistoryEntry(
-              booking.status,
-              role,
-              BOOKING_STATUS_MESSAGES.RESCHEDULE_ACCEPTED(otherPartyName, newDateStr)
-            ),
+      const historyEntry = this.createStatusHistoryEntry(
+        booking.status,
+        role,
+        BOOKING_STATUS_MESSAGES.RESCHEDULE_ACCEPTED(otherPartyName, newDateStr)
+      );
+      await this._unitOfWork.execute(async (options) => {
+        const updated = await this._bookingRepository.acceptReschedule(
+          bookingId,
+          {
+            oldSlotDate: oldSlot.date,
+            newSlot: newBookingSlot,
+            historyEntry,
+            newStatus,
           },
-          status: newStatus,
-          $unset: { rescheduleRequest: 1 },
-        }),
-        this._slotRepository.delete(oldSlotId.toString()),
-      ]);
+          options
+        );
 
-      if (booking.quoteId) {
-        await this._quoteRepository.update(booking.quoteId, {
-          $pull: { slotIds: new Types.ObjectId(oldSlotId), dates: { date: oldSlot.date } },
-        });
-        await this._quoteRepository.update(booking.quoteId, {
-          $push: { slotIds: new Types.ObjectId(newSlotId), dates: newBookingSlot },
-        });
-      }
+        if (!updated) {
+          throw new CustomError(BOOKING.UPDATE_FAILED, HTTPSTATUS.BAD_REQUEST);
+        }
+        await this._slotRepository.delete(oldSlotId.toString(), options);
+        if (booking.quoteId) {
+          await this._quoteRepository.syncRescheduleSlot(
+            booking.quoteId.toString(),
+            {
+              oldSlotId: oldSlotId.toString(),
+              oldSlotDate: oldSlot.date,
+              newSlotId: newSlotId.toString(),
+              newSlot: newBookingSlot,
+            },
+            options
+          );
+        }
+      });
 
       void this._notificationService.createNotification(
         initiatorId.toString(),
         NOTIFICATION_TEMPLATES.RESCHEDULE_ACCEPTED(booking.bookingId, otherPartyName, newDateStr)
       );
     } else {
-      await Promise.all([
-        this._slotRepository.delete(newSlotId.toString()),
-        this._bookingRepository.update(bookingId, {
-          $push: {
-            statusHistory: this.createStatusHistoryEntry(
-              booking.status,
-              role,
-              BOOKING_STATUS_MESSAGES.RESCHEDULE_REJECTED(otherPartyName)
-            ),
+      await this._unitOfWork.execute(async (options) => {
+        await this._slotRepository.delete(newSlotId.toString(), options);
+        await this._bookingRepository.update(
+          bookingId,
+          {
+            $push: {
+              statusHistory: this.createStatusHistoryEntry(
+                booking.status,
+                role,
+                BOOKING_STATUS_MESSAGES.RESCHEDULE_REJECTED(otherPartyName)
+              ),
+            },
+            $unset: { rescheduleRequest: 1 },
           },
-          $unset: { rescheduleRequest: 1 },
-        }),
-      ]);
+          options
+        );
+      });
 
       void this._notificationService.createNotification(
         initiatorId.toString(),
@@ -822,22 +874,26 @@ export class BookingService implements IBookingService {
     }
     const responderId = requestedBy === ROLE.USER ? workerId : userId;
 
-    const [updated] = await Promise.all([
-      this._bookingRepository.update(bookingId, {
-        $push: {
-          statusHistory: this.createStatusHistoryEntry(
-            booking.status,
-            requestedBy,
-            "Reschedule request cancelled by requester"
-          ),
+    await this._unitOfWork.execute(async (options) => {
+      const updated = await this._bookingRepository.update(
+        bookingId,
+        {
+          $push: {
+            statusHistory: this.createStatusHistoryEntry(
+              booking.status,
+              requestedBy,
+              "Reschedule request cancelled by requester"
+            ),
+          },
+          $unset: { rescheduleRequest: 1 },
         },
-        $unset: { rescheduleRequest: 1 },
-      }),
-      this._slotRepository.delete(rescheduleRequest.newSlotId.toString()),
-    ]);
-    if (!updated) {
-      throw new CustomError(BOOKING.RESCHEDULE_CANCEL_FAILED, HTTPSTATUS.BAD_REQUEST);
-    }
+        options
+      );
+      if (!updated) {
+        throw new CustomError(BOOKING.RESCHEDULE_CANCEL_FAILED, HTTPSTATUS.BAD_REQUEST);
+      }
+      await this._slotRepository.delete(rescheduleRequest.newSlotId.toString(), options);
+    });
     void this._notificationService.createNotification(
       responderId.toString(),
       NOTIFICATION_TEMPLATES.RESCHEDULE_CANCELLED(booking.bookingId)
@@ -849,31 +905,39 @@ export class BookingService implements IBookingService {
       if (booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD) {
         await this._paymentService.refundBookingPayment(booking._id.toString());
       }
-      await Promise.all([
-        this._bookingRepository.update(booking._id.toString(), {
-          status: BOOKING_STATUS.EXPIRED,
-          paymentStatus:
-            booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
-              ? BOOKING_PAYMENT_STATUS.REFUNDED
-              : booking.paymentStatus,
-          $push: {
-            statusHistory: this.createStatusHistoryEntry(
-              BOOKING_STATUS.EXPIRED,
-              ROLE.SYSTEM,
-              BOOKING_STATUS_MESSAGES.EXPIRED
-            ),
+      await this._unitOfWork.execute(async (options) => {
+        await this._bookingRepository.update(
+          booking._id.toString(),
+          {
+            status: BOOKING_STATUS.EXPIRED,
+            paymentStatus:
+              booking.paymentStatus === BOOKING_PAYMENT_STATUS.HELD
+                ? BOOKING_PAYMENT_STATUS.REFUNDED
+                : booking.paymentStatus,
+            $push: {
+              statusHistory: this.createStatusHistoryEntry(
+                BOOKING_STATUS.EXPIRED,
+                ROLE.SYSTEM,
+                BOOKING_STATUS_MESSAGES.EXPIRED
+              ),
+            },
           },
-        }),
-        this._slotRepository.findOneAndDelete({
-          bookingId: new Types.ObjectId(booking._id.toString()),
-          reservedBy: new Types.ObjectId(booking.userId),
-          status: SLOT_STATUS.BOOKED,
-        }),
-        this._workerRepository.findOneAndUpdate(
+          options
+        );
+        await this._slotRepository.findOneAndDelete(
+          {
+            bookingId: new Types.ObjectId(booking._id.toString()),
+            reservedBy: new Types.ObjectId(booking.userId),
+            status: SLOT_STATUS.BOOKED,
+          },
+          options
+        );
+        await this._workerRepository.findOneAndUpdate(
           { _id: booking.workerId },
-          { $inc: { noResponses: 1 } }
-        ),
-      ]);
+          { $inc: { noResponses: 1 } },
+          options
+        );
+      });
       void this._notificationService.createNotification(
         booking.userId.toString(),
         NOTIFICATION_TEMPLATES.BOOKING_EXPIRED(booking.bookingId)
@@ -894,7 +958,7 @@ export class BookingService implements IBookingService {
     return {
       status,
       changedBy,
-      reason: reason ?? null,
+      reason,
       changedAt: new Date(),
     };
   }

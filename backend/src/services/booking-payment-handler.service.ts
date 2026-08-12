@@ -3,22 +3,26 @@ import { Types, UpdateQuery } from "mongoose";
 
 import logger from "@/config/logger";
 import {
+  BILL_TYPE,
   BOOKING,
   BOOKING_PAYMENT_STATUS,
   BOOKING_STATUS,
   BOOKING_STATUS_MESSAGES,
   NOTIFICATION_TEMPLATES,
+  PAYMENT_STATUS,
   QUOTE_STATUS,
   ROLE,
   SLOT_STATUS,
 } from "@/constants";
 import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
+import { IPaymentRepository } from "@/core/interfaces/repositories/IPaymentRepository";
 import { IQuoteRepository } from "@/core/interfaces/repositories/IQuoteRepository";
 import { ISlotRepository } from "@/core/interfaces/repositories/ISlotRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IBookingPaymentHandler } from "@/core/interfaces/services/IBookingPaymentHandler";
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { INotificationService } from "@/core/interfaces/services/INotificationService";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { TYPES } from "@/di/types";
 import { IBooking } from "@/types/booking/booking.entity";
 import { IWorker } from "@/types/worker/worker.entity";
@@ -28,11 +32,13 @@ import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 export class BookingPaymentHandlerService implements IBookingPaymentHandler {
   constructor(
     @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
+    @inject(TYPES.PaymentRepository) private _paymentRepository: IPaymentRepository,
     @inject(TYPES.SlotRepository) private _slotRepository: ISlotRepository,
     @inject(TYPES.QuoteRepository) private _quoteRepository: IQuoteRepository,
     @inject(TYPES.WorkerRepository) private _workerRepository: IWorkerRepository,
     @inject(TYPES.NotificationService) private _notificationService: INotificationService,
-    @inject(TYPES.MessageService) private _messageService: IMessageService
+    @inject(TYPES.MessageService) private _messageService: IMessageService,
+    @inject(TYPES.UnitOfWork) private _unitOfWork: IUnitOfWork
   ) {}
 
   private async getBookingOrThrow(bookingId: string): Promise<IBooking> {
@@ -56,23 +62,22 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
   async confirmBookingAfterPayment(
     bookingId: string,
     slotId: string,
-    workerId: string
+    workerId: string,
+    paymentIntentId: string
   ): Promise<void> {
     const booking = await this.getBookingOrThrow(bookingId);
 
-    let slotUpdate: Promise<unknown>;
     let bookingUpdateData: UpdateQuery<IBooking>;
     let workerUpdateData: UpdateQuery<IWorker>;
     let notifyAction: () => void;
     let chatMessage = `Booking ${booking.bookingId} has been created and is awaiting worker confirmation`;
+    let quoteSlotIds: string[] = [];
+    let quoteId: string | null = null;
 
     if (booking.quoteId) {
       const quote = await this._quoteRepository.findById(booking.quoteId.toString());
-      const slotIds = quote?.slotIds?.map((id) => id.toString()) ?? [];
-      slotUpdate = Promise.all([
-        this._slotRepository.updatePaymentSlots(slotIds, new Types.ObjectId(bookingId)),
-        this._quoteRepository.findByIdAndUpdate(booking.quoteId, { status: QUOTE_STATUS.ACCEPTED }),
-      ]);
+      quoteSlotIds = quote?.slotIds?.map((id) => id.toString()) ?? [];
+      quoteId = booking.quoteId.toString();
 
       bookingUpdateData = {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
@@ -95,11 +100,6 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
         );
       };
     } else {
-      slotUpdate = this._slotRepository.findByIdAndUpdate(slotId, {
-        status: SLOT_STATUS.BOOKED,
-        bookingId: new Types.ObjectId(bookingId),
-      });
-
       bookingUpdateData = {
         paymentStatus: BOOKING_PAYMENT_STATUS.HELD,
         statusHistory: [
@@ -120,13 +120,36 @@ export class BookingPaymentHandlerService implements IBookingPaymentHandler {
         );
       };
     }
-    await Promise.all([
-      slotUpdate,
-      this._bookingRepository.findByIdAndUpdate(bookingId, bookingUpdateData),
-      this._workerRepository.findByIdAndUpdate(workerId, workerUpdateData),
-      this.sendBookingEvent(booking, chatMessage),
-    ]);
 
+    await this._unitOfWork.execute(async (options) => {
+      if (quoteId && quoteSlotIds.length > 0) {
+        await this._slotRepository.updatePaymentSlots(
+          quoteSlotIds,
+          new Types.ObjectId(bookingId),
+          options
+        );
+        await this._quoteRepository.findByIdAndUpdate(
+          quoteId,
+          { status: QUOTE_STATUS.ACCEPTED },
+          options
+        );
+      } else {
+        await this._slotRepository.findByIdAndUpdate(
+          slotId,
+          { status: SLOT_STATUS.BOOKED, bookingId: new Types.ObjectId(bookingId) },
+          options
+        );
+      }
+      await this._bookingRepository.findByIdAndUpdate(bookingId, bookingUpdateData, options);
+      await this._workerRepository.findByIdAndUpdate(workerId, workerUpdateData, options);
+      await this._paymentRepository.findOneAndUpdate(
+        { bookingId: new Types.ObjectId(bookingId), billType: BILL_TYPE.BOOKING },
+        { status: PAYMENT_STATUS.SUCCEEDED, paymentIntentId },
+        options
+      );
+    });
+
+    void this.sendBookingEvent(booking, chatMessage);
     notifyAction();
   }
 

@@ -89,6 +89,7 @@ import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { ITokenService } from "@/core/interfaces/services/ITokenService";
+import { IUnitOfWork } from "@/core/interfaces/services/IUnitOfWork";
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { BookingRepository } from "@/repositories/booking.repository";
@@ -133,6 +134,7 @@ import { ReviewService } from "@/services/review.service";
 import { S3Service } from "@/services/s3.service";
 import { ServiceManagement } from "@/services/service-management.service";
 import { SlotService } from "@/services/slot.service";
+import { UnitOfWork } from "@/services/unit-of-work.service";
 import { UserService } from "@/services/user.service";
 import { WorkerService } from "@/services/worker.service";
 
@@ -235,5 +237,7 @@ container.bind<IMessageController>(TYPES.MessageController).to(MessageController
 container.bind<IChatRepository>(TYPES.ChatRepository).to(ChatRepository);
 container.bind<IChatService>(TYPES.ChatService).to(ChatService);
 container.bind<IChatController>(TYPES.ChatController).to(ChatController);
+
+container.bind<IUnitOfWork>(TYPES.UnitOfWork).to(UnitOfWork).inSingletonScope();
 
 export { container };

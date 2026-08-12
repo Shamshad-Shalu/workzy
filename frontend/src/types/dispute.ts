@@ -63,7 +63,8 @@ export interface DisputeListQuery {
   search?: string;
   status?: string;
   reason?: DisputeReason | 'all';
-  role: Role;
+  userId?: string;
+  workerId?: string;
 }
 
 export interface DisputeStats {

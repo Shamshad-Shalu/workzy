@@ -1,4 +1,3 @@
-import dayjs from "dayjs";
 import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 import Stripe from "stripe";
@@ -25,10 +24,11 @@ import { INotificationService } from "@/core/interfaces/services/INotificationSe
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
-import { PaymentAdminDTO, PaymentUserDTO, PaymentWorkerDTO } from "@/dtos/responses/payment.dto";
+import { PaymentAdminDto, PaymentUserDto, PaymentWorkerDto } from "@/dtos/responses/payment.dto";
 import { IBooking } from "@/types/booking/booking.entity";
+import { CursorPaginatedResult } from "@/types/common/pagination";
 import { BookingCheckoutParams, VerifySessionType } from "@/types/payment/payment.entity";
-import { PaymentListQuery, PaymentListQueryInput } from "@/types/payment/payment.query";
+import { PaymentListQuery } from "@/types/payment/payment.query";
 import { IWorker } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { generateTxnCode } from "@/utils/generateTxnCode";
@@ -351,16 +351,12 @@ export class PaymentService implements IPaymentService {
       slotId: string;
       workerId: string;
     };
-    await Promise.all([
-      this._bookingPaymentHandler.confirmBookingAfterPayment(bookingId, slotId, workerId),
-      this._paymentRepo.findOneAndUpdate(
-        { sessionId: session.id },
-        {
-          status: PAYMENT_STATUS.SUCCEEDED,
-          paymentIntentId: session.payment_intent as string,
-        }
-      ),
-    ]);
+    await this._bookingPaymentHandler.confirmBookingAfterPayment(
+      bookingId,
+      slotId,
+      workerId,
+      session.payment_intent as string
+    );
   }
 
   async verifySession(sessionId: string): Promise<VerifySessionType> {
@@ -436,50 +432,27 @@ export class PaymentService implements IPaymentService {
     ]);
   }
 
-  async getPayments(
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentAdminDTO[]; nextCursor: string | null }> {
-    const query = this.mapToPaymentDTO(input);
-    const { payments, nextCursor } = await this._paymentRepo.getPayments(query);
+  async getPayments(input: PaymentListQuery): Promise<CursorPaginatedResult<PaymentAdminDto>> {
+    const { data, nextCursor } = await this._paymentRepo.getPayments(input);
     return {
-      payments: PaymentAdminDTO.fromEntities(payments),
+      data: PaymentAdminDto.fromEntities(data),
       nextCursor,
     };
   }
 
   async getUserPayments(
     userId: string,
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentUserDTO[]; nextCursor: string | null }> {
-    const query = this.mapToPaymentDTO(input);
-    const { payments, nextCursor } = await this._paymentRepo.getPayments({ userId, ...query });
-    return { payments: PaymentUserDTO.fromEntities(payments), nextCursor };
+    input: PaymentListQuery
+  ): Promise<CursorPaginatedResult<PaymentUserDto>> {
+    const { data, nextCursor } = await this._paymentRepo.getPayments({ userId, ...input });
+    return { data: PaymentUserDto.fromEntities(data), nextCursor };
   }
 
   async getWorkerPayments(
     workerId: string,
-    input: PaymentListQueryInput
-  ): Promise<{ payments: PaymentWorkerDTO[]; nextCursor: string | null }> {
-    const query = this.mapToPaymentDTO(input);
-    const { payments, nextCursor } = await this._paymentRepo.getPayments({ workerId, ...query });
-
-    return { payments: PaymentWorkerDTO.fromEntities(payments), nextCursor };
-  }
-
-  private mapToPaymentDTO(input: PaymentListQueryInput): PaymentListQuery {
-    const { cursor, fromDate, toDate, ...rest } = input;
-    const fromDateTime = fromDate ? dayjs(fromDate).startOf("day").toDate() : undefined;
-    const toDateTime = toDate ? dayjs(toDate).endOf("day").toDate() : undefined;
-    return {
-      ...rest,
-      cursor: cursor
-        ? {
-            createdAt: new Date(cursor.createdAt),
-            _id: cursor.id,
-          }
-        : undefined,
-      fromDate: fromDateTime,
-      toDate: toDateTime,
-    };
+    input: PaymentListQuery
+  ): Promise<CursorPaginatedResult<PaymentWorkerDto>> {
+    const { data, nextCursor } = await this._paymentRepo.getPayments({ workerId, ...input });
+    return { data: PaymentWorkerDto.fromEntities(data), nextCursor };
   }
 }

@@ -11,6 +11,12 @@ import { validateDto } from "@/middlewares/validate-dto.middleware";
 const router = Router();
 const controller = container.get<IDisputeController>(TYPES.DisputeController);
 
+router.patch(
+  "/:disputeId/resolve",
+  authenticate([ROLE.ADMIN]),
+  validateDto(ResolveDisputeDto),
+  controller.resolveDispute
+);
 router.use(authenticate([ROLE.USER, ROLE.WORKER, ROLE.ADMIN]));
 
 router.get("/", controller.getAllDisputes);
@@ -19,6 +25,5 @@ router.get("/stats", controller.getDisputeStats);
 router.get("/:bookingId", controller.getDisputeByBookingId);
 router.post("/:bookingId", validateDto(CreateDisputeDto), controller.raiseDispute);
 router.patch("/:disputeId", validateDto(CreateDisputeDto), controller.updateDispute);
-router.patch("/:disputeId/resolve", validateDto(ResolveDisputeDto), controller.resolveDispute);
 
 export default router;

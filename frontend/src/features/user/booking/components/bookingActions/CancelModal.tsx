@@ -6,14 +6,14 @@ import Label from '@/components/atoms/Label';
 import { Textarea } from '@/components/atoms/Textarea';
 import { AppModal } from '@/components/molecules/AppModal';
 import { createDescriptionRule } from '@/lib/validation/rules';
-import type { BookingListItem } from '@/types/booking';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
 interface CancelModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (note: string) => Promise<void>;
-  booking: BookingListItem | null;
+  booking: BookingListItem | BookingDetails | null;
   isSubmitting?: boolean;
 }
 

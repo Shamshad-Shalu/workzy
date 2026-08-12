@@ -21,8 +21,6 @@ import {
   DISPUTE_STATUS_VALUES,
   DisputeReason,
   DisputeStatus,
-  Role,
-  ROLE,
 } from "@/constants";
 
 import { EvidenceItemDTO } from "./booking.dto";
@@ -43,9 +41,6 @@ export class CreateDisputeDto {
   @ValidateNested({ each: true })
   @Type(() => EvidenceItemDTO)
   evidence!: EvidenceItemDTO[];
-
-  @IsEnum(ROLE)
-  raisedBy!: Role;
 }
 
 export class ResolveDisputeDto {
