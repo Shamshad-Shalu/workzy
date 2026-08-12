@@ -1,13 +1,14 @@
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 import { CalendarDays } from 'lucide-react';
 
 import EmptyState from '@/components/molecules/EmptyState';
 import ErrorState from '@/components/molecules/ErrorState';
 import { ROLE } from '@/constants';
 import BookingCard from '@/features/booking/components/BookingCard';
-import { BookingCardSkeleton } from '@/features/booking/components/BookingCardSkeleton';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
-import type { BookingListItem } from '@/types/booking';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
+
+import BookingCardSkeleton from './BookingCardSkeleton';
 
 interface BookingListProps {
   bookings: BookingListItem[];
@@ -21,8 +22,8 @@ interface BookingListProps {
   onAccept?: (id: string) => void;
   onApprove?: (id: string) => void;
   onReject?: (id: string) => void;
-  onStart?: (booking: BookingListItem) => void;
-  onCancel?: (booking: BookingListItem) => void;
+  onStart?: (booking: BookingListItem | BookingDetails) => void;
+  onCancel?: (booking: BookingListItem | BookingDetails) => void;
   onReached?: (id: string) => void;
   onComplete?: (id: string) => void;
   onDispute?: (id: string) => void;
@@ -60,9 +61,7 @@ export function BookingList({
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <BookingCardSkeleton key={i} />
-        ))}
+        <BookingCardSkeleton />
       </div>
     );
   }
@@ -117,15 +116,9 @@ export function BookingList({
       <div ref={sentinelRef} className="h-4" />
 
       {isFetchingNextPage && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col gap-3"
-        >
-          {Array.from({ length: 2 }).map((_, i) => (
-            <BookingCardSkeleton key={i} />
-          ))}
-        </motion.div>
+        <div className="flex flex-col gap-3">
+          <BookingCardSkeleton />
+        </div>
       )}
     </div>
   );

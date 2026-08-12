@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
+import { useBookings } from '@/features/booking';
 import { StatusBadge } from '@/features/booking/components/BookingCard';
 import { useWorkerProfile } from '@/features/profile/hooks/useWorkerProfile';
 import { useWorkerReviews } from '@/features/review';
@@ -31,7 +32,6 @@ import type { RootState } from '@/store/store';
 import { formatCurrency } from '@/utils/currency';
 import { formatDate, formatTime12 } from '@/utils/time.format';
 
-import { useWorkerBooking } from '../../booking/hooks/useWorkerBooking';
 import WorkerDashboardSkeleton from '../components/WorkerDashboardSkeleton';
 import { useWorkerDashboard } from '../hooks/useWorkerDashboard';
 
@@ -39,7 +39,7 @@ export default function WorkerDashboard() {
   const { user } = useAppSelector((s: RootState) => s.auth);
 
   const { data: reviews, isLoading: reviewsLoading, error } = useWorkerReviews();
-  const { data: bookings, isLoading: bookingLoading } = useWorkerBooking();
+  const { data: bookings, isLoading: bookingLoading } = useBookings();
   const { data: worker, isLoading: profileLoading } = useWorkerProfile(user?.worker?.id);
   const { data, isLoading: dashBoardLoading } = useWorkerDashboard();
   const { earningsData, totalEarnings, totalAmount } = data ?? {};

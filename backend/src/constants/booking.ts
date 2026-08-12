@@ -4,8 +4,9 @@ export const BOOKING_STATUS = {
   EN_ROUTE: "en_route", // worker heading to location ✦ from friend
   REACHED: "reached", // worker arrived
   IN_PROGRESS: "in_progress", // worker started job
-  COMPLETED: "completed", // job finished
-  APPROVED: "approved", // user approved
+  COMPLETED: "completed",
+  APPROVED: "approved",
+  SETTLED: "settled",
   CANCELLED: "cancelled", // cancelled before start
   REJECTED: "rejected", // worker rejected
   DISPUTED: "disputed", // user raised dispute
@@ -21,6 +22,55 @@ export const UPCOMING_BOOKING_STATUSES = [
   BOOKING_STATUS.REACHED,
   BOOKING_STATUS.IN_PROGRESS,
 ] as const;
+
+export const BOOKING_TYPE = {
+  INSTANT: "instant",
+  PROJECT: "project",
+} as const;
+export type BookingType = (typeof BOOKING_TYPE)[keyof typeof BOOKING_TYPE];
+
+export const DAY_STATUS = {
+  PENDING: "pending",
+  CHECKED_IN: "checked_in",
+  COMPLETED: "completed",
+  SKIPPED: "skipped",
+} as const;
+export type DayStatus = (typeof DAY_STATUS)[keyof typeof DAY_STATUS];
+
+export const PAYMENT_SCHEDULE_STATUS = {
+  PENDING: "pending",
+  HELD: "held",
+  RELEASED: "released",
+  REFUNDED: "refunded",
+} as const;
+export type PaymentScheduleStatus =
+  (typeof PAYMENT_SCHEDULE_STATUS)[keyof typeof PAYMENT_SCHEDULE_STATUS];
+
+export const PROJECT_BOOKING_STATUS_EXTRA = {
+  SETTLED: "settled",
+} as const;
+
+export const ALLOWED_BOOKING_TRANSITIONS: Record<string, string[]> = {
+  pending: ["confirmed", "cancelled", "expired"],
+  confirmed: ["en_route", "cancelled", "in_progress"],
+  en_route: ["reached", "cancelled"],
+  reached: ["in_progress"],
+  in_progress: ["completed", "disputed"],
+  completed: ["approved", "disputed"],
+  approved: ["settled"],
+  settled: [],
+  disputed: ["cancelled", "approved", "settled"],
+  cancelled: [],
+  expired: [],
+  rejected: [],
+};
+
+export const DAY_TRANSITIONS: Record<DayStatus, DayStatus[]> = {
+  pending: ["checked_in", "skipped"],
+  checked_in: ["completed", "skipped"],
+  completed: [],
+  skipped: ["pending"],
+};
 
 export const BOOKING_PAYMENT_STATUS = {
   PENDING: "pending",

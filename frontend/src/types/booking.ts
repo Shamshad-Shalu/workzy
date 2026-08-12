@@ -194,16 +194,13 @@ export interface BookingListingResponse {
 export interface BookingListQuery {
   status?: BookingFilterStatus;
   search?: string;
-  limit: number;
-  cursor?: string | null;
-}
-
-export interface AdminBookingListQuery extends BookingListQuery {
   userId?: string;
-  paymentStatus?: BookingPaymentStatus | 'all';
   workerId?: string;
+  paymentStatus?: BookingPaymentStatus | 'all';
   fromDate?: string;
   toDate?: string;
+  limit: number;
+  cursor?: string | null;
 }
 
 export interface BookingDetails extends Omit<Booking, 'snapshot'> {
