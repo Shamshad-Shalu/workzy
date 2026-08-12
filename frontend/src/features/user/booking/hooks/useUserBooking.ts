@@ -1,47 +1,16 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import type { BookingFilterStatus } from '@/constants';
 import {
-  bookingKeys,
   useApproveBooking,
   useCancelBooking,
   usePayExtraCharge,
 } from '@/features/booking/hooks/useBooking';
 import { useCreateReview, useUpdateReview, type CreateReviewFormType } from '@/features/review';
-import BookingService from '@/services/booking.service';
-import type { BookingListingResponse, BookingListItem } from '@/types/booking';
-
-const LIMIT = 5;
-
-export function useUserBookings(status: BookingFilterStatus) {
-  return useInfiniteQuery<
-    BookingListingResponse,
-    Error,
-    { pages: BookingListingResponse[]; pageParams: (string | undefined)[] },
-    ReturnType<typeof bookingKeys.user>,
-    string | undefined
-  >({
-    queryKey: bookingKeys.user(status),
-    queryFn: ({ pageParam }) =>
-      BookingService.getUserBookings({
-        status,
-        limit: LIMIT,
-        cursor: pageParam ? JSON.parse(pageParam) : null,
-      }),
-    initialPageParam: undefined,
-    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    staleTime: 5000,
-    gcTime: 1000 * 60 * 5,
-    refetchOnWindowFocus: true,
-    refetchOnMount: true,
-    refetchOnReconnect: true,
-  });
-}
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 
 export function useUserBookingHandler() {
-  const [cancelB, setCancelB] = useState<BookingListItem | null>(null);
+  const [cancelB, setCancelB] = useState<BookingListItem | BookingDetails | null>(null);
   const [approveBId, setApproveBId] = useState<string | null>(null);
   const [evidenceBId, setEvidenceBId] = useState<string | null>(null);
   const [payExtraBId, setPayExtraBId] = useState<string | null>(null);

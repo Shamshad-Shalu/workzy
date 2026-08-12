@@ -2,6 +2,7 @@ import { useState } from 'react';
 
 import PageHeader from '@/components/molecules/PageHeader';
 import { ROLE, type BookingFilterStatus } from '@/constants';
+import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
 import DisputeModal from '@/features/dispute/components/DisputeModal';
@@ -10,14 +11,14 @@ import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
 import ExtraChargeModal from '../components/bookingActions/ExtraChargeModal';
 import ReviewModal from '../components/bookingActions/ReviewModal';
-import { useUserBookingHandler, useUserBookings } from '../hooks/useUserBooking';
+import { useUserBookingHandler } from '../hooks/useUserBooking';
 
 export default function UserBookingsPage() {
   const [status, setStatus] = useState<BookingFilterStatus>('all');
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
-
   const { data, isLoading, isError, refetch, fetchNextPage, hasNextPage, isFetchingNextPage } =
-    useUserBookings(status);
+    useBookings({ status });
+
   const { cancel, approve, payExtra, review } = useUserBookingHandler();
   const { cancelB, isCancelling, setCancelB, handleCancelBooking } = cancel;
   const { payExtraBId, setPayExtraBId, isPayingExtra, handlePayExtra } = payExtra;

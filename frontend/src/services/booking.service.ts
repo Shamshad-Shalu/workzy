@@ -5,25 +5,11 @@ import type { bookingFormData } from '@/features/user/booking/validation/booking
 import type { BookigCompleteForm } from '@/features/worker/booking/components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '@/features/worker/booking/validation/extraChargeSchema';
 import api from '@/lib/api/axios';
-import type {
-  AdminBookingListQuery,
-  BookingDetails,
-  BookingListingResponse,
-  BookingListQuery,
-} from '@/types/booking';
+import type { BookingDetails, BookingListingResponse, BookingListQuery } from '@/types/booking';
 
 const BookingService = {
-  getBookings: async (params: AdminBookingListQuery): Promise<BookingListingResponse> => {
+  getBookings: async (params: BookingListQuery): Promise<BookingListingResponse> => {
     const res = await api.get(BOOKING_API.ROOT, { params });
-    return res.data;
-  },
-  getUserBookings: async (params: BookingListQuery): Promise<BookingListingResponse> => {
-    const res = await api.get(BOOKING_API.BY_USER, { params });
-    console.log('data::', res.data);
-    return res.data;
-  },
-  getWorkerBookings: async (params: BookingListQuery): Promise<BookingListingResponse> => {
-    const res = await api.get(BOOKING_API.BY_WORKER, { params });
     return res.data;
   },
   getBookingDetails: async (bookingId: string): Promise<{ booking: BookingDetails }> => {

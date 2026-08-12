@@ -1,38 +1,14 @@
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import type { BookingFilterStatus } from '@/constants';
 import { bookingKeys, useAcceptBooking } from '@/features/booking/hooks/useBooking';
 import { useAddReviewReply } from '@/features/review';
 import BookingService from '@/services/booking.service';
-import type { BookingListingResponse, BookingListItem } from '@/types/booking';
+import type { BookingDetails, BookingListItem } from '@/types/booking';
 
 import type { BookigCompleteForm } from '../components/WorkerCompleteModal';
 import type { ExtraChargeFormType } from '../validation/extraChargeSchema';
-
-export function useWorkerBooking(status: BookingFilterStatus = 'all', limit: number = 3) {
-  return useInfiniteQuery<
-    BookingListingResponse,
-    Error,
-    { pages: BookingListingResponse[]; pageParams: (string | undefined)[] },
-    ReturnType<typeof bookingKeys.worker>,
-    string | undefined
-  >({
-    queryKey: bookingKeys.worker(status),
-    queryFn: ({ pageParam }) =>
-      BookingService.getWorkerBookings({
-        status,
-        limit: limit,
-        cursor: pageParam ? pageParam : null,
-      }),
-    initialPageParam: undefined,
-    getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    staleTime: 5000,
-    gcTime: 1000 * 60 * 5,
-    refetchInterval: 10000,
-  });
-}
 
 export function useMarkEnRoute() {
   const qc = useQueryClient();
@@ -107,7 +83,7 @@ export function useWorkerBookingHandler() {
   const [rejectBId, setRejectBId] = useState<string | null>(null);
   const [finishBId, setFinishBId] = useState<string | null>(null);
   const [extraChargeBId, setExtraChargeBId] = useState<string | null>(null);
-  const [startB, setStartB] = useState<BookingListItem | null>(null);
+  const [startB, setStartB] = useState<BookingListItem | BookingDetails | null>(null);
   const [reviewData, setReviewData] = useState<{ id: string; reviewId?: string } | null>(null);
   const [enRouteBId, setEnRouteBId] = useState<string | null>(null);
   const [reachedBId, setReachedBId] = useState<string | null>(null);
