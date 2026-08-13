@@ -1,3 +1,4 @@
+export * from './components/AdminPaymentsContent';
 export * from './components/PaymentFilterBar';
 export * from './components/paymentColumns';
 export * from './hooks/useAdminPayments';

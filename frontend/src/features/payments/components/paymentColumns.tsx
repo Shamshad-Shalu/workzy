@@ -127,7 +127,9 @@ export function getPaymentColumns<T extends Payment>(
         const payment = row.original;
         return (
           <div className="flex flex-col gap-0.5">
-            <span className="font-medium text-foreground">{payment.title}</span>
+            <span className="font-medium text-foreground whitespace-normal break-words">
+              {payment.title}
+            </span>
             {role === ROLE.USER && (
               <span className="text-xs text-muted-foreground">
                 {payment.billType.toUpperCase()}
