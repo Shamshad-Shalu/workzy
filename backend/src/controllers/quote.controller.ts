@@ -29,7 +29,12 @@ export class QuoteController implements IQuoteController {
   });
 
   getWorkerQuoteStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const workerId = this.requireWorkerId(req);
+    let workerId: string;
+    if (req.user?.role === ROLE.ADMIN && req.query.workerId) {
+      workerId = req.query.workerId as string;
+    } else {
+      workerId = this.requireWorkerId(req);
+    }
     const stats = await this._quoteService.getWorkerQuoteStats(workerId);
     res.status(HTTPSTATUS.OK).json(stats);
   });
