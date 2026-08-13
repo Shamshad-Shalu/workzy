@@ -6,12 +6,13 @@ import { MediaViewer, type MediaItem } from '@/components/organisms/MediaViewer'
 import { ROLE, type Role } from '@/constants';
 import { DISPUTE_STATUS } from '@/constants/dispute';
 
-import { useDisputeModal } from '../hooks/useDisputeModal';
-
-import DisputeDetailsView from './DisputeDetailsView';
-import DisputeModalSkeleton from './DisputeModalSkeleton';
-import RaiseDisputeForm from './RaiseDisputeForm';
-import ResolveDisputeForm from './ResolveDisputeForm';
+import {
+  useDisputeModal,
+  DisputeDetailsView,
+  DisputeModalSkeleton,
+  RaiseDisputeForm,
+  ResolveDisputeForm,
+} from '../index';
 
 interface Props {
   open: boolean;
@@ -20,7 +21,7 @@ interface Props {
   bookingId?: string | null;
 }
 
-export default function DisputeModal({ open, onClose, bookingId, role = ROLE.USER }: Props) {
+export function DisputeModal({ open, onClose, bookingId, role = ROLE.USER }: Props) {
   const {
     dispute,
     isDisputeLoading,

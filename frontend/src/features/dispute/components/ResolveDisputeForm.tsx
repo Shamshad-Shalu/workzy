@@ -13,11 +13,9 @@ import {
   DISPUTE_STATUS,
   DISPUTE_STATUS_VALUES,
 } from '@/constants/dispute';
-import {
-  resolveDisputeSchema,
-  type ResolveDisputeFormType,
-} from '@/features/admin/disputes/validation/resolveDispute.schema';
 import type { Dispute } from '@/types/dispute';
+
+import { resolveDisputeSchema, type ResolveDisputeFormType } from '../index';
 
 interface Props {
   dispute: Dispute | null;
@@ -25,7 +23,7 @@ interface Props {
   isSubmitting: boolean;
 }
 
-export default function ResolveDisputeForm({ dispute, onSubmit, isSubmitting }: Props) {
+export function ResolveDisputeForm({ dispute, onSubmit, isSubmitting }: Props) {
   const {
     register,
     watch,

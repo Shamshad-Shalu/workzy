@@ -19,7 +19,7 @@ interface Props {
   onPreview: (index: number) => void;
 }
 
-export default function DisputeDetailsView({ dispute, role, onPreview }: Props) {
+export function DisputeDetailsView({ dispute, role, onPreview }: Props) {
   return (
     <div className="space-y-4 pt-1">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-3 bg-muted/40 rounded-xl border border-border">

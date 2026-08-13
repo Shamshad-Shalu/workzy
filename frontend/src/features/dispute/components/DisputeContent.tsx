@@ -14,34 +14,30 @@ import {
   DISPUTE_REASON_LABELS,
   type DisputeReason,
 } from '@/constants/dispute';
-import disputeColumns from '@/features/dispute/components/disputeColumns';
-import DisputeModal from '@/features/dispute/components/DisputeModal';
-import DisputeStatsSection from '@/features/dispute/components/DisputeStatsSection';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
 import { cn } from '@/lib/utils';
 
-import { useDisputes, useDisputeStats } from '../hooks/useDisputes';
+import {
+  disputeColumns,
+  DisputeModal,
+  DisputeStatsSection,
+  useDisputes,
+  useDisputeStats,
+} from '../index';
 
-interface DisputePageProps {
+export interface DisputeContentProps {
   role?: Role;
   userId?: string;
   workerId?: string;
 }
-export default function DisputePage({ role = ROLE.USER, workerId, userId }: DisputePageProps) {
+
+export function DisputeContent({ role = ROLE.USER, workerId, userId }: DisputeContentProps) {
   const [disputeBId, setDisputeBId] = useState<string | null>(null);
   const { updateParams, search, status, reason } = useUrlFilterParams<{
     reason: DisputeReason | 'all';
   }>([{ key: 'reason', defaultValue: 'all' }]);
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    error,
-    isError,
-    refetch,
-  } = useDisputes({ search, status, reason, userId, workerId });
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, error, refetch } =
+    useDisputes({ search, status, reason, userId, workerId });
 
   const {
     data: statsData,
@@ -61,7 +57,7 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
   );
 
   return (
-    <main className="p-4 lg:p-6">
+    <div>
       {!workerId && !userId && (
         <PageHeader title="Disputes" description="Manage and resolve all booking disputes" />
       )}
@@ -80,7 +76,7 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
       >
         <div className={cn('col-span-12 md:col-span-1', hasActiveFilters && 'col-span-8')}>
           <SearchInput
-            disabled={isError}
+            disabled={!!error}
             placeholder="Search by bookingId or ServiceName..."
             value={search}
             onChange={handleSearchChange}
@@ -104,7 +100,7 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
             value={status}
             onChange={v => updateParams({ status: v })}
             leftIcon={<Filter />}
-            disabled={isError}
+            disabled={!!error}
             options={[
               { label: 'All Status', value: 'all' },
               ...DISPUTE_STATUS_VALUES.map(val => ({
@@ -119,7 +115,7 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
             value={reason}
             onChange={v => updateParams({ reason: v })}
             leftIcon={<Filter />}
-            disabled={isError}
+            disabled={!!error}
             options={[
               { label: 'All Reasons', value: 'all' },
               ...Object.entries(DISPUTE_REASON_LABELS).map(([value, label]) => ({
@@ -144,7 +140,7 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
               description="There are no disputes matching your criteria."
               action={
                 hasActiveFilters ? (
-                  <Button onClick={clearFilters} variant="outline">
+                  <Button onClick={clearFilters} variant="outline" size="sm" className="mt-2">
                     Clear filters
                   </Button>
                 ) : null
@@ -165,6 +161,6 @@ export default function DisputePage({ role = ROLE.USER, workerId, userId }: Disp
         bookingId={disputeBId}
         role={role}
       />
-    </main>
+    </div>
   );
 }

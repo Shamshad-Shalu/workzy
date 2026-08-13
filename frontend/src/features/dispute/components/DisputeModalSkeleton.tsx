@@ -1,6 +1,6 @@
 import { Skeleton } from '@/components/ui/skeleton';
 
-export default function DisputeModalSkeleton() {
+export function DisputeModalSkeleton() {
   return (
     <div className="flex flex-col gap-4 pt-1">
       <div className="flex items-center justify-between gap-3 px-4 py-3 bg-muted/40 rounded-xl border border-border">

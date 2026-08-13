@@ -8,9 +8,7 @@ import ProtectedRoute from './ProtectedRoute';
 const WorkerChatPage = lazy(() => import('@/features/worker/chat/pages/WorkerChatPage'));
 const WorkerPaymentsPage = lazy(() => import('@/features/payments/pages/WorkerPaymentsPage'));
 const WorkerLayout = lazy(() => import('@/layouts/worker/WorkerLayout'));
-const WorkerDisputesPage = lazy(
-  () => import('@/features/worker/disputes/pages/WorkerDisputesPage')
-);
+const WorkerDisputesPage = lazy(() => import('@/features/dispute/pages/WorkerDisputesPage'));
 const WorkerQuoteCreatePage = lazy(() => import('@/features/quote/pages/WorkerQuoteCreatePage'));
 const WorkerQuotesListPage = lazy(() => import('@/features/quote/pages/WorkerQuotesListPage'));
 

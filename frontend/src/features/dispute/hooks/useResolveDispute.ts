@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { bookingKeys } from '@/features/booking';
 import { disputeService } from '@/services/dispute.service';
 
-import type { ResolveDisputeFormType } from '../validation/resolveDispute.schema';
+import { disputeKeys, type ResolveDisputeFormType } from '../index';
 
 export function useResolveDispute() {
   const qc = useQueryClient();
@@ -13,10 +14,8 @@ export function useResolveDispute() {
   >({
     mutationFn: ({ disputeId, data }) => disputeService.resolveDispute(disputeId, data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['dispute-details'] });
-      qc.invalidateQueries({ queryKey: ['disputes'] });
-      qc.invalidateQueries({ queryKey: ['dispute-stats'] });
-      qc.invalidateQueries({ queryKey: ['bookings'] });
+      qc.invalidateQueries({ queryKey: disputeKeys.all });
+      qc.invalidateQueries({ queryKey: bookingKeys.all });
     },
   });
 }

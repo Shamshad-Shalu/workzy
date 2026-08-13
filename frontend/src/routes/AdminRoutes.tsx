@@ -29,12 +29,15 @@ const AdminWorkerQuotesPage = lazy(
 const AdminWorkerPaymentsPage = lazy(
   () => import('@/features/admin/worker/pages/AdminWorkerPaymentsPage')
 );
+const AdminWorkerDisputesPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerDisputesPage')
+);
 
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
 );
 const AdminChatPage = lazy(() => import('@/features/admin/chat/pages/AdminChatPage'));
-const AdminDisputesPage = lazy(() => import('@/features/admin/disputes/pages/AdminDisputesPage'));
+const AdminDisputesPage = lazy(() => import('@/features/dispute/pages/AdminDisputesPage'));
 const HomePageLayout = lazy(() => import('@/features/admin/home/layout/HomeLayout'));
 
 const HomeSectionPage = lazy(() => import('@/features/admin/home/pages/HomeSectionPage'));
@@ -68,7 +71,7 @@ export default function AdminRoutes() {
                 <Route path="bookings" element={<AdminWorkerAboutPage />} />
                 <Route path="reviews" element={<AdminWorkerReviewsPage />} />
                 <Route path="quotes" element={<AdminWorkerQuotesPage />} />
-                <Route path="disputes" element={<AdminWorkerAboutPage />} />
+                <Route path="disputes" element={<AdminWorkerDisputesPage />} />
                 <Route path="payments" element={<AdminWorkerPaymentsPage />} />
               </Route>
             </Route>
