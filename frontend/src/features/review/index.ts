@@ -1,4 +1,5 @@
 export * from './components/AdminReviewFilters';
+export * from './components/AdminReviewsContent';
 export * from './components/ReviewCard';
 export * from './components/ReviewCardSkeleton';
 export * from './components/ReviewFilterBar';

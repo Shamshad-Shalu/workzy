@@ -20,6 +20,9 @@ const WorkerDetailsLayout = lazy(
 const AdminWorkerAboutPage = lazy(
   () => import('@/features/admin/worker/pages/AdminWorkerAboutPage')
 );
+const AdminWorkerReviewsPage = lazy(
+  () => import('@/features/admin/worker/pages/AdminWorkerReviewsPage')
+);
 
 const CategoryManagementPage = lazy(
   () => import('@/features/admin/service/pages/CategoryManagementPage')
@@ -57,7 +60,7 @@ export default function AdminRoutes() {
                 <Route path="documents" element={<AdminWorkerDocumentsPage />} />
                 <Route path="services" element={<AdminWorkerServicesPage />} />
                 <Route path="bookings" element={<AdminWorkerAboutPage />} />
-                <Route path="reviews" element={<AdminWorkerAboutPage />} />
+                <Route path="reviews" element={<AdminWorkerReviewsPage />} />
                 <Route path="quotes" element={<AdminWorkerAboutPage />} />
                 <Route path="disputes" element={<AdminWorkerAboutPage />} />
                 <Route path="payments" element={<AdminWorkerAboutPage />} />

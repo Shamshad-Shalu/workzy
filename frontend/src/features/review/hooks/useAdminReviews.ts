@@ -4,7 +4,7 @@ import { reviewKeys } from '@/features/review';
 import ReviewService from '@/services/review.service';
 import type { AdminReviewListQuery, AdminReviewListResponse } from '@/types/review';
 
-const LIMIT = 3;
+const LIMIT = 4;
 
 export function useAdminReviews(query: Omit<AdminReviewListQuery, 'cursor' | 'limit'>) {
   return useInfiniteQuery<

@@ -309,7 +309,7 @@ export class WorkerService implements IWorkerService {
       completionRate: accepted > 0 ? Number(((completed / accepted) * 100).toFixed(1)) : 0,
       upcomingBookings,
       totalReviews: reviewStats.reviewCount,
-      rating: reviewStats.averageRating,
+      rating: Number(reviewStats.averageRating.toFixed(1)),
       grossRevenue,
       platformRevenue,
       workerEarnings,
