@@ -39,7 +39,7 @@ const UserBookingsPage = lazy(() => import('@/features/user/booking/pages/UserBo
 const UserBookingDetailsPage = lazy(
   () => import('@/features/user/booking/pages/UserBookingDetailsPage')
 );
-const UserDisputesPage = lazy(() => import('@/features/user/disputes/pages/UserDisputesPage'));
+const UserDisputesPage = lazy(() => import('@/features/dispute/pages/UserDisputesPage'));
 const UserPaymentsPage = lazy(() => import('@/features/payments/pages/UserPaymentsPage'));
 
 export default function UserRoutes() {

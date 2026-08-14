@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { ROLE } from '@/constants';
 import BookingDetailsPage from '@/features/booking/page/Bookingdetailspage';
-import DisputeModal from '@/features/dispute/components/DisputeModal';
+import { DisputeModal } from '@/features/dispute';
 
 export default function AdminBookingDetailsPage() {
   const [disputeBId, setDisputeBId] = useState<string | null>(null);

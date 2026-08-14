@@ -1,19 +1,18 @@
-import { FileText, Search, TrendingUp, Wallet } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 
 import Button from '@/components/atoms/Button';
 import EmptyState from '@/components/molecules/EmptyState';
 import SearchInput from '@/components/molecules/SearchInput';
-import StatCard from '@/components/molecules/StatCard';
 import { ROLE } from '@/constants';
 import PageError from '@/pages/PageError';
 import type { QuoteListItem } from '@/types/quote';
-import { formatCurrency } from '@/utils/currency';
 
 import {
   QuoteCard,
   QuoteCardSkeleton,
   QuoteEditModal,
+  QuoteStatsGrid,
   QuoteStatsSkeleton,
   QuoteStatusTabs,
   useQuoteList,
@@ -38,7 +37,6 @@ export default function WorkerQuotesListPage() {
   } = useQuoteList();
 
   const { data: stats, isLoading: statsLoading } = useWorkerQuoteStats();
-  const { counts, acceptRate, totalEarned } = stats ?? {};
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
@@ -48,37 +46,12 @@ export default function WorkerQuotesListPage() {
           <p className="text-sm text-muted-foreground">Track quotes you've sent to customers.</p>
         </div>
       </div>
-      {statsLoading ? (
-        <QuoteStatsSkeleton />
-      ) : (
-        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3">
-          <StatCard
-            icon={<FileText className="h-4 w-4" />}
-            label="Quotes sent"
-            value={counts?.all}
-            sub=""
-          />
-          <StatCard
-            icon={<TrendingUp className="h-4 w-4" />}
-            label="Acceptance rate"
-            value={`${acceptRate}%`}
-            sub=""
-            tone="info"
-          />
-          <StatCard
-            icon={<Wallet className="h-4 w-4" />}
-            label="Earned (accepted)"
-            value={formatCurrency(totalEarned)}
-            tone="success"
-            sub=""
-          />
-        </div>
-      )}
+      {statsLoading ? <QuoteStatsSkeleton /> : stats ? <QuoteStatsGrid stats={stats} /> : null}
 
       <QuoteStatusTabs
         value={status}
         onValueChange={v => updateParams({ status: v })}
-        counts={counts}
+        counts={stats?.counts}
         className="mb-4"
       />
       <div className="mb-4 flex flex-wrap items-center gap-2">

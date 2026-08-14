@@ -1,13 +1,13 @@
 import { useState } from 'react';
 
-import { useResolveDispute } from '@/features/admin/disputes/hooks/useResolveDispute';
-import type { ResolveDisputeFormType } from '@/features/admin/disputes/validation/resolveDispute.schema';
-
-import { useDisputeDetails } from './useDispute';
-import { useRaiseDispute } from './useRaiseDispute';
-import { useUpdateDispute } from './useUpdateDispute';
-
-import type { RaiseDisputeFormType } from '../validation/raiseDispute.schema';
+import {
+  useDisputeDetails,
+  useRaiseDispute,
+  useResolveDispute,
+  useUpdateDispute,
+  type RaiseDisputeFormType,
+  type ResolveDisputeFormType,
+} from '../index';
 
 type DisputeModalMode = 'view' | 'edit' | 'resolve';
 

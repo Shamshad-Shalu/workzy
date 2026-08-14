@@ -4,10 +4,10 @@ import QuoteService from '@/services/quote.service';
 
 import { quoteKeys } from '../api/quoteKeys';
 
-export function useWorkerQuoteStats() {
+export function useWorkerQuoteStats(workerId?: string) {
   return useQuery({
-    queryKey: quoteKeys.workerStats(),
-    queryFn: () => QuoteService.getWorkerQuoteStats(),
+    queryKey: quoteKeys.workerStats(workerId),
+    queryFn: () => QuoteService.getWorkerQuoteStats(workerId),
     staleTime: 1000 * 60,
   });
 }

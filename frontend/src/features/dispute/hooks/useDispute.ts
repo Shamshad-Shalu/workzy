@@ -3,15 +3,16 @@ import { useQuery } from '@tanstack/react-query';
 import { disputeService } from '@/services/dispute.service';
 import type { Dispute } from '@/types/dispute';
 
+import { disputeKeys } from '../index';
+
 export function useDisputeDetails(bookingId?: string | null) {
   const query = useQuery<Dispute | null>({
-    queryKey: ['dispute-details', bookingId],
+    queryKey: disputeKeys.detail(bookingId),
     queryFn: async () => {
       if (!bookingId) {
         throw new Error('Booking ID is required');
       }
-      const res = await disputeService.getDisputeByBookingId(bookingId);
-      return res;
+      return await disputeService.getDisputeByBookingId(bookingId);
     },
     enabled: !!bookingId,
     staleTime: 1000 * 60 * 5,

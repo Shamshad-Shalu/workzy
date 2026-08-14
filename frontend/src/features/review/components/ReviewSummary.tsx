@@ -12,17 +12,21 @@ type ReviewSummaryProps = {
   averageRating: number;
   reviewCount: number;
   breakdown: Record<string, number>;
-  rating: number | null;
-  onRatingChange: (star: number | null) => void;
+  rating?: number | null;
+  onRatingChange?: (star: number | null) => void;
+  interactive?: boolean;
 };
 
 export function ReviewSummary({
   averageRating,
   reviewCount,
   breakdown,
-  rating,
+  rating = null,
   onRatingChange,
+  interactive = true,
 }: ReviewSummaryProps) {
+  const isInteractive = interactive && !!onRatingChange;
+
   return (
     <motion.div
       variants={summaryVariants}
@@ -44,23 +48,29 @@ export function ReviewSummary({
           <span className="text-sm text-muted-foreground">{reviewCount} reviews</span>
         </div>
         <div className="flex-1 space-y-1.5">
-          {[5, 4, 3, 2, 1].map(star => (
-            <motion.button
-              key={star}
-              whileHover={{ scale: 1.01 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => onRatingChange(rating === star ? null : star)}
-              className={`w-full rounded-md px-2 py-0.5 transition-colors hover:bg-accent ${
-                rating === star ? 'bg-accent' : ''
-              }`}
-            >
-              <RatingDistributionBar
-                star={star}
-                count={breakdown[String(star)] ?? 0}
-                total={reviewCount}
-              />
-            </motion.button>
-          ))}
+          {[5, 4, 3, 2, 1].map(star => {
+            const count = breakdown[String(star)] ?? 0;
+            if (isInteractive) {
+              return (
+                <motion.button
+                  key={star}
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => onRatingChange?.(rating === star ? null : star)}
+                  className={`w-full rounded-md px-2 py-0.5 transition-colors hover:bg-accent ${
+                    rating === star ? 'bg-accent' : ''
+                  }`}
+                >
+                  <RatingDistributionBar star={star} count={count} total={reviewCount} />
+                </motion.button>
+              );
+            }
+            return (
+              <div key={star} className="w-full px-2 py-0.5">
+                <RatingDistributionBar star={star} count={count} total={reviewCount} />
+              </div>
+            );
+          })}
         </div>
       </div>
     </motion.div>

@@ -10,7 +10,7 @@ import type { DisputeListItem } from '@/types/dispute';
 import type { TableColumnDef } from '@/types/table.types';
 import { formatDate } from '@/utils/time.format';
 
-const disputeColumns = (
+export const disputeColumns = (
   onDisputeDetails: (bookingId: string) => void,
   role: Role = ROLE.ADMIN,
   context?: { workerId?: string; userId?: string }
@@ -211,5 +211,3 @@ const disputeColumns = (
     return true;
   });
 };
-
-export default disputeColumns;

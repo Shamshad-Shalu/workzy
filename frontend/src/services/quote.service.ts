@@ -24,8 +24,10 @@ const QuoteService = {
     const res = await api.post(QUOTE_API.REJECT(quoteId));
     return res.data;
   },
-  getWorkerQuoteStats: async (): Promise<WorkerQuoteStats> => {
-    const res = await api.get(QUOTE_API.WORKER_STATS);
+  getWorkerQuoteStats: async (workerId?: string): Promise<WorkerQuoteStats> => {
+    const res = await api.get(QUOTE_API.WORKER_STATS, {
+      params: workerId ? { workerId } : undefined,
+    });
     return res.data;
   },
 };

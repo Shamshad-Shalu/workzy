@@ -12,7 +12,7 @@ import { UploadPurposes } from '@/constants';
 import { DISPUTE_REASON, DISPUTE_REASON_LABELS } from '@/constants/dispute';
 import type { Dispute } from '@/types/dispute';
 
-import { raiseDisputeSchema, type RaiseDisputeFormType } from '../validation/raiseDispute.schema';
+import { raiseDisputeSchema, type RaiseDisputeFormType } from '../index';
 
 interface Props {
   onSubmit: (data: RaiseDisputeFormType) => Promise<string | undefined | void>;
@@ -27,7 +27,7 @@ const DEFAULT_FORM_VALUES: RaiseDisputeFormType = {
   evidence: [],
 };
 
-export default function RaiseDisputeForm({ dispute, onSubmit, mediaUploading, onPreview }: Props) {
+export function RaiseDisputeForm({ dispute, onSubmit, mediaUploading, onPreview }: Props) {
   const {
     register,
     control,

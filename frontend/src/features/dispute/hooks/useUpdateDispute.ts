@@ -1,8 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { bookingKeys } from '@/features/booking';
 import { disputeService } from '@/services/dispute.service';
 
-import type { RaiseDisputeFormType } from '../validation/raiseDispute.schema';
+import { disputeKeys, type RaiseDisputeFormType } from '../index';
 
 export function useUpdateDispute() {
   const qc = useQueryClient();
@@ -10,10 +11,8 @@ export function useUpdateDispute() {
     {
       mutationFn: ({ disputeId, data }) => disputeService.updateDispute(disputeId, data),
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ['dispute-details'] });
-        qc.invalidateQueries({ queryKey: ['disputes'] });
-        qc.invalidateQueries({ queryKey: ['dispute-stats'] });
-        qc.invalidateQueries({ queryKey: ['bookings'] });
+        qc.invalidateQueries({ queryKey: disputeKeys.all });
+        qc.invalidateQueries({ queryKey: bookingKeys.all });
       },
     }
   );

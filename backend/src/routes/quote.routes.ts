@@ -12,7 +12,11 @@ const router = Router();
 const controller = container.get<IQuoteController>(TYPES.QuoteController);
 
 router.get("/", authenticate([ROLE.USER, ROLE.WORKER, ROLE.ADMIN]), controller.listQuotes);
-router.get("/worker/stats", authenticate([ROLE.WORKER]), controller.getWorkerQuoteStats);
+router.get(
+  "/worker/stats",
+  authenticate([ROLE.WORKER, ROLE.ADMIN]),
+  controller.getWorkerQuoteStats
+);
 
 router.post("/", authenticate([ROLE.WORKER]), validateDto(CreateQuoteDto), controller.createQuote);
 router.patch(

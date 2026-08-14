@@ -17,7 +17,7 @@ const DISPUTE_STATS_CONFIG = [
   { key: 'dismissed', label: 'Dismissed', icon: <XCircle />, tone: 'error' },
 ] as const;
 
-export default function DisputeStatsSection({ isError, isLoading, statsData }: Props) {
+export function DisputeStatsSection({ isError, isLoading, statsData }: Props) {
   return (
     <>
       {!isError && (
