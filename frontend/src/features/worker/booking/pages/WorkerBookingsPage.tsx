@@ -5,7 +5,7 @@ import { ROLE, type BookingFilterStatus } from '@/constants';
 import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
-import DisputeModal from '@/features/dispute/components/DisputeModal';
+import { DisputeModal } from '@/features/dispute';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';

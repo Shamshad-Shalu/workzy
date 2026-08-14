@@ -80,11 +80,19 @@ interface Props {
   booking: BookingListItem;
   handlers?: BookingCardHandlers;
   role: Role;
-  index: number;
   detailPath?: string;
+  workerId?: string;
+  userId?: string;
 }
 
-export default function BookingCard({ booking: b, handlers, role, index, detailPath }: Props) {
+export default function BookingCard({
+  booking: b,
+  handlers,
+  role,
+  detailPath,
+  workerId,
+  userId,
+}: Props) {
   const cfg = BOOKING_STATUS_META[b.status];
   const pc = PAYMENT_STATUS_META[b.paymentStatus] ?? PAYMENT_STATUS_META.pending;
 
@@ -115,20 +123,19 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
   const hasVisibleReview = !!b.reviewId && b.hasVisibleReview;
   const canAddReview = !hasVisibleReview && !isReviewExpired;
 
-  const otherAvatar = isWorker ? b.user?.profileImage : b.worker?.profileImage;
-  const otherName = isWorker ? b.user?.name : b.worker?.name;
+  const showBothProfiles = isAdmin && !workerId && !userId;
+  const showCustomer = isWorker || !!workerId;
+  const otherAvatar = showCustomer ? b.user?.profileImage : b.worker?.profileImage;
+  const otherName = showCustomer ? b.user?.name : b.worker?.name;
   const to = detailPath ?? `/bookings/${b.id}`;
 
   const quotePath = b.quoteId ? `/worker/quotes` : `/worker/quotes/${b.id}`;
 
-  // const isReschedulePending = b.isRescheduleRequested &&
-  //   [BOOKING_STATUS.PENDING, BOOKING_STATUS.CONFIRMED , BOOKING_STATUS.EN_ROUTE , BOOKING_STATUS.REACHED , BOOKING_STATUS.IN_PROGRESS].includes(b.status);
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
+      initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.04, ease: 'easeOut' }}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
       className={cn(
         'bg-card rounded-2xl border border-border border-l-[3px] overflow-hidden',
         'shadow-sm hover:shadow-md transition-all duration-200',
@@ -163,7 +170,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
       <div className="p-4 sm:p-5">
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            {isAdmin ? (
+            {showBothProfiles ? (
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
                 <div className="flex items-center gap-2.5 min-w-0">
                   <ProfileImage src={b.user?.profileImage} size={32} name={b.user?.name} />
@@ -221,7 +228,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
           )}
         </div>
 
-        {isAdmin && (
+        {showBothProfiles && (
           <div className="mt-3 pt-3 border-t border-dashed border-border flex flex-wrap items-center gap-2">
             <div className="flex items-center gap-1.5 bg-muted/60 px-2 py-1 rounded-lg">
               {b.category.iconUrl && (
@@ -236,7 +243,7 @@ export default function BookingCard({ booking: b, handlers, role, index, detailP
         <div
           className={cn(
             'mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs text-muted-foreground',
-            !isAdmin && 'sm:ml-[56px]'
+            !showBothProfiles && 'sm:ml-[56px]'
           )}
         >
           <span className="flex items-center gap-1.5">

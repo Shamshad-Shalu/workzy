@@ -5,7 +5,7 @@ import { ROLE, type BookingFilterStatus } from '@/constants';
 import { useBookings } from '@/features/booking';
 import { BookingList } from '@/features/booking/components/BookingList';
 import { BookingStatusTabs } from '@/features/booking/components/BookingStatusTabs';
-import DisputeModal from '@/features/dispute/components/DisputeModal';
+import { DisputeModal } from '@/features/dispute';
 
 import ApproveModal from '../components/bookingActions/ApproveModal';
 import CancelModal from '../components/bookingActions/CancelModal';
@@ -80,7 +80,6 @@ export default function UserBookingsPage() {
       <DisputeModal
         open={!!disputeBId}
         role={ROLE.USER}
-        // onSubmit={handleRaiseDispute}
         onClose={() => setDisputeBId(null)}
         bookingId={disputeBId}
       />

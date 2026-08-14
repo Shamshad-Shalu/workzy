@@ -8,7 +8,7 @@ import BookingCard from '@/features/booking/components/BookingCard';
 import { useInfiniteScroll } from '@/hooks/useInfiniteScroll';
 import type { BookingDetails, BookingListItem } from '@/types/booking';
 
-import BookingCardSkeleton from './BookingCardSkeleton';
+import { BookingCardSkeleton } from './BookingCardSkeleton';
 
 interface BookingListProps {
   bookings: BookingListItem[];
@@ -32,6 +32,8 @@ interface BookingListProps {
   onPayExtra?: (id: string) => void;
   onReview?: (data: { id: string; reviewId?: string }) => void;
   detailBasePath?: string;
+  workerId?: string;
+  userId?: string;
 }
 
 export function BookingList({
@@ -56,8 +58,11 @@ export function BookingList({
   onPayExtra,
   onDispute,
   detailBasePath = '/bookings',
+  workerId,
+  userId,
 }: BookingListProps) {
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-3">
@@ -89,13 +94,14 @@ export function BookingList({
   return (
     <div className="flex flex-col gap-3">
       <AnimatePresence>
-        {bookings.map((booking, i) => (
+        {bookings.map(booking => (
           <BookingCard
             key={booking?.id}
             booking={booking}
             role={role}
-            index={i}
             detailPath={`${detailBasePath}/${booking?.id}`}
+            workerId={workerId}
+            userId={userId}
             handlers={{
               onAccept,
               onStart,

@@ -2,7 +2,7 @@ import { useState } from 'react';
 
 import { ROLE } from '@/constants';
 import BookingDetailsPage from '@/features/booking/page/Bookingdetailspage';
-import DisputeModal from '@/features/dispute/components/DisputeModal';
+import { DisputeModal } from '@/features/dispute';
 
 import WorkerAcceptModal from '../components/WorkerAcceptModal';
 import WorkerCompleteModal from '../components/WorkerCompleteModal';
