@@ -34,4 +34,16 @@ export class AdminUserController implements IAdminUserController {
     const message = await this._userService.toggleUserStatus(userId);
     res.status(HTTPSTATUS.OK).json({ message });
   });
+
+  getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const user = await this._userService.getUserById(userId);
+    res.status(HTTPSTATUS.OK).json(user);
+  });
+
+  getUserStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.params.userId;
+    const stats = await this._userService.getUserStats(userId);
+    res.status(HTTPSTATUS.OK).json(stats);
+  });
 }

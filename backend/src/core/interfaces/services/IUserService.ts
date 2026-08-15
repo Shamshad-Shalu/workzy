@@ -24,4 +24,10 @@ export interface IUserService {
   requestChangePhone(userId: string, phone: string): Promise<boolean>;
   resendOtp(userId: string, type: "email" | "phone", value: string): Promise<boolean>;
   toggleUserStatus(userId: string): Promise<string>;
+  getUserById(userId: string): Promise<UserProfileResponseDto>;
+  getUserStats(userId: string): Promise<{
+    totalBookings: number;
+    totalSpent: number;
+    totalDisputes: number;
+  }>;
 }

@@ -9,6 +9,8 @@ export class UserProfileResponseDto {
   phone?: string;
   role!: string;
   profileImage?: string;
+  isBlocked!: boolean;
+  createdAt!: Date;
   profile?: { address?: IAdress; location: ILocation };
 
   static async fromEntity(entity: IUser, s3Service: IS3Service): Promise<UserProfileResponseDto> {
@@ -19,6 +21,8 @@ export class UserProfileResponseDto {
     dto.email = entity.email;
     dto.phone = entity.phone;
     dto.role = entity.role;
+    dto.isBlocked = entity.isBlocked;
+    dto.createdAt = entity.createdAt;
     dto.profile = entity.profile;
     dto.profileImage = await resolveS3Url(entity.profileImage, s3Service);
 
