@@ -12,6 +12,7 @@ import {
   WorkerReviewRequestDTO,
 } from "@/dtos/requests/admin/worker-review.dto";
 import { WorkerStatusFilter } from "@/types/worker/worker.query";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class AdminWorkerController implements IAdminWorkerController {
@@ -35,24 +36,26 @@ export class AdminWorkerController implements IAdminWorkerController {
       stripStatus,
     });
 
-    res.status(HTTPSTATUS.OK).json({
-      workers: data,
-      total,
-    });
+    res.status(HTTPSTATUS.OK).json(
+      new ApiResponse({
+        workers: data,
+        total,
+      })
+    );
   });
 
   reviewWorker = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const data = req.body as WorkerReviewRequestDTO;
     const updatedWorker = await this._workerService.reviewWorker(workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: WORKER.VERIFIED, worker: updatedWorker });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ worker: updatedWorker }, WORKER.VERIFIED));
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const reason = req.body.reason;
     const message = await this._workerService.toggleWorkerStatus(workerId, reason);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   reviewWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -60,13 +63,13 @@ export class AdminWorkerController implements IAdminWorkerController {
     const data = req.body as WorkerDocumentReviewRequestDTO;
     const worker = await this._workerService.reviewWorkerDocument(workerId, documentId, data);
 
-    res.status(HTTPSTATUS.OK).json({ message: WORKER.DOCUMENT_REVIEWED, worker: worker });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ worker: worker }, WORKER.DOCUMENT_REVIEWED));
   });
 
   getWorkerStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const stats = await this._workerService.getWorkerStats(workerId);
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 
   getWorkerServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -87,11 +90,11 @@ export class AdminWorkerController implements IAdminWorkerController {
         ? { _id: parsedCursor._id, createdAt: new Date(parsedCursor.createdAt) }
         : undefined,
     });
-    res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ services: data, nextCursor }));
   });
   getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const categories = await this._serviceMangement.getWorkerServiceCategories(workerId);
-    res.status(HTTPSTATUS.OK).json({ categories });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ categories }));
   });
 }

@@ -7,6 +7,7 @@ import { IMessageController } from "@/core/interfaces/controllers/IMessageContro
 import { IMessageService } from "@/core/interfaces/services/IMessageService";
 import { TYPES } from "@/di/types";
 import { MessagePaginationDirection } from "@/types/chat/chat.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -36,6 +37,6 @@ export class MessageController implements IMessageController {
       role: role as SenderRole,
     });
 
-    res.status(HTTPSTATUS.OK).json({ messages: data, nextCursor, prevCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ messages: data, nextCursor, prevCursor }));
   });
 }

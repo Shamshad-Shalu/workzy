@@ -1,16 +1,10 @@
-class CustomError extends Error {
-  statusCode: number;
-  errors?: Array<{ field: string; messages: string }>;
-
+export default class CustomError extends Error {
   constructor(
     message: string,
-    statusCode: number = 500,
-    errors?: Array<{ field: string; messages: string }>
+    public statusCode: number = 500,
+    public errors?: Array<{ field: string; messages: string }>
   ) {
     super(message);
-    this.statusCode = statusCode;
-    this.errors = errors;
+    Object.setPrototypeOf(this, CustomError.prototype);
   }
 }
-
-export default CustomError;

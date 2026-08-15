@@ -7,6 +7,7 @@ import { ICategoryController } from "@/core/interfaces/controllers/ICategoryCont
 import { ICategoryService } from "@/core/interfaces/services/ICategoryService";
 import { TYPES } from "@/di/types";
 import { ServiceSort } from "@/types/category";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class CategoryController implements ICategoryController {
@@ -27,25 +28,25 @@ export class CategoryController implements ICategoryController {
       parentId
     );
 
-    res.status(HTTPSTATUS.OK).json({
-      categories,
-      total,
-    });
+    res.status(HTTPSTATUS.OK).json(
+      new ApiResponse({
+        categories,
+        total,
+      })
+    );
   });
 
   getCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const categoryId = req.params.categoryId;
 
     const category = await this._categoryService.getCategoryById(categoryId);
-    res.status(HTTPSTATUS.OK).json({
-      category,
-    });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(category));
   });
 
   getCategoryAncestors = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const ancestors = await this._categoryService.getCategoryAncestors(id);
-    res.status(200).json({ ancestors });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ ancestors }));
   });
 
   getCategoryLevels = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -53,7 +54,7 @@ export class CategoryController implements ICategoryController {
     const parentId = (req.query.parentId as string) || null;
 
     const categories = await this._categoryService.getCategoriesByLevel(level, parentId);
-    res.status(200).json({ categories });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ categories }));
   });
 
   getCategorySuggestions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -61,21 +62,22 @@ export class CategoryController implements ICategoryController {
     const limit = parseInt(req.query.limit as string) || 20;
 
     const results = await this._categoryService.getCategorySuggestions(search, limit);
-    res.status(200).json({ results });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ results }));
   });
 
   getTrendingCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const limit = parseInt(req.query.limit as string) || 10;
     const results = await this._categoryService.getTrendingCategories(limit);
-    res.status(200).json({ results });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ results }));
   });
 
   getServicesByCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { categoryId } = req.params;
     const limit = parseInt(req.query.limit as string) || 10;
     const services = await this._categoryService.getServicesByCategory(categoryId, limit);
-    res.status(200).json({ services });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ services }));
   });
+
   getPublicCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const categoryId = (req.query.categoryId as string) || undefined;
     const sortBy = (req.query.sortBy as ServiceSort) || "newest";
@@ -88,6 +90,6 @@ export class CategoryController implements ICategoryController {
       limit,
       cursor,
     });
-    res.status(HTTPSTATUS.OK).json({ categories, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ categories, nextCursor }));
   });
 }

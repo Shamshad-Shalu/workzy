@@ -7,6 +7,7 @@ import { IQuoteController } from "@/core/interfaces/controllers/IQuoteController
 import { IQuoteService } from "@/core/interfaces/services/IQuoteService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteDto, UpdateQuoteDto } from "@/dtos/requests/quote.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -17,7 +18,7 @@ export class QuoteController implements IQuoteController {
     const workerId = this.requireWorkerId(req);
     const data = req.body as CreateQuoteDto;
     const quote = await this._quoteService.createQuote(workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: QUOTE.CREATED, quote });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ quote }, QUOTE.CREATED));
   });
 
   updateQuote = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -25,7 +26,7 @@ export class QuoteController implements IQuoteController {
     const { quoteId } = req.params;
     const data = req.body as UpdateQuoteDto;
     const quote = await this._quoteService.updateQuote(workerId, quoteId, data);
-    res.status(HTTPSTATUS.OK).json({ message: QUOTE.UPDATED, quote });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ quote }, QUOTE.UPDATED));
   });
 
   getWorkerQuoteStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -36,21 +37,21 @@ export class QuoteController implements IQuoteController {
       workerId = this.requireWorkerId(req);
     }
     const stats = await this._quoteService.getWorkerQuoteStats(workerId);
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 
   acceptQuote = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { quoteId } = req.params;
     const { url } = await this._quoteService.acceptQuote(userId, quoteId);
-    res.status(HTTPSTATUS.OK).json({ url });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url }));
   });
 
   rejectQuote = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { quoteId } = req.params;
     await this._quoteService.rejectQuote(userId, quoteId);
-    res.status(HTTPSTATUS.OK).json({ message: QUOTE.REJECTED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, QUOTE.REJECTED));
   });
 
   listQuotes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -70,7 +71,7 @@ export class QuoteController implements IQuoteController {
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ quotes: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ quotes: data, nextCursor }));
   });
 
   private requireWorkerId(req: Request): string {

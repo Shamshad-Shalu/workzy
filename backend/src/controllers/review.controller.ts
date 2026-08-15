@@ -9,6 +9,7 @@ import { IReviewService } from "@/core/interfaces/services/IReviewService";
 import { TYPES } from "@/di/types";
 import { CreateReviewDto, UpdateReviewDto, ReviewReplyDto } from "@/dtos/requests/review.dto";
 import { ReviewListQueryInput } from "@/types/review/review.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -18,21 +19,21 @@ export class ReviewController implements IReviewController {
   getReviewById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
     const review = await this._reviewService.getReviewById(reviewId);
-    res.status(HTTPSTATUS.CREATED).json({ review });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(review));
   });
 
   createReview = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const data = req.body as CreateReviewDto;
     const review = await this._reviewService.createReview(userId, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: REVIEW.CREATED, review });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ review }, REVIEW.CREATED));
   });
 
   updateReviewById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
     const data = req.body as UpdateReviewDto;
     const review = await this._reviewService.updateReview(reviewId, data);
-    res.status(HTTPSTATUS.OK).json({ message: REVIEW.UPDATED, review });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ review }, REVIEW.UPDATED));
   });
 
   addReplyToReview = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -40,13 +41,13 @@ export class ReviewController implements IReviewController {
     const { reviewId } = req.params;
     const data = req.body as ReviewReplyDto;
     await this._reviewService.addReplyToReview(reviewId, data, workerId);
-    res.status(HTTPSTATUS.OK).json({ message: REVIEW.REPLY_ADDED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, REVIEW.REPLY_ADDED));
   });
 
   ToggleReviewVisibilityById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { reviewId } = req.params;
     const message = await this._reviewService.toggleReviewVisibility(reviewId);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   listReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -67,7 +68,7 @@ export class ReviewController implements IReviewController {
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ reviews: data, nextCursor }));
   });
 
   getPublicWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -77,27 +78,27 @@ export class ReviewController implements IReviewController {
       ...query,
       status: "visible",
     });
-    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor: nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ reviews: data, nextCursor: nextCursor }));
   });
 
   getWorkerReviewStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const result = await this._reviewService.getWorkerReviewStats(workerId);
-    res.status(HTTPSTATUS.OK).json(result);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(result));
   });
 
   getMyWorkerReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const query = this.parseQuery(req);
     const { data, nextCursor } = await this._reviewService.getWorkerReviews(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ reviews: data, nextCursor }));
   });
 
   getUserReviews = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const query = this.parseQuery(req);
     const { data, nextCursor } = await this._reviewService.getUserReviews(userId, query);
-    res.status(HTTPSTATUS.OK).json({ reviews: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ reviews: data, nextCursor }));
   });
 
   private parseQuery(req: Request): ReviewListQueryInput {

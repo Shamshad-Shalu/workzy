@@ -7,6 +7,7 @@ import { IAdminUserController } from "@/core/interfaces/controllers/admin/IAdmin
 import { IUserService } from "@/core/interfaces/services/IUserService";
 import { TYPES } from "@/di/types";
 import { UserStatusFilter } from "@/types/user/user.query";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class AdminUserController implements IAdminUserController {
@@ -26,24 +27,24 @@ export class AdminUserController implements IAdminUserController {
       status,
       role,
     });
-    res.status(HTTPSTATUS.OK).json({ users: data, total });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ users: data, total }));
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
     const message = await this._userService.toggleUserStatus(userId);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
     const user = await this._userService.getUserById(userId);
-    res.status(HTTPSTATUS.OK).json(user);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(user));
   });
 
   getUserStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = req.params.userId;
     const stats = await this._userService.getUserStats(userId);
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 }

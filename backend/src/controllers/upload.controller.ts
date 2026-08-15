@@ -7,6 +7,7 @@ import { IUploadController } from "@/core/interfaces/controllers/IUploadControll
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
 import { TYPES } from "@/di/types";
 import { RequestUploadUrlDTO } from "@/dtos/requests/upload.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class UploadController implements IUploadController {
@@ -17,6 +18,6 @@ export class UploadController implements IUploadController {
 
     const signedUrl = await this._s3Service.generateUploadPresignedUrl(data);
 
-    res.status(HTTPSTATUS.OK).json(signedUrl);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(signedUrl));
   });
 }

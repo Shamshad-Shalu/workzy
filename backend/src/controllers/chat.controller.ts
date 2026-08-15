@@ -6,6 +6,7 @@ import { AUTH, CHAT, HTTPSTATUS, ROLE, SenderRole } from "@/constants";
 import { IChatController } from "@/core/interfaces/controllers/IChatController";
 import { IChatService } from "@/core/interfaces/services/IChatService";
 import { TYPES } from "@/di/types";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -23,7 +24,7 @@ export class ChatController implements IChatController {
       participantId,
       role,
     });
-    res.status(HTTPSTATUS.OK).json(chat);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(chat));
   });
 
   getChatRooms = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -61,7 +62,7 @@ export class ChatController implements IChatController {
       role,
       cursor: parsedCursor,
     });
-    res.status(HTTPSTATUS.OK).json({ chats: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ chats: data, nextCursor }));
   });
 
   getOrCreateChat = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -80,7 +81,7 @@ export class ChatController implements IChatController {
       creatorRole: role,
       participantId,
     });
-    res.status(HTTPSTATUS.CREATED).json(chat);
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse(chat));
   });
 
   private requireUserId(req: Request): string {

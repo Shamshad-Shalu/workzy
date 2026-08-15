@@ -8,6 +8,7 @@ import { ILeaveService } from "@/core/interfaces/services/ILeaveService";
 import { TYPES } from "@/di/types";
 import { CreateLeaveDTO } from "@/dtos/requests/leave.dto";
 import { LeaveFilter } from "@/types/leave";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -21,7 +22,7 @@ export class LeaveController implements ILeaveController {
     }
     const data = req.body as CreateLeaveDTO;
     const leave = await this._leaveService.createLeave(workerId, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: LEAVE.CREATED, data: leave });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ data: leave }, LEAVE.CREATED));
   });
 
   cancelLeave = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -32,7 +33,7 @@ export class LeaveController implements ILeaveController {
     const { leaveId } = req.params;
     await this._leaveService.cancelLeave(leaveId, workerId);
 
-    res.status(HTTPSTATUS.OK).json({ message: LEAVE.CANCELLED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, LEAVE.CANCELLED));
   });
 
   getWorkerLeaves = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -45,7 +46,7 @@ export class LeaveController implements ILeaveController {
     const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
 
     const results = await this._leaveService.getWorkerLeaves({ workerId, cursor, filter, limit });
-    res.status(HTTPSTATUS.OK).json(results);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(results));
   });
 
   getWorkerLeaveStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -54,6 +55,6 @@ export class LeaveController implements ILeaveController {
       throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.UNAUTHORIZED);
     }
     const results = await this._leaveService.getLeaveStats(workerId);
-    res.status(HTTPSTATUS.OK).json(results);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(results));
   });
 }

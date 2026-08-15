@@ -19,6 +19,7 @@ import { IPaymentController } from "@/core/interfaces/controllers/IPaymentContro
 import { IPaymentService } from "@/core/interfaces/services/IPaymentService";
 import { TYPES } from "@/di/types";
 import { PaymentListQuery } from "@/types/payment/payment.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -50,7 +51,7 @@ export class PaymentController implements IPaymentController {
   verifySession = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { sessionId } = req.params;
     const result = await this._paymentService.verifySession(sessionId);
-    res.status(HTTPSTATUS.OK).json(result);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(result));
   });
 
   getPayments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -62,7 +63,7 @@ export class PaymentController implements IPaymentController {
       workerId,
       ...query,
     });
-    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ payments: data, nextCursor }));
   });
 
   getUserPayments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -72,7 +73,7 @@ export class PaymentController implements IPaymentController {
     }
     const query = this.parseQuery(req);
     const { nextCursor, data } = await this._paymentService.getUserPayments(userId, query);
-    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ payments: data, nextCursor }));
   });
 
   getWorkerPayments = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -82,7 +83,7 @@ export class PaymentController implements IPaymentController {
     }
     const query = this.parseQuery(req);
     const { nextCursor, data } = await this._paymentService.getWorkerPayments(workerId, query);
-    res.status(HTTPSTATUS.OK).json({ payments: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ payments: data, nextCursor }));
   });
 
   private parseQuery(req: Request): PaymentListQuery {

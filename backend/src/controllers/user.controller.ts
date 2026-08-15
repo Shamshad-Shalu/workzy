@@ -12,6 +12,7 @@ import {
   UserProfileRequestDto,
   VerifyOtpDto,
 } from "@/dtos/requests/profile.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -28,28 +29,28 @@ export class UserController implements IUserController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const imageUrl = await this._userService.updateProfileImage(userId, url);
-    res.status(HTTPSTATUS.OK).json({ url: imageUrl });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url: imageUrl }));
   });
 
   changePassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
 
     await this._userService.updatePassword(userId, req.body as ChangePasswordDto);
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.PASSWORD_UPDATED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.PASSWORD_UPDATED));
   });
 
   changeEmail = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { email } = req.body;
     await this._userService.requestChangeEmail(userId, email);
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_SENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_SENT));
   });
 
   changePhone = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { phone } = req.body;
     await this._userService.requestChangePhone(userId, phone);
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_SENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_SENT));
   });
 
   resentOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -57,7 +58,7 @@ export class UserController implements IUserController {
     const { type, value } = req.body;
     await this._userService.resendOtp(userId, type, value);
 
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_RESENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_RESENT));
   });
 
   confirmOtpAndUpdateContact = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -65,14 +66,14 @@ export class UserController implements IUserController {
     const data = req.body as VerifyOtpDto;
     const { user, message } = await this._userService.confirmOtpAndUpdateContact(userId, data);
 
-    res.status(HTTPSTATUS.OK).json({ user, message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(user, message));
   });
 
   updateProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const data = req.body as UserProfileRequestDto;
     const user = await this._userService.updateProfile(userId, data);
-    res.status(HTTPSTATUS.OK).json({ message: USER.PROFILE_SUCCESS, user });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(user, USER.PROFILE_SUCCESS));
   });
 
   private requireUserId(req: Request): string {

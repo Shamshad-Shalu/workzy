@@ -25,6 +25,7 @@ import {
   CancelRescheduleDto,
 } from "@/dtos/requests/booking.dto";
 import { BookingListQuery, ListingStatus } from "@/types/booking/booking.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -34,7 +35,7 @@ export class BookingController implements IBookingController {
     const userId = this.requireUserId(req);
     const data = req.body as CreatebookingDTO;
     const { url } = await this._bookingService.createBooking(userId, data);
-    res.status(HTTPSTATUS.OK).json({ url });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url }));
   });
 
   getBookings = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -47,13 +48,13 @@ export class BookingController implements IBookingController {
       userId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ bookings: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ bookings: data, nextCursor }));
   });
 
   getBookingById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const result = await this._bookingService.getBookingDetails(bookingId);
-    res.status(HTTPSTATUS.OK).json({ booking: result });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(result));
   });
 
   cancelBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -62,14 +63,14 @@ export class BookingController implements IBookingController {
     const { reason } = req.body as CancelBookingDTO;
     await this._bookingService.cancelBooking(bookingId, userId, reason);
 
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.CANCELLED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.CANCELLED));
   });
 
   acceptBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const workerId = this.requireWorkerId(req);
     await this._bookingService.acceptBooking(bookingId, workerId);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.CONFIRMED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.CONFIRMED));
   });
 
   rejectBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -77,19 +78,19 @@ export class BookingController implements IBookingController {
     const { bookingId } = req.params;
     const { reason } = req.body as RejectBookingDTO;
     await this._bookingService.rejectBooking({ bookingId, reason, workerId });
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.REJECTED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.REJECTED));
   });
 
   markEnRoute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     await this._bookingService.markEnRoute(req.params.bookingId, workerId);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.EN_ROUTE });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.EN_ROUTE));
   });
 
   markReached = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     await this._bookingService.markReached(req.params.bookingId, workerId);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.REACHED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.REACHED));
   });
 
   startJob = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -98,14 +99,14 @@ export class BookingController implements IBookingController {
     const { otp } = req.body as VerifyBookingOtpDTO;
 
     await this._bookingService.startJob(bookingId, workerId, otp);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.IN_PROGRESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.IN_PROGRESS));
   });
 
   approveBooking = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { bookingId } = req.params;
     await this._bookingService.approveBooking(bookingId, userId);
-    res.status(HTTPSTATUS.OK).json({ message: "Job approved and payment released" });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Job approved and payment released"));
   });
 
   payExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -113,14 +114,14 @@ export class BookingController implements IBookingController {
     const { bookingId } = req.params;
 
     const { url } = await this._bookingService.payExtraCharge(bookingId, userId);
-    res.status(HTTPSTATUS.OK).json({ url });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url }));
   });
 
   rejectExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { bookingId } = req.params;
     await this._bookingService.rejectExtraCharge(bookingId, userId);
-    res.status(HTTPSTATUS.OK).json({ message: "Extra charge rejected" });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Extra charge rejected"));
   });
 
   completeJob = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -129,7 +130,7 @@ export class BookingController implements IBookingController {
     const data = req.body as CompleteBookingDTO;
 
     await this._bookingService.completeJob(bookingId, workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING_STATUS_MESSAGES.COMPLETED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING_STATUS_MESSAGES.COMPLETED));
   });
 
   requestExtraCharge = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -137,7 +138,7 @@ export class BookingController implements IBookingController {
     const { bookingId } = req.params;
     const data = req.body as ExtraChargeDTO;
     await this._bookingService.requestExtraCharge(bookingId, workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: "Extra charge request sent to client" });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, "Extra charge request sent to client"));
   });
 
   requestReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -146,7 +147,7 @@ export class BookingController implements IBookingController {
     const initiatorId =
       data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
     await this._bookingService.requestReschedule(bookingId, initiatorId, data);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING.RESCHEDULE_REQUESTED_SUCCESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.RESCHEDULE_REQUESTED_SUCCESS));
   });
 
   respondReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -155,7 +156,7 @@ export class BookingController implements IBookingController {
     const responderId =
       data.role === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
     const message = await this._bookingService.respondReschedule(bookingId, responderId, data);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   cancelReschedule = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -164,7 +165,7 @@ export class BookingController implements IBookingController {
     const initiatorId =
       data.requestedBy === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
     await this._bookingService.cancelReschedule(bookingId, initiatorId, data);
-    res.status(HTTPSTATUS.OK).json({ message: BOOKING.RESCHEDULE_CANCELLED_SUCCESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, BOOKING.RESCHEDULE_CANCELLED_SUCCESS));
   });
 
   private parseQuery(req: Request): BookingListQuery {

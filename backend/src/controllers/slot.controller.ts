@@ -8,6 +8,7 @@ import { ISlotService } from "@/core/interfaces/services/ISlotService";
 import { TYPES } from "@/di/types";
 import { CreateQuoteSlotsDTO, CreateSlotDTO, RescheduleSlotDto } from "@/dtos/requests/slot.dto";
 import { GetQuoteAvailableDatesDTO } from "@/types/slot";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -31,7 +32,7 @@ export class SlotController implements ISlotController {
       lat,
       lng,
     });
-    res.status(HTTPSTATUS.OK).json({ dates });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ dates }));
   });
 
   getAvailableDatesForQuotes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -43,7 +44,7 @@ export class SlotController implements ISlotController {
       serviceId,
       workerId,
     });
-    res.status(HTTPSTATUS.OK).json({ dates });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ dates }));
   });
 
   private parseQuery(req: Request): Omit<GetQuoteAvailableDatesDTO, "workerId" | "serviceId"> {
@@ -81,21 +82,21 @@ export class SlotController implements ISlotController {
       lng,
       itemCount,
     });
-    res.status(HTTPSTATUS.OK).json({ slots });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ slots }));
   });
 
   reserveSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const data = req.body as CreateSlotDTO;
     const { slotId, reservedUntil } = await this._slotService.reserveSlot(userId, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotId, reservedUntil });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ slotId, reservedUntil }, SLOT.CREATED));
   });
 
   releaseSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const userId = this.requireUserId(req);
     const { slotId } = req.params;
     await this._slotService.releaseSlot(slotId, userId);
-    res.status(HTTPSTATUS.OK).json({ message: SLOT.RELEASED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, SLOT.RELEASED));
   });
 
   reserveQuoteSlots = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -103,13 +104,13 @@ export class SlotController implements ISlotController {
     const data = req.body as CreateQuoteSlotsDTO;
 
     const { slotIds, reservedUntil } = await this._slotService.reserveQuoteSlots(workerId, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotIds, reservedUntil });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ slotIds, reservedUntil }, SLOT.CREATED));
   });
 
   getRescheduleDates = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const { dates, isFullDay } = await this._slotService.getRescheduleDates(bookingId);
-    res.status(HTTPSTATUS.OK).json({ dates, isFullDay });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ dates, isFullDay }));
   });
 
   getRescheduleSlots = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -120,14 +121,15 @@ export class SlotController implements ISlotController {
       throw new CustomError(SLOT.INVALID_DATE, HTTPSTATUS.BAD_REQUEST);
     }
     const slots = await this._slotService.getRescheduleSlots(bookingId, parsedDate);
-    res.status(HTTPSTATUS.OK).json({ slots });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ slots }));
   });
 
   getRescheduleSlotOptions = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const slots = await this._slotService.getRescheduleSlotOptions(bookingId);
-    res.status(HTTPSTATUS.OK).json({ slots });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ slots }));
   });
+
   reserveRescheduleSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const data = req.body as RescheduleSlotDto;
@@ -138,8 +140,9 @@ export class SlotController implements ISlotController {
       initiatorId,
       data,
     });
-    res.status(HTTPSTATUS.CREATED).json({ message: SLOT.CREATED, slotId, reservedUntil });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ slotId, reservedUntil }, SLOT.CREATED));
   });
+
   releaseRescheduleSlot = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const bookingId = req.query.bookingId as string;
     const role = req.query.role as Role;
@@ -150,7 +153,7 @@ export class SlotController implements ISlotController {
     const initiatorId = role === ROLE.WORKER ? this.requireWorkerId(req) : this.requireUserId(req);
     await this._slotService.releaseRescheduleSlot(slotId, initiatorId, role);
 
-    res.status(HTTPSTATUS.OK).json({ message: SLOT.RELEASED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, SLOT.RELEASED));
   });
 
   private requireUserId(req: Request): string {
