@@ -13,6 +13,8 @@ import {
   NOTIFICATION_TEMPLATES,
   USER,
 } from "@/constants";
+import { IBookingRepository } from "@/core/interfaces/repositories/IBookingRepository";
+import { IDisputeRepository } from "@/core/interfaces/repositories/IDisputeRepository";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import { IEmailService } from "@/core/interfaces/services/IEmailService";
@@ -45,7 +47,9 @@ export class UserService implements IUserService {
     @inject(TYPES.RedisService) private _redisService: IRedisService,
     @inject(TYPES.EmailService) private _emailService: IEmailService,
     @inject(TYPES.S3Service) private _s3Service: IS3Service,
-    @inject(TYPES.NotificationService) private _notificationService: INotificationService
+    @inject(TYPES.NotificationService) private _notificationService: INotificationService,
+    @inject(TYPES.BookingRepository) private _bookingRepository: IBookingRepository,
+    @inject(TYPES.DisputeRepository) private _disputeRepository: IDisputeRepository
   ) {}
 
   async findByEmail(email: string): Promise<IUser | null> {
@@ -80,6 +84,26 @@ export class UserService implements IUserService {
       );
     }
     return newStatus ? USER.BLOCKEDSUCCESS : USER.UNBLOCKED;
+  }
+
+  async getUserById(userId: string): Promise<UserProfileResponseDto> {
+    const user = await getEntityOrThrow(this._userRepository, userId, USER.NOT_FOUND);
+    return UserProfileResponseDto.fromEntity(user, this._s3Service);
+  }
+
+  async getUserStats(userId: string): Promise<{
+    totalBookings: number;
+    totalSpent: number;
+    totalDisputes: number;
+  }> {
+    const [bookingStats, totalDisputes] = await Promise.all([
+      this._bookingRepository.getUserBookingStats(userId),
+      this._disputeRepository.countDocuments({ userId: new Types.ObjectId(userId) }),
+    ]);
+    return {
+      ...bookingStats,
+      totalDisputes,
+    };
   }
 
   async updateProfileImage(userId: string, url: string): Promise<string> {

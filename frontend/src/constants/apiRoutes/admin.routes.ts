@@ -5,6 +5,8 @@ const admin = buildRoute('/admin');
 export const ADMIN_API = {
   USER: {
     USERS: admin(`/users`),
+    USER_DETAILS: (id: string) => admin(`/users/${id}`),
+    USER_STATS: (id: string) => admin(`/users/${id}/stats`),
     USER_STATUS: (id: string) => admin(`/users/${id}/toggle-status`),
   },
   CATEGORY: {

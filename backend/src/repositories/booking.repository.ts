@@ -459,4 +459,28 @@ export class BookingRepository extends BaseRepository<IBooking> implements IBook
       workerEarnings: grossRevenue - platformRevenue,
     };
   }
+  async getUserBookingStats(
+    userId: string
+  ): Promise<{ totalBookings: number; totalSpent: number }> {
+    const result = await this.model.aggregate([
+      {
+        $match: {
+          userId: new Types.ObjectId(userId),
+          status: { $in: [BOOKING_STATUS.COMPLETED, BOOKING_STATUS.APPROVED] },
+          paymentStatus: { $in: [BOOKING_PAYMENT_STATUS.RELEASED, BOOKING_PAYMENT_STATUS.HELD] },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          totalBookings: { $sum: 1 },
+          totalSpent: { $sum: "$total" },
+        },
+      },
+    ]);
+    return {
+      totalBookings: result[0].totalBookings ?? 0,
+      totalSpent: result[0].totalSpent ?? 0,
+    };
+  }
 }

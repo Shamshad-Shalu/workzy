@@ -23,4 +23,5 @@ export interface IBookingRepository extends BaseRepository<IBooking> {
     data: IAcceptRescheduleData,
     options?: RepositoryOptions
   ): Promise<boolean>;
+  getUserBookingStats(userId: string): Promise<{ totalBookings: number; totalSpent: number }>;
 }

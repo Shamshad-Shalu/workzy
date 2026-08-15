@@ -1,5 +1,7 @@
 import type { Role } from '@/constants';
 
+import type { User } from '../user';
+
 export interface UserListItem {
   id: string;
   name: string;
@@ -10,6 +12,8 @@ export interface UserListItem {
   isBlocked: boolean;
   createdAt: Date;
 }
+
+export type UserProfileDetails = Omit<User, 'worker'> & { createdAt: Date };
 
 export interface AdminUserListResponse {
   users: UserListItem[];
@@ -23,3 +27,9 @@ export type AdminUserListQuery = {
   status?: string;
   role?: string;
 };
+
+export interface AdminUserStats {
+  totalBookings: number;
+  totalSpent: number;
+  totalDisputes: number;
+}
