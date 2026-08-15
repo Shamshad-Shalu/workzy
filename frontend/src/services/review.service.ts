@@ -19,7 +19,7 @@ const ReviewService = {
 
   getReviewById: async (reviewId: string): Promise<Review> => {
     const res = await api.get(REVIEW_API.BY_ID(reviewId));
-    return res.data.review;
+    return res.data;
   },
 
   updateReview: async (

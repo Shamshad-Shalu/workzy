@@ -33,9 +33,8 @@ export const refreshAccessToken = createAsyncThunk(
       if (!res.ok) {
         throw new Error(SESSION_MESSAGES.EXPIRED);
       }
-
-      const data = await res.json();
-      return data;
+      const json = await res.json();
+      return json.data;
     } catch (error) {
       console.error('Error refreshing access token:', error);
       return rejectWithValue(SESSION_MESSAGES.EXPIRED);
@@ -89,7 +88,6 @@ const authSlice = createSlice({
       })
       .addCase(refreshAccessToken.fulfilled, (state, action) => {
         const { user, accessToken } = action.payload;
-        console.log({ accessToken, user });
         state.user = user;
         state.accessToken = accessToken;
         state.isAuthenticated = true;

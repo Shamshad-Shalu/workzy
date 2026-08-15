@@ -9,5 +9,6 @@ export function useWorkerQuoteStats(workerId?: string) {
     queryKey: quoteKeys.workerStats(workerId),
     queryFn: () => QuoteService.getWorkerQuoteStats(workerId),
     staleTime: 1000 * 60,
+    enabled: !!workerId,
   });
 }

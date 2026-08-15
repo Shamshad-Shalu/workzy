@@ -12,7 +12,7 @@ const BookingService = {
     const res = await api.get(BOOKING_API.ROOT, { params });
     return res.data;
   },
-  getBookingDetails: async (bookingId: string): Promise<{ booking: BookingDetails }> => {
+  getBookingDetails: async (bookingId: string): Promise<BookingDetails> => {
     const res = await api.get(BOOKING_API.BY_ID(bookingId));
     return res.data;
   },

@@ -4,7 +4,7 @@ import type { WorkerProfile, WorkerProfileDetails } from '@/types/worker';
 import type { WorkerDashboardAnalytics } from '@/types/workerDashboard.types';
 
 const WorkerService = {
-  getWorkerProfile: async (workerId: string): Promise<{ worker: WorkerProfile }> => {
+  getWorkerProfile: async (workerId: string): Promise<WorkerProfile> => {
     const res = await api.get(WORKER_API.BY_ID(workerId));
     return res.data;
   },

@@ -13,7 +13,7 @@ const NotificationService = {
   },
   markAsRead: async (id: string): Promise<Notification> => {
     const res = await api.patch(NOTIFICATION_API.MARK_AS_READ(id));
-    return res.data.notification as Notification;
+    return res.data;
   },
   markAllAsRead: async (type: 'WORKER' | 'USER'): Promise<{ modifiedCount: number }> => {
     const res = await api.patch(NOTIFICATION_API.MARK_ALL_AS_READ, null, {

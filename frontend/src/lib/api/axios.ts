@@ -12,6 +12,11 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const refreshApi = axios.create({
+  baseURL,
+  withCredentials: true,
+});
+
 let accessToken: string | null = null;
 
 export function setAxiosToken(token: string | null) {
@@ -58,7 +63,25 @@ api.interceptors.request.use(
 
 // Axios interceptors
 api.interceptors.response.use(
-  res => res,
+  res => {
+    if (res.data && typeof res.data === 'object' && 'success' in res.data) {
+      if (res.data.data !== undefined && res.data.data !== null) {
+        if (
+          typeof res.data.data === 'object' &&
+          !Array.isArray(res.data.data) &&
+          res.data.message &&
+          !('message' in res.data.data)
+        ) {
+          return { ...res, data: { ...res.data.data, message: res.data.message } };
+        }
+        return { ...res, data: res.data.data };
+      }
+      if (res.data.message !== undefined) {
+        return { ...res, data: { message: res.data.message } };
+      }
+    }
+    return res;
+  },
 
   async (error: AxiosError) => {
     const originalConfig = error.config as AxiosRequestConfig & { _retry?: boolean };
@@ -84,14 +107,21 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await api.post<RefreshResponse>(
+        const response = await refreshApi.post<
+          RefreshResponse | { success: boolean; data: RefreshResponse }
+        >(
           AUTH_API.REFRESH_TOKEN,
           {},
           {
             withCredentials: true,
           }
         );
-        const { accessToken: newToken } = response.data;
+        const resPayload = response.data;
+        const refreshData =
+          resPayload && typeof resPayload === 'object' && 'data' in resPayload && resPayload.data
+            ? (resPayload.data as RefreshResponse)
+            : (resPayload as RefreshResponse);
+        const { accessToken: newToken } = refreshData;
         setAxiosToken(newToken);
         processQueue(null, newToken);
 
@@ -102,18 +132,28 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError, null);
         window.dispatchEvent(new Event('auth:logout'));
-        const axiosErr = refreshError as AxiosError<{ message?: string }>;
+        const axiosErr = refreshError as AxiosError<{
+          message?: string;
+          errors?: Array<{ field: string; messages: string }>;
+        }>;
         const backendMessage = axiosErr.response?.data?.message;
+        const backendErrors = axiosErr.response?.data?.errors;
         const status = axiosErr.response?.status ?? 500;
-        return Promise.reject(new ApiError(status, backendMessage ?? 'Session expired'));
+        return Promise.reject(
+          new ApiError(status, backendMessage ?? 'Session expired', backendErrors)
+        );
       } finally {
         isRefreshing = false;
       }
     }
 
     const status = error.response?.status ?? 500;
-    const backendMessage = (error.response?.data as { message?: string })?.message;
-    return Promise.reject(new ApiError(status, backendMessage ?? error.message));
+    const responseData = error.response?.data as
+      | { message?: string; errors?: Array<{ field: string; messages: string }> }
+      | undefined;
+    const backendMessage = responseData?.message;
+    const backendErrors = responseData?.errors;
+    return Promise.reject(new ApiError(status, backendMessage ?? error.message, backendErrors));
   }
 );
 

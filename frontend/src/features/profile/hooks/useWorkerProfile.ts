@@ -8,6 +8,5 @@ export function useWorkerProfile(workerId: string | undefined) {
     queryFn: () => WorkerService.getWorkerProfile(workerId!),
     enabled: !!workerId,
     staleTime: 1000 * 60 * 5,
-    select: data => data.worker,
   });
 }
