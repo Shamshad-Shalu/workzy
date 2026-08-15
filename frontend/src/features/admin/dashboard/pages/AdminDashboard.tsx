@@ -73,28 +73,28 @@ export default function AdminDashboard() {
         title="Admin Dashboard"
         description="Overview of users, workers, jobs and revenue across the platform."
       />
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <StatCard
           label="Total Users"
-          value={data?.totalUsers.toLocaleString()}
+          value={data?.totalUsers?.toLocaleString() ?? 0}
           icon={<Users />}
           tone="info"
         />
         <StatCard
           label="Total Workers"
-          value={data?.totalWorkers.toLocaleString()}
+          value={data?.totalWorkers?.toLocaleString() ?? 0}
           tone="primary"
           icon={<UserCheck />}
         />
         <StatCard
           label="Categories"
-          value={String(data?.totalCategories)}
+          value={String(data?.totalCategories ?? 0)}
           tone="neutral"
           icon={<Layers />}
         />
         <StatCard
           label="Active Jobs"
-          value={String(data?.activeJobs)}
+          value={String(data?.activeJobs ?? 0)}
           tone="success"
           icon={<Briefcase />}
         />
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2 border-border/60">
+        <Card className="lg:col-span-2 border-border/60 min-w-0">
           <CardHeader className="flex flex-row items-start justify-between space-y-0">
             <div>
               <CardTitle>Revenue & Commission</CardTitle>
@@ -123,10 +123,10 @@ export default function AdminDashboard() {
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </CardHeader>
-          <CardContent>
-            <div style={{ width: '100%', height: 300 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={revenueData} width={700} height={300}>
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={300} minWidth={0} debounce={50}>
+                <AreaChart data={revenueData}>
                   <defs>
                     <linearGradient id="rev" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.4} />
@@ -139,14 +139,21 @@ export default function AdminDashboard() {
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
                   <XAxis dataKey="month" className="text-xs" />
-                  <YAxis className="text-xs" />
+                  <YAxis
+                    className="text-xs"
+                    tickFormatter={v => `₹${(v / 1000).toFixed(0)}k`}
+                    domain={[0, 'auto']}
+                  />
                   <Tooltip
                     contentStyle={{
                       background: 'hsl(var(--background))',
                       border: '1px solid hsl(var(--border))',
                       borderRadius: 8,
                     }}
-                    formatter={v => [`₹${Number(v ?? 0).toLocaleString()}`, ''] as [string, string]}
+                    formatter={(v: unknown, name: unknown) => [
+                      formatCurrency(Number(v ?? 0)),
+                      name === 'revenue' ? 'Revenue' : 'Commission',
+                    ]}
                   />
                   <Area
                     type="monotone"
@@ -165,17 +172,25 @@ export default function AdminDashboard() {
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+            <div className="mt-3 flex items-center justify-center gap-6 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-primary" /> Total Revenue
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="h-2 w-2 rounded-full bg-[hsl(var(--chart-2))]" /> Commission
+              </span>
+            </div>
           </CardContent>
         </Card>
 
-        <Card className="border-border/60">
+        <Card className="border-border/60 min-w-0">
           <CardHeader>
             <CardTitle>Category Distribution</CardTitle>
             <CardDescription>Active jobs by category</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div style={{ width: '100%', height: 260 }}>
-              <ResponsiveContainer width="100%" height="100%">
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={260} minWidth={0} debounce={50}>
                 <PieChart>
                   <Pie
                     data={categoryDist}
@@ -202,7 +217,10 @@ export default function AdminDashboard() {
             <div className="mt-3 grid grid-cols-2 gap-2">
               {categoryDist.map((c, i) => (
                 <div key={c.name} className="flex items-center gap-2 text-xs">
-                  <span className="h-2 w-2 rounded-full" style={{ background: PIE_COLORS[i] }} />
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: PIE_COLORS[i % PIE_COLORS.length] }}
+                  />
                   <span className="text-muted-foreground">{c.name}</span>
                   <span className="ml-auto font-medium">{c.value}%</span>
                 </div>
@@ -211,15 +229,16 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <Card className="lg:col-span-2 border-border/60">
+        <Card className="lg:col-span-2 border-border/60 min-w-0">
           <CardHeader>
             <CardTitle>User & Worker Growth</CardTitle>
             <CardDescription>New signups over the year</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div style={{ width: '100%', height: 280 }}>
-              <ResponsiveContainer width="100%" height="100%">
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={280} minWidth={0} debounce={50}>
                 <AreaChart data={userGrowth}>
                   <defs>
                     <linearGradient id="usersFill" x1="0" y1="0" x2="0" y2="1">
@@ -240,7 +259,6 @@ export default function AdminDashboard() {
                   />
 
                   <XAxis dataKey="month" tickLine={false} axisLine={false} className="text-xs" />
-
                   <YAxis tickLine={false} axisLine={false} className="text-xs" />
 
                   <Tooltip
@@ -285,14 +303,15 @@ export default function AdminDashboard() {
               <div key={it.label}>
                 <div className="mb-1 flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">{it.label}</span>
-                  <span className="font-medium">{it.count}</span>
+                  <span className="font-medium">{it.count ?? 0}</span>
                 </div>
-                <Progress value={(it?.count ?? 0 / it.total) * 100} className="h-2" />
+                <Progress value={((it.count ?? 0) / it.total) * 100} className="h-2" />
               </div>
             ))}
           </CardContent>
         </Card>
       </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         <Card className="lg:col-span-2 border-border/60">
           <CardHeader className="flex flex-row items-start justify-between space-y-0">
@@ -300,7 +319,12 @@ export default function AdminDashboard() {
               <CardTitle>Recent Bookings</CardTitle>
               <CardDescription>Latest jobs across the platform</CardDescription>
             </div>
-            <Link to={'/admin/bookings'}>View all</Link>
+            <Link
+              to={'/admin/bookings'}
+              className="text-xs text-primary hover:underline font-medium"
+            >
+              View all
+            </Link>
           </CardHeader>
           <CardContent>
             <Table>
@@ -333,14 +357,15 @@ export default function AdminDashboard() {
             </Table>
           </CardContent>
         </Card>
-        <Card className="border-border/60">
+
+        <Card className="border-border/60 min-w-0">
           <CardHeader>
             <CardTitle>Top Performing Workers</CardTitle>
             <CardDescription>By completed jobs this month</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div style={{ width: '100%', height: 180 }}>
-              <ResponsiveContainer width="100%" height="100%">
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={180} minWidth={0} debounce={50}>
                 <BarChart data={topWorkers} layout="vertical" margin={{ left: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" className="stroke-border/50" />
                   <XAxis type="number" className="text-xs" />

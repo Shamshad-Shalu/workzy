@@ -119,9 +119,9 @@ export default function WorkerDashboard() {
               <CardDescription>Monthly revenue for the current year</CardDescription>
             </div>
           </CardHeader>
-          <CardContent>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={300} minWidth={0} debounce={50}>
                 <AreaChart data={earningsData} margin={{ left: -20, right: 8, top: 8 }}>
                   <defs>
                     <linearGradient id="incomeFill" x1="0" y1="0" x2="0" y2="1">
@@ -175,9 +175,9 @@ export default function WorkerDashboard() {
             <CardTitle>Job Performance</CardTitle>
             <CardDescription>{jobStats?.offered} jobs offered</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="h-[200px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+          <CardContent className="min-w-0">
+            <div className="w-full min-w-0">
+              <ResponsiveContainer width="100%" height={200} minWidth={0} debounce={50}>
                 <PieChart>
                   <Pie
                     data={performanceData}
@@ -329,9 +329,9 @@ export default function WorkerDashboard() {
           <CardTitle>Jobs Completed per Month</CardTitle>
           <CardDescription>Breakdown of completed jobs throughout the year</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-[260px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
+        <CardContent className="min-w-0">
+          <div className="w-full min-w-0">
+            <ResponsiveContainer width="100%" height={260} minWidth={0} debounce={50}>
               <BarChart data={earningsData} margin={{ left: -20, right: 8, top: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#d4d4d8" vertical={false} />
                 <XAxis

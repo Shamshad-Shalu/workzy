@@ -176,6 +176,7 @@ export default function WorkerServicesPage() {
             <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {services.map(service => (
                 <WorkerServiceCard
+                  key={service.id}
                   service={service}
                   mode="worker"
                   onEdit={openEditModal}
