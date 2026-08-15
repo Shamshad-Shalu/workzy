@@ -10,7 +10,10 @@ import ProtectedRoute from './ProtectedRoute';
 const AdminLayout = lazy(() => import('@/layouts/admin/AdminLayout'));
 const AdminDashboard = lazy(() => import('@/features/admin/dashboard/pages/AdminDashboard'));
 const UserManagementPage = lazy(() => import('@/features/admin/user/pages/UserMangementPage'));
-const UserDetailsLayout = lazy(() => import('@/features/admin/user/pages/UserDetailsLayout'));
+const UserDetailsLayout = lazy(() => import('@/features/admin/user/wrapper/UserDetailsLayout'));
+const AdminUserOverviewPage = lazy(
+  () => import('@/features/admin/user/pages/AdminUserOverviewPage')
+);
 const AdminWorkerManagementPage = lazy(
   () => import('@/features/admin/worker/pages/AdminWorkerManagementPage')
 );
@@ -62,7 +65,9 @@ export default function AdminRoutes() {
 
             <Route path="users">
               <Route index element={<UserManagementPage />} />
-              <Route path=":userId" element={<UserDetailsLayout />} />
+              <Route path=":userId" element={<UserDetailsLayout />}>
+                <Route index element={<AdminUserOverviewPage />} />
+              </Route>
             </Route>
 
             <Route path="workers">

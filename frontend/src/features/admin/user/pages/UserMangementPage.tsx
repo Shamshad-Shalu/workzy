@@ -1,6 +1,5 @@
 import { Filter } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import { toast } from 'sonner';
+import { useCallback } from 'react';
 
 import Button from '@/components/atoms/Button';
 import Select from '@/components/atoms/Select';
@@ -11,41 +10,39 @@ import PageHeader from '@/components/molecules/PageHeader';
 import SearchInput from '@/components/molecules/SearchInput';
 import StatusChangeModal from '@/components/molecules/StatusChangeModal';
 import { useUrlFilterParams } from '@/hooks/useUrlFilterParams';
-import type { UserListItem } from '@/types/admin/user';
 
 import userColumns from '../components/columns';
 import { useAdminUsers } from '../hooks/useAdminUsers';
+import { useToggleUserStatus } from '../hooks/useToggleUserStatus';
 
 const CUSTOM_PARAMS = [{ key: 'role', defaultValue: 'all' }];
 export default function UserManagementPage() {
-  const [selectedUser, setSelectedUser] = useState<UserListItem | null>(null);
   const { pageIndex, pageSize, search, status, updateParams, role } = useUrlFilterParams<{
     role: string;
   }>(CUSTOM_PARAMS);
-  const { users, isLoading, error, isError, refetch, total, isToggling, toggleUserStatus } =
-    useAdminUsers({ page: pageIndex, limit: pageSize, search, status, role });
+  const { users, isLoading, error, isError, refetch, total } = useAdminUsers({
+    page: pageIndex,
+    limit: pageSize,
+    search,
+    status,
+    role,
+  });
 
+  const {
+    targetId,
+    isModalOpen,
+    openModal,
+    closeModal,
+    handleConfirm,
+    isPending: isToggling,
+  } = useToggleUserStatus();
+  const selectedUser = users.find(u => u.id === targetId) ?? null;
   const handleSearchChange = useCallback(
     (v: string) => updateParams({ search: v, pageIndex: 0 }),
     [updateParams]
   );
 
-  const handleToggleUserStatus = async () => {
-    if (!selectedUser?.id) {
-      return;
-    }
-    const res = await toggleUserStatus(selectedUser.id);
-    if (res.message) {
-      toast.success(res.message);
-      setSelectedUser(null);
-    }
-  };
-
-  const openStatusModal = (user: UserListItem) => {
-    setSelectedUser(user);
-  };
   const isHideButton = search !== '' || status !== 'all' || role !== 'all';
-
   const clearAllFilters = useCallback(() => {
     updateParams({
       search: '',
@@ -103,7 +100,7 @@ export default function UserManagementPage() {
         onPageChange={v => updateParams({ pageIndex: v })}
         onPageSizeChange={v => updateParams({ pageSize: v, pageIndex: 0 })}
         pageCount={Math.ceil(total / pageSize) || 1}
-        columns={userColumns(openStatusModal)}
+        columns={userColumns(u => openModal(u.id))}
         isError={isError}
         errorState={<ErrorState onRetry={() => refetch()} description={error?.message} />}
         emptyState={
@@ -123,11 +120,11 @@ export default function UserManagementPage() {
         }
       />
       <StatusChangeModal
-        open={!!selectedUser}
-        onClose={() => setSelectedUser(null)}
-        onConfirm={handleToggleUserStatus}
-        fromStatus={selectedUser?.isBlocked ? 'Block' : 'Unblok'}
-        toStatus={selectedUser?.isBlocked ? 'Unblok' : 'Block'}
+        open={isModalOpen}
+        onClose={closeModal}
+        onConfirm={handleConfirm}
+        fromStatus={selectedUser?.isBlocked ? 'Blocked' : 'Active'}
+        toStatus={selectedUser?.isBlocked ? 'Active' : 'Blocked'}
         loading={isToggling}
         name={selectedUser?.name}
       />
