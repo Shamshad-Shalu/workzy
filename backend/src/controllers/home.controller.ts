@@ -14,6 +14,7 @@ import {
   HomeSectionRequestDTO,
   HomeSectionUpdateRequestDTO,
 } from "@/dtos/requests/admin/homeSection.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -27,7 +28,7 @@ export class HomeController implements IHomeController {
 
   getHome = asyncHandler(async (_req: Request, res: Response): Promise<void> => {
     const home = await this._homeService.getHome();
-    res.status(HTTPSTATUS.OK).json(home);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(home));
   });
 
   getNearbyWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -41,7 +42,7 @@ export class HomeController implements IHomeController {
       throw new CustomError("Invalid query parameters", HTTPSTATUS.BAD_REQUEST);
     }
     const workers = await this._workerService.listNearbyWorkers({ lat, lng, radius, limit });
-    res.status(HTTPSTATUS.OK).json({ workers });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ workers }));
   });
 
   listSections = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -59,12 +60,12 @@ export class HomeController implements IHomeController {
       type
     );
 
-    res.status(HTTPSTATUS.OK).json({ sections, total });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ sections, total }));
   });
   createSection = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = req.body as HomeSectionRequestDTO;
     const section = await this._homeSectionService.createSection(data);
-    res.status(HTTPSTATUS.CREATED).json({ message: HOME_SECTION.CREATED, section });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ section }, HOME_SECTION.CREATED));
   });
 
   updateSection = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -72,28 +73,28 @@ export class HomeController implements IHomeController {
     const data = req.body as HomeSectionUpdateRequestDTO;
 
     const section = await this._homeSectionService.updateSection(sectionId, data);
-    res.status(HTTPSTATUS.OK).json({ message: HOME_SECTION.UPDATED, section });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ section }, HOME_SECTION.UPDATED));
   });
 
   toggleSectionStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { sectionId } = req.params;
     const { message } = await this._homeSectionService.toggleStatus(sectionId);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   deleteSection = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { sectionId } = req.params;
     const message = await this._homeSectionService.deleteSection(sectionId);
-    res.status(HTTPSTATUS.OK).json({ message });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, message));
   });
 
   getLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const layout = await this._homeLayoutService.getLayout();
-    res.status(HTTPSTATUS.OK).json({ layout });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ layout }));
   });
   saveLayout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const dto = req.body as SaveLayoutDTO;
     const layout = await this._homeLayoutService.saveLayout(dto.items);
-    res.status(HTTPSTATUS.OK).json({ message: HOME_LAYOUT.SAVED, layout });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ layout }, HOME_LAYOUT.SAVED));
   });
 }

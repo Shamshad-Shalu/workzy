@@ -8,6 +8,7 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -17,7 +18,7 @@ export class WorkerController implements IWorkerController {
   getWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = req.params.workerId;
     const worker = await this._workerService.getWorkerProfile(workerId);
-    res.status(HTTPSTATUS.OK).json({ worker });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(worker));
   });
 
   listPublicWorkers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -54,26 +55,26 @@ export class WorkerController implements IWorkerController {
         : undefined,
     });
 
-    res.status(HTTPSTATUS.OK).json({ workers: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ workers: data, nextCursor }));
   });
 
   getWorkerProfileDetails = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const workerData = await this._workerService.getWorkerProfileDetails(workerId);
-    res.status(HTTPSTATUS.OK).json(workerData);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(workerData));
   });
 
   getWorkerProfileDetailsById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const workerData = await this._workerService.getWorkerProfileDetails(workerId);
-    res.status(HTTPSTATUS.OK).json(workerData);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(workerData));
   });
 
   updateWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const data = req.body as WorkerProfileRequestDto;
     const workerData = await this._workerService.updateWorkerProfile(workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: WORKER.UPDATE_SUCCESS, workerData });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ workerData }, WORKER.UPDATE_SUCCESS));
   });
 
   updateWorkerPhone = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -81,7 +82,7 @@ export class WorkerController implements IWorkerController {
     const { phone } = req.body;
 
     await this._workerService.updateWorkerPhone(workerId, phone);
-    res.status(HTTPSTATUS.OK).json({ message: WORKER.UPDATE_SUCCESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, WORKER.UPDATE_SUCCESS));
   });
 
   updateProfileImage = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -91,7 +92,7 @@ export class WorkerController implements IWorkerController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const imageUrl = await this._workerService.updateProfileImage(workerId, url);
-    res.status(HTTPSTATUS.OK).json({ url: imageUrl });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url: imageUrl }));
   });
 
   getMyWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -100,7 +101,7 @@ export class WorkerController implements IWorkerController {
       throw new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED);
     }
     const worker = await this._workerService.getMyWorkerProfile(userId);
-    res.status(HTTPSTATUS.OK).json(worker);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(worker));
   });
 
   createWorkerProfile = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -110,31 +111,34 @@ export class WorkerController implements IWorkerController {
     }
     const data = req.body as JoinUsDTO;
     const worker = await this._workerService.createWorkerProfile(userId, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: WORKER.CREATE_SUCCESS, worker });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ worker }, WORKER.CREATE_SUCCESS));
   });
 
   reSubmitWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { workerId } = req.params;
     const data = req.body as JoinUsDTO;
     const workerData = await this._workerService.reSubmitWorkerDocument(workerId, data);
-    res.status(HTTPSTATUS.OK).json({ message: WORKER.DOCUMENT_UPDATED, worker: workerData });
+    res
+      .status(HTTPSTATUS.OK)
+      .json(new ApiResponse({ worker: workerData }, WORKER.DOCUMENT_UPDATED));
   });
+
   connectStripe = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const url = await this._workerService.connectStripe(workerId);
-    res.status(HTTPSTATUS.OK).json({ url });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ url }));
   });
 
   getWorkerDashboardAnalytics = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const stats = await this._workerService.getWorkerDashboardAnalytics(workerId);
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 
   getStripeStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const { status, stripeAccountId } = await this._workerService.getStripeStatus(workerId);
-    res.status(HTTPSTATUS.OK).json({ status, stripeAccountId });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ status, stripeAccountId }));
   });
 
   private requireWorkerId(req: Request): string {

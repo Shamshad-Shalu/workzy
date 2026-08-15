@@ -6,6 +6,7 @@ import type { INotificationController } from "@/core/interfaces/controllers/INot
 import type { INotificationService } from "@/core/interfaces/services/INotificationService";
 import { TYPES } from "@/di/types";
 import { NotificationListQuery } from "@/types/notification/notification.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 import type { Request, Response } from "express";
@@ -28,13 +29,13 @@ export class NotificationController implements INotificationController {
       recipientId: recipient,
       ...params,
     });
-    res.status(HTTPSTATUS.OK).json({ notifications: data, nextCursor: nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ notifications: data, nextCursor }));
   });
 
   markAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const notification = await this._notificationService.markAsRead(id);
-    res.status(HTTPSTATUS.OK).json({ notification });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(notification));
   });
 
   markAllAsRead = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -46,7 +47,7 @@ export class NotificationController implements INotificationController {
     }
 
     const modifiedCount = await this._notificationService.markAllAsRead(recipient);
-    res.status(HTTPSTATUS.OK).json({ modifiedCount });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ modifiedCount }));
   });
 
   private parseQuery(req: Request): Omit<NotificationListQuery, "recipientId"> {

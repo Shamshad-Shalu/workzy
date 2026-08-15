@@ -8,6 +8,7 @@ import { IDisputeService } from "@/core/interfaces/services/IDisputeService";
 import { TYPES } from "@/di/types";
 import { CreateDisputeDto, ResolveDisputeDto } from "@/dtos/requests/dispute.dto";
 import { DisputeListQuery } from "@/types/dispute/dispute.query";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -21,25 +22,25 @@ export class DisputeController implements IDisputeController {
     const { bookingId } = req.params;
 
     const dispute = await this._disputeService.raiseDispute(bookingId, initiatorId, role, data);
-    res.status(HTTPSTATUS.CREATED).json({ message: DISPUTE.RAISED, dispute });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ dispute }, DISPUTE.RAISED));
   });
 
   getAllDisputes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const query = this.parseQuery(req);
     const { data, nextCursor } = await this._disputeService.getAllDisputes(query);
-    res.status(HTTPSTATUS.OK).json({ disputes: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ disputes: data, nextCursor }));
   });
 
   getDisputeStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const data = this.resolveActorIds(req);
     const stats = await this._disputeService.getDisputeStats(data);
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 
   getDisputeByBookingId = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { bookingId } = req.params;
     const dispute = await this._disputeService.getDisputeByBookingId(bookingId);
-    res.status(HTTPSTATUS.OK).json(dispute);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(dispute));
   });
 
   updateDispute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -48,7 +49,7 @@ export class DisputeController implements IDisputeController {
     const initiatorId = role === ROLE.USER ? this.requireUserId(req) : this.requireWorkerId(req);
     const { disputeId } = req.params;
     const dispute = await this._disputeService.updateDispute(disputeId, initiatorId, role, data);
-    res.status(HTTPSTATUS.OK).json({ message: DISPUTE.UPDATED, dispute });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ dispute }, DISPUTE.UPDATED));
   });
 
   resolveDispute = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -57,7 +58,7 @@ export class DisputeController implements IDisputeController {
     const data = req.body as ResolveDisputeDto;
 
     await this._disputeService.resolveDispute(disputeId, adminId, data);
-    res.status(HTTPSTATUS.OK).json({ message: DISPUTE.RESOLVED });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, DISPUTE.RESOLVED));
   });
 
   private parseQuery(req: Request): DisputeListQuery {

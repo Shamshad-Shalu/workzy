@@ -19,6 +19,7 @@ import { AccessTokenPayload } from "@/core/types/global/jwt";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
 import { LoginResponseDto } from "@/dtos/responses/auth.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
 import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
 import CustomError from "@/utils/customError";
@@ -50,7 +51,7 @@ export class AuthController implements IAuthController {
 
     logger.info(`user: ${userData.email} , otp:${otp}`);
 
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_SENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_SENT));
   });
 
   // Verify OTP and complete registration
@@ -65,7 +66,7 @@ export class AuthController implements IAuthController {
 
     const accessToken = generateAccessToken({ ...user });
 
-    res.status(HTTPSTATUS.CREATED).json({ user, accessToken });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ user, accessToken }, AUTH.LOGIN_SUCCESS));
   });
 
   resendOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -77,7 +78,7 @@ export class AuthController implements IAuthController {
 
     await this._otpService.resendOtp(email);
 
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.OTP_RESENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.OTP_RESENT));
   });
 
   login = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -90,7 +91,7 @@ export class AuthController implements IAuthController {
       workerId: user.worker?.id,
     });
 
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGIN_SUCCESS, accessToken, user });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ accessToken, user }, AUTH.LOGIN_SUCCESS));
   });
 
   logout = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -113,7 +114,7 @@ export class AuthController implements IAuthController {
       }
     }
     await clearRefreshTokenCookie(res);
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.LOGOUT_SUCCESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.LOGOUT_SUCCESS));
   });
 
   refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -135,7 +136,7 @@ export class AuthController implements IAuthController {
     const isBlocked = await redisClient.get(`blocked_user:${userId}`);
     if (isBlocked) {
       clearRefreshTokenCookie(res);
-      res.status(HTTPSTATUS.FORBIDDEN).json({ message: USER.BLOCKED });
+      res.status(HTTPSTATUS.FORBIDDEN).json({ success: false, message: USER.BLOCKED });
       return;
     }
 
@@ -164,7 +165,7 @@ export class AuthController implements IAuthController {
 
     const accessToken = generateAccessToken(payload);
     const plainUser = await LoginResponseDto.fromEntity(fullUser, this._s3Service);
-    res.status(HTTPSTATUS.OK).json({ accessToken, user: plainUser });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ accessToken, user: plainUser }));
   });
 
   forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -181,7 +182,7 @@ export class AuthController implements IAuthController {
 
     await this._emailService.sendResetEmailWithToken(email);
 
-    res.status(HTTPSTATUS.OK).json({ message: AUTH.FORGOT_PASS_EMAIL_SENT });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, AUTH.FORGOT_PASS_EMAIL_SENT));
   });
 
   resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -199,7 +200,7 @@ export class AuthController implements IAuthController {
 
     await this._authService.updatePassword(email, password);
 
-    res.status(HTTPSTATUS.OK).json({ message: USER.PASSWORD_UPDATE_SUCCESS });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(null, USER.PASSWORD_UPDATE_SUCCESS));
   });
 
   handleGoogleUser = asyncHandler(async (req: Request, res: Response): Promise<void> => {

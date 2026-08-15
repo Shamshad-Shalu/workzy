@@ -19,7 +19,7 @@ const CategoryService = {
 
   getCategory: async (categoryId: string): Promise<Category> => {
     const res = await api.get(CATEGORY_API.BY_ID(categoryId));
-    return res.data.category;
+    return res.data;
   },
   getCategoryAncestors: async (categoryId: string): Promise<CategoryAncestor[]> => {
     const res = await api.get(CATEGORY_API.ANCESTORS(categoryId));

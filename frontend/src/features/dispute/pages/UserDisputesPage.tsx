@@ -4,7 +4,7 @@ import { DisputeContent } from '../index';
 
 export default function UserDisputesPage() {
   return (
-    <main className="p-4 lg:p-6">
+    <main className="section-container">
       <DisputeContent role={ROLE.USER} />
     </main>
   );

@@ -6,12 +6,13 @@ import { HTTPSTATUS } from "@/constants";
 import { IAdminController } from "@/core/interfaces/controllers/admin/IAdminController";
 import { IAdminService } from "@/core/interfaces/services/IAdminService";
 import { TYPES } from "@/di/types";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class AdminController implements IAdminController {
   constructor(@inject(TYPES.AdminService) private _adminService: IAdminService) {}
   getAdminDashboard = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const stats = await this._adminService.getAdminDashboardAnalytics();
-    res.status(HTTPSTATUS.OK).json(stats);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(stats));
   });
 }

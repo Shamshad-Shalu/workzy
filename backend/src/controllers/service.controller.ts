@@ -8,6 +8,7 @@ import { IServiceController } from "@/core/interfaces/controllers/IServiceContro
 import { IServiceManagement } from "@/core/interfaces/services/IServiceManagement";
 import { TYPES } from "@/di/types";
 import { ServiceRequestDTO } from "@/dtos/requests/service.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
 
 @injectable()
@@ -18,7 +19,7 @@ export class ServiceController implements IServiceController {
     const data = req.body as ServiceRequestDTO;
     const service = await this._serviceMangement.createService(workerId, data);
 
-    res.status(HTTPSTATUS.CREATED).json({ message: SERVICE.CREATED, service });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ service }, SERVICE.CREATED));
   });
 
   updateService = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -27,7 +28,7 @@ export class ServiceController implements IServiceController {
     const data = req.body as ServiceRequestDTO;
     const service = await this._serviceMangement.updateService(workerId, serviceId, data);
 
-    res.status(HTTPSTATUS.OK).json({ message: SERVICE.UPDATED, service });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ service }, SERVICE.UPDATED));
   });
 
   toggleStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -38,7 +39,7 @@ export class ServiceController implements IServiceController {
       serviceId
     );
 
-    res.status(HTTPSTATUS.OK).json({ message, isAvailable: newStatus });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ isAvailable: newStatus }, message));
   });
 
   getWorkerServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -60,7 +61,7 @@ export class ServiceController implements IServiceController {
         ? { _id: parsedCursor._id, createdAt: new Date(parsedCursor.createdAt) }
         : undefined,
     });
-    res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ services: data, nextCursor }));
   });
 
   listWorkerPublicServices = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -79,13 +80,13 @@ export class ServiceController implements IServiceController {
         : undefined,
       search,
     });
-    res.status(HTTPSTATUS.OK).json({ services: data, nextCursor });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ services: data, nextCursor }));
   });
 
   getWorkerServiceCategories = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const workerId = this.requireWorkerId(req);
     const categories = await this._serviceMangement.getWorkerServiceCategories(workerId);
-    res.status(HTTPSTATUS.OK).json({ categories });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ categories }));
   });
 
   private requireWorkerId(req: Request): string {

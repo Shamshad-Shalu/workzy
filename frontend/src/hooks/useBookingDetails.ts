@@ -8,10 +8,7 @@ import type { BookingDetails } from '@/types/booking';
 export function useBookingDetails(bookingId?: string | null) {
   const query = useQuery<BookingDetails, ApiError>({
     queryKey: bookingKeys.detail(bookingId!),
-    queryFn: async () => {
-      const res = await BookingService.getBookingDetails(bookingId!);
-      return res.booking;
-    },
+    queryFn: async () => await BookingService.getBookingDetails(bookingId!),
     enabled: !!bookingId,
     staleTime: 0,
     refetchInterval: 10000,

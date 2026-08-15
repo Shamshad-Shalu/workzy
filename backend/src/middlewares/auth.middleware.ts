@@ -3,13 +3,13 @@ import { NextFunction, Request, Response } from "express";
 import logger from "@/config/logger";
 import { AUTH, HTTPSTATUS, Role } from "@/constants";
 import { verifyAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
+import CustomError from "@/utils/customError";
 
-export const validateRefreshToken = (req: Request, res: Response, next: NextFunction) => {
+export const validateRefreshToken = (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = req.cookies.refreshToken;
     if (!token) {
-      res.status(HTTPSTATUS.FORBIDDEN).json({ message: AUTH.NO_REFRESH_TOKEN });
-      return;
+      return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.FORBIDDEN));
     }
     const decoded = verifyRefreshToken(token);
     req.user = {
@@ -17,18 +17,17 @@ export const validateRefreshToken = (req: Request, res: Response, next: NextFunc
       role: decoded.user.role,
     };
     next();
-  } catch (error) {
-    res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.NO_REFRESH_TOKEN, error });
+  } catch {
+    return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED));
   }
 };
 
 export const authenticate = (roles: Array<Role>) => {
-  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+  return async (req: Request, _res: Response, next: NextFunction): Promise<void> => {
     try {
       const token = req.headers.authorization?.split(" ")[1];
       if (!token) {
-        res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: "Access token not found" });
-        return;
+        return next(new CustomError(AUTH.UNAUTHORIZED, HTTPSTATUS.UNAUTHORIZED));
       }
 
       const decoded = verifyAccessToken(token);
@@ -36,17 +35,16 @@ export const authenticate = (roles: Array<Role>) => {
 
       if (roles.length && (!req.user || !roles.includes(req.user?.role))) {
         logger.debug(req.user.role, roles);
-        res.status(HTTPSTATUS.FORBIDDEN).json({ message: "Permission denied" });
-        return;
+        return next(new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.FORBIDDEN));
       }
       next();
-    } catch (error) {
-      res.status(HTTPSTATUS.UNAUTHORIZED).json({ message: AUTH.TOKEN_INVALID, error });
+    } catch {
+      return next(new CustomError(AUTH.TOKEN_INVALID, HTTPSTATUS.UNAUTHORIZED));
     }
   };
 };
 
-export const optionalAuth = (req: Request, res: Response, next: NextFunction) => {
+export const optionalAuth = (req: Request, _res: Response, next: NextFunction) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
 

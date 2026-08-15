@@ -4,10 +4,6 @@ import logger from "@/config/logger";
 import { SERVER } from "@/constants";
 import CustomError from "@/utils/customError";
 
-interface CustomErrorWithValidation extends CustomError {
-  validationErrors?: unknown;
-}
-
 const errorMiddleware = (
   err: CustomError | Error,
   req: Request,
@@ -26,8 +22,8 @@ const errorMiddleware = (
     errors?: unknown;
   } = { success: false, message };
 
-  if ((err as CustomErrorWithValidation).validationErrors) {
-    response.errors = (err as CustomErrorWithValidation).validationErrors;
+  if (err instanceof CustomError && err.errors) {
+    response.errors = err.errors;
   }
 
   logger.error(statusCode.toString(), message);

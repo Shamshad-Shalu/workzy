@@ -7,6 +7,7 @@ import { IAdminCategoryController } from "@/core/interfaces/controllers/admin/IA
 import { ICategoryManagementService } from "@/core/interfaces/services/admin/ICategoryManagementService";
 import { TYPES } from "@/di/types";
 import { CategoryRequestDTO } from "@/dtos/requests/category.dto";
+import { ApiResponse } from "@/utils/apiResponse";
 
 @injectable()
 export class AdminCategoryController implements IAdminCategoryController {
@@ -18,7 +19,7 @@ export class AdminCategoryController implements IAdminCategoryController {
     const data = req.body as CategoryRequestDTO;
 
     const category = await this._categoryManagement.createCategory(data);
-    res.status(HTTPSTATUS.CREATED).json({ message: CATEGORY.CREATED, category });
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse({ category }, CATEGORY.CREATED));
   });
 
   updateCategory = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -26,13 +27,13 @@ export class AdminCategoryController implements IAdminCategoryController {
     const updateData = req.body;
 
     const category = await this._categoryManagement.updateCategory(categoryId, updateData);
-    res.status(HTTPSTATUS.OK).json({ message: CATEGORY.UPDATED, category });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ category }, CATEGORY.UPDATED));
   });
 
   toggleCategoryStatus = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const categoryId = req.params.categoryId;
     const { newStatus, message } = await this._categoryManagement.toggleCategoryStatus(categoryId);
 
-    res.status(HTTPSTATUS.OK).json({ message, isAvailable: newStatus });
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ isAvailable: newStatus }, message));
   });
 }

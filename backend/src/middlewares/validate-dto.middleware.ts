@@ -43,15 +43,11 @@ export const validateDto = <T extends object>(
 
     if (errors.length > 0) {
       const formattedErrors = flattenErrors(errors);
-
       const validationError = new CustomError(
         AUTH.INVALID_INPUT,
-        HTTPSTATUS.BAD_REQUEST
-      ) as CustomError & {
-        validationErrors?: unknown;
-      };
-      validationError.validationErrors = formattedErrors;
-
+        HTTPSTATUS.BAD_REQUEST,
+        formattedErrors
+      );
       return next(validationError);
     }
 
