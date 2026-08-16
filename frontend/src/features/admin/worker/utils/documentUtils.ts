@@ -11,6 +11,16 @@ export const MANDATORY_DOCUMENT_TYPES: DocumentType[] = [
   DOCUMENT_TYPE.SELFIE_VERIFICATION,
 ];
 
+export const WORKER_DOCUMENT_OPTIONS = Object.values(DOCUMENT_TYPE)
+  .filter(value => !MANDATORY_DOCUMENT_TYPES.includes(value))
+  .map(v => ({
+    label: v
+      .split('_')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' '),
+    value: v,
+  }));
+
 export const DOCUMENT_INFO_MAP: Record<
   string,
   { label: string; icon: React.ComponentType<{ className?: string }> }

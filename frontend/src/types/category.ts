@@ -11,6 +11,8 @@ export interface Category {
   platformFee: number;
   parentId?: null | string;
 
+  requiredDocuments?: string[];
+
   baseRate: number;
   priceVarianceLimit?: number;
   estimatedDuration: number;

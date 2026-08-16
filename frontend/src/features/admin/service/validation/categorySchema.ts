@@ -15,6 +15,7 @@ const baseSchema = z.object({
     .min(0.1, 'Platform fee is required')
     .max(50, 'Platform fee cannot exceed 50%'),
   isAvailable: z.boolean(),
+  requiredDocuments: z.array(z.string()).optional(),
 
   baseRate: z
     .number({ message: 'Base rate is required ' })
