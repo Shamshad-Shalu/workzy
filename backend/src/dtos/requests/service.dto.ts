@@ -53,6 +53,9 @@ export class ServiceRequestDTO {
   @IsMongoId()
   categoryId!: string;
 
+  @IsMongoId()
+  parentCategoryId!: string;
+
   @IsNumber()
   @Min(0)
   rate!: number;

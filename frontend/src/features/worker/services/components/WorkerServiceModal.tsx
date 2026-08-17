@@ -1,11 +1,14 @@
 import { FormProvider } from 'react-hook-form';
 
 import { AppModal } from '@/components/molecules/AppModal';
+import { DOCUMENT_STATUS } from '@/constants';
+import { useWorkerProfileDetails } from '@/features/worker/profile/hooks/useWorkerProfile';
 import type { Service } from '@/types/service';
 
 import { useCategoryLevels } from '../hooks/useCategoryLevels';
 import { useServiceForm } from '../hooks/useServiceForm';
 
+import { CategoryDocumentChecklist } from './CategoryDocumentChecklist';
 import { CategorySection } from './CategorySection';
 import ServiceFormSection from './ServiceFormSection';
 
@@ -19,8 +22,20 @@ interface WorkerServiceModalProps {
 }
 
 export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerServiceModalProps) {
-  const { category, ...rest } = useCategoryLevels(service?.categoryId);
-  const form = useServiceForm(service, category);
+  const { category, parentCategory, ...rest } = useCategoryLevels(service?.categoryId);
+  const { data: workerProfile } = useWorkerProfileDetails();
+  const form = useServiceForm(service, category, parentCategory);
+
+  const workerDocuments = workerProfile?.documents || [];
+  const requiredDocTypes = Array.from(
+    new Set([...(parentCategory?.requiredDocuments || []), ...(category?.requiredDocuments || [])])
+  );
+
+  const hasUnverifiedDocs = requiredDocTypes.some(docType => {
+    const doc = workerDocuments.find(d => d.type === docType);
+    return !doc || doc.status !== DOCUMENT_STATUS.VERIFIED;
+  });
+
   const handleClose = () => {
     form.reset();
     rest.handlers.resetLevels();
@@ -47,12 +62,25 @@ export function WorkerServiceModal({ open, onClose, onSubmit, service }: WorkerS
       onClose={onClose}
       title={service ? 'Edit Service' : 'Add Service'}
       onConfirm={form.handleSubmit(handleSubmit)}
+      isConfirmDisabled={hasUnverifiedDocs}
       className="sm:max-w-3xl max-h-[90vh] overflow-y-auto no-scrollbar"
     >
       <div className="space-y-4 w-full">
         <FormProvider {...form}>
           <form className="space-y-4">
-            <CategorySection categoryInfo={{ category, ...rest }} service={service} />
+            <CategorySection
+              categoryInfo={{ category, parentCategory, ...rest }}
+              service={service}
+            />
+
+            {category && (
+              <CategoryDocumentChecklist
+                category={category}
+                parentCategory={parentCategory}
+                workerDocuments={workerDocuments}
+              />
+            )}
+
             {category ? (
               <ServiceFormSection form={form} category={category} />
             ) : (

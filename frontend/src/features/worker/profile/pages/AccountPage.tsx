@@ -36,7 +36,7 @@ export default function AccountPage() {
         {isConnected && (
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3 bg-muted/40 rounded-xl p-3">
-              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-full bg-emerald-50 flex items-center justify-center shrink-0">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
               </div>
               <div className="flex-1 min-w-0">
@@ -77,7 +77,7 @@ export default function AccountPage() {
         {isPending && !isConnected && (
           <div className="flex flex-col gap-3">
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3.5">
-              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
               <p className="text-xs text-amber-700 leading-relaxed">
                 Your Stripe account is under review. This usually takes a few minutes. If
                 verification is incomplete, click below to continue.
@@ -98,7 +98,7 @@ export default function AccountPage() {
         {!isConnected && !isPending && (
           <div className="flex flex-col gap-4">
             <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl p-3.5">
-              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0" />
+              <AlertCircle className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
               <p className="text-xs text-amber-700 leading-relaxed">
                 Connect Stripe to start accepting bookings and receiving payments.
               </p>
@@ -111,7 +111,7 @@ export default function AccountPage() {
                 { n: 3, label: 'Add your bank account' },
               ].map(s => (
                 <div key={s.n} className="flex items-center gap-3">
-                  <div className="w-5 h-5 rounded-full border border-border flex items-center justify-center text-[10px] font-medium text-muted-foreground flex-shrink-0">
+                  <div className="w-5 h-5 rounded-full border border-border flex items-center justify-center text-[10px] font-medium text-muted-foreground shrink-0">
                     {s.n}
                   </div>
                   <p className="text-xs text-muted-foreground">{s.label}</p>

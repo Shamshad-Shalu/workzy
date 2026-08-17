@@ -8,6 +8,7 @@ export interface BulkDiscountType {
 export interface Service {
   id: string;
   categoryId: string;
+  parentCategoryId: string;
   serviceName: string;
   serviceType: ServiceType;
   pricingMode: PricingMode;

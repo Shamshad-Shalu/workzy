@@ -1,6 +1,6 @@
 import mongoose, { Document } from "mongoose";
 
-import { PricingMode, ServiceType } from "@/constants";
+import { DocumentType, PricingMode, ServiceType } from "@/constants";
 
 export interface ICategory extends Document<string> {
   name: string;
@@ -11,6 +11,8 @@ export interface ICategory extends Document<string> {
   parentId?: mongoose.Types.ObjectId | null;
   platformFee: number;
   isAvailable: boolean;
+
+  requiredDocuments?: DocumentType[];
 
   baseRate: number;
   priceVarianceLimit: number;

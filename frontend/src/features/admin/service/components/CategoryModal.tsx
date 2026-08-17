@@ -8,6 +8,7 @@ import { useCategoryForm } from '../hooks/useCategoryForm';
 import { type CategoryFormData } from '../validation/categorySchema';
 
 import { CategoryBasicFields } from './CategoryBasicFields';
+import { CategoryDocumentFields } from './CategoryDocumentFields';
 import { CategoryImageFields } from './CategoryImageFields';
 import { ServiceFields } from './ServiceFields';
 
@@ -67,6 +68,7 @@ export function CategoryModal({
             serviceType={serviceType}
           />
         )}
+        <CategoryDocumentFields form={form} />
         <CategoryImageFields form={form} />
       </form>
     </AppModal>

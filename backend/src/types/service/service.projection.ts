@@ -7,6 +7,7 @@ import { BulkDiscountType, IService } from "./service.entity";
 export type WorkerServiceItem = Omit<IService, "categoryId"> & {
   categoryId: {
     _id: Types.ObjectId;
+    parentId: Types.ObjectId;
     name: string;
     iconUrl: string;
     imageUrl: string;

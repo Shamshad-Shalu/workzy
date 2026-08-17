@@ -1,6 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 
-import { PRICING_MODE_VALUES, SERVICE_TYPE_VALUES } from "@/constants";
+import { DOCUMENT_TYPE, PRICING_MODE_VALUES, SERVICE_TYPE_VALUES } from "@/constants";
 import { ICategory } from "@/types/category";
 
 const CategorySchema: Schema<ICategory> = new Schema(
@@ -17,6 +17,10 @@ const CategorySchema: Schema<ICategory> = new Schema(
     },
     platformFee: { type: Number, default: 0 },
     isAvailable: { type: Boolean, default: true },
+    requiredDocuments: {
+      type: [{ type: String, enum: Object.values(DOCUMENT_TYPE) }],
+      default: [],
+    },
     baseRate: { type: Number, required: true, min: 50 },
     priceVarianceLimit: { type: Number, min: 0, max: 100 },
 

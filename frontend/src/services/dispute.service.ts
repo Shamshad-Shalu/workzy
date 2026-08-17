@@ -1,6 +1,6 @@
 import { DISPUTE_API } from '@/constants';
-import type { ResolveDisputeFormType } from '@/features/admin/disputes/validation/resolveDispute.schema';
 import type { RaiseDisputeFormType } from '@/features/dispute/validation/raiseDispute.schema';
+import type { ResolveDisputeFormType } from '@/features/dispute/validation/resolveDispute.schema';
 import api from '@/lib/api/axios';
 import type {
   Dispute,
@@ -36,7 +36,6 @@ export const disputeService = {
 
   getDisputeByBookingId: async (bookingId: string): Promise<Dispute | null> => {
     const res = await api.get(DISPUTE_API.BY_BOOKING_ID(bookingId));
-    console.log('dispute:::', res.data);
     return res.data;
   },
 

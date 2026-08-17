@@ -31,6 +31,13 @@ export const useCategoryLevels = (categoryId?: string) => {
     enabled: !!selectedCategoryId,
   });
 
+  const parentCategoryId = category?.parentId ?? level1Id;
+  const { data: parentCategory } = useQuery({
+    queryKey: ['category-details', parentCategoryId],
+    queryFn: () => CategoryService.getCategory(parentCategoryId!),
+    enabled: !!parentCategoryId,
+  });
+
   const handleL1Change = (val: string) => {
     setLevel1Id(val);
     setLevel2Id('');
@@ -54,5 +61,6 @@ export const useCategoryLevels = (categoryId?: string) => {
     options: { l1Options, l2Options },
     loading: { isL2Loading, isDetailsLoading },
     category,
+    parentCategory,
   };
 };

@@ -14,26 +14,46 @@ export const ACTIVE_WORKER_STATUSES: WorkerStatus[] = [
 ];
 
 export const DOCUMENT_TYPE = {
+  // Identity & KYC (Standard Base)
   AADHAAR: "aadhaar",
   PAN: "pan",
   PROFILE_PHOTO: "profile_photo",
   SELFIE_VERIFICATION: "selfie_verification",
 
-  // Professional (Optional)
+  // Trust & Safety
+  POLICE_CLEARANCE: "police_clearance",
+  INSURANCE: "insurance",
+
+  // Technical & Home Maintenance (Category Gating)
+  ELECTRICAL_LICENSE: "electrical_license",
+  HVAC_AC_CERTIFICATE: "hvac_ac_certificate",
+  PLUMBING_CERTIFICATE: "plumbing_certificate",
+  REFRIGERATION_CERTIFICATE: "refrigeration_certificate",
+  APPLIANCE_REPAIR_CERTIFICATE: "appliance_repair_certificate",
+  RO_WATER_PURIFIER_CERTIFICATE: "ro_water_purifier_certificate",
+  CARPENTRY_CERTIFICATE: "carpentry_certificate",
+
+  // Personal Care, Salon & Wellness (Future Services)
+  BEAUTY_HAIR_CERTIFICATE: "beauty_hair_certificate",
+  MASSAGE_THERAPIST_LICENSE: "massage_therapist_license",
+
+  // Driving & Logistics (Future Services)
+  DRIVING_LICENSE: "driving_license",
+
+  // Culinary & Food (Future Services)
+  FOOD_HANDLING_CERTIFICATE: "food_handling_certificate",
+
+  // Safety & Security (Future Services)
+  PEST_CONTROL_LICENSE: "pest_control_license",
+  CCTV_SECURITY_CERTIFICATE: "cctv_security_certificate",
+
+  // General & Business
   TRADE_CERTIFICATE: "trade_certificate",
   SKILL_CERTIFICATE: "skill_certificate",
   EXPERIENCE_LETTER: "experience_letter",
   PROFESSIONAL_LICENSE: "professional_license",
-
-  // Trust & Safety (Optional)
-  POLICE_CLEARANCE: "police_clearance",
-  INSURANCE: "insurance",
-
-  // Business (Optional)
   GST_CERTIFICATE: "gst_certificate",
   BUSINESS_REGISTRATION: "business_registration",
-
-  // Misc
   OTHER: "other",
 } as const;
 

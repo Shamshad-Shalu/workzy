@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import {
+  IsArray,
   IsBoolean,
   IsDefined,
   IsEnum,
@@ -19,7 +20,13 @@ import {
   ValidationArguments,
 } from "class-validator";
 
-import { CATEGORY, DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
+import {
+  CATEGORY,
+  DESCRIPTION_REGEX,
+  DOCUMENT_TYPE,
+  DocumentType,
+  SERVICE_NAME_REGEX,
+} from "@/constants";
 import { PRICING_MODE, PricingMode, SERVICE_TYPE, ServiceType } from "@/constants";
 
 @ValidatorConstraint({ name: "CategoryRules", async: false })
@@ -120,6 +127,11 @@ export class CategoryRequestDTO {
 
   @IsBoolean()
   isAvailable: boolean = true;
+
+  @IsOptional()
+  @IsArray()
+  @IsEnum(DOCUMENT_TYPE, { each: true, message: "Invalid document type in requiredDocuments" })
+  requiredDocuments?: DocumentType[];
 
   @IsNumber()
   @Min(0, { message: "Base rate is required" })

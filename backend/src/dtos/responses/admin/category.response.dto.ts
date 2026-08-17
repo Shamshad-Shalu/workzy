@@ -23,6 +23,7 @@ export class CategoryResponseDTO {
   pricingMode?: PricingMode;
   allowBulkOffers?: boolean;
   allowSuddenBooking?: boolean;
+  requiredDocuments?: string[];
   createdAt!: Date;
 
   static fromEntity(entity: ICategory): CategoryResponseDTO {
@@ -37,6 +38,7 @@ export class CategoryResponseDTO {
     dto.parentId = entity.parentId ? entity.parentId.toString() : null;
     dto.platformFee = entity.platformFee;
     dto.isAvailable = entity.isAvailable;
+    dto.requiredDocuments = entity.requiredDocuments || [];
     dto.createdAt = entity.createdAt;
     dto.baseRate = entity.baseRate;
     dto.priceVarianceLimit = entity.priceVarianceLimit;

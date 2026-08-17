@@ -82,6 +82,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
           createdAt: 1,
           categoryId: {
             _id: "$category._id",
+            parentId: "$category.parentId",
             name: "$category.name",
             maxTravelCost: "$category.maxTravelCost",
             iconUrl: "$category.iconUrl",
@@ -276,7 +277,7 @@ export class ServiceRepository extends BaseRepository<IService> implements IServ
   async getServiceById(serviceId: string): Promise<WorkerServiceItem | null> {
     return await this.model
       .findById(serviceId)
-      .populate("categoryId", "name iconUrl imageUrl serviceType pricingMode")
+      .populate("categoryId", "name iconUrl imageUrl serviceType pricingMode parentId")
       .lean<WorkerServiceItem>();
   }
 }

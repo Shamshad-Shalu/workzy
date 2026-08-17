@@ -27,6 +27,7 @@ export function useCategoryForm({ category, parentCategory }: UseCategoryFormPro
       platformFee: category?.platformFee ?? parentCategory?.platformFee ?? 1,
       baseRate: category?.baseRate ?? parentCategory?.baseRate ?? 0,
       isAvailable: category?.isAvailable ?? true,
+      requiredDocuments: category?.requiredDocuments ?? [],
     };
 
     if (level === 2) {

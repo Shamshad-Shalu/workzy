@@ -28,6 +28,7 @@ interface CategoryLevelsHook {
     isDetailsLoading: boolean;
   };
   category: Category | undefined;
+  parentCategory?: Category | undefined;
 }
 interface CategorySectionProps {
   categoryInfo: CategoryLevelsHook;
