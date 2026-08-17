@@ -34,7 +34,7 @@ export function WorkerDocumentCard({ doc, onReview, isMandatory }: WorkerDocumen
   return (
     <div
       className={cn(
-        'rounded-xl border overflow-hidden border border-border shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300',
+        'rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300',
         isPendingUntouched && 'bg-blue-500/15',
         isInReview && 'bg-amber-500/15'
       )}

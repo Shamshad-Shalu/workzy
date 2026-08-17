@@ -5,11 +5,11 @@ import { toast } from 'sonner';
 import { bookingKeys } from '@/features/booking/hooks/useBooking';
 import { useToggleReviewVisibility } from '@/features/review';
 import BookingService from '@/services/booking.service';
-import type { AdminBookingListQuery, BookingListingResponse } from '@/types/booking';
+import type { BookingListQuery, BookingListingResponse } from '@/types/booking';
 
 const LIMIT = 5;
 
-export function useAdminBookings(filters: Omit<AdminBookingListQuery, 'limit' | 'cursor'>) {
+export function useAdminBookings(filters: Omit<BookingListQuery, 'limit' | 'cursor'>) {
   const filterKey = JSON.stringify(filters);
 
   return useInfiniteQuery<

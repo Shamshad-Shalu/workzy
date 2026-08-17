@@ -53,7 +53,7 @@ export function WorkerAboutContent({ about, languages, availability }: AboutCont
       <div className="space-y-5 min-w-0">
         <motion.div {...fade(0)} className="rounded-2xl border bg-card p-6">
           <SectionTitle icon={<BookOpen className="h-4 w-4" />} title="About" />
-          <p className="mt-3 text-sm leading-relaxed text-muted-foreground break-words">
+          <p className="mt-3 text-sm leading-relaxed text-muted-foreground wrap-break-word">
             {about ?? 'No description provided yet.'}
           </p>
         </motion.div>
