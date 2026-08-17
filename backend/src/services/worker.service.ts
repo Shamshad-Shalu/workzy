@@ -27,6 +27,7 @@ import {
   WorkerReviewRequestDTO,
 } from "@/dtos/requests/admin/worker-review.dto";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
+import { WorkerDocumentUploadDTO } from "@/dtos/requests/worker-document.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
 import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
@@ -430,5 +431,55 @@ export class WorkerService implements IWorkerService {
           : NOTIFICATION_TEMPLATES.WORKER_DOCUMENT_IN_REVIEW(document.type)
     );
     return await WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+  }
+
+  async addWorkerDocument(
+    workerId: string,
+    data: WorkerDocumentUploadDTO
+  ): Promise<WorkerDetailsResponseDto> {
+    const updatedWorker = await this._workerRepository.addWorkerDocument(
+      workerId,
+      data.type,
+      extractKeyFromUrl(data.url)
+    );
+    if (!updatedWorker) {
+      throw new CustomError(
+        "Document of this type already exists or Worker Not fount",
+        HTTPSTATUS.BAD_REQUEST
+      );
+    }
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
+  }
+
+  async updateWorkerDocument(
+    workerId: string,
+    documentId: string,
+    url: string
+  ): Promise<WorkerDetailsResponseDto> {
+    const newKey = extractKeyFromUrl(url);
+
+    const updatedWorker = await this._workerRepository.updateWorkerDocument(
+      workerId,
+      documentId,
+      newKey
+    );
+    if (!updatedWorker) {
+      throw new CustomError("update worker document failed", HTTPSTATUS.BAD_REQUEST);
+    }
+    const targetDoc = updatedWorker.documents.find((d) => d._id?.toString() === documentId);
+    const oldKey = targetDoc?.url;
+
+    if (targetDoc) {
+      targetDoc.url = newKey;
+      targetDoc.status = DOCUMENT_STATUS.PENDING;
+      delete targetDoc.rejectReason;
+      delete targetDoc.verifiedAt;
+      targetDoc.uploadedAt = new Date();
+    }
+
+    if (oldKey && oldKey !== newKey) {
+      void this._s3Service.deleteFile(oldKey);
+    }
+    return WorkerDetailsResponseDto.fromEntity(updatedWorker, this._s3Service);
   }
 }

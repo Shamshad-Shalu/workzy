@@ -2,7 +2,14 @@ import dayjs from "dayjs";
 import { injectable } from "inversify";
 import { FilterQuery, PipelineStage, Types } from "mongoose";
 
-import { SLOT_STATUS, STRIPE_ACCOUNT_STATUS, WORKER_STATUS, WorkerStatus } from "@/constants";
+import {
+  DOCUMENT_STATUS,
+  DocumentType,
+  SLOT_STATUS,
+  STRIPE_ACCOUNT_STATUS,
+  WORKER_STATUS,
+  WorkerStatus,
+} from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
 import Worker from "@/models/worker.model";
@@ -644,6 +651,39 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
         },
       },
       { new: true }
+    );
+  }
+  async addWorkerDocument(
+    workerId: string,
+    type: DocumentType,
+    url: string
+  ): Promise<IWorker | null> {
+    return this.model.findOneAndUpdate(
+      { _id: new Types.ObjectId(workerId), "documents.type": { $ne: type } },
+      { $push: { documents: { type, url } } },
+      { new: true }
+    );
+  }
+
+  async updateWorkerDocument(
+    workerId: string,
+    documentId: string,
+    url: string
+  ): Promise<IWorker | null> {
+    return this.model.findOneAndUpdate(
+      { _id: workerId, "documents._id": documentId },
+      {
+        $set: {
+          "documents.$.url": url,
+          "documents.$.status": DOCUMENT_STATUS.PENDING,
+          "documents.$.uploadedAt": new Date(),
+        },
+        $unset: {
+          "documents.$.rejectReason": "",
+          "documents.$.verifiedAt": "",
+        },
+      },
+      { new: false }
     );
   }
 }

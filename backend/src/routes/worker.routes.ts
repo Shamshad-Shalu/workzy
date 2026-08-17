@@ -5,6 +5,10 @@ import { IWorkerController } from "@/core/interfaces/controllers/IWorkerControll
 import { container } from "@/di/container";
 import { TYPES } from "@/di/types";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
+import {
+  WorkerDocumentUpdateDTO,
+  WorkerDocumentUploadDTO,
+} from "@/dtos/requests/worker-document.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { authenticate, optionalAuth } from "@/middlewares/auth.middleware";
 import { validateDto } from "@/middlewares/validate-dto.middleware";
@@ -46,6 +50,13 @@ router.patch(
 );
 router.patch("/phone", workerController.updateWorkerPhone);
 router.patch("/profile-url", workerController.updateProfileImage);
+
+router.post("/documents", validateDto(WorkerDocumentUploadDTO), workerController.addWorkerDocument);
+router.patch(
+  "/documents/:documentId",
+  validateDto(WorkerDocumentUpdateDTO),
+  workerController.updateWorkerDocument
+);
 
 router.get("/stripe/connect", workerController.connectStripe);
 router.get("/stripe/status", workerController.getStripeStatus);

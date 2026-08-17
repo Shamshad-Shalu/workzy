@@ -1,4 +1,4 @@
-import { WorkerStatus } from "@/constants";
+import { DocumentType, WorkerStatus } from "@/constants";
 import { BaseRepository } from "@/core/abstracts/base.repository";
 import { PaginatedResult, CursorPaginatedResult } from "@/types/common/pagination";
 import { IReviewStats, IWorker } from "@/types/worker/worker.entity";
@@ -34,4 +34,6 @@ export interface IWorkerRepository extends BaseRepository<IWorker> {
     status: WorkerStatus,
     reason: string
   ): Promise<Worker | null>;
+  addWorkerDocument(workerId: string, type: DocumentType, url: string): Promise<IWorker | null>;
+  updateWorkerDocument(workerId: string, documentId: string, url: string): Promise<IWorker | null>;
 }

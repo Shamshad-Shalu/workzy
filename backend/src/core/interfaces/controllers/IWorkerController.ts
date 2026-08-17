@@ -16,4 +16,6 @@ export interface IWorkerController {
   connectStripe: RequestHandler;
   getStripeStatus: RequestHandler;
   getWorkerDashboardAnalytics: RequestHandler;
+  addWorkerDocument: RequestHandler;
+  updateWorkerDocument: RequestHandler;
 }

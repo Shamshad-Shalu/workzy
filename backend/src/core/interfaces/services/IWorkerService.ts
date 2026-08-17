@@ -4,6 +4,7 @@ import {
   WorkerReviewRequestDTO,
 } from "@/dtos/requests/admin/worker-review.dto";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
+import { WorkerDocumentUploadDTO } from "@/dtos/requests/worker-document.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { WorkerListResponseDto } from "@/dtos/responses/admin/worker.dto";
 import { PublicWorkerListResponseDto } from "@/dtos/responses/worker/worker-public.response.dto";
@@ -56,5 +57,14 @@ export interface IWorkerService {
     workerId: string,
     documentId: string,
     data: WorkerDocumentReviewRequestDTO
+  ): Promise<WorkerDetailsResponseDto>;
+  addWorkerDocument(
+    workerId: string,
+    data: WorkerDocumentUploadDTO
+  ): Promise<WorkerDetailsResponseDto>;
+  updateWorkerDocument(
+    workerId: string,
+    documentId: string,
+    url: string
   ): Promise<WorkerDetailsResponseDto>;
 }
