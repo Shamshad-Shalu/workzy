@@ -53,7 +53,7 @@ export default function WorkerProfileRouteWrapper() {
     }
   }
   return (
-    <main className="space-y-6 md:-mx-7 -mt-6 p-4 lg:p-6">
+    <main>
       {isLoading ? (
         <WorkerProfileLayoutSkeleton />
       ) : isError ? (
@@ -68,15 +68,19 @@ export default function WorkerProfileRouteWrapper() {
                   src={user?.worker?.profileImage}
                   name={data.displayName}
                   onClickImage={() => setOpenImage(true)}
+                  shape="rounded"
+                  size={120}
                   onChange={handleImageUpload}
                   loading={imageUploading}
+                  className="!w-24 !h-24 sm:!w-28 sm:!h-28"
                   editable
                   progress={progress}
                 />
               }
+              type="worker"
             />
           )}
-          <div className="max-w-7xl mx-auto sm:px-6 pb-16">
+          <div className="px-4 sm:px-6 pb-16">
             <div className="flex border-b border-border overflow-x-auto no-scrollbar mb-6">
               {TABS.map(tab => (
                 <NavLink

@@ -64,3 +64,25 @@ export function useWorkerProfileImageUpload() {
     progress,
   };
 }
+
+export function useAddWorkerDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: { type: string; url: string }) =>
+      WorkerProfileService.addWorkerDocument(data),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+}
+
+export function useUpdateWorkerDocument() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ documentId, url }: { documentId: string; url: string }) =>
+      WorkerProfileService.updateWorkerDocument(documentId, url),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: QUERY_KEY });
+    },
+  });
+}

@@ -41,6 +41,20 @@ const WorkerProfileService = {
     const res = await api.patch(WORKER_API.REAPPLICATION(workerId), payload);
     return res.data;
   },
+  addWorkerDocument: async (data: {
+    type: string;
+    url: string;
+  }): Promise<{ message: string; workerData: WorkerProfileDetails }> => {
+    const res = await api.post(WORKER_API.DOCUMENTS, data);
+    return res.data;
+  },
+  updateWorkerDocument: async (
+    documentId: string,
+    url: string
+  ): Promise<{ message: string; workerData: WorkerProfileDetails }> => {
+    const res = await api.patch(WORKER_API.UPDATE_DOCUMENT(documentId), { url });
+    return res.data;
+  },
 };
 
 export default WorkerProfileService;

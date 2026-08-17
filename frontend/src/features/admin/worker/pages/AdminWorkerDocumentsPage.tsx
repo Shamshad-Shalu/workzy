@@ -2,9 +2,9 @@ import { FileText } from 'lucide-react';
 import { useState } from 'react';
 import { useOutletContext } from 'react-router-dom';
 
+import { WorkerDocumentCard } from '@/features/worker/components/WorkerDocumentCard';
 import type { WorkerDocument, WorkerProfileDetails } from '@/types/worker';
 
-import { WorkerDocumentCard } from '../components/WorkerDocumentCard';
 import { WorkerDocumentReviewModal } from '../components/WorkerDocumentReviewModal';
 import { MANDATORY_DOCUMENT_TYPES } from '../utils/documentUtils';
 
@@ -29,7 +29,7 @@ export default function AdminWorkerDocumentsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {mandatoryDocs.map(doc => (
-          <WorkerDocumentCard key={doc.id} doc={doc} isMandatory={true} />
+          <WorkerDocumentCard key={doc.id} doc={doc} type="admin" isMandatory={true} />
         ))}
       </div>
 
@@ -45,7 +45,12 @@ export default function AdminWorkerDocumentsPage() {
         {additionalDocs.length > 0 ? (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {additionalDocs.map(doc => (
-              <WorkerDocumentCard key={doc.id} doc={doc} onReview={() => setReviewDoc(doc)} />
+              <WorkerDocumentCard
+                key={doc.id}
+                doc={doc}
+                type="admin"
+                onReview={() => setReviewDoc(doc)}
+              />
             ))}
           </div>
         ) : (

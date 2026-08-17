@@ -11,6 +11,7 @@ import {
   Star,
 } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
 import type { WorkerProfile } from '@/types/worker';
 
 import Button from '../atoms/Button';
@@ -25,12 +26,14 @@ interface Props {
   workerAction?: React.ReactNode;
   onStartChat?: () => void;
   isChatLoading?: boolean;
+  type?: 'public' | 'worker';
 }
 
 export default function WorkerProfileHeader({
   worker,
   workerAction,
   onStartChat,
+  type = 'public',
   isChatLoading,
 }: Props) {
   const {
@@ -62,7 +65,12 @@ export default function WorkerProfileHeader({
         />
         <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-black/10 via-transparent to-background sm:h-60" />
 
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-8">
+        <div
+          className={cn(
+            'relative px-4 ',
+            type === 'public' ? 'mx-auto max-w-7xl sm:px-8' : 'sm:px-6'
+          )}
+        >
           <div className="-mt-14 flex flex-col gap-5 sm:-mt-16 sm:flex-row sm:items-end sm:justify-between pb-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
               {workerAction ? (
@@ -123,7 +131,12 @@ export default function WorkerProfileHeader({
           </div>
         </div>
       </motion.section>
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4 max-w-7xl mx-auto px-4 sm:px-8">
+      <section
+        className={cn(
+          'grid grid-cols-2 gap-3 sm:grid-cols-4 px-4 ',
+          type === 'public' ? 'max-w-7xl mx-auto sm:px-8' : 'sm:px-6'
+        )}
+      >
         <StatCard
           icon={<Star className="h-4 w-4" />}
           label="Rating"

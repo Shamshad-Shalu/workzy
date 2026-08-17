@@ -11,31 +11,46 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { DOCUMENT_STATUS } from '@/constants';
+import { getDocInfo } from '@/features/admin/worker/utils/documentUtils';
 import { cn } from '@/lib/utils';
 import type { WorkerDocument } from '@/types/worker';
 
-import { getDocInfo } from '../utils/documentUtils';
-
-interface WorkerDocumentCardProps {
+export interface WorkerDocumentCardProps {
   doc: WorkerDocument;
-  onReview?: () => void;
+  type?: 'admin' | 'worker';
   isMandatory?: boolean;
+  onReview?: () => void;
+  onUpdate?: () => void;
 }
 
-export function WorkerDocumentCard({ doc, onReview, isMandatory }: WorkerDocumentCardProps) {
+export function WorkerDocumentCard({
+  doc,
+  type = 'worker',
+  isMandatory = false,
+  onReview,
+  onUpdate,
+}: WorkerDocumentCardProps) {
   const docInfo = getDocInfo(doc.type);
   const DocmentIcon = docInfo.icon;
 
   const isVerified = doc.status === DOCUMENT_STATUS.VERIFIED;
   const isRejected = doc.status === DOCUMENT_STATUS.REJECTED;
   const isInReview = doc.status === DOCUMENT_STATUS.IN_REVIEW;
-  const isPendingUntouched = doc.status === DOCUMENT_STATUS.PENDING;
+  const isPending = doc.status === DOCUMENT_STATUS.PENDING;
+
+  const handleAction = type === 'admin' ? onReview : onUpdate;
+  const canShowAction =
+    type === 'admin'
+      ? !!onReview && !isVerified && !isRejected
+      : !!onUpdate && (isPending || isRejected);
+
+  const actionTitle = type === 'admin' ? 'Review this document' : 'Update/Re-upload this document';
 
   return (
     <div
       className={cn(
         'rounded-xl border border-border overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300',
-        isPendingUntouched && 'bg-blue-500/15',
+        isPending && 'bg-blue-500/15',
         isInReview && 'bg-amber-500/15'
       )}
     >
@@ -59,11 +74,11 @@ export function WorkerDocumentCard({ doc, onReview, isMandatory }: WorkerDocumen
             View
           </a>
         </div>
-        {onReview && !isVerified && !isRejected && (
+        {canShowAction && (
           <button
             type="button"
-            onClick={onReview}
-            title="Review this document"
+            onClick={handleAction}
+            title={actionTitle}
             className="absolute top-2 right-2 z-10 rounded-full bg-background/90 p-1.5 shadow-sm hover:bg-background transition-colors"
           >
             <Pencil className="h-3.5 w-3.5 text-foreground" />
@@ -87,11 +102,7 @@ export function WorkerDocumentCard({ doc, onReview, isMandatory }: WorkerDocumen
               </p>
             </div>
           </div>
-          <Badge
-            variant={
-              isVerified ? 'green' : isRejected ? 'red' : isPendingUntouched ? 'blue' : 'amber'
-            }
-          >
+          <Badge variant={isVerified ? 'green' : isRejected ? 'red' : isPending ? 'blue' : 'amber'}>
             {isVerified ? (
               isMandatory ? (
                 <ShieldCheck className="h-3 w-3" />
@@ -107,13 +118,13 @@ export function WorkerDocumentCard({ doc, onReview, isMandatory }: WorkerDocumen
               ? 'Verified'
               : isRejected
                 ? 'Rejected'
-                : isPendingUntouched
+                : isPending
                   ? 'Pending'
                   : 'In Review'}
           </Badge>
         </div>
 
-        {isVerified && !isMandatory && (
+        {type === 'admin' && isVerified && !isMandatory && (
           <p className="text-xs text-muted-foreground italic">
             This document has been verified and can no longer be reviewed.
           </p>
