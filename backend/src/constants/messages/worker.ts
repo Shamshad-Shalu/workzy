@@ -6,6 +6,7 @@ export const WORKER = {
   CREATE_SUCCESS: "Worker profile created successfully",
   DOCUMENT_REQUIRED: "Document is required.",
   DOCUMENT_UPDATED: "Document updated successfully",
+  DOCUMENT_UPLOADED: "Document Uploaded successfully",
   DOCUMENT_REVIEWED: "Document reviewed successfully",
   DOCUMENT_NOTFOUND: "Document not found",
   DOCUMENT_ALREADY_VERIFIED: "Document is already verified.",

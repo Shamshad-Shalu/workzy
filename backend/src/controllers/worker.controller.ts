@@ -7,6 +7,7 @@ import { IWorkerController } from "@/core/interfaces/controllers/IWorkerControll
 import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { TYPES } from "@/di/types";
 import { JoinUsDTO } from "@/dtos/requests/joinUs.dto";
+import { WorkerDocumentUploadDTO } from "@/dtos/requests/worker-document.dto";
 import { WorkerProfileRequestDto } from "@/dtos/requests/worker.profile.dto";
 import { ApiResponse } from "@/utils/apiResponse";
 import CustomError from "@/utils/customError";
@@ -139,6 +140,21 @@ export class WorkerController implements IWorkerController {
     const workerId = this.requireWorkerId(req);
     const { status, stripeAccountId } = await this._workerService.getStripeStatus(workerId);
     res.status(HTTPSTATUS.OK).json(new ApiResponse({ status, stripeAccountId }));
+  });
+
+  addWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const data = req.body as WorkerDocumentUploadDTO;
+    const workerData = await this._workerService.addWorkerDocument(workerId, data);
+    res.status(HTTPSTATUS.CREATED).json(new ApiResponse(workerData, WORKER.DOCUMENT_UPLOADED));
+  });
+
+  updateWorkerDocument = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const workerId = this.requireWorkerId(req);
+    const { documentId } = req.params;
+    const { url } = req.body;
+    const workerData = await this._workerService.updateWorkerDocument(workerId, documentId, url);
+    res.status(HTTPSTATUS.OK).json(new ApiResponse(workerData, WORKER.DOCUMENT_UPDATED));
   });
 
   private requireWorkerId(req: Request): string {
