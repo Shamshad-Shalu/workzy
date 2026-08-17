@@ -10,6 +10,7 @@ import { serviceSchema } from '../validation/ServiceFormData';
 
 const baseDefaults = {
   categoryId: '',
+  parentCategoryId: '',
   rate: 0,
   description: '',
   estimatedDuration: 0,
@@ -50,7 +51,11 @@ function resolveBufferMinutes(category: Category): number {
   return b;
 }
 
-export function useServiceForm(service?: Service | null, category?: Category | null) {
+export function useServiceForm(
+  service?: Service | null,
+  category?: Category | null,
+  parentCategory?: Category | null
+) {
   const form = useForm({
     resolver: zodResolver(serviceSchema),
     mode: 'onChange',
@@ -74,6 +79,8 @@ export function useServiceForm(service?: Service | null, category?: Category | n
       reset({
         ...baseDefaults,
         categoryId: service.categoryId,
+        parentCategoryId:
+          service.parentCategoryId ?? category?.parentId ?? parentCategory?.id ?? '',
         rate: service.rate,
         description: service.description ?? '',
         estimatedDuration,
@@ -105,6 +112,7 @@ export function useServiceForm(service?: Service | null, category?: Category | n
       reset({
         ...baseDefaults,
         categoryId: category.id,
+        parentCategoryId: category.parentId ?? parentCategory?.id ?? '',
         rate: category.baseRate,
         description: category.description ?? '',
         estimatedDuration: resolveDurationMinutes(category),
@@ -116,7 +124,7 @@ export function useServiceForm(service?: Service | null, category?: Category | n
         _serviceType: category.serviceType,
       });
     }
-  }, [service, category, reset]);
+  }, [service, category, parentCategory, reset]);
 
   return form;
 }

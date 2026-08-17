@@ -64,6 +64,7 @@ const progressiveBulkDiscountSchema = z.array(bulkDiscountSchema).superRefine((d
 export const serviceSchema = z
   .object({
     categoryId: z.string().min(1, 'Category is required'),
+    parentCategoryId: z.string().min(1, 'Parent category is required'),
     rate: z.preprocess(v => Number(v), z.number().min(0, 'Rate must be non-negative')),
     description: z.string().regex(DESCRIPTION_REGEX, 'Invalid format').optional().or(z.literal('')),
     estimatedDuration: z.preprocess(

@@ -1,7 +1,7 @@
-import { inject } from "inversify";
+import { inject, injectable } from "inversify";
 import { Types } from "mongoose";
 
-import { CATEGORY, HTTPSTATUS, SERVICE, SERVICE_TYPE, WORKER } from "@/constants";
+import { CATEGORY, DOCUMENT_STATUS, HTTPSTATUS, SERVICE, SERVICE_TYPE, WORKER } from "@/constants";
 import { ICategoryRepository } from "@/core/interfaces/repositories/ICategoryRepository";
 import { IServiceRepository } from "@/core/interfaces/repositories/IServiceRepository";
 import { IWorkerRepository } from "@/core/interfaces/repositories/IWorkerRepository";
@@ -13,10 +13,12 @@ import { PublicServiceListResponseDto, ServiceResponseDto } from "@/dtos/respons
 import { CategoryOption, ICategory } from "@/types/category";
 import { CursorPaginatedResult } from "@/types/common/pagination";
 import { PublicServiceListQuery, ServiceListQuery } from "@/types/service/service.query";
+import { IWorkerDocument } from "@/types/worker/worker.entity";
 import CustomError from "@/utils/customError";
 import { getEntityOrThrow } from "@/utils/getEntityOrThrow";
 import { formatDuration } from "@/utils/time.convert";
 
+@injectable()
 export class ServiceManagement implements IServiceManagement {
   constructor(
     @inject(TYPES.CategoryRepository) private _categoryRepository: ICategoryRepository,
@@ -26,30 +28,38 @@ export class ServiceManagement implements IServiceManagement {
   ) {}
 
   async createService(workerId: string, data: ServiceRequestDTO): Promise<ServiceResponseDto> {
-    const isAlredyExists = await this._serviceRepository.findOne({
-      workerId,
-      categoryId: data.categoryId,
-    });
+    const { parentCategoryId, categoryId, ...rest } = data;
+    const [isAlredyExists, category, parentCategory, worker] = await Promise.all([
+      this._serviceRepository.findOne({ workerId, categoryId: categoryId }),
+      getEntityOrThrow(this._categoryRepository, categoryId, CATEGORY.NOT_FOUND),
+      getEntityOrThrow(this._categoryRepository, parentCategoryId, CATEGORY.NOT_FOUND),
+      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
+    ]);
+
     if (isAlredyExists) {
       throw new CustomError(SERVICE.ALREADY_EXISTS, HTTPSTATUS.CONFLICT);
     }
-    const category = await getEntityOrThrow(
-      this._categoryRepository,
-      data.categoryId,
-      CATEGORY.NOT_FOUND
-    );
-    await this.validateServiceRate(category, data.rate);
+    if (!category) {
+      throw new CustomError(CATEGORY.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+
+    this.validateCategoryDocuments(worker.documents, category, parentCategory);
+    this.validateServiceRate(category, data.rate);
     this.validateServiceTiming(category, data);
+
     const service = await this._serviceRepository.create({
-      ...data,
+      ...rest,
       workerId: new Types.ObjectId(workerId),
       categoryId: category.id,
     });
-    const serviceData = await this._serviceRepository.getServiceById(service._id);
+    const [serviceData] = await Promise.all([
+      this._serviceRepository.getServiceById(service._id),
+      this._redisService.clearPattern(`worker:${workerId}:services`),
+    ]);
+
     if (!serviceData) {
       throw new CustomError(SERVICE.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    await this._redisService.clearPattern(`worker:${workerId}:services`);
     return ServiceResponseDto.fromEntity(serviceData);
   }
 
@@ -58,25 +68,30 @@ export class ServiceManagement implements IServiceManagement {
     serviceId: string,
     data: ServiceRequestDTO
   ): Promise<ServiceResponseDto> {
-    const service = await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND);
+    const { parentCategoryId, categoryId, ...rest } = data;
+    const [service, category, parentCategory, worker] = await Promise.all([
+      await getEntityOrThrow(this._serviceRepository, serviceId, SERVICE.NOT_FOUND),
+      getEntityOrThrow(this._categoryRepository, categoryId, CATEGORY.NOT_FOUND),
+      getEntityOrThrow(this._categoryRepository, parentCategoryId, CATEGORY.NOT_FOUND),
+      getEntityOrThrow(this._workerRepository, workerId, WORKER.NOT_FOUND),
+    ]);
 
     if (!service.workerId.equals(workerId)) {
       throw new CustomError(WORKER.UNAUTHORIZED, HTTPSTATUS.FORBIDDEN);
     }
-    const category = await getEntityOrThrow(
-      this._categoryRepository,
-      data.categoryId,
-      CATEGORY.NOT_FOUND
-    );
-    await this.validateServiceRate(category, data.rate);
+
+    this.validateCategoryDocuments(worker.documents, category, parentCategory);
+    this.validateServiceRate(category, data.rate);
     this.validateServiceTiming(category, data);
 
-    const updatedService = await this._serviceRepository.findByIdAndUpdate(serviceId, data);
-    const serviceData = await this._serviceRepository.getServiceById(service?._id);
+    const updatedService = await this._serviceRepository.findByIdAndUpdate(serviceId, { ...rest });
+    const [serviceData] = await Promise.all([
+      this._serviceRepository.getServiceById(service?._id),
+      this._redisService.clearPattern(`worker:${workerId}:services`),
+    ]);
     if (!updatedService || !serviceData) {
       throw new CustomError(SERVICE.UPDATE_ERROR, HTTPSTATUS.NOT_FOUND);
     }
-    await this._redisService.clearPattern(`worker:${workerId}:services`);
     return ServiceResponseDto.fromEntity(serviceData);
   }
 
@@ -97,13 +112,41 @@ export class ServiceManagement implements IServiceManagement {
     return { newStatus, message };
   }
 
-  private async validateServiceRate(category: ICategory, rate: number): Promise<void> {
+  private validateServiceRate(category: ICategory, rate: number): void {
     const { baseRate, priceVarianceLimit } = category;
     const deviation = (baseRate * priceVarianceLimit) / 100;
     const minPrice = baseRate - deviation;
     const maxPrice = baseRate + deviation;
     if (rate < minPrice || rate > maxPrice) {
       throw new CustomError(SERVICE.PRICE_OUT_OF_RANGE, HTTPSTATUS.BAD_REQUEST);
+    }
+  }
+
+  private validateCategoryDocuments(
+    documents: IWorkerDocument[] = [],
+    category: ICategory,
+    parentCategory: ICategory
+  ): void {
+    const requiredDocTypes = Array.from(
+      new Set([
+        ...(parentCategory?.requiredDocuments || []),
+        ...(category?.requiredDocuments || []),
+      ])
+    );
+
+    if (requiredDocTypes.length === 0) {
+      return;
+    }
+    const missingDocs = requiredDocTypes.filter((docType) => {
+      const doc = documents.find((d) => d.type === docType);
+      return !doc || doc.status !== DOCUMENT_STATUS.VERIFIED;
+    });
+
+    if (missingDocs.length > 0) {
+      throw new CustomError(
+        `Missing required verified documents for this service category: ${missingDocs.join(", ")}`,
+        HTTPSTATUS.BAD_REQUEST
+      );
     }
   }
 

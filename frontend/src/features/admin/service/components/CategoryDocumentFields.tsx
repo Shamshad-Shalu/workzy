@@ -13,7 +13,7 @@ interface CategoryDocumentFieldsProps {
 }
 export function CategoryDocumentFields({ form }: CategoryDocumentFieldsProps) {
   return (
-    <div className="space-y-2 border-slate-700/50">
+    <div className="space-y-2 pt-2 border-t border-border">
       <Label className="text-sm font-semibold">Required Verified Documents for Workers</Label>
       <Controller
         name="requiredDocuments"

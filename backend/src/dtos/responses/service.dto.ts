@@ -5,6 +5,7 @@ import { PublicWorkerServiceItem, WorkerServiceItem } from "@/types/service/serv
 export class ServiceResponseDto {
   id!: string;
   categoryId!: string;
+  parentCategoryId!: string;
   serviceName!: string;
   serviceType!: ServiceType;
   pricingMode!: PricingMode;
@@ -25,10 +26,11 @@ export class ServiceResponseDto {
 
   static fromEntity(entity: WorkerServiceItem): ServiceResponseDto {
     const dto = new ServiceResponseDto();
-    const { _id, name, iconUrl, imageUrl, pricingMode, serviceType } = entity.categoryId;
+    const { _id, parentId, name, iconUrl, imageUrl, pricingMode, serviceType } = entity.categoryId;
 
     dto.id = entity._id.toString();
     dto.categoryId = _id.toString();
+    dto.parentCategoryId = parentId?.toString();
     dto.serviceName = name;
     dto.serviceType = serviceType as ServiceType;
     dto.pricingMode = pricingMode as PricingMode;
