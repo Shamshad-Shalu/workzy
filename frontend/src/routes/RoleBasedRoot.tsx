@@ -1,32 +1,41 @@
-import { Navigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Navigate } from 'react-router-dom';
 
 import { ROLE } from '@/constants';
 import HomePage from '@/pages/Home';
-import { useAppSelector } from '@/store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
+import { syncUserLocation } from '@/utils/locationSync';
 
 export default function RoleBasedRoot() {
   const { user, isAuthenticated, status } = useAppSelector((s: RootState) => s.auth);
-  const location = useLocation();
+  const dispatch = useAppDispatch();
 
-  const params = new URLSearchParams(location.search);
-  const asUser = params.get('as') === 'user';
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      syncUserLocation(dispatch, user);
+    }
+  }, [dispatch, isAuthenticated, user]);
 
   if (status === 'loading') {
-    return null;
+    return (
+      <div className="flex h-screen w-screen items-center justify-center bg-background">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+      </div>
+    );
   }
 
-  const isGuest = !isAuthenticated || !user;
-  const workerUserMode = asUser && user?.role === ROLE.WORKER;
-
-  if (isGuest || workerUserMode) {
+  if (!isAuthenticated || !user) {
     return <HomePage />;
   }
 
   if (user.role === ROLE.ADMIN) {
     return <Navigate to="/admin/dashboard" replace />;
-  } else if (user.role === ROLE.WORKER) {
+  }
+
+  if (user.role === ROLE.WORKER) {
     return <Navigate to="/worker/dashboard" replace />;
   }
+
   return <HomePage />;
 }

@@ -10,11 +10,15 @@ const errorMiddleware = (
   res: Response,
   _next: NextFunction
 ) => {
-  logger.error("Error occurred:", err);
-  console.log(err);
-
   const statusCode = err instanceof CustomError ? err.statusCode : 500;
   const message = err.message || SERVER.ERROR;
+
+  if (statusCode >= 500) {
+    logger.error(`[${statusCode}] ${req.method} ${req.url} - Server Error:`, err);
+  } else if (statusCode !== 401) {
+    logger.warn(`[${statusCode}] ${req.method} ${req.url} - ${message}`);
+    console.log(err);
+  }
 
   const response: {
     success: false;
@@ -26,7 +30,6 @@ const errorMiddleware = (
     response.errors = err.errors;
   }
 
-  logger.error(statusCode.toString(), message);
   res.status(statusCode).json(response);
 };
 

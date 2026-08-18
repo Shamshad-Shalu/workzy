@@ -12,4 +12,5 @@ export const AUTH_API = {
   LOGOUT: auth(`/logout`),
   GOOGLE: auth(`/google`),
   REFRESH_TOKEN: auth(`/refresh-token`),
+  SWITCH_ROLE: auth(`/switch-role`),
 };
