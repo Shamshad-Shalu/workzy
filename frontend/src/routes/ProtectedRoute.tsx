@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
-import type { Role } from '@/constants';
+import { ROLE, type Role } from '@/constants';
 import { useAppSelector } from '@/store/hooks';
 import type { RootState } from '@/store/store';
 
@@ -26,7 +26,16 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ requiredRoles }) => {
   }
 
   if (requiredRoles && (!user.role || !requiredRoles.includes(user.role))) {
-    return <Navigate to={'/unauthorized'} replace />;
+    if (user.role === ROLE.USER) {
+      return <Navigate to="/" replace />;
+    }
+    if (user.role === ROLE.WORKER) {
+      return <Navigate to="/worker/dashboard" replace />;
+    }
+    if (user.role === ROLE.ADMIN) {
+      return <Navigate to="/admin/dashboard" replace />;
+    }
+    return <Navigate to="/unauthorized" replace />;
   }
 
   return <Outlet />;

@@ -4,11 +4,12 @@ import { useNavigate } from 'react-router-dom';
 import { ROLE } from '@/constants';
 import { setAxiosToken } from '@/lib/api/axios';
 import { cn } from '@/lib/utils';
-import { logoutService } from '@/services/auth.service';
+import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppDispatch } from '@/store/hooks';
-import { clearUser } from '@/store/slices/authSlice';
+import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import type { MenuItem } from '@/types/navigation';
 import type { User } from '@/types/user';
+import { syncUserLocation } from '@/utils/locationSync';
 
 import workzyLogo from '../../assets/icons/logo-icon.jpg';
 import workzyIcon from '../../assets/icons/logo-icon.jpg';
@@ -60,8 +61,17 @@ export function BaseSidebar({
     }
   };
 
-  const handleSwitchMode = () => {
-    navigate('/?as=user');
+  const handleSwitchMode = async () => {
+    try {
+      const data = await switchRoleService();
+      setAxiosToken(data.accessToken);
+      const targetPath = data.user.role === ROLE.WORKER ? '/worker/dashboard' : '/';
+      navigate(targetPath, { replace: true });
+      dispatch(setCredentials({ user: data.user, accessToken: data.accessToken }));
+      syncUserLocation(dispatch, data.user);
+    } catch (error) {
+      console.error('Failed to switch role:', error);
+    }
   };
 
   return (
@@ -154,7 +164,7 @@ export function BaseSidebar({
           </DropdownMenuTrigger>
 
           <DropdownMenuContent className="w-56 rounded-xl p-2" align="end">
-            {user.role === ROLE.WORKER && (
+            {user?.worker?.id && (
               <DropdownMenuItem className="p-3 text-sm" onClick={handleSwitchMode}>
                 <Repeat className="mr-2 h-4 w-4" /> Switch to User
               </DropdownMenuItem>

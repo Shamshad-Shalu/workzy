@@ -40,12 +40,13 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { ROLE } from '@/constants';
 import ServiceSearchContainer from '@/features/user/services/components/ServiceSearchContainer';
 import { setAxiosToken } from '@/lib/api/axios';
-import { logoutService } from '@/services/auth.service';
+import { logoutService, switchRoleService } from '@/services/auth.service';
 import { useAppSelector, useAppDispatch } from '@/store/hooks';
-import { clearUser } from '@/store/slices/authSlice';
+import { clearUser, setCredentials } from '@/store/slices/authSlice';
 import { setLocation } from '@/store/slices/locationSlice';
 import type { RootState } from '@/store/store';
 import type { CategorySuggestion } from '@/types/category';
+import { syncUserLocation } from '@/utils/locationSync';
 
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
@@ -98,9 +99,22 @@ export default function Header() {
     }
   };
 
-  const handleSwitchMode = () => {
-    navigate('/worker/dashboard');
-    setMobileMenuOpen(false);
+  const handleSwitchMode = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const data = await switchRoleService();
+      setAxiosToken(data.accessToken);
+      const targetPath = data.user.role === ROLE.WORKER ? '/worker/dashboard' : '/';
+      navigate(targetPath, { replace: true });
+      dispatch(setCredentials({ user: data.user, accessToken: data.accessToken }));
+      syncUserLocation(dispatch, data.user);
+    } catch (error) {
+      console.error('Failed to switch role:', error);
+    } finally {
+      setMobileMenuOpen(false);
+    }
   };
 
   const isActiveRoute = (path: string) => {
@@ -246,7 +260,7 @@ export default function Header() {
                       Messages
                     </DropdownMenuItem>
 
-                    {user?.role === ROLE.WORKER && (
+                    {user?.worker?.id && (
                       <DropdownMenuItem onClick={handleSwitchMode}>
                         <Users className="h-4 w-4 mr-2" />
                         Switch to Worker Mode

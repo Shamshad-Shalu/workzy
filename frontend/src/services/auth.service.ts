@@ -40,3 +40,8 @@ export const logoutService = async () => {
   const res = await api.post(AUTH_API.LOGOUT, {});
   return res.data;
 };
+
+export const switchRoleService = async (): Promise<{ user: User; accessToken: string }> => {
+  const res = await api.post(AUTH_API.SWITCH_ROLE);
+  return res.data;
+};
