@@ -3,7 +3,7 @@ import { plainToInstance } from "class-transformer";
 import { inject, injectable } from "inversify";
 
 import redisClient from "@/config/redisClient";
-import { AUTH, HTTPSTATUS, ROLE, Role, USER } from "@/constants";
+import { AUTH, HTTPSTATUS, ROLE, Role, USER, WORKER_STATUS } from "@/constants";
 import { IUserRepository } from "@/core/interfaces/repositories/IUserRepository";
 import { IAuthService } from "@/core/interfaces/services/IAuthService";
 import { IS3Service } from "@/core/interfaces/services/IS3Service";
@@ -67,7 +67,7 @@ export class AuthService implements IAuthService {
       const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
         const { _id, displayName, profileImage } = worker;
-        userObj.worker = {
+        userObj.workerData = {
           _id: _id.toString(),
           displayName,
           profileImage,
@@ -127,7 +127,7 @@ export class AuthService implements IAuthService {
       const worker = await this._workerService.getWorkerByUserId(user._id);
       if (worker) {
         const { _id, displayName, profileImage } = worker;
-        userObj.worker = {
+        userObj.workerData = {
           _id: _id.toString(),
           displayName,
           profileImage,
@@ -135,5 +135,27 @@ export class AuthService implements IAuthService {
       }
     }
     return await LoginResponseDto.fromEntity(userObj, this._s3Service);
+  }
+
+  async getUserInfo(userId: string, role: Role): Promise<LoginResponseDto | null> {
+    const [user, worker] = await Promise.all([
+      this._userRepository.findById(userId),
+      this._workerService.getWorkerByUserId(userId),
+    ]);
+    if (!user) return null;
+    const userObj = {
+      ...user.toObject(),
+      workerData:
+        worker?.status === WORKER_STATUS.VERIFIED
+          ? {
+              _id: worker._id,
+              displayName: worker.displayName,
+              profileImage: worker.profileImage,
+            }
+          : null,
+      role,
+    };
+
+    return LoginResponseDto.fromEntity(userObj, this._s3Service);
   }
 }

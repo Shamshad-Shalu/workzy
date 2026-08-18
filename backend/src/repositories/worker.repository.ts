@@ -37,7 +37,6 @@ export class WorkerRepository extends BaseRepository<IWorker> implements IWorker
 
   async getWorkerByUserId(userId: string): Promise<IWorker | null> {
     const worker = await this.model.findOne({ userId: new Types.ObjectId(userId) }).lean<IWorker>();
-
     if (!worker) return null;
     return worker;
   }

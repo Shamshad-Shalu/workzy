@@ -16,4 +16,5 @@ export interface IAuthService {
     name: string;
     profile: string;
   }): Promise<LoginResponseDto>;
+  getUserInfo(userId: string, role: Role): Promise<LoginResponseDto | null>;
 }

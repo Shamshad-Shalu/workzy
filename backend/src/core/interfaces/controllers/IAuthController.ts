@@ -10,4 +10,5 @@ export interface IAuthController {
   forgotPassword: RequestHandler;
   resetPassword: RequestHandler;
   handleGoogleUser: RequestHandler;
+  switchRole: RequestHandler;
 }

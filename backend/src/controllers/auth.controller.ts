@@ -18,7 +18,6 @@ import { IWorkerService } from "@/core/interfaces/services/IWorkerService";
 import { AccessTokenPayload } from "@/core/types/global/jwt";
 import { TYPES } from "@/di/types";
 import { LoginRequestDTO, RegisterRequestDTO } from "@/dtos/requests/auth.dto";
-import { LoginResponseDto } from "@/dtos/responses/auth.dto";
 import { ApiResponse } from "@/utils/apiResponse";
 import { clearRefreshTokenCookie, setRefreshTokenCookie } from "@/utils/auth/cookieUtils";
 import { generateAccessToken, verifyRefreshToken } from "@/utils/auth/jwt.util";
@@ -90,7 +89,6 @@ export class AuthController implements IAuthController {
       role: user.role as Role,
       workerId: user.worker?.id,
     });
-
     res.status(HTTPSTATUS.OK).json(new ApiResponse({ accessToken, user }, AUTH.LOGIN_SUCCESS));
   });
 
@@ -129,7 +127,6 @@ export class AuthController implements IAuthController {
       clearRefreshTokenCookie(res);
       throw new CustomError(AUTH.INVALID_TOKEN, HTTPSTATUS.FORBIDDEN);
     }
-
     const userId = decodedToken.user.id;
     const role = decodedToken.user.role;
 
@@ -139,33 +136,27 @@ export class AuthController implements IAuthController {
       res.status(HTTPSTATUS.FORBIDDEN).json({ success: false, message: USER.BLOCKED });
       return;
     }
+    const user = await this._authService.getUserInfo(userId, role);
 
-    const user = await this._authService.getUserByRoleAndId(role, userId);
     if (!user) {
       clearRefreshTokenCookie(res);
       throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-    let fullUser = user.toObject ? user.toObject() : user;
 
     const payload: AccessTokenPayload = {
-      id: user._id.toString(),
+      id: user.id.toString(),
       role: user.role,
     };
 
-    if (user.role === ROLE.WORKER) {
-      const worker = await this._workerService.getWorkerByUserId(user._id.toString());
-      if (!worker) {
-        clearRefreshTokenCookie(res);
-        throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
-      }
-      const { _id, displayName, profileImage } = worker;
-      payload["workerId"] = _id.toString();
-      fullUser = { ...fullUser, workerData: { _id: _id.toString(), displayName, profileImage } };
+    if (role === ROLE.WORKER && !user.worker?.id) {
+      clearRefreshTokenCookie(res);
+      throw new CustomError(WORKER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
     }
-
+    if (user.worker?.id) {
+      payload.workerId = user.worker.id;
+    }
     const accessToken = generateAccessToken(payload);
-    const plainUser = await LoginResponseDto.fromEntity(fullUser, this._s3Service);
-    res.status(HTTPSTATUS.OK).json(new ApiResponse({ accessToken, user: plainUser }));
+    res.status(HTTPSTATUS.OK).json(new ApiResponse({ accessToken, user }));
   });
 
   forgotPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
@@ -228,5 +219,29 @@ export class AuthController implements IAuthController {
     setRefreshTokenCookie(res, { id: user.id, role: user.role as Role });
 
     res.redirect(`${CLIENT_URL}/auth/google/callback`);
+  });
+
+  switchRole = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    if (!userId || !role) {
+      throw new CustomError(AUTH.ACCESS_DENIED, HTTPSTATUS.UNAUTHORIZED);
+    }
+    const targetRole = role === ROLE.WORKER ? ROLE.USER : ROLE.WORKER;
+    const user = await this._authService.getUserInfo(userId, targetRole);
+
+    if (!user) {
+      throw new CustomError(USER.NOT_FOUND, HTTPSTATUS.NOT_FOUND);
+    }
+    setRefreshTokenCookie(res, { id: userId, role: targetRole });
+    const payload: AccessTokenPayload = {
+      id: userId,
+      role: targetRole,
+      workerId: user.worker?.id,
+    };
+    const accessToken = generateAccessToken(payload);
+    res
+      .status(HTTPSTATUS.OK)
+      .json(new ApiResponse({ accessToken, user }, "Role switched successfully"));
   });
 }
