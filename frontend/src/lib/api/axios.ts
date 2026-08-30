@@ -65,8 +65,9 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   res => {
     if (res.data && typeof res.data === 'object' && 'success' in res.data) {
-      if (res.data.data !== undefined && res.data.data !== null) {
+      if (res.data.data !== undefined) {
         if (
+          res.data.data !== null &&
           typeof res.data.data === 'object' &&
           !Array.isArray(res.data.data) &&
           res.data.message &&

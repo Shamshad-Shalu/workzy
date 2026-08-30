@@ -56,7 +56,7 @@ export function DisputeDetailsView({ dispute, role, onPreview }: Props) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         {(role === ROLE.ADMIN || role === ROLE.WORKER) && (
           <div className="flex items-center gap-3 p-4 rounded-xl border border-border bg-card">
-            <ProfileImage src={dispute.user.profileImage} name={dispute.user.name} size={50} />
+            <ProfileImage src={dispute.user?.profileImage} name={dispute.user.name} size={50} />
             <div className="min-w-0">
               <div className="flex items-center justify-between gap-1.5 flex-wrap">
                 <span className="text-[10px] font-semibold text-blue-600 dark:text-blue-400 uppercase tracking-wider">
@@ -84,7 +84,9 @@ export function DisputeDetailsView({ dispute, role, onPreview }: Props) {
               <p className="text-sm font-semibold text-foreground truncate mt-0.5">
                 {dispute.worker.name}
               </p>
-              <p className="text-xs text-muted-foreground truncate">{dispute.worker.phone}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                {dispute.worker?.phone ?? 'N/A'}
+              </p>
             </div>
           </div>
         )}
