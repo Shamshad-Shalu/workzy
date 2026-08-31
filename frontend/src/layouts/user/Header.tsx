@@ -7,7 +7,6 @@ import {
   X,
   Home,
   Briefcase,
-  Info,
   UserPlus,
   LogOut,
   ChevronRight,
@@ -51,7 +50,6 @@ import { syncUserLocation } from '@/utils/locationSync';
 const NAV_LINKS = [
   { path: '/', label: 'Home', icon: Home },
   { path: '/services', label: 'Services', icon: Briefcase },
-  { path: '/about', label: 'About Us', icon: Info },
   { path: '/join-us', label: 'Join Us', icon: UserPlus },
 ];
 

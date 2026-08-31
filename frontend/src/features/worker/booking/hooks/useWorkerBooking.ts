@@ -14,8 +14,9 @@ export function useMarkEnRoute() {
   const qc = useQueryClient();
   return useMutation<{ message: string }, Error, string>({
     mutationFn: (id: string) => BookingService.markEnRoute(id),
-    onSuccess: res => {
+    onSuccess: (res, id) => {
       qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
       toast.success(res.message);
     },
   });
@@ -25,26 +26,35 @@ export function useMarkReached() {
   const qc = useQueryClient();
   return useMutation<{ message: string }, Error, string>({
     mutationFn: (id: string) => BookingService.markReached(id),
-    onSuccess: res => {
+    onSuccess: (res, id) => {
       qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
       toast.success(res.message);
     },
   });
 }
+
 export function useStartJob() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, otp }: { id: string; otp: string }) =>
       BookingService.startJob({ bookingId: id, otp }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
+
 export function useRejectBooking() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }: { id: string; reason: string }) =>
       BookingService.rejectBooking(id, reason),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
 
@@ -53,9 +63,13 @@ export function useFinishJob() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: BookigCompleteForm }) =>
       BookingService.completeJob(id, data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
+
 export function useExtraCharge() {
   const qc = useQueryClient();
   return useMutation({
@@ -105,7 +119,8 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleRejectBooking(reason: string) {
-    const res = await rejectBookingMutate({ id: rejectBId!, reason });
+    if (!rejectBId) {return;}
+    const res = await rejectBookingMutate({ id: rejectBId, reason });
     if (res?.message) {
       toast.success(res.message);
     }
@@ -113,7 +128,8 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleFinishJob(data: BookigCompleteForm) {
-    const res = await finishJobMutate({ id: finishBId!, data });
+    if (!finishBId) {return;}
+    const res = await finishJobMutate({ id: finishBId, data });
     if (res?.message) {
       toast.success(res.message);
     }
@@ -121,9 +137,7 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleExtraCharge(data: ExtraChargeFormType) {
-    if (!extraChargeBId) {
-      return;
-    }
+    if (!extraChargeBId) {return;}
     const res = await requestExtraChargeMutate({ id: extraChargeBId, data });
     if (res?.message) {
       toast.success(res.message);
@@ -132,10 +146,8 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleReviewReply(message: string) {
-    if (!reviewData?.reviewId) {
-      return;
-    }
-    const res = await replyToReview({ reviewId: reviewData?.reviewId, message });
+    if (!reviewData?.reviewId) {return;}
+    const res = await replyToReview({ reviewId: reviewData.reviewId, message });
     if (res?.message) {
       toast.success(res.message);
     }

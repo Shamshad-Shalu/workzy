@@ -119,6 +119,9 @@ export function RaiseDisputeForm({ dispute, onSubmit, mediaUploading, onPreview 
               />
             )}
           />
+          {errors.evidence?.message && (
+            <p className="text-xs font-medium text-destructive">{errors.evidence?.message}</p>
+          )}
         </div>
       </form>
     </div>
