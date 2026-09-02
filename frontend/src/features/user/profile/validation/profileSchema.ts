@@ -19,6 +19,7 @@ export const ProfileSchema = z.object({
         .object({
           house: z
             .string()
+            .trim()
             .optional()
             .refine(val => !val || val.length >= 3, {
               message: 'House address must be at least 3 characters',
@@ -30,6 +31,7 @@ export const ProfileSchema = z.object({
 
           place: z
             .string()
+            .trim()
             .optional()
             .refine(val => !val || val.length >= 3, {
               message: 'Place must be at least 3 characters',
@@ -40,6 +42,7 @@ export const ProfileSchema = z.object({
 
           city: z
             .string()
+            .trim()
             .optional()
             .refine(val => !val || val.length >= 3, {
               message: 'City must be at least 3 characters',
@@ -52,6 +55,7 @@ export const ProfileSchema = z.object({
 
           pincode: z
             .string()
+            .trim()
             .optional()
             .refine(val => !val || PINCODE_REGEX.test(val), {
               message: 'Pincode must be exactly 6 digits',

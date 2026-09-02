@@ -53,6 +53,9 @@ export default function OtpModal({ open, onOpenChange, onResend, onVerify, loadi
     <AppModal
       open={open}
       onClose={() => onOpenChange(false)}
+      title="Verify OTP"
+      description="Enter the 6-digit code sent to your email"
+      isDescriptionHidden={false}
       canCloseOnOutsideClick={false}
       hideFooter
     >

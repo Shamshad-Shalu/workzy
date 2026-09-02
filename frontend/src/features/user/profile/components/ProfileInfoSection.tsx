@@ -33,7 +33,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
     handleSubmit,
     setValue,
     watch,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     reset,
   } = useForm<ProfileFormType>({
     resolver: zodResolver(ProfileSchema),
@@ -88,6 +88,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                 variant="green"
                 iconRight={<Save size={19} />}
                 loading={isSubmitting}
+                disabled={!isDirty || isSubmitting}
                 onClick={handleSubmit(handleFormSubmit)}
               >
                 Save Changes
@@ -111,7 +112,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                 placeholder="Enter full Name"
                 disabled={!editMode}
                 error={errors.name?.message}
-                {...register('name')}
+                {...register('name', { setValueAs: v => v.trim() })}
               />
             </div>
             <div>
@@ -145,7 +146,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                       disabled={!editMode}
                       placeholder="Street address, apartment, suite"
                       className="px-3"
-                      {...register('profile.address.house')}
+                      {...register('profile.address.house', { setValueAs: v => v.trim() })}
                       error={errors.profile?.address?.house?.message}
                     />
                   </div>
@@ -157,7 +158,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                         disabled={!editMode}
                         placeholder="Enter your place"
                         className="px-3"
-                        {...register('profile.address.place')}
+                        {...register('profile.address.place', { setValueAs: v => v.trim() })}
                         error={errors.profile?.address?.place?.message}
                       />
                     </div>
@@ -168,7 +169,7 @@ export default function ProfileInfoSection({ user, onSubmit }: Props) {
                         disabled={!editMode}
                         placeholder="Enter your city"
                         className="px-3"
-                        {...register('profile.address.city')}
+                        {...register('profile.address.city', { setValueAs: v => v.trim() })}
                         error={errors.profile?.address?.city?.message}
                       />
                     </div>

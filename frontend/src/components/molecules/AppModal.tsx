@@ -67,7 +67,7 @@ export function AppModal({
   );
 
   const handleOpenChange = (next: boolean) => {
-    if (!next && canCloseOnOutsideClick) {
+    if (!next) {
       onClose();
     }
   };
@@ -77,6 +77,16 @@ export function AppModal({
       <AnimatePresence>
         {open && (
           <DialogContent
+            onPointerDownOutside={e => {
+              if (!canCloseOnOutsideClick) {
+                e.preventDefault();
+              }
+            }}
+            onInteractOutside={e => {
+              if (!canCloseOnOutsideClick) {
+                e.preventDefault();
+              }
+            }}
             className={cn(
               'max-h-[90vh] flex flex-col p-0 gap-0 overflow-hidden rounded-2xl border border-border shadow-2xl',
               className

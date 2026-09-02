@@ -45,12 +45,11 @@ export default function ContactChangeModal({
       setError(result.error.issues[0].message);
       return;
     }
-
     await onConfirm(value);
-    onClose();
   };
 
   const isPhone = type === 'phone';
+  const isUnchanged = value.trim() === (currentValue ?? '').trim() || !value.trim();
 
   return (
     <AppModal
@@ -61,6 +60,7 @@ export default function ContactChangeModal({
       confirmText={isPhone ? 'Update Phone' : 'Update Email'}
       cancelText="Cancel"
       isConfirmLoading={isPending}
+      isConfirmDisabled={isUnchanged}
       onConfirm={handleConfirm}
       buttonVariant="blue"
       className="sm:max-w-md"
@@ -84,7 +84,9 @@ export default function ContactChangeModal({
             <p className="text-xs font-semibold text-section-blue-text mb-0.5">
               OTP will be sent to your email
             </p>
-            <p className="text-xs text-section-blue-text break-all">{userEmail}</p>
+            <p className="text-xs text-section-blue-text break-all">
+              {isPhone ? userEmail : value}
+            </p>
           </div>
         </div>
       </div>
