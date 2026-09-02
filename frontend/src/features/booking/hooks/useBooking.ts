@@ -15,9 +15,9 @@ export function useAcceptBooking() {
   const qc = useQueryClient();
   return useMutation<{ message: string }, Error, string>({
     mutationFn: (id: string) => BookingService.acceptBooking(id),
-
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
     },
   });
 }
@@ -31,15 +31,21 @@ export function useCancelBooking() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, reason }: CancelBookingPayload) => BookingService.cancelBooking(id, reason),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, { id }) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
 
 export function useApproveBooking() {
   const qc = useQueryClient();
-  return useMutation({
+  return useMutation<{ message: string }, Error, string>({
     mutationFn: (id: string) => BookingService.approveBooking(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }
 
@@ -47,6 +53,9 @@ export function usePayExtraCharge() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => BookingService.payExtraCharge(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: bookingKeys.lists() }),
+    onSuccess: (_, id) => {
+      qc.invalidateQueries({ queryKey: bookingKeys.lists() });
+      qc.invalidateQueries({ queryKey: bookingKeys.detail(id) });
+    },
   });
 }

@@ -9,7 +9,7 @@ export const validateRefreshToken = (req: Request, _res: Response, next: NextFun
   try {
     const token = req.cookies.refreshToken;
     if (!token) {
-      return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.FORBIDDEN));
+      return next(new CustomError(AUTH.NO_REFRESH_TOKEN, HTTPSTATUS.UNAUTHORIZED));
     }
     const decoded = verifyRefreshToken(token);
     req.user = {

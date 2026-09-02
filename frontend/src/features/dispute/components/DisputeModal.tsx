@@ -51,9 +51,9 @@ export function DisputeModal({ open, onClose, bookingId, role = ROLE.USER }: Pro
     ? 'Loading Dispute...'
     : !dispute
       ? 'Raise a Dispute'
-      : mode === 'edit'
+      : isEditMode
         ? 'Edit Dispute Details'
-        : mode === 'resolve'
+        : isResolveMode
           ? 'Resolve Dispute'
           : `Dispute Details: #${dispute.disputeId}`;
 
@@ -92,7 +92,7 @@ export function DisputeModal({ open, onClose, bookingId, role = ROLE.USER }: Pro
 
               {mode === 'view' && dispute && (
                 <>
-                  {dispute?.status === DISPUTE_STATUS.PENDING && dispute.raisedBy === role && (
+                  {dispute.status === DISPUTE_STATUS.PENDING && dispute.raisedBy === role && (
                     <Button iconLeft={<Edit size={16} />} onClick={openEdit}>
                       Edit Dispute
                     </Button>

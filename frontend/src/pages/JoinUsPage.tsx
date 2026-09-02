@@ -60,7 +60,7 @@ export default function JoinUsPage() {
 
   return (
     <main>
-      <section className="relative bg-gradient-to-br from-[oklch(89.1% 0.01315 266.734)] to-[oklch(89.1% 0.01315 266.734)] dark:bg-[oklch(21.48%_0.03444_254.607)] text-white overflow-hidden">
+      <section className="relative bg-gradient-to-br from-[oklch(89.1% 0.01315 266.734)] to-[oklch(89.1% 0.01315 266.734)] bg-[oklch(21.48%_0.03444_254.607)] text-white overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-golden animate-pulse"></div>
           <div

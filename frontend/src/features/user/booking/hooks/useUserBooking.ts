@@ -46,7 +46,7 @@ export function useUserBookingHandler() {
       return;
     }
     const res = await payExtra(payExtraBId);
-    if (res.url) {
+    if (res?.url) {
       window.location.href = res.url;
     }
     setPayExtraBId(null);

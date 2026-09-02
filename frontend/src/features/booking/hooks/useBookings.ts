@@ -24,7 +24,9 @@ export function useBookings(filters?: Omit<BookingListQuery, 'limit' | 'cursor'>
       }),
     initialPageParam: undefined,
     getNextPageParam: lastPage => lastPage.nextCursor ?? undefined,
-    staleTime: 1000 * 60 * 2,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
     gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }

@@ -28,29 +28,26 @@ import {
   useUserVerifyOtp,
 } from '../hooks/useUserProfile';
 
+type ModalType = 'image' | 'email' | 'phone' | 'password' | 'otp' | null;
+
 export default function ProfilePage() {
   const { user } = useAppSelector((s: RootState) => s.auth);
   const dispatch = useAppDispatch();
-
-  const [openImage, setOpenImage] = useState(false);
-  const [openEmail, setOpenEmail] = useState(false);
-  const [openPhone, setOpenPhone] = useState(false);
-  const [openPass, setOpenPass] = useState(false);
-  const [openOtpModal, setOpenOtpModal] = useState(false);
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [otpData, setOtpData] = useState<{ type: 'email' | 'phone'; value: string } | null>(null);
   const { imageUploading, progress, uploadImage } = useUserProfileImageUpload();
-  const { updateProfile } = useUpdateUserProfile();
-  const { resendOtp, isResending } = useUserResendOtp();
-  const { verifyOtp, isVerifying } = useUserVerifyOtp();
-  const { updatePhone, isUpdatingPhone } = useUserUpdatePhone();
-  const { updateEmail, isUpdatingEmail } = useUserUpdateEmail();
-  const { updatePassword } = useUserUpdatePassword();
+  const { mutateAsync: updateProfile } = useUpdateUserProfile();
+  const { mutateAsync: resendOtp, isPending: isResending } = useUserResendOtp();
+  const { mutateAsync: verifyOtp, isPending: isVerifying } = useUserVerifyOtp();
+  const { mutateAsync: updatePhone, isPending: isUpdatingPhone } = useUserUpdatePhone();
+  const { mutateAsync: updateEmail, isPending: isUpdatingEmail } = useUserUpdateEmail();
+  const { mutateAsync: updatePassword } = useUserUpdatePassword();
 
   const { profileImage, email, name } = user ?? {};
 
   function handleOtpRequest(type: 'email' | 'phone', value: string) {
     setOtpData({ type, value });
-    setOpenOtpModal(true);
+    setActiveModal('otp');
   }
 
   const handleImageUpload = async (file: File) => {
@@ -106,11 +103,11 @@ export default function ProfilePage() {
   }
 
   return (
-    <div>
-      <div className="max-w-7xl mx-auto p-4 lg:text-left md:text-center s:text-center">
+    <div className="max-w-7xl mx-auto">
+      <div className="p-4 lg:text-left md:text-center s:text-center">
         <PageHeader title="My Profile" description="Manage your personal information" />
       </div>
-      <div className="max-w-7xl mx-auto p-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
         <div className="bg-card rounded-xl border p-6 flex flex-col items-center gap-4">
           <div className="text-center">
             <ProfileImage
@@ -119,7 +116,7 @@ export default function ProfilePage() {
               editable
               loading={imageUploading}
               progress={progress}
-              onClickImage={() => setOpenImage(true)}
+              onClickImage={() => setActiveModal('image')}
               onChange={handleImageUpload}
             />
             <h2 className="text-2xl font-bold text-muted-foreground-700 mt-4">{name}</h2>
@@ -127,16 +124,16 @@ export default function ProfilePage() {
           </div>
           <Separator />
           <AccountChangeActions
-            onChangeEmail={() => setOpenEmail(true)}
-            onChangePhone={() => setOpenPhone(true)}
-            onChangePassword={() => setOpenPass(true)}
+            onChangeEmail={() => setActiveModal('email')}
+            onChangePhone={() => setActiveModal('phone')}
+            onChangePassword={() => setActiveModal('password')}
           />
         </div>
 
         <ProfileInfoSection user={user} onSubmit={handleProfileUpdate} />
         <ContactChangeModal
-          open={openEmail}
-          onClose={() => setOpenEmail(false)}
+          open={activeModal === 'email'}
+          onClose={() => setActiveModal(null)}
           currentValue={user.email ?? ''}
           userEmail={user?.email ?? ''}
           onConfirm={async (email: string) => {
@@ -148,8 +145,8 @@ export default function ProfilePage() {
           type="email"
         />
         <ContactChangeModal
-          open={openPhone}
-          onClose={() => setOpenPhone(false)}
+          open={activeModal === 'phone'}
+          onClose={() => setActiveModal(null)}
           currentValue={user.phone ?? ''}
           userEmail={user?.email ?? ''}
           onConfirm={async (phone: string) => {
@@ -160,19 +157,22 @@ export default function ProfilePage() {
           isPending={isUpdatingPhone}
         />
         <OtpModal
-          open={openOtpModal}
-          onOpenChange={setOpenOtpModal}
-          // otpData={otpData}
+          open={activeModal === 'otp'}
+          onOpenChange={(v: boolean) => setActiveModal(v ? 'otp' : null)}
           onVerify={handleVerifyOtp}
           onResend={handleResendOtp}
           loading={isResending || isVerifying}
         />
         <ChangePasswordModal
-          open={openPass}
-          onOpenChange={setOpenPass}
+          open={activeModal === 'password'}
+          onOpenChange={(v: boolean) => setActiveModal(v ? 'password' : null)}
           onConfirm={handleUpdatePassword}
         />
-        <ProfileImageModal open={openImage} onOpenChange={setOpenImage} image={user.profileImage} />
+        <ProfileImageModal
+          open={activeModal === 'image'}
+          onOpenChange={(v: boolean) => setActiveModal(v ? 'image' : null)}
+          image={user.profileImage}
+        />
       </div>
     </div>
   );

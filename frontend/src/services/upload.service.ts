@@ -1,5 +1,6 @@
 import { UPLOAD_API, type UploadPurpose } from '@/constants';
 import api from '@/lib/api/axios';
+import type { ApiResponse } from '@/types/api';
 
 interface UploadUrlResponse {
   uploadUrl: string;
@@ -22,16 +23,18 @@ export async function uploadToS3({
 }: UploadProps & { onProgress?: (p: number) => void }): Promise<string> {
   const fileType = normalizeMimeType(file.type);
 
-  const { data } = await api.post<UploadUrlResponse>(UPLOAD_API.REQUEST_URL, {
+  const res = await api.post<ApiResponse<UploadUrlResponse>>(UPLOAD_API.REQUEST_URL, {
     fileName: file.name,
     fileType,
     fileSize: file.size,
     purpose,
   });
 
+  const uploadData = res.data.data;
+
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open('PUT', data.uploadUrl);
+    xhr.open('PUT', uploadData.uploadUrl);
     xhr.setRequestHeader('Content-Type', fileType);
 
     if (onProgress) {
@@ -45,7 +48,7 @@ export async function uploadToS3({
 
     xhr.onload = () => {
       if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(data.publicUrl);
+        resolve(uploadData.publicUrl);
       } else {
         reject(new Error('S3 upload failed'));
       }

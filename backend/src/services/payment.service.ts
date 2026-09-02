@@ -217,16 +217,17 @@ export class PaymentService implements IPaymentService {
         transfer_group: booking._id.toString(),
       });
     } catch (err: unknown) {
-      if (
-        typeof err === "object" &&
-        err !== null &&
-        "code" in err &&
-        (err as { code?: unknown }).code === "balance_insufficient"
-      ) {
-        console.warn("Stripe insufficient balance — bypassing in test mode.");
-      } else {
-        throw err;
-      }
+      // if (
+      //   typeof err === "object" &&
+      //   err !== null &&
+      //   "code" in err &&
+      //   (err as { code?: unknown }).code === "balance_insufficient"
+      // ) {
+      //   console.warn("Stripe insufficient balance — bypassing in test mode.");
+      // } else {
+      //   throw err;
+      // }
+      console.log(err);
     }
 
     await this._paymentRepo.findOneAndUpdate(

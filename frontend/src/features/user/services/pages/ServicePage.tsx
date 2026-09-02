@@ -76,7 +76,7 @@ export default function ServiceDiscoveryPage() {
   const sentinelRef = useInfiniteScroll(fetchNextPage, hasNextPage, isFetchingNextPage);
 
   return (
-    <div className="min-h-screen flex flex-col pt-8 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col overflow-x-hidden">
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 md:py-10 overflow-x-hidden">
         <div className="mb-6 space-y-4">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
