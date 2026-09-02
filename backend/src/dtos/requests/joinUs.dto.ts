@@ -9,6 +9,7 @@ import {
   Max,
   ValidateNested,
   IsArray,
+  ValidateIf,
 } from "class-validator";
 
 import { DESCRIPTION_REGEX, SERVICE_NAME_REGEX } from "@/constants";
@@ -53,6 +54,9 @@ export class JoinUsDTO {
   location!: GeoLocationDto;
 
   @IsOptional()
+  @ValidateIf(
+    (o) => o.profileImage !== "" && o.profileImage !== null && o.profileImage !== undefined
+  )
   @IsUrl({}, { message: "Profile image must be a valid URL" })
   profileImage?: string;
 

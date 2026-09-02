@@ -480,7 +480,6 @@ export class BookingService implements IBookingService {
       await this._slotRepository.deleteMany(
         {
           bookingId: new Types.ObjectId(bookingId),
-          reservedBy: new Types.ObjectId(updated.userId),
           status: SLOT_STATUS.BOOKED,
         },
         options

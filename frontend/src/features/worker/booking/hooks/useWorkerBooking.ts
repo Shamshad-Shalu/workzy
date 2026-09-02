@@ -119,7 +119,9 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleRejectBooking(reason: string) {
-    if (!rejectBId) {return;}
+    if (!rejectBId) {
+      return;
+    }
     const res = await rejectBookingMutate({ id: rejectBId, reason });
     if (res?.message) {
       toast.success(res.message);
@@ -128,7 +130,9 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleFinishJob(data: BookigCompleteForm) {
-    if (!finishBId) {return;}
+    if (!finishBId) {
+      return;
+    }
     const res = await finishJobMutate({ id: finishBId, data });
     if (res?.message) {
       toast.success(res.message);
@@ -137,7 +141,9 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleExtraCharge(data: ExtraChargeFormType) {
-    if (!extraChargeBId) {return;}
+    if (!extraChargeBId) {
+      return;
+    }
     const res = await requestExtraChargeMutate({ id: extraChargeBId, data });
     if (res?.message) {
       toast.success(res.message);
@@ -146,7 +152,9 @@ export function useWorkerBookingHandler() {
   }
 
   async function handleReviewReply(message: string) {
-    if (!reviewData?.reviewId) {return;}
+    if (!reviewData?.reviewId) {
+      return;
+    }
     const res = await replyToReview({ reviewId: reviewData.reviewId, message });
     if (res?.message) {
       toast.success(res.message);

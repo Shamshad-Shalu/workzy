@@ -72,8 +72,8 @@ export const MetricCard: React.FC<{ value: string; label: string }> = ({ value, 
         <ArrowRight className="h-5 w-5 text-golden" />
       </div>
       <div>
-        <p className="font-bold text-section-dark">{value}</p>
-        <p className="text-xs text-section-dark/80">{label}</p>
+        <p className="font-bold text-slate-950">{value}</p>
+        <p className="text-xs text-slate-900/80">{label}</p>
       </div>
     </div>
   </div>

@@ -3,6 +3,7 @@ export const INDIAN_LANGUAGES = [
   'Bengali',
   'Bodo',
   'Dogri',
+  'English',
   'Gujarati',
   'Hindi',
   'Kannada',

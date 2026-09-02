@@ -15,7 +15,10 @@ export function useAvailableDates(params: WorkerSlotDatesQuery) {
     queryKey: ['available-dates', workerId, serviceId, itemCount, lat, lng],
     queryFn: () => SlotService.getAvailableDates(params),
     enabled: !!workerId && !!serviceId,
-    staleTime: 1000 * 60 * 2,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }
 
@@ -25,7 +28,10 @@ export function useAvailableSlots(params: SlotParams) {
     queryKey: ['available-slots', workerId, serviceId, date, itemCount, lat, lng],
     queryFn: () => SlotService.getAvailableSlots(params),
     enabled: !!params.workerId && !!params.serviceId && !!params.date,
-    staleTime: 1000 * 30,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }
 
@@ -53,7 +59,10 @@ export function useRescheduleDates(bookingId: string) {
     queryKey: ['available-dates', bookingId],
     queryFn: () => SlotService.getRescheduleDates(bookingId),
     enabled: !!bookingId,
-    staleTime: 1000 * 60 * 5,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }
 
@@ -62,7 +71,10 @@ export function useRescheduleSlots({ bookingId, date }: { bookingId: string; dat
     queryKey: ['reschedule-slots', bookingId, date],
     queryFn: () => SlotService.getRescheduleSlots(bookingId, date),
     enabled: !!bookingId && !!date,
-    staleTime: 1000 * 60 * 2,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }
 
@@ -71,8 +83,10 @@ export function useRescheduleSlotOptions(bookingId: string) {
     queryKey: ['slots-options', bookingId],
     queryFn: () => SlotService.getRescheduleSlotOptions(bookingId),
     enabled: !!bookingId,
-    staleTime: 1000 * 60 * 2,
-    refetchOnMount: true,
+    refetchOnMount: 'always',
+    refetchOnWindowFocus: true,
+    gcTime: 1000 * 60 * 5,
+    staleTime: 0,
   });
 }
 
