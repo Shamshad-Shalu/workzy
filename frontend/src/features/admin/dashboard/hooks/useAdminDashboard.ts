@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { ADMIN_API } from '@/constants';
 import api from '@/lib/api/axios';
 import type { AdminDashboardAnalytics } from '@/types/admin/dashboard';
+import type { ApiResponse } from '@/types/api';
 
 const getAdminDashboardAnalytics = async (): Promise<AdminDashboardAnalytics> => {
-  const res = await api.get(ADMIN_API.DASHBOARD);
-  return res.data;
+  const res = await api.get<ApiResponse<AdminDashboardAnalytics>>(ADMIN_API.DASHBOARD);
+  return res.data.data;
 };
 
 export function useAdminDashboard() {

@@ -63,26 +63,7 @@ api.interceptors.request.use(
 
 // Axios interceptors
 api.interceptors.response.use(
-  res => {
-    if (res.data && typeof res.data === 'object' && 'success' in res.data) {
-      if (res.data.data !== undefined) {
-        if (
-          res.data.data !== null &&
-          typeof res.data.data === 'object' &&
-          !Array.isArray(res.data.data) &&
-          res.data.message &&
-          !('message' in res.data.data)
-        ) {
-          return { ...res, data: { ...res.data.data, message: res.data.message } };
-        }
-        return { ...res, data: res.data.data };
-      }
-      if (res.data.message !== undefined) {
-        return { ...res, data: { message: res.data.message } };
-      }
-    }
-    return res;
-  },
+  res => res,
 
   async (error: AxiosError) => {
     const originalConfig = error.config as AxiosRequestConfig & { _retry?: boolean };
